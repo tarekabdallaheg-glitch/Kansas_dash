@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash</title>
-    <!-- Tailwind CSS -->
+    <title>كنساس داش | Kansas Dash v2</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS (Excel Export) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         tailwind.config = {
@@ -33,19 +29,17 @@
 </head>
 <body class="min-h-screen pb-16">
 
-    <!-- Header / Navbar -->
     <header class="bg-kansasCard border-b border-kansasBorder sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">Kansas Dash</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v2.0</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
             </div>
-            <!-- Connection Status -->
             <div id="sync-status" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="sync-text">متصل بالسحابة</span>
@@ -53,7 +47,6 @@
         </div>
     </header>
 
-    <!-- Main Navigation Tabs -->
     <nav class="max-w-7xl mx-auto px-4 mt-4">
         <div class="flex bg-kansasCard border border-kansasBorder rounded-xl p-1 shadow">
             <button onclick="switchTab('revenue')" id="btn-revenue" class="flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow">
@@ -67,30 +60,25 @@
 
     <main class="max-w-7xl mx-auto px-4 mt-5 space-y-5">
 
-        <!-- ================= PAGE 1: REVENUE & ANALYTICS ================= -->
+        <!-- ================= REVENUE SECTION ================= -->
         <section id="tab-revenue" class="space-y-5">
             
-            <!-- Quick Date & Export Toolbar -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex items-center gap-2 text-xs text-gray-300">
                     <span class="p-2 bg-kansasRed/10 text-kansasRed rounded-lg">📅</span>
                     <span id="current-day-label" class="font-bold">اليوم: جار التحميل...</span>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="exportToExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 shadow transition">
-                        📊 Excel
-                    </button>
-                    <button onclick="exportToPDF()" class="flex-1 sm:flex-none bg-kansasRed hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 shadow transition">
-                        📄 PDF
-                    </button>
+                    <button onclick="exportToExcel()" class="flex-1 sm:flex-none bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-medium">📊 Excel</button>
+                    <button onclick="exportToPDF()" class="flex-1 sm:flex-none bg-kansasRed text-white px-3 py-2 rounded-xl text-xs font-medium">📄 PDF</button>
                 </div>
             </div>
 
-            <!-- Baseline / Setup Accordion (One-time entry) -->
+            <!-- Baseline Settings -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر والسنوات السابقة (تدخل مرة واحدة)
+                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للمقارنة (تُدخل مرة واحدة)
                     </h3>
                     <span id="baseline-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
@@ -100,11 +88,11 @@
                         <input type="number" id="base-plan-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-gray-400 mb-1">إيراد نفس الشهر (عام سابق)</label>
+                        <label class="block text-gray-400 mb-1">إيراد نفس الشهر (العام السابق)</label>
                         <input type="number" id="base-ly-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-gray-400 mb-1">عمليات نفس الشهر (عام سابق)</label>
+                        <label class="block text-gray-400 mb-1">عمليات نفس الشهر (العام السابق)</label>
                         <input type="number" id="base-ly-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0">
                     </div>
                     <div>
@@ -116,12 +104,12 @@
                         <input type="number" id="base-lm-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0">
                     </div>
                     <div class="flex items-end">
-                        <button onclick="saveBaseline()" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition">حفظ الأرقام الثابتة</button>
+                        <button onclick="saveBaseline()" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition">حفظ البيانات الثابتة</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Daily Input Section -->
+            <!-- Daily Entry -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <h3 class="font-bold text-white text-sm mb-3 flex items-center gap-2">
                     <span class="text-kansasRed">📝</span> تسجيل إيراد وعمليات اليوم
@@ -146,13 +134,13 @@
                 </div>
             </div>
 
-            <!-- Dashboards Grid -->
+            <!-- Dashboards & Comparisons -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- MTD Dashboard with Comparison -->
+                <!-- MTD & Comparisons -->
                 <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                     <h4 class="font-bold text-white text-xs border-b border-kansasBorder pb-2 flex justify-between items-center">
-                        <span>📊 المقارنة التحليلية حتى تاريخه (MTD)</span>
-                        <span class="text-kansasRed">النمو / العجز</span>
+                        <span>📊 الإيراد حتى تاريخه (MTD) والمقارنات</span>
+                        <span class="text-kansasRed">النمو والعجز</span>
                     </h4>
                     <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
@@ -173,21 +161,21 @@
                         </div>
                     </div>
 
-                    <!-- Comparison Table: LY and LM -->
+                    <!-- Detailed Comparison Box (LY & LM) -->
                     <div class="border-t border-kansasBorder pt-3 space-y-2">
-                        <div class="text-[11px] text-gray-400 font-bold">مقارنة مع العام السابق والشهر السابق:</div>
+                        <div class="text-[11px] text-kansasRed font-bold">🔍 تفاصيل المقارنة ونسب النمو / المينص:</div>
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
                             <div class="bg-kansasDark p-2.5 rounded-xl border border-kansasBorder space-y-1">
-                                <span class="text-gray-400 block">vs العام السابق (نفس الشهر)</span>
-                                <div id="comp-ly-rev" class="font-bold text-white">إيراد: 0%</div>
-                                <div id="comp-ly-orders" class="font-bold text-white">عمليات: 0%</div>
-                                <div id="comp-ly-check" class="font-bold text-white">متوسط الشيك: 0%</div>
+                                <span class="text-gray-300 font-bold block border-b border-kansasBorder pb-1">vs العام السابق (نفس الشهر)</span>
+                                <div id="comp-ly-rev" class="text-white">إيراد: 0%</div>
+                                <div id="comp-ly-orders" class="text-white">عمليات: 0%</div>
+                                <div id="comp-ly-check" class="text-white">متوسط الشيك: 0%</div>
                             </div>
                             <div class="bg-kansasDark p-2.5 rounded-xl border border-kansasBorder space-y-1">
-                                <span class="text-gray-400 block">vs الشهر السابق</span>
-                                <div id="comp-lm-rev" class="font-bold text-white">إيراد: 0%</div>
-                                <div id="comp-lm-orders" class="font-bold text-white">عمليات: 0%</div>
-                                <div id="comp-lm-check" class="font-bold text-white">متوسط الشيك: 0%</div>
+                                <span class="text-gray-300 font-bold block border-b border-kansasBorder pb-1">vs الشهر السابق</span>
+                                <div id="comp-lm-rev" class="text-white">إيراد: 0%</div>
+                                <div id="comp-lm-orders" class="text-white">عمليات: 0%</div>
+                                <div id="comp-lm-check" class="text-white">متوسط الشيك: 0%</div>
                             </div>
                         </div>
                     </div>
@@ -216,7 +204,7 @@
                 </div>
             </div>
 
-            <!-- Chart Section -->
+            <!-- Chart -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <h4 class="font-bold text-white text-xs mb-3">📉 رسم بياني لأداء الإيرادات اليومية</h4>
                 <div class="h-56 relative">
@@ -226,10 +214,8 @@
 
         </section>
 
-        <!-- ================= PAGE 2: INVENTORY & VARIANCE ================= -->
+        <!-- ================= INVENTORY SECTION ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
-            
-            <!-- Date Filter for Analysis Period -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                 <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
                     <span class="text-kansasRed font-bold">🔍 نطاق تحليل العجز والزيادة:</span>
@@ -237,7 +223,7 @@
                     <span class="text-gray-400">إلى</span>
                     <input type="date" id="inv-date-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
                 </div>
-                <button onclick="renderInventoryList()" class="w-full sm:w-auto bg-kansasRed hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold transition">تحديث نطاق التحليل</button>
+                <button onclick="renderInventoryList()" class="w-full sm:w-auto bg-kansasRed text-white px-4 py-2 rounded-xl font-bold">تحديث النطاق</button>
             </div>
 
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
@@ -245,24 +231,17 @@
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <span class="text-kansasRed">📦</span> إدارة المخزون وتحليل العجز والزيادة
                     </h3>
-                    <button onclick="addNewProductModal()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ صنف جديد</button>
+                    <button onclick="addNewProductModal()" class="bg-kansasRed text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ صنف جديد</button>
                 </div>
-
-                <!-- Inventory Container -->
-                <div id="inventory-container" class="space-y-4">
-                    <!-- Dynamic Inventory Items -->
-                </div>
-
+                <div id="inventory-container" class="space-y-4"></div>
                 <div class="mt-5 flex justify-end">
-                    <button onclick="saveInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow transition">حفظ وتحديث المخزون</button>
+                    <button onclick="saveInventoryData()" class="bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">حفظ وتحديث المخزون</button>
                 </div>
             </div>
-
         </section>
 
     </main>
 
-    <!-- Firebase SDKs & Connection Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -276,31 +255,21 @@
             appId: "1:450873671289:web:59db30c2343720ab54dea8",
             measurementId: "G-N839XE9654"
         };
-
         try {
             const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            window.appDB = db;
+            window.appDB = getFirestore(app);
             window.isOnline = true;
-            const statusEl = document.getElementById('sync-status');
-            if(statusEl) {
-                statusEl.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20";
-                statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>متصل بالسحابة</span>';
-            }
-        } catch (e) {
-            console.warn("Offline mode active", e);
-        }
+            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>متصل بالسحابة</span>';
+        } catch (e) { console.warn(e); }
     </script>
 
-    <!-- Application Core Script -->
     <script>
         let currentTab = 'revenue';
         let revenueChartInstance = null;
 
         const defaultProducts = [
             { id: 'p1', name: 'لحم برجر', opening: 100, received: 50, transferIn: 0, transferInBranch: '', transferOut: 0, transferOutBranch: '', closing: 30, sold: 120 },
-            { id: 'p2', name: 'خبز كيزر', opening: 200, received: 100, transferIn: 10, transferInBranch: 'فرع المعادي', transferOut: 5, transferOutBranch: 'فرع مدينة نصر', closing: 55, sold: 250 },
-            { id: 'p3', name: 'صوص كنساس', opening: 50, received: 20, transferIn: 0, transferInBranch: '', transferOut: 0, transferOutBranch: '', closing: 10, sold: 60 }
+            { id: 'p2', name: 'خبز كيزر', opening: 200, received: 100, transferIn: 10, transferInBranch: 'فرع المعادي', transferOut: 5, transferOutBranch: 'فرع مدينة نصر', closing: 55, sold: 250 }
         ];
 
         let appData = {
@@ -311,13 +280,9 @@
 
         window.onload = function() {
             const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('daily-date');
-            if(dateInput && !dateInput.value) dateInput.value = today;
-            
-            const fromInput = document.getElementById('inv-date-from');
-            const toInput = document.getElementById('inv-date-to');
-            if(fromInput && !fromInput.value) fromInput.value = today;
-            if(toInput && !toInput.value) toInput.value = today;
+            document.getElementById('daily-date').value = today;
+            document.getElementById('inv-date-from').value = today;
+            document.getElementById('inv-date-to').value = today;
 
             updateDayName();
             loadLocalData();
@@ -328,38 +293,23 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            const revSec = document.getElementById('tab-revenue');
-            const invSec = document.getElementById('tab-inventory');
-            const btnRev = document.getElementById('btn-revenue');
-            const btnInv = document.getElementById('btn-inventory');
-
-            if(tab === 'revenue') {
-                revSec.classList.remove('hidden');
-                invSec.classList.add('hidden');
-                btnRev.className = "flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow";
-                btnInv.className = "flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm transition";
-            } else {
-                revSec.classList.add('hidden');
-                invSec.classList.remove('hidden');
-                btnInv.className = "flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow";
-                btnRev.className = "flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm transition";
-                renderInventoryList();
-            }
+            document.getElementById('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
+            document.getElementById('tab-inventory').classList.toggle('hidden', tab === 'revenue');
+            document.getElementById('btn-revenue').className = tab === 'revenue' ? 'flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm shadow' : 'flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm';
+            document.getElementById('btn-inventory').className = tab === 'inventory' ? 'flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm shadow' : 'flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm';
+            if(tab === 'inventory') renderInventoryList();
         }
 
         function toggleBaseline() {
             const content = document.getElementById('baseline-content');
-            const arrow = document.getElementById('baseline-arrow');
             content.classList.toggle('hidden');
-            arrow.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
         }
 
         function updateDayName() {
             const dateVal = document.getElementById('daily-date').value;
             if(!dateVal) return;
             const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-            const d = new Date(dateVal);
-            const dayName = days[d.getDay()];
+            const dayName = days[new Date(dateVal).getDay()];
             document.getElementById('day-name-display').innerText = `اليوم: ${dayName}`;
             document.getElementById('current-day-label').innerText = `تاريخ اليوم: ${dateVal} (${dayName})`;
         }
@@ -374,7 +324,7 @@
             };
             saveAndSync();
             calculateAnalytics();
-            alert('تم حفظ الأرقام الثابتة ومقارنات الأداء بنجاح!');
+            alert('تم حفظ البيانات الثابتة ومقارنات الأداء بنجاح!');
         }
 
         function loadDayData() {
@@ -388,22 +338,17 @@
         function saveDailyData() {
             const dateVal = document.getElementById('daily-date').value;
             if(!dateVal) return alert('الرجاء اختيار التاريخ');
-            
             appData.dailyRecords[dateVal] = {
                 revenue: parseFloat(document.getElementById('daily-revenue').value) || 0,
                 orders: parseInt(document.getElementById('daily-orders').value) || 0
             };
-
             saveAndSync();
             calculateAnalytics();
-            alert('تم حفظ إيراد وعمليات اليوم بنجاح!');
+            alert('تم حفظ بيانات اليوم بنجاح!');
         }
 
         function calculateAnalytics() {
-            let totalRev = 0;
-            let totalOrders = 0;
-            let daysCount = 0;
-
+            let totalRev = 0, totalOrders = 0, daysCount = 0;
             Object.values(appData.dailyRecords).forEach(rec => {
                 totalRev += rec.revenue;
                 totalOrders += rec.orders;
@@ -419,16 +364,13 @@
             document.getElementById('mtd-avg-check').innerText = avgCheck.toFixed(2) + ' ج.م';
             document.getElementById('mtd-plan-ratio').innerText = planRatio.toFixed(1) + '%';
 
-            // Current Month Averages
             const avgRevDay = daysCount > 0 ? (totalRev / daysCount) : 0;
             const avgOrdDay = daysCount > 0 ? (totalOrders / daysCount) : 0;
-            const projectedTotal = avgRevDay * 30;
-
             document.getElementById('curr-avg-rev').innerText = avgRevDay.toLocaleString() + ' ج.م';
             document.getElementById('curr-avg-orders').innerText = avgOrdDay.toFixed(1);
-            document.getElementById('projected-rev').innerText = projectedTotal.toLocaleString() + ' ج.م';
+            document.getElementById('projected-rev').innerText = (avgRevDay * 30).toLocaleString() + ' ج.م';
 
-            // Calculations for Last Year (LY) and Last Month (LM) Comparisons & Growth/Minus
+            // Comparison calculations
             const lyRev = appData.baseline.lyRev || 0;
             const lyOrders = appData.baseline.lyOrders || 0;
             const lyAvgCheck = lyOrders > 0 ? (lyRev / lyOrders) : 0;
@@ -437,22 +379,20 @@
             const lmOrders = appData.baseline.lmOrders || 0;
             const lmAvgCheck = lmOrders > 0 ? (lmRev / lmOrders) : 0;
 
-            // Helper function for formatting growth/minus percentage
-            function getDiffHtml(current, baseline) {
-                if (baseline === 0) return `<span class="text-gray-400">غير متوفر</span>`;
-                const diff = ((current - baseline) / baseline) * 100;
-                const cls = diff >= 0 ? 'text-emerald-400' : 'text-red-400';
-                const sign = diff >= 0 ? '+' : '';
-                return `<span class="${cls}">${sign}${diff.toFixed(1)}%</span>`;
+            function formatDiff(curr, base) {
+                if (base === 0) return `<span class="text-gray-400">0%</span>`;
+                const diff = ((curr - base) / base) * 100;
+                const cls = diff >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold';
+                return `<span class="${cls}">${diff >= 0 ? '+' : ''}${diff.toFixed(1)}%</span>`;
             }
 
-            document.getElementById('comp-ly-rev').innerHTML = `إيراد: ${getDiffHtml(totalRev, lyRev)}`;
-            document.getElementById('comp-ly-orders').innerHTML = `عمليات: ${getDiffHtml(totalOrders, lyOrders)}`;
-            document.getElementById('comp-ly-check').innerHTML = `متوسط الشيك: ${getDiffHtml(avgCheck, lyAvgCheck)}`;
+            document.getElementById('comp-ly-rev').innerHTML = `إيراد: ${formatDiff(totalRev, lyRev)}`;
+            document.getElementById('comp-ly-orders').innerHTML = `عمليات: ${formatDiff(totalOrders, lyOrders)}`;
+            document.getElementById('comp-ly-check').innerHTML = `متوسط الشيك: ${formatDiff(avgCheck, lyAvgCheck)}`;
 
-            document.getElementById('comp-lm-rev').innerHTML = `إيراد: ${getDiffHtml(totalRev, lmRev)}`;
-            document.getElementById('comp-lm-orders').innerHTML = `عمليات: ${getDiffHtml(totalOrders, lmOrders)}`;
-            document.getElementById('comp-lm-check').innerHTML = `متوسط الشيك: ${getDiffHtml(avgCheck, lmAvgCheck)}`;
+            document.getElementById('comp-lm-rev').innerHTML = `إيراد: ${formatDiff(totalRev, lmRev)}`;
+            document.getElementById('comp-lm-orders').innerHTML = `عمليات: ${formatDiff(totalOrders, lmOrders)}`;
+            document.getElementById('comp-lm-check').innerHTML = `متوسط الشيك: ${formatDiff(avgCheck, lmAvgCheck)}`;
 
             updateChart();
         }
@@ -461,15 +401,14 @@
             const container = document.getElementById('inventory-container');
             if(!container) return;
             container.innerHTML = '';
-
-            const dateFrom = document.getElementById('inv-date-from').value;
-            const dateTo = document.getElementById('inv-date-to').value;
+            const dFrom = document.getElementById('inv-date-from').value;
+            const dTo = document.getElementById('inv-date-to').value;
 
             appData.inventory.forEach((item, index) => {
                 const theoretical = (item.opening || 0) + (item.received || 0) + (item.transferIn || 0) - (item.transferOut || 0) - (item.sold || 0);
                 const variance = (item.closing || 0) - theoretical;
-                const varianceClass = variance < 0 ? 'text-red-400 font-bold' : (variance > 0 ? 'text-emerald-400 font-bold' : 'text-gray-400');
-                const statusText = variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون');
+                const vClass = variance < 0 ? 'text-red-400 font-bold' : (variance > 0 ? 'text-emerald-400 font-bold' : 'text-gray-400');
+                const vText = variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون');
 
                 const card = document.createElement('div');
                 card.className = "bg-kansasDark border border-kansasBorder rounded-2xl p-4 space-y-3";
@@ -477,36 +416,26 @@
                     <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
                         <span class="font-bold text-white text-sm">🛒 ${item.name}</span>
                         <div class="text-right">
-                            <span class="text-xs ${varianceClass}">${variance > 0 ? '+' + variance : variance} (${statusText})</span>
-                            <span class="text-[10px] text-gray-400 block">الفترة: ${dateFrom} إلى ${dateTo}</span>
+                            <span class="text-xs ${vClass}">${variance > 0 ? '+' + variance : variance} (${vText})</span>
+                            <span class="text-[10px] text-gray-400 block">${dFrom} إلى ${dTo}</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">أول المدة (أول الشهر)</label>
-                            <input type="number" value="${item.opening}" onchange="updateInvItem(${index}, 'opening', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                            <label class="text-[10px] text-gray-400 block mb-0.5">أول المدة</label>
+                            <input type="number" value="${item.opening}" onchange="appData.inventory[index].opening=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">الوارد اليومي</label>
-                            <input type="number" value="${item.received}" onchange="updateInvItem(${index}, 'received', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                            <label class="text-[10px] text-gray-400 block mb-0.5">الوارد</label>
+                            <input type="number" value="${item.received}" onchange="appData.inventory[index].received=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع (بالفترة)</label>
-                            <input type="number" value="${item.sold}" onchange="updateInvItem(${index}, 'sold', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white font-bold text-kansasRed">
+                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع</label>
+                            <input type="number" value="${item.sold}" onchange="appData.inventory[index].sold=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white text-kansasRed font-bold">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">آخر المدة (جرد)</label>
-                            <input type="number" value="${item.closing}" onchange="updateInvItem(${index}, 'closing', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white font-bold text-emerald-400">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1 border-t border-kansasBorder/50">
-                        <div class="flex gap-1 items-center">
-                            <input type="number" value="${item.transferIn}" placeholder="كمية" onchange="updateInvItem(${index}, 'transferIn', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
-                            <input type="text" value="${item.transferInBranch || ''}" placeholder="محول إليه (من فرع...)" onchange="updateInvItem(${index}, 'transferInBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
-                        </div>
-                        <div class="flex gap-1 items-center">
-                            <input type="number" value="${item.transferOut}" placeholder="كمية" onchange="updateInvItem(${index}, 'transferOut', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
-                            <input type="text" value="${item.transferOutBranch || ''}" placeholder="محول منه (إلى فرع...)" onchange="updateInvItem(${index}, 'transferOutBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
+                            <label class="text-[10px] text-gray-400 block mb-0.5">آخر المدة</label>
+                            <input type="number" value="${item.closing}" onchange="appData.inventory[index].closing=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white text-emerald-400 font-bold">
                         </div>
                     </div>
                 `;
@@ -514,32 +443,10 @@
             });
         }
 
-        function updateInvItem(index, field, val) {
-            appData.inventory[index][field] = (field.includes('Branch')) ? val : (parseFloat(val) || 0);
-        }
-
-        function saveInventoryData() {
-            saveAndSync();
-            alert('تم حفظ وتحديث المخزون وتحليل العجز بنجاح!');
-        }
-
+        function saveInventoryData() { saveAndSync(); alert('تم حفظ المخزون بنجاح!'); }
         function addNewProductModal() {
-            const name = prompt('أدخل اسم المنتج الجديد:');
-            if(!name) return;
-            appData.inventory.push({ 
-                id: 'p_' + Date.now(), 
-                name, 
-                opening: 0, 
-                received: 0, 
-                transferIn: 0, 
-                transferInBranch: '', 
-                transferOut: 0, 
-                transferOutBranch: '', 
-                closing: 0, 
-                sold: 0 
-            });
-            renderInventoryList();
-            saveAndSync();
+            const name = prompt('اسم المنتج الجديد:');
+            if(name) { appData.inventory.push({id:'p_'+Date.now(), name, opening:0, received:0, transferIn:0, transferOut:0, closing:0, sold:0}); renderInventoryList(); saveAndSync(); }
         }
 
         function initChart() {
@@ -547,31 +454,19 @@
             revenueChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: { labels: [], datasets: [{ label: 'إيراد اليوم', data: [], borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.15)', borderWidth: 3, fill: true, tension: 0.3 }] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
-                        y: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
-                    },
-                    plugins: { legend: { labels: { color: '#ffffff', font: { size: 11 } } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af' } }, y: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af' } } } }
             });
         }
 
         function updateChart() {
             if(!revenueChartInstance) return;
-            const sortedDates = Object.keys(appData.dailyRecords).sort();
-            const revenues = sortedDates.map(d => appData.dailyRecords[d].revenue);
-            revenueChartInstance.data.labels = sortedDates;
-            revenueChartInstance.data.datasets[0].data = revenues;
+            const dates = Object.keys(appData.dailyRecords).sort();
+            revenueChartInstance.data.labels = dates;
+            revenueChartInstance.data.datasets[0].data = dates.map(d => appData.dailyRecords[d].revenue);
             revenueChartInstance.update();
         }
 
-        function saveAndSync() {
-            localStorage.setItem('kansas_dash_data', JSON.stringify(appData));
-        }
-
+        function saveAndSync() { localStorage.setItem('kansas_dash_data', JSON.stringify(appData)); }
         function loadLocalData() {
             const saved = localStorage.getItem('kansas_dash_data');
             if(saved) {
@@ -591,24 +486,13 @@
 
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
-            const revData = Object.keys(appData.dailyRecords).map(d => ({
-                'التاريخ': d, 'الإيراد': appData.dailyRecords[d].revenue, 'العمليات': appData.dailyRecords[d].orders
-            }));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(revData), "الإيرادات");
-
-            const invData = appData.inventory.map(i => ({
-                'الصنف': i.name, 'أول المدة': i.opening, 'الوارد': i.received, 'المباع': i.sold, 'آخر المدة': i.closing
-            }));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(invData), "المخزون");
-
-            XLSX.writeFile(wb, 'Kansas_Dash_Report.xlsx');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Object.keys(appData.dailyRecords).map(d => ({'التاريخ': d, 'الإيراد': appData.dailyRecords[d].revenue, 'العمليات': appData.dailyRecords[d].orders}))), "الإيرادات");
+            XLSX.writeFile(wb, 'Kansas_Report.xlsx');
         }
-
         function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text("Kansas Dash - Operational Report", 20, 20);
-            doc.save("Kansas_Dash_Report.pdf");
+            const doc = new window.jspdf.jsPDF();
+            doc.text("Kansas Dash Report", 20, 20);
+            doc.save("Kansas_Report.pdf");
         }
     </script>
 </body>
