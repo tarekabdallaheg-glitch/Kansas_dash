@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.1</title>
+    <title>كنساس داش | Kansas Dash v3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.1</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.2</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -250,13 +250,13 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (v3.1) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.2) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="text-base">⚠️</span>
-                    <span id="inv-missing-text" class="font-bold">تنبيه مخزون: يوجد تاريخ لم يُدخل له وارد يومي!</span>
+                    <span id="inv-missing-text" class="font-bold">تنبيه مخزون: يوجد أيام لم يُدخل لها وارد يومي!</span>
                 </div>
             </div>
 
@@ -282,27 +282,46 @@
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <span class="text-kansasRed">2️⃣</span> الوارد اليومي للمخزون
                     </h3>
-                    <div class="flex items-center gap-2 text-xs">
+                    <div class="flex items-center gap-2 text-xs flex-wrap">
                         <label class="text-gray-400">تاريخ الوارد:</label>
                         <input type="date" id="inv-daily-date" onchange="loadDailyInventory()" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
+                        <span id="received-status-badge" class="px-2 py-0.5 rounded bg-gray-700 text-gray-300 text-[10px]">لم يُسجل</span>
                     </div>
                 </div>
                 <div id="daily-received-container" class="space-y-2"></div>
-                <div class="flex justify-end pt-2">
+                <div class="flex flex-col sm:flex-row justify-between items-center pt-2 gap-2">
+                    <div class="flex items-center gap-2 text-xs w-full sm:w-auto">
+                        <span class="text-gray-400">تصدير الوارد (من - إلى):</span>
+                        <input type="date" id="rec-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
+                        <span>إلى</span>
+                        <input type="date" id="rec-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
+                        <button onclick="exportReceivedExcel()" class="bg-emerald-600 text-white px-3 py-1 rounded font-bold">📊 Excel الوارد</button>
+                    </div>
                     <button onclick="saveDailyReceived()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">تأكيد وحفظ الوارد اليومي</button>
                 </div>
             </div>
 
-            <!-- Section 3: Transfers (In / Out) -->
+            <!-- Section 3: Transfers (In / Out) with Unified Date per Day -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
-                <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
+                <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <span class="text-kansasRed">3️⃣</span> التحويلات (محول منه أو إليه)
                     </h3>
-                    <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1 rounded-xl text-xs font-bold">+ إضافة تحويل</button>
+                    <div class="flex items-center gap-2 text-xs">
+                        <label class="text-gray-400">تاريخ اليوم الموحد للتحويلات:</label>
+                        <input type="date" id="transfer-unified-date" onchange="renderTransfersList()" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
+                        <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ إضافة تحويل جديد لليوم</button>
+                    </div>
                 </div>
                 <div id="transfers-container" class="space-y-3"></div>
-                <div class="flex justify-end pt-2">
+                <div class="flex flex-col sm:flex-row justify-between items-center pt-2 gap-2">
+                    <div class="flex items-center gap-2 text-xs w-full sm:w-auto">
+                        <span class="text-gray-400">تصدير التحويلات (من - إلى):</span>
+                        <input type="date" id="trans-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
+                        <span>إلى</span>
+                        <input type="date" id="trans-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
+                        <button onclick="exportTransfersExcel()" class="bg-emerald-600 text-white px-3 py-1 rounded font-bold">📊 Excel التحويلات</button>
+                    </div>
                     <button onclick="saveTransfersData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">تأكيد وحفظ التحويلات</button>
                 </div>
             </div>
@@ -319,7 +338,7 @@
                         <span class="text-gray-400">إلى:</span>
                         <input type="date" id="inv-analysis-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-1 text-white">
                         <button onclick="renderInventoryAnalysis()" class="bg-kansasRed text-white px-3 py-1.5 rounded-lg font-bold">تحديث</button>
-                        <button onclick="exportInventoryExcel()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel المخزون</button>
+                        <button onclick="exportInventoryExcel()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel تحليل الجرد</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -380,8 +399,8 @@
                 { id: 'p1', name: 'لحم برجر', unit: 'كرتونة', opening: 100 },
                 { id: 'p2', name: 'خبز كيزر', unit: 'كيس', opening: 200 }
             ],
-            dailyReceived: {},
-            transfers: [],
+            dailyReceived: {}, // { '2026-10-29': { data: {p1: 20}, updatedAt: '...' } }
+            transfers: [],     // [ { date, type, branch, productId, qty } ]
             closingData: {}
         };
 
@@ -395,8 +414,15 @@
 
             document.getElementById('daily-date').value = todayStr;
             document.getElementById('inv-daily-date').value = todayStr;
+            document.getElementById('transfer-unified-date').value = todayStr;
+
             document.getElementById('inv-analysis-from').value = yearMonth + '-01';
             document.getElementById('inv-analysis-to').value = todayStr;
+
+            document.getElementById('rec-excel-from').value = yearMonth + '-01';
+            document.getElementById('rec-excel-to').value = todayStr;
+            document.getElementById('trans-excel-from').value = yearMonth + '-01';
+            document.getElementById('trans-excel-to').value = todayStr;
 
             document.getElementById('rev-date-from').value = yearMonth + '-01';
             document.getElementById('rev-date-to').value = todayStr;
@@ -603,7 +629,7 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.1) =================
+        // ================= INVENTORY FUNCTIONS (v3.2) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
@@ -611,6 +637,7 @@
             appData.products.push({ id: 'p_' + Date.now(), name, unit, opening: 0 });
             renderOpeningList();
             loadDailyInventory();
+            renderTransfersList();
             renderInventoryAnalysis();
             saveAndSync();
         }
@@ -620,6 +647,7 @@
             appData.products = appData.products.filter(p => p.id !== id);
             renderOpeningList();
             loadDailyInventory();
+            renderTransfersList();
             renderInventoryAnalysis();
             saveAndSync();
         }
@@ -650,12 +678,22 @@
         function loadDailyInventory() {
             const dateVal = document.getElementById('inv-daily-date').value;
             const container = document.getElementById('daily-received-container');
+            const badge = document.getElementById('received-status-badge');
             container.innerHTML = '';
 
-            if(!appData.dailyReceived[dateVal]) appData.dailyReceived[dateVal] = {};
+            const existing = appData.dailyReceived[dateVal];
+            if(existing && existing.data) {
+                badge.className = "px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold";
+                badge.innerText = `تم تسجيله مسبقاً (${existing.updatedAt || 'مسجل'})`;
+            } else {
+                badge.className = "px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400 text-[10px] font-bold";
+                badge.innerText = "لم يُسجل اليوم";
+            }
+
+            if(!appData.dailyReceived[dateVal]) appData.dailyReceived[dateVal] = { data: {}, updatedAt: '' };
 
             appData.products.forEach(p => {
-                const val = appData.dailyReceived[dateVal][p.id] || 0;
+                const val = appData.dailyReceived[dateVal].data[p.id] || 0;
                 const div = document.createElement('div');
                 div.className = "flex items-center justify-between bg-kansasDark p-2.5 rounded-xl border border-kansasBorder text-xs gap-3";
                 div.innerHTML = `
@@ -667,40 +705,58 @@
         }
 
         function updateDailyRec(date, prodId, val) {
-            if(!appData.dailyReceived[date]) appData.dailyReceived[date] = {};
-            appData.dailyReceived[date][prodId] = parseFloat(val) || 0;
+            if(!appData.dailyReceived[date]) appData.dailyReceived[date] = { data: {}, updatedAt: '' };
+            appData.dailyReceived[date].data[prodId] = parseFloat(val) || 0;
             saveAndSync();
         }
 
         function saveDailyReceived() {
+            const dateVal = document.getElementById('inv-daily-date').value;
+            if(!dateVal) return alert('اختر التاريخ أولاً');
+
+            if(appData.dailyReceived[dateVal] && appData.dailyReceived[dateVal].updatedAt) {
+                if(!confirm(`⚠️ تنبيه تعديل:\nتاريخ ${dateVal} مسجل وارد مسبقاً.\nهل أنت متأكد من التعديل؟`)) return;
+            }
+
+            const nowStr = new Date().toLocaleString('ar-EG');
+            appData.dailyReceived[dateVal].updatedAt = nowStr;
+
             saveAndSync();
-            alert('تم تأكيد وحفظ الوارد اليومي بنجاح!');
+            loadDailyInventory();
+            alert(`تم تأكيد وحفظ الوارد اليومي بنجاح في (${nowStr})!`);
         }
 
         function addTransferRow() {
-            appData.transfers.push({ date: document.getElementById('inv-daily-date').value, type: 'in', branch: '', productId: appData.products[0]?.id || '', qty: 0 });
+            const unifiedDate = document.getElementById('transfer-unified-date').value;
+            if(!unifiedDate) return alert('اختر تاريخ التحويلات الموحد أولاً');
+
+            appData.transfers.push({ date: unifiedDate, type: 'in', branch: '', productId: appData.products[0]?.id || '', qty: 0 });
             renderTransfersList();
             saveAndSync();
         }
 
         function renderTransfersList() {
             const container = document.getElementById('transfers-container');
+            const unifiedDate = document.getElementById('transfer-unified-date').value;
             container.innerHTML = '';
+
+            // Filter transfers for the selected unified date
             appData.transfers.forEach((t, idx) => {
+                if(t.date !== unifiedDate) return;
+
                 const div = document.createElement('div');
                 div.className = "flex flex-col sm:flex-row items-center gap-2 bg-kansasDark p-3 rounded-xl border border-kansasBorder text-xs";
                 
-                let prodOptions = appData.products.map(p => `<option value="${p.id}" ${t.productId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
+                let prodOptions = appData.products.map(p => `<option value="${p.id}" ${t.productId === p.id ? 'selected' : ''}>${p.name} (${p.unit})</option>`).join('');
 
                 div.innerHTML = `
-                    <input type="date" value="${t.date}" onchange="appData.transfers[${idx}].date=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
-                    <select onchange="appData.transfers[${idx}].type=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
-                        <option value="in" ${t.type==='in'?'selected':''}>محول إليه</option>
-                        <option value="out" ${t.type==='out'?'selected':''}>محول منه</option>
+                    <select onchange="appData.transfers[${idx}].type=this.value; saveAndSync();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
+                        <option value="in" ${t.type==='in'?'selected':''}>محول إليه (استلام)</option>
+                        <option value="out" ${t.type==='out'?'selected':''}>محول منه (إرسال)</option>
                     </select>
-                    <input type="text" value="${t.branch}" placeholder="اسم الفرع" onchange="appData.transfers[${idx}].branch=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white flex-1">
-                    <select onchange="appData.transfers[${idx}].productId=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">${prodOptions}</select>
-                    <input type="number" value="${t.qty}" placeholder="الكمية" onchange="appData.transfers[${idx}].qty=parseFloat(this.value)||0" class="w-20 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                    <input type="text" value="${t.branch}" placeholder="اسم الفرع المحول معه" onchange="appData.transfers[${idx}].branch=this.value; saveAndSync();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white flex-1">
+                    <select onchange="appData.transfers[${idx}].productId=this.value; saveAndSync();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">${prodOptions}</select>
+                    <input type="number" value="${t.qty}" placeholder="الكمية" onchange="appData.transfers[${idx}].qty=parseFloat(this.value)||0; saveAndSync();" class="w-20 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
                     <button onclick="appData.transfers.splice(${idx},1); renderTransfersList(); saveAndSync();" class="text-red-400 font-bold px-2">حذف</button>
                 `;
                 container.appendChild(div);
@@ -726,7 +782,7 @@
                 let totalReceived = 0;
                 Object.keys(appData.dailyReceived).forEach(dateStr => {
                     if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
-                        totalReceived += appData.dailyReceived[dateStr][p.id] || 0;
+                        totalReceived += (appData.dailyReceived[dateStr].data[p.id] || 0);
                     }
                 });
 
@@ -763,13 +819,57 @@
             alert('تم حفظ وإغلاق جرد المخزون بنجاح!');
         }
 
-        function exportRevenueExcel() {
+        // Excel Export Functions with Date Range
+        function exportReceivedExcel() {
+            const f = document.getElementById('rec-excel-from').value;
+            const t = document.getElementById('rec-excel-to').value;
+            let rows = [];
+
+            Object.keys(appData.dailyReceived).forEach(dateStr => {
+                if((!f || dateStr >= f) && (!t || dateStr <= t)) {
+                    const rec = appData.dailyReceived[dateStr];
+                    appData.products.forEach(p => {
+                        const qty = rec.data[p.id] || 0;
+                        if(qty > 0) {
+                            rows.push({
+                                'التاريخ': dateStr,
+                                'الصنف': p.name,
+                                'الوحدة': p.unit,
+                                'الكمية الواردة': qty,
+                                'تاريخ/ساعة التعديل': rec.updatedAt || 'مسجل'
+                            });
+                        }
+                    });
+                }
+            });
+
             const wb = XLSX.utils.book_new();
-            const revData = Object.keys(appData.dailyRecords).map(d => ({
-                'التاريخ': d, 'الإيراد': appData.dailyRecords[d].revenue, 'العمليات': appData.dailyRecords[d].orders
-            }));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(revData), "الإيرادات اليومية");
-            XLSX.writeFile(wb, 'Kansas_Revenue_Report.xlsx');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "تقرير الوارد");
+            XLSX.writeFile(wb, `Kansas_Received_${f}_to_${t}.xlsx`);
+        }
+
+        function exportTransfersExcel() {
+            const f = document.getElementById('trans-excel-from').value;
+            const t = document.getElementById('trans-excel-to').value;
+            let rows = [];
+
+            appData.transfers.forEach(tr => {
+                if((!f || tr.date >= f) && (!t || tr.date <= t)) {
+                    const prod = appData.products.find(p => p.id === tr.productId);
+                    rows.push({
+                        'التاريخ': tr.date,
+                        'نوع التحويل': tr.type === 'in' ? 'محول إليه' : 'محول منه',
+                        'اسم الفرع': tr.branch,
+                        'الصنف': prod ? prod.name : 'صنف محذوف',
+                        'الوحدة': prod ? prod.unit : '',
+                        'الكمية': tr.qty
+                    });
+                }
+            });
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "تقرير التحويلات");
+            XLSX.writeFile(wb, `Kansas_Transfers_${f}_to_${t}.xlsx`);
         }
 
         function exportInventoryExcel() {
@@ -777,11 +877,30 @@
             const invSummary = appData.products.map(p => {
                 const cData = appData.closingData[p.id] || { closing: 0, sold: 0 };
                 let totalRec = 0;
-                Object.values(appData.dailyReceived).forEach(d => totalRec += d[p.id] || 0);
-                return { 'الصنف': p.name, 'الوحدة': p.unit, 'أول المدة': p.opening, 'الوارد': totalRec, 'المباع': cData.sold, 'آخر المدة': cData.closing };
+                Object.values(appData.dailyReceived).forEach(d => totalRec += (d.data[p.id] || 0));
+                let tIn = 0, tOut = 0;
+                appData.transfers.forEach(t => {
+                    if(t.productId === p.id) { if(t.type === 'in') tIn += t.qty; else tOut += t.qty; }
+                });
+                const theo = (p.opening || 0) + totalRec + (tIn - tOut) - cData.sold;
+                const var_ = cData.closing - theo;
+                return {
+                    'الصنف': p.name, 'الوحدة': p.unit, 'أول المدة': p.opening, 'الوارد': totalRec,
+                    'تحويلات (إلى/من)': tIn - tOut, 'المباع': cData.sold, 'آخر المدة': cData.closing,
+                    'العجز / الزيادة': var_
+                };
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(invSummary), "تحليل جرد المخزون");
-            XLSX.writeFile(wb, 'Kansas_Inventory_Report.xlsx');
+            XLSX.writeFile(wb, 'Kansas_Inventory_Analysis_Report.xlsx');
+        }
+
+        function exportRevenueExcel() {
+            const wb = XLSX.utils.book_new();
+            const revData = Object.keys(appData.dailyRecords).map(d => ({
+                'التاريخ': d, 'الإيراد': appData.dailyRecords[d].revenue, 'العمليات': appData.dailyRecords[d].orders
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(revData), "الإيرادات اليومية");
+            XLSX.writeFile(wb, 'Kansas_Revenue_Report.xlsx');
         }
 
         function initChart() {
