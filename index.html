@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v2.2</title>
+    <title>كنساس داش | Kansas Dash v2.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v2.2</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v2.4</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -47,6 +47,24 @@
         </div>
     </header>
 
+    <!-- Month Selector Bar -->
+    <div class="max-w-7xl mx-auto px-4 mt-3">
+        <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="p-2 bg-kansasRed/10 text-kansasRed rounded-lg text-sm">📅</span>
+                <div>
+                    <span class="text-gray-400 block text-[10px]">الشهر النشط حالياً في الداش بورد:</span>
+                    <span id="active-month-title" class="text-sm font-bold text-white">أكتوبر 2026</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <label class="text-gray-400">اختر الشهر:</label>
+                <input type="month" id="global-month-selector" onchange="changeActiveMonth()" class="bg-kansasDark border border-kansasBorder rounded-xl p-2 text-white font-bold text-xs">
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
     <nav class="max-w-7xl mx-auto px-4 mt-4">
         <div class="flex bg-kansasCard border border-kansasBorder rounded-xl p-1 shadow">
             <button onclick="switchTab('revenue')" id="btn-revenue" class="flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow">
@@ -63,9 +81,19 @@
         <!-- ================= REVENUE SECTION ================= -->
         <section id="tab-revenue" class="space-y-5">
             
+            <div id="audit-missing-alert" class="hidden bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-xs text-red-400 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">⚠️</span>
+                    <div>
+                        <span class="font-bold block">تنبيه رقابي: يوجد أيام لم يتم تسجيل إيراداتها خلال الشهر المختار!</span>
+                        <span id="missing-days-list" class="text-[11px] text-gray-300"></span>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex items-center gap-2 text-xs text-gray-300">
-                    <span class="p-2 bg-kansasRed/10 text-kansasRed rounded-lg">📅</span>
+                    <span class="p-2 bg-kansasRed/10 text-kansasRed rounded-lg">🗓️</span>
                     <span id="current-day-label" class="font-bold">اليوم: جار التحميل...</span>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
@@ -78,7 +106,7 @@
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للمقارنة (تُدخل مرة واحدة)
+                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر النشط (تُدخل مرة واحدة)
                     </h3>
                     <span id="baseline-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
@@ -111,9 +139,12 @@
 
             <!-- Daily Entry -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
-                <h3 class="font-bold text-white text-sm mb-3 flex items-center gap-2">
-                    <span class="text-kansasRed">📝</span> تسجيل إيراد وعمليات اليوم
-                </h3>
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <span class="text-kansasRed">📝</span> تسجيل إيراد وعمليات اليوم
+                    </h3>
+                    <span id="record-status-badge" class="text-[10px] px-2 py-0.5 rounded bg-gray-700 text-gray-300">جديد غير مسجل</span>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
                         <label class="block text-gray-400 mb-1">التاريخ واليوم</label>
@@ -130,7 +161,7 @@
                     </div>
                 </div>
                 <div class="mt-4 flex justify-end">
-                    <button onclick="saveDailyData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow transition">حفظ بيانات اليوم</button>
+                    <button onclick="saveDailyData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow transition">حفظ وتأكيد بيانات اليوم</button>
                 </div>
             </div>
 
@@ -142,7 +173,7 @@
                     <span class="text-gray-400">إلى</span>
                     <input type="date" id="rev-date-to" onchange="calculateAnalytics()" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
                 </div>
-                <button onclick="resetRevDateRange()" class="w-full sm:w-auto bg-kansasDark border border-kansasBorder text-gray-300 px-3 py-2 rounded-xl font-bold">كل الشهر</button>
+                <button onclick="resetRevDateRange()" class="w-full sm:w-auto bg-kansasDark border border-kansasBorder text-gray-300 px-3 py-2 rounded-xl font-bold">الشهر الحالي</button>
             </div>
 
             <!-- Dashboards & Comparisons -->
@@ -290,21 +321,53 @@
         };
 
         window.onload = function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('daily-date').value = today;
-            
-            document.getElementById('rev-date-from').value = today.substring(0, 8) + '01';
-            document.getElementById('rev-date-to').value = today;
+            const today = new Date();
+            const yearMonth = today.toISOString().slice(0, 7); // e.g. "2026-10"
+            const todayStr = today.toISOString().split('T')[0];
 
-            document.getElementById('inv-date-from').value = today;
-            document.getElementById('inv-date-to').value = today;
+            document.getElementById('global-month-selector').value = yearMonth;
+            updateActiveMonthTitle();
+
+            document.getElementById('daily-date').value = todayStr;
+            document.getElementById('rev-date-from').value = yearMonth + '-01';
+            document.getElementById('rev-date-to').value = todayStr;
+
+            document.getElementById('inv-date-from').value = todayStr;
+            document.getElementById('inv-date-to').value = todayStr;
 
             updateDayName();
             loadLocalData();
             initChart();
             calculateAnalytics();
             renderInventoryList();
+            checkMissingDays();
         };
+
+        function changeActiveMonth() {
+            const selectedMonth = document.getElementById('global-month-selector').value; // e.g. "2026-11"
+            if(!selectedMonth) return;
+            
+            updateActiveMonthTitle();
+            
+            // Set date range to selected month bounds
+            document.getElementById('rev-date-from').value = selectedMonth + '-01';
+            document.getElementById('rev-date-to').value = selectedMonth + '-30';
+            
+            // Set daily date to first of selected month
+            document.getElementById('daily-date').value = selectedMonth + '-01';
+            loadDayData();
+            calculateAnalytics();
+            checkMissingDays();
+        }
+
+        function updateActiveMonthTitle() {
+            const val = document.getElementById('global-month-selector').value;
+            if(!val) return;
+            const [y, m] = val.split('-');
+            const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+            const monthName = monthsAr[parseInt(m, 10) - 1];
+            document.getElementById('active-month-title').innerText = `${monthName} ${y}`;
+        }
 
         function switchTab(tab) {
             currentTab = tab;
@@ -339,33 +402,81 @@
             };
             saveAndSync();
             calculateAnalytics();
-            alert('تم حفظ البيانات الثابتة ومقارنات الأداء بنجاح!');
+            alert('تم حفظ البيانات الثابتة للشهر النشط بنجاح!');
         }
 
         function loadDayData() {
             updateDayName();
             const dateVal = document.getElementById('daily-date').value;
-            const dayRec = appData.dailyRecords[dateVal] || { revenue: '', orders: '' };
-            document.getElementById('daily-revenue').value = dayRec.revenue !== undefined ? dayRec.revenue : '';
-            document.getElementById('daily-orders').value = dayRec.orders !== undefined ? dayRec.orders : '';
+            const dayRec = appData.dailyRecords[dateVal];
+            const badge = document.getElementById('record-status-badge');
+
+            if(dayRec && (dayRec.revenue > 0 || dayRec.orders > 0)) {
+                document.getElementById('daily-revenue').value = dayRec.revenue;
+                document.getElementById('daily-orders').value = dayRec.orders;
+                badge.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold";
+                badge.innerText = "مسجل مسبقاً (تعديل)";
+            } else {
+                document.getElementById('daily-revenue').value = '';
+                document.getElementById('daily-orders').value = '';
+                badge.className = "text-[10px] px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-bold";
+                badge.innerText = "جديد غير مسجل";
+            }
         }
 
         function saveDailyData() {
             const dateVal = document.getElementById('daily-date').value;
             if(!dateVal) return alert('الرجاء اختيار التاريخ');
-            appData.dailyRecords[dateVal] = {
-                revenue: parseFloat(document.getElementById('daily-revenue').value) || 0,
-                orders: parseInt(document.getElementById('daily-orders').value) || 0
-            };
+
+            const newRev = parseFloat(document.getElementById('daily-revenue').value) || 0;
+            const newOrders = parseInt(document.getElementById('daily-orders').value) || 0;
+
+            if(appData.dailyRecords[dateVal] && (appData.dailyRecords[dateVal].revenue > 0 || appData.dailyRecords[dateVal].orders > 0)) {
+                const oldRev = appData.dailyRecords[dateVal].revenue;
+                const confirmMod = confirm(`⚠️ تنبيه تعديل:\nتاريخ ${dateVal} مسجل مسبقاً بإيراد (${oldRev} ج.م).\nهل أنت متأكد من تعديله إلى (${newRev} ج.م)؟`);
+                if(!confirmMod) return;
+            }
+
+            appData.dailyRecords[dateVal] = { revenue: newRev, orders: newOrders, updatedAt: new Date().toISOString() };
             saveAndSync();
             calculateAnalytics();
-            alert('تم حفظ بيانات اليوم بنجاح!');
+            checkMissingDays();
+            loadDayData();
+            alert('تم حفظ وتوثيق بيانات اليوم بنجاح!');
+        }
+
+        function checkMissingDays() {
+            const selectedMonth = document.getElementById('global-month-selector').value; // "2026-10"
+            if(!selectedMonth) return;
+            const [year, month] = selectedMonth.split('-').map(Number);
+            const alertBox = document.getElementById('audit-missing-alert');
+            const missingList = document.getElementById('missing-days-list');
+            let missingDays = [];
+
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const today = new Date();
+            const isCurrentMonth = (today.getFullYear() === year && (today.getMonth() + 1) === month);
+            const limitDay = isCurrentMonth ? today.getDate() : daysInMonth + 1;
+
+            for(let d = 1; d < limitDay; d++) {
+                const dayStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                if(!appData.dailyRecords[dayStr] || (appData.dailyRecords[dayStr].revenue === 0 && appData.dailyRecords[dayStr].orders === 0)) {
+                    missingDays.push(d);
+                }
+            }
+
+            if(missingDays.length > 0) {
+                alertBox.classList.remove('hidden');
+                missingList.innerText = `الأيام المفقودة لشهر ${document.getElementById('active-month-title').innerText}: [ يوم ${missingDays.join(', يوم ')} ] لم تُسجل!`;
+            } else {
+                alertBox.classList.add('hidden');
+            }
         }
 
         function resetRevDateRange() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('rev-date-from').value = today.substring(0, 8) + '01';
-            document.getElementById('rev-date-to').value = today;
+            const selectedMonth = document.getElementById('global-month-selector').value;
+            document.getElementById('rev-date-from').value = selectedMonth + '-01';
+            document.getElementById('rev-date-to').value = new Date().toISOString().split('T')[0];
             calculateAnalytics();
         }
 
@@ -376,8 +487,9 @@
 
             Object.keys(appData.dailyRecords).forEach(dateStr => {
                 if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
-                    totalRev += appData.dailyRecords[dateStr].revenue;
-                    totalOrders += appData.dailyRecords[dateStr].orders;
+                    const rec = appData.dailyRecords[dateStr];
+                    totalRev += rec.revenue || 0;
+                    totalOrders += rec.orders || 0;
                     daysCount++;
                 }
             });
@@ -393,8 +505,8 @@
 
             let mRev = 0, mOrders = 0, mDays = 0;
             Object.values(appData.dailyRecords).forEach(rec => {
-                mRev += rec.revenue;
-                mOrders += rec.orders;
+                mRev += rec.revenue || 0;
+                mOrders += rec.orders || 0;
                 mDays++;
             });
             const avgRevDay = mDays > 0 ? (mRev / mDays) : 0;
