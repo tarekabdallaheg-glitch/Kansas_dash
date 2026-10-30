@@ -90,7 +90,7 @@
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر
+                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر (تدخل مرة واحدة)
                     </h3>
                     <span id="baseline-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
@@ -210,15 +210,15 @@
         <!-- ================= PAGE 2: INVENTORY & VARIANCE ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
-            <!-- Date Filter for Analysis -->
+            <!-- Date Filter for Analysis Period -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <span class="text-kansasRed font-bold">🔍 نطاق تحليل العجز:</span>
+                <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+                    <span class="text-kansasRed font-bold">🔍 نطاق تحليل العجز والزيادة:</span>
                     <input type="date" id="inv-date-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
                     <span class="text-gray-400">إلى</span>
                     <input type="date" id="inv-date-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
                 </div>
-                <button onclick="renderInventoryList()" class="w-full sm:w-auto bg-kansasRed hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold transition">تحديث التحليل</button>
+                <button onclick="renderInventoryList()" class="w-full sm:w-auto bg-kansasRed hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold transition">تحديث نطاق التحليل</button>
             </div>
 
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
@@ -295,8 +295,10 @@
             const dateInput = document.getElementById('daily-date');
             if(dateInput && !dateInput.value) dateInput.value = today;
             
-            document.getElementById('inv-date-from').value = today;
-            document.getElementById('inv-date-to').value = today;
+            const fromInput = document.getElementById('inv-date-from');
+            const toInput = document.getElementById('inv-date-to');
+            if(fromInput && !fromInput.value) fromInput.value = today;
+            if(toInput && !toInput.value) toInput.value = today;
 
             updateDayName();
             loadLocalData();
@@ -429,7 +431,7 @@
                         <span class="font-bold text-white text-sm">🛒 ${item.name}</span>
                         <div class="text-right">
                             <span class="text-xs ${varianceClass}">${variance > 0 ? '+' + variance : variance} (${statusText})</span>
-                            <span class="text-[10px] text-gray-400 block">فترة التحليل: ${dateFrom} إلى ${dateTo}</span>
+                            <span class="text-[10px] text-gray-400 block">الفترة: ${dateFrom} إلى ${dateTo}</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
@@ -442,7 +444,7 @@
                             <input type="number" value="${item.received}" onchange="updateInvItem(${index}, 'received', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع (خلال الفترة)</label>
+                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع (بالفترة)</label>
                             <input type="number" value="${item.sold}" onchange="updateInvItem(${index}, 'sold', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white font-bold text-kansasRed">
                         </div>
                         <div>
