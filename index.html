@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.6 (Master Sync)</title>
+    <title>كنساس داش | Kansas Dash v3.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.6 Pro</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.7</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -250,7 +250,7 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (v3.6 Master Sync) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.7 Fixed UI) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
@@ -260,7 +260,7 @@
                 </div>
             </div>
 
-            <!-- Section 1: Opening Balance & Product Setup (Accordion) with Pro Styled Excel Button -->
+            <!-- Section 1: Opening Balance & Product Setup (Accordion) with Fixed Buttons Layout -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleOpeningAccordion()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -269,15 +269,17 @@
                     <span id="opening-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
                 <div id="opening-content" class="hidden mt-3 pt-3 border-t border-kansasBorder space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
-                        <button onclick="exportOpeningExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button onclick="exportOpeningExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5">
                             <span>📊</span> تصدير أول المدة (Excel)
                         </button>
-                        <button onclick="addNewProduct()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
+                        <button onclick="addNewProduct()" class="w-full bg-kansasRed hover:bg-red-700 text-white py-2 px-3 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5">
+                            <span>+</span> إضافة صنف جديد
+                        </button>
                     </div>
                     <div id="opening-container" class="space-y-2"></div>
                     <div class="flex justify-end pt-2">
-                        <button onclick="saveOpeningData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow">حفظ واعتماد رصيد أول المدة والأصناف</button>
+                        <button onclick="saveOpeningData()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow">حفظ واعتماد رصيد أول المدة والأصناف</button>
                     </div>
                 </div>
             </div>
@@ -637,7 +639,7 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.6 Master Sync) =================
+        // ================= INVENTORY FUNCTIONS (v3.7) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
