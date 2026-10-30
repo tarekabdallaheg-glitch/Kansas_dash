@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#17212b">
+<title>Restaurant Intelligence</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#17212b;--muted:#697586;--line:#e4e8ee;--gold:#e5a900;--nav:#17212b;--green:#16845b;--red:#c74646}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:11px 15px;background:var(--gold);color:#1c2430;font-weight:700}.app{display:grid;grid-template-columns:245px 1fr;min-height:100vh}.side{background:var(--nav);color:#fff;padding:22px 15px}.brand{font-size:19px;font-weight:800;line-height:1.5;margin:0 8px 24px}.brand small{display:block;color:#c5ccd5;font-size:11px;font-weight:400;letter-spacing:1px}.nav button{display:block;width:100%;text-align:right;background:transparent;color:#d9e0e8;margin:5px 0;padding:12px}.nav button.active,.nav button:hover{background:#2b3948;color:#fff}.main{padding:24px;min-width:0}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}.top h1{font-size:23px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:6px}.actions{display:flex;gap:8px;flex-wrap:wrap}.secondary{background:#e8edf3;color:#253243}.danger{background:#fae6e6;color:#9e3030}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 2px 8px #17212b08}.metric label{font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:25px;margin:9px 0 3px}.metric small{color:var(--muted)}.layout{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.section-title{font-size:16px;font-weight:800;margin:0 0 14px}.formgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field input,.field select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}.field.full{grid-column:1/-1}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}th,td{padding:12px 10px;text-align:right;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:700;background:#fafbfc}td button{padding:6px 9px;font-size:11px}.hidden{display:none!important}.pill{display:inline-block;border-radius:20px;padding:4px 8px;background:#eef2f6;font-size:11px}.good{color:var(--green)}.bad{color:var(--red)}.barrow{display:grid;grid-template-columns:120px 1fr 80px;gap:8px;align-items:center;margin:13px 0;font-size:12px}.bar{height:10px;border-radius:9px;background:#edf0f4;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}.chat{height:300px;overflow:auto;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}.msg{padding:10px 12px;border-radius:12px;margin:8px 0;max-width:95%;font-size:13px;line-height:1.8;white-space:pre-wrap}.user{background:#fff1c7;margin-right:auto}.bot{background:#eaf0f6;margin-left:auto}.chatrow{display:flex;gap:8px}.chatrow input{flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px}.note{font-size:12px;color:var(--muted);line-height:1.8}.status{font-size:12px;color:var(--green)}.empty{text-align:center;color:var(--muted);padding:25px}.foot{margin-top:18px;color:var(--muted);font-size:11px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{padding:12px}.brand{margin:0 5px 10px}.nav{display:flex;overflow:auto;gap:4px}.nav button{white-space:nowrap;width:auto;margin:0;padding:10px}.main{padding:15px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.top{align-items:flex-start;flex-direction:column}.grid{gap:8px}.metric strong{font-size:20px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.card{padding:13px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand">RESTAURANT<br>INTELLIGENCE<small>BUSINESS PERFORMANCE SYSTEM</small></div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard">لوحة التحكم</button>
+    <button data-page="sales">تسجيل الإيرادات</button>
+    <button data-page="branches">إدارة الفروع</button>
+    <button data-page="targets">خطط ومستهدفات</button>
+    <button data-page="compare">مقارنة الفروع</button>
+    <button data-page="assistant">المساعد التحليلي</button>
+    <button data-page="data">البيانات والنسخ الاحتياطي</button>
+  </nav>
+  <div class="foot" style="color:#aeb9c6">نسخة أولى تجريبية مستقلة<br>البيانات محفوظة على هذا الجهاز</div>
+</aside>
+<main class="main">
+<header class="top"><div><h1 id="pageTitle">لوحة التحكم</h1><div class="sub">متابعة الإيرادات والنمو وأداء الفروع</div></div><div class="actions"><button class="secondary" onclick="exportCSV()">تصدير CSV</button><button onclick="showPage('sales')">＋ تسجيل مبيعات</button></div></header>
+
+<section id="dashboard" class="page">
+ <div class="grid">
+  <div class="card metric"><label>إجمالي الإيرادات</label><strong id="kSales">0 ج.م</strong><small>حسب الفترة المحددة</small></div>
+  <div class="card metric"><label>عدد الفواتير</label><strong id="kOrders">0</strong><small>إجمالي الفواتير المسجلة</small></div>
+  <div class="card metric"><label>متوسط الشيك</label><strong id="kAvg">0 ج.م</strong><small>الإيرادات ÷ عدد الفواتير</small></div>
+  <div class="card metric"><label>تحقيق المستهدف</label><strong id="kTarget">—</strong><small id="kTargetNote">أضف مستهدفًا للفترة</small></div>
+ </div>
+ <div class="card" style="margin-bottom:14px"><div class="formgrid">
+  <div class="field"><label>من تاريخ</label><input type="date" id="dashFrom" onchange="render()"></div>
+  <div class="field"><label>إلى تاريخ</label><input type="date" id="dashTo" onchange="render()"></div>
+  <div class="field"><label>الفرع</label><select id="dashBranch" onchange="render()"><option value="">كل الفروع</option></select></div>
+ </div></div>
+ <div class="layout">
+  <div class="card"><h3 class="section-title">الإيرادات حسب الفرع</h3><div id="branchBars"></div></div>
+  <div class="card"><h3 class="section-title">ملخص الأداء</h3><div id="summary" class="note">لا توجد بيانات بعد. ابدأ بإضافة فرع ثم سجل المبيعات.</div></div>
+ </div>
+ <div class="card" style="margin-top:14px"><h3 class="section-title">آخر تسجيلات المبيعات</h3><div id="recent"></div></div>
+</section>
+
+<section id="sales" class="page hidden">
+ <div class="card">
+  <h3 class="section-title">إضافة إيراد يومي</h3>
+  <form id="salesForm" class="formgrid">
+   <div class="field"><label>الفرع *</label><select id="sBranch" required></select></div>
+   <div class="field"><label>التاريخ *</label><input id="sDate" type="date" required></div>
+   <div class="field"><label>إجمالي المبيعات بالجنيه *</label><input id="sRevenue" type="number" min="0" step=".01" required placeholder="مثال: 40000"></div>
+   <div class="field"><label>عدد الفواتير *</label><input id="sOrders" type="number" min="0" step="1" required placeholder="مثال: 120"></div>
+   <div class="field"><label>مبيعات الدليفري</label><input id="sDelivery" type="number" min="0" step=".01" value="0"></div>
+   <div class="field"><label>مبيعات الصالة</label><input id="sDine" type="number" min="0" step=".01" value="0"></div>
+   <div class="field"><label>مبيعات التيك أواي</label><input id="sTake" type="number" min="0" step=".01" value="0"></div>
+   <div class="field"><label>ملاحظات</label><input id="sNotes" placeholder="اختياري"></div>
+   <div class="field" style="align-self:end"><button type="submit">حفظ الإيراد</button></div>
+  </form>
+  <p class="note">كل سجل يمثل إجمالي يوم واحد للفرع. لا تسجل نفس الفرع والتاريخ مرتين؛ عدّل السجل الموجود بدلًا من ذلك.</p>
+ </div>
+ <div class="card" style="margin-top:14px"><h3 class="section-title">سجل الإيرادات</h3><div id="salesTable"></div></div>
+</section>
+
+<section id="branches" class="page hidden">
+ <div class="card"><h3 class="section-title">إضافة فرع جديد</h3>
+  <form id="branchForm" class="formgrid"><div class="field"><label>اسم الفرع *</label><input id="bName" required placeholder="مثال: زهراء المعادي"></div><div class="field"><label>المدينة / المنطقة</label><input id="bArea" placeholder="القاهرة"></div><div class="field" style="align-self:end"><button>إضافة الفرع</button></div></form>
+ </div>
+ <div class="card" style="margin-top:14px"><h3 class="section-title">الفروع المسجلة</h3><div id="branchesTable"></div></div>
+</section>
+
+<section id="targets" class="page hidden">
+ <div class="card"><h3 class="section-title">تحديد مستهدف مبيعات شهري</h3>
+  <form id="targetForm" class="formgrid"><div class="field"><label>الفرع *</label><select id="tBranch" required></select></div><div class="field"><label>الشهر *</label><input id="tMonth" type="month" required></div><div class="field"><label>المستهدف بالجنيه *</label><input id="tAmount" type="number" min="1" required></div><div class="field" style="align-self:end"><button>حفظ المستهدف</button></div></form>
+ </div><div class="card" style="margin-top:14px"><h3 class="section-title">المستهدفات</h3><div id="targetsTable"></div></div>
+</section>
+
+<section id="compare" class="page hidden">
+ <div class="card"><h3 class="section-title">مقارنة أداء الفروع</h3><div class="formgrid">
+  <div class="field"><label>من تاريخ</label><input type="date" id="cFrom"></div><div class="field"><label>إلى تاريخ</label><input type="date" id="cTo"></div><div class="field" style="align-self:end"><button onclick="renderCompare()">تحديث المقارنة</button></div>
+ </div><div id="compareTable" style="margin-top:15px"></div></div>
+ <div class="card" style="margin-top:14px"><h3 class="section-title">مقارنة فترة بفترة سابقة</h3><p class="note">تعرض هذه المقارنة نمو الإيرادات بين الفترة المختارة والفترة السابقة المساوية لها في عدد الأيام.</p><div id="periodCompare"></div></div>
+</section>
+
+<section id="assistant" class="page hidden">
+ <div class="card"><h3 class="section-title">المساعد التحليلي</h3><p class="note">اسأل عن المبيعات أو متوسط الشيك أو أفضل فرع أو تحقيق الخطة. هذه النسخة تحلل قاعدة بياناتك محليًا بقواعد حسابية واضحة؛ لم يتم توصيل نموذج ذكاء اصطناعي خارجي بعد.</p>
+ <div class="chat" id="chat"><div class="msg bot">أهلًا بك. أستطيع تحليل البيانات المسجلة في هذا البرنامج. جرّب: ما إجمالي المبيعات؟ أو ما أفضل فرع؟ أو قارن الفروع.</div></div>
+ <div class="chatrow"><input id="question" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter')askAssistant()"><button onclick="askAssistant()">إرسال</button></div>
+ <div class="actions" style="margin-top:10px"><button class="secondary" onclick="quickAsk('ما إجمالي المبيعات؟')">إجمالي المبيعات</button><button class="secondary" onclick="quickAsk('ما أفضل فرع؟')">أفضل فرع</button><button class="secondary" onclick="quickAsk('حلل متوسط الشيك')">تحليل متوسط الشيك</button></div>
+ </div>
+</section>
+
+<section id="data" class="page hidden">
+ <div class="card"><h3 class="section-title">استيراد ملف CSV</h3><p class="note">يمكنك استيراد ملف CSV محفوظ من Excel. الأعمدة المطلوبة: branch,date,revenue,orders، والأعمدة الاختيارية: delivery,dine_in,takeaway,notes. يجب أن يكون اسم الفرع موجودًا مسبقًا.</p><input type="file" id="csvFile" accept=".csv,text/csv"><button style="margin-top:12px" onclick="importCSV()">استيراد الملف</button><div id="importStatus" class="note" style="margin-top:10px"></div></div>
+ <div class="card" style="margin-top:14px"><h3 class="section-title">نسخ احتياطي واستعادة</h3><p class="note">النسخة الاحتياطية تحفظ الفروع والإيرادات والمستهدفات في ملف JSON. احتفظ بها في مكان آمن بانتظام.</p><div class="actions"><button onclick="backup()">تنزيل نسخة احتياطية</button><label class="secondary" style="padding:11px 15px;border-radius:10px;cursor:pointer">استعادة نسخة JSON<input type="file" id="restoreFile" accept=".json,application/json" hidden onchange="restoreBackup(event)"></label></div></div>
+ <div class="card" style="margin-top:14px"><h3 class="section-title">إدارة البيانات</h3><p class="note">حذف جميع البيانات نهائي من هذا المتصفح. صدّر نسخة احتياطية أولًا.</p><button class="danger" onclick="clearAll()">حذف كل البيانات</button></div>
+</section>
+</main></div>
+<script>
+const KEY='restaurant_intelligence_v1';
+let db=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{branches:[],sales:[],targets:[]}}catch(e){return{branches:[],sales:[],targets:[]}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+const $=id=>document.getElementById(id);
+const money=n=>(Number(n)||0).toLocaleString('en-US',{maximumFractionDigits:2})+' ج.م';
+const today=()=>new Date().toISOString().slice(0,10);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function branchName(id){return db.branches.find(b=>b.id===id)?.name||'فرع محذوف'}
+function fillSelect(id,all=false){let el=$(id);if(!el)return;let old=el.value;el.innerHTML=(all?'<option value="">كل الفروع</option>':'<option value="">اختر الفرع</option>')+db.branches.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join('');if([...el.options].some(o=>o.value===old))el.value=old}
+function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$(p).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));$('pageTitle').textContent=document.querySelector(`[data-page="${p}"]`).textContent;render()}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+$('branchForm').onsubmit=e=>{e.preventDefault();let name=$('bName').value.trim();if(db.branches.some(b=>b.name.toLowerCase()===name.toLowerCase()))return alert('اسم الفرع موجود بالفعل');db.branches.push({id:crypto.randomUUID(),name,area:$('bArea').value.trim()});e.target.reset();save()};
+$('salesForm').onsubmit=e=>{e.preventDefault();let branchId=$('sBranch').value,date=$('sDate').value;if(!branchId)return alert('أضف فرعًا أولًا');let old=db.sales.find(x=>x.branchId===branchId&&x.date===date);let rec={id:old?.id||crypto.randomUUID(),branchId,date,revenue:+$('sRevenue').value,orders:+$('sOrders').value,delivery:+$('sDelivery').value||0,dine:+$('sDine').value||0,take:+$('sTake').value||0,notes:$('sNotes').value};if(old&&!confirm('يوجد سجل لهذا الفرع في هذا التاريخ. هل تريد استبداله؟'))return;if(old)Object.assign(old,rec);else db.sales.push(rec);e.target.reset();$('sDate').value=today();$('sDelivery').value=$('sDine').value=$('sTake').value='0';save();alert('تم حفظ الإيراد')};
+$('targetForm').onsubmit=e=>{e.preventDefault();let branchId=$('tBranch').value,month=$('tMonth').value;if(!branchId)return alert('أضف فرعًا أولًا');let old=db.targets.find(x=>x.branchId===branchId&&x.month===month);if(old)old.amount=+$('tAmount').value;else db.targets.push({id:crypto.randomUUID(),branchId,month,amount:+$('tAmount').value});e.target.reset();save()};
+function sum(a,k){return a.reduce((s,x)=>s+(+x[k]||0),0)}
+function filtered(){let from=$('dashFrom').value,to=$('dashTo').value,b=$('dashBranch').value;return db.sales.filter(x=>(!from||x.date>=from)&&(!to||x.date<=to)&&(!b||x.branchId===b))}
+function render(){['sBranch','tBranch'].forEach(id=>fillSelect(id));fillSelect('dashBranch',true);let a=filtered(),rev=sum(a,'revenue'),orders=sum(a,'orders'),avg=orders?rev/orders:0;$('kSales').textContent=money(rev);$('kOrders').textContent=orders.toLocaleString('en-US');$('kAvg').textContent=money(avg);
+let month=( $('dashTo').value||today()).slice(0,7),b=$('dashBranch').value,targets=db.targets.filter(t=>t.month===month&&(!b||t.branchId===b)),target=sum(targets,'amount');$('kTarget').textContent=target?(rev/target*100).toFixed(1)+'%':'—';$('kTargetNote').textContent=target?'المستهدف: '+money(target):'أضف مستهدفًا للشهر';
+let bars=db.branches.map(br=>({name:br.name,val:sum(a.filter(x=>x.branchId===br.id),'revenue')})).sort((x,y)=>y.val-x.val),max=Math.max(1,...bars.map(x=>x.val));$('branchBars').innerHTML=bars.length?bars.map(x=>`<div class="barrow"><span>${esc(x.name)}</span><div class="bar"><i style="width:${x.val/max*100}%"></i></div><b>${money(x.val)}</b></div>`).join(''):'<div class="empty">أضف فروعًا لعرض المقارنة</div>';
+$('summary').textContent=a.length?`تم تسجيل ${a.length} يومًا من البيانات. إجمالي الإيرادات ${money(rev)} من ${orders} فاتورة. متوسط الشيك ${money(avg)}. ${bars[0]?.val?`أعلى فرع في الفترة: ${bars[0].name}.`:''}`:'لا توجد بيانات في الفترة المحددة.';
+$('recent').innerHTML=tableSales([...db.sales].sort((x,y)=>y.date.localeCompare(x.date)).slice(0,8),false);$('salesTable').innerHTML=tableSales([...db.sales].sort((x,y)=>y.date.localeCompare(x.date)),true);$('branchesTable').innerHTML=tableBranches();$('targetsTable').innerHTML=tableTargets();renderCompare()}
+function tableSales(rows,actions){if(!rows.length)return'<div class="empty">لا توجد سجلات حتى الآن</div>';return `<div class="tablewrap"><table><thead><tr><th>التاريخ</th><th>الفرع</th><th>الإيرادات</th><th>الفواتير</th><th>متوسط الشيك</th>${actions?'<th>إجراء</th>':''}</tr></thead><tbody>${rows.map(x=>`<tr><td>${x.date}</td><td>${esc(branchName(x.branchId))}</td><td>${money(x.revenue)}</td><td>${x.orders}</td><td>${money(x.orders?x.revenue/x.orders:0)}</td>${actions?`<td><button class="secondary" onclick="editSale('${x.id}')">تعديل</button> <button class="danger" onclick="deleteSale('${x.id}')">حذف</button></td>`:''}</tr>`).join('')}</tbody></table></div>`}
+function tableBranches(){return db.branches.length?`<div class="tablewrap"><table><tr><th>اسم الفرع</th><th>المنطقة</th><th>إجراء</th></tr>${db.branches.map(b=>`<tr><td>${esc(b.name)}</td><td>${esc(b.area)}</td><td><button class="danger" onclick="deleteBranch('${b.id}')">حذف</button></td></tr>`).join('')}</table></div>`:'<div class="empty">لا توجد فروع</div>'}
+function tableTargets(){return db.targets.length?`<div class="tablewrap"><table><tr><th>الفرع</th><th>الشهر</th><th>المستهدف</th><th>إجراء</th></tr>${db.targets.map(t=>`<tr><td>${esc(branchName(t.branchId))}</td><td>${t.month}</td><td>${money(t.amount)}</td><td><button class="danger" onclick="deleteTarget('${t.id}')">حذف</button></td></tr>`).join('')}</table></div>`:'<div class="empty">لا توجد مستهدفات</div>'}
+function editSale(id){let x=db.sales.find(x=>x.id===id);if(!x)return;showPage('sales');$('sBranch').value=x.branchId;$('sDate').value=x.date;$('sRevenue').value=x.revenue;$('sOrders').value=x.orders;$('sDelivery').value=x.delivery;$('sDine').value=x.dine;$('sTake').value=x.take;$('sNotes').value=x.notes||'';alert('عدّل البيانات ثم اضغط حفظ الإيراد. سيتم استبدال السجل الحالي لنفس الفرع والتاريخ.') }
+function deleteSale(id){if(confirm('حذف سجل الإيراد؟')){db.sales=db.sales.filter(x=>x.id!==id);save()}}
+function deleteBranch(id){if(db.sales.some(x=>x.branchId===id)||db.targets.some(x=>x.branchId===id))return alert('لا يمكن حذف فرع مرتبط بإيرادات أو مستهدفات. احذف السجلات المرتبطة أولًا.');if(confirm('حذف الفرع؟')){db.branches=db.branches.filter(x=>x.id!==id);save()}}
+function deleteTarget(id){db.targets=db.targets.filter(x=>x.id!==id);save()}
+function renderCompare(){let from=$('cFrom')?.value||'0000-01-01',to=$('cTo')?.value||'9999-12-31';let rows=db.branches.map(b=>{let a=db.sales.filter(x=>x.branchId===b.id&&x.date>=from&&x.date<=to);let r=sum(a,'revenue'),o=sum(a,'orders');return{name:b.name,revenue:r,orders:o,avg:o?r/o:0,days:a.length}}).sort((a,b)=>b.revenue-a.revenue);$('compareTable').innerHTML=rows.length?`<div class="tablewrap"><table><tr><th>الترتيب</th><th>الفرع</th><th>الإيرادات</th><th>الفواتير</th><th>متوسط الشيك</th><th>أيام التسجيل</th></tr>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${money(x.revenue)}</td><td>${x.orders}</td><td>${money(x.avg)}</td><td>${x.days}</td></tr>`).join('')}</table></div>`:'<div class="empty">أضف فروعًا لبدء المقارنة</div>';
+let dates=db.sales.map(x=>x.date).filter(d=>d>=from&&d<=to).sort();if(!dates.length){$('periodCompare').innerHTML='<div class="empty">لا توجد بيانات كافية</div>';return}let start=new Date(dates[0]+'T00:00:00'),end=new Date(dates[dates.length-1]+'T00:00:00'),days=Math.round((end-start)/86400000)+1,prevStart=new Date(start);prevStart.setDate(prevStart.getDate()-days);let prevEnd=new Date(start);prevEnd.setDate(prevEnd.getDate()-1);let fmt=d=>d.toISOString().slice(0,10),cur=sum(db.sales.filter(x=>x.date>=fmt(start)&&x.date<=fmt(end)),'revenue'),prev=sum(db.sales.filter(x=>x.date>=fmt(prevStart)&&x.date<=fmt(prevEnd)),'revenue'),growth=prev?(cur-prev)/prev*100:null;$('periodCompare').innerHTML=`<div class="grid"><div class="metric"><label>الفترة الحالية</label><strong>${money(cur)}</strong><small>${fmt(start)} إلى ${fmt(end)}</small></div><div class="metric"><label>الفترة السابقة</label><strong>${money(prev)}</strong><small>${fmt(prevStart)} إلى ${fmt(prevEnd)}</small></div><div class="metric"><label>معدل النمو</label><strong class="${growth>=0?'good':'bad'}">${growth===null?'—':(growth>0?'+':'')+growth.toFixed(1)+'%'}</strong><small>${prev?'مقارنة الإيرادات':'لا توجد مبيعات للفترة السابقة'}</small></div></div>`}
+function answer(q){let a=db.sales,rev=sum(a,'revenue'),ord=sum(a,'orders'),avg=ord?rev/ord:0,by=db.branches.map(b=>({name:b.name,r:sum(a.filter(x=>x.branchId===b.id),'revenue'),o:sum(a.filter(x=>x.branchId===b.id),'orders')})).sort((x,y)=>y.r-x.r);let s=q.toLowerCase();if(!a.length)return'لا توجد بيانات مبيعات مسجلة بعد. أضف فرعًا ثم سجّل الإيرادات اليومية حتى أستطيع التحليل.';if(s.includes('أفضل')||s.includes('اعلى')||s.includes('أعلى'))return by.length?`أعلى فرع من حيث الإيرادات هو ${by[0].name} بإجمالي ${money(by[0].r)}. يليه ${by[1]?.name||'لا يوجد فرع آخر'}${by[1]?' بإجمالي '+money(by[1].r):''}.`:'لا توجد فروع.';if(s.includes('متوسط')||s.includes('شيك'))return`إجمالي الإيرادات المسجلة: ${money(rev)}.\nعدد الفواتير: ${ord.toLocaleString('en-US')}.\nمتوسط الشيك: ${money(avg)}.\nالمعادلة: إجمالي الإيرادات ÷ عدد الفواتير.`;if(s.includes('قارن')||s.includes('الفروع'))return by.map((x,i)=>`${i+1}. ${x.name}: ${money(x.r)} | ${x.o} فاتورة | متوسط الشيك ${money(x.o?x.r/x.o:0)}`).join('\n');if(s.includes('نمو')||s.includes('زيادة')||s.includes('انخفاض'))return'لحساب النمو بدقة، اختر فترة حالية وفترة مقارنة متساوية من شاشة مقارنة الفروع. إجمالي البيانات المسجلة حاليًا '+money(rev)+'.';if(s.includes('خطة')||s.includes('مستهدف')){let m=today().slice(0,7),ts=db.targets.filter(t=>t.month===m),target=sum(ts,'amount'),actual=sum(a.filter(x=>x.date.startsWith(m)),'revenue');return target?`مستهدف الشهر الحالي: ${money(target)}.\nالمحقق: ${money(actual)}.\nنسبة التحقيق: ${(actual/target*100).toFixed(1)}%.\nالمتبقي: ${money(Math.max(0,target-actual))}.`:'لا يوجد مستهدف مسجل للشهر الحالي. أضفه من شاشة خطط ومستهدفات.'}return`ملخص قاعدة البيانات:\nإجمالي الإيرادات: ${money(rev)}.\nعدد الفواتير: ${ord}.\nمتوسط الشيك: ${money(avg)}.\nعدد الفروع: ${db.branches.length}.\nعدد أيام التسجيل: ${a.length}.\nيمكنك سؤالي عن أفضل فرع أو متوسط الشيك أو مقارنة الفروع أو المستهدف.`}
+function addMsg(txt,cls){let d=document.createElement('div');d.className='msg '+cls;d.textContent=txt;$('chat').appendChild(d);$('chat').scrollTop=$('chat').scrollHeight}
+function askAssistant(){let q=$('question').value.trim();if(!q)return;addMsg(q,'user');$('question').value='';addMsg(answer(q),'bot')}
+function quickAsk(q){$('question').value=q;askAssistant()}
+function download(name,content,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+function exportCSV(){let rows=[['branch','date','revenue','orders','delivery','dine_in','takeaway','notes'],...db.sales.map(x=>[branchName(x.branchId),x.date,x.revenue,x.orders,x.delivery,x.dine,x.take,x.notes||''])];let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');download('restaurant-sales.csv',csv,'text/csv;charset=utf-8')}
+function backup(){download('restaurant-intelligence-backup.json',JSON.stringify(db,null,2),'application/json')}
+function restoreBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.branches)||!Array.isArray(x.sales)||!Array.isArray(x.targets))throw Error();if(confirm('سيتم استبدال البيانات الحالية. هل أنت متأكد؟')){db=x;save();alert('تمت الاستعادة')}}catch(err){alert('ملف النسخة الاحتياطية غير صالح')}};r.readAsText(f)}
+function parseCSV(text){let lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());return lines.map(line=>{let out=[],v='',q=false;for(let i=0;i<line.length;i++){let c=line[i];if(c==='"'&&line[i+1]==='"'&&q){v+='"';i++}else if(c==='"')q=!q;else if(c===','&&!q){out.push(v);v=''}else v+=c}out.push(v);return out})}
+function importCSV(){let f=$('csvFile').files[0];if(!f)return alert('اختر ملف CSV أولًا');let r=new FileReader();r.onload=()=>{try{let rows=parseCSV(r.result),head=rows.shift().map(x=>x.trim().toLowerCase()),idx=k=>head.indexOf(k);for(let k of ['branch','date','revenue','orders'])if(idx(k)<0)throw Error('عمود مفقود: '+k);let count=0;rows.forEach(row=>{let b=db.branches.find(x=>x.name.toLowerCase()===row[idx('branch')].trim().toLowerCase());if(!b)return;let date=row[idx('date')],revenue=Number(row[idx('revenue')]),orders=Number(row[idx('orders')]);if(!date||!Number.isFinite(revenue)||!Number.isFinite(orders))return;let obj={id:crypto.randomUUID(),branchId:b.id,date,revenue,orders,delivery:Number(row[idx('delivery')])||0,dine:Number(row[idx('dine_in')])||0,take:Number(row[idx('takeaway')])||0,notes:row[idx('notes')]||''};let old=db.sales.find(x=>x.branchId===b.id&&x.date===date);if(old)Object.assign(old,obj);else db.sales.push(obj);count++});save();$('importStatus').textContent=`تم استيراد/تحديث ${count} سجل. السجلات التي لا تطابق اسم فرع معروف تم تجاهلها.`}catch(e){$('importStatus').textContent='تعذر الاستيراد: '+e.message}};r.readAsText(f,'utf-8')}
+function clearAll(){if(confirm('تحذير: سيتم حذف كل الفروع والإيرادات والمستهدفات من هذا الجهاز. هل تريد المتابعة؟')){db={branches:[],sales:[],targets:[]};save()}}
+$('sDate').value=today();$('dashTo').value=today();$('dashFrom').value=today().slice(0,7)+'-01';$('cTo').value=today();$('cFrom').value=today().slice(0,7)+'-01';$('tMonth').value=today().slice(0,7);render();
+</script>
+</body></html>
