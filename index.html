@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v2.4</title>
+    <title>كنساس داش | Kansas Dash v3.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v2.4</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.0</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -53,7 +53,7 @@
             <div class="flex items-center gap-2">
                 <span class="p-2 bg-kansasRed/10 text-kansasRed rounded-lg text-sm">📅</span>
                 <div>
-                    <span class="text-gray-400 block text-[10px]">الشهر النشط حالياً في الداش بورد:</span>
+                    <span class="text-gray-400 block text-[10px]">الشهر النشط حالياً:</span>
                     <span id="active-month-title" class="text-sm font-bold text-white">أكتوبر 2026</span>
                 </div>
             </div>
@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <!-- Main Navigation Tabs -->
+    <!-- Navigation Tabs -->
     <nav class="max-w-7xl mx-auto px-4 mt-4">
         <div class="flex bg-kansasCard border border-kansasBorder rounded-xl p-1 shadow">
             <button onclick="switchTab('revenue')" id="btn-revenue" class="flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow">
@@ -80,7 +80,6 @@
 
         <!-- ================= REVENUE SECTION ================= -->
         <section id="tab-revenue" class="space-y-5">
-            
             <div id="audit-missing-alert" class="hidden bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-xs text-red-400 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="text-base">⚠️</span>
@@ -106,7 +105,7 @@
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر النشط (تُدخل مرة واحدة)
+                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للمقارنة
                     </h3>
                     <span id="baseline-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
@@ -178,7 +177,6 @@
 
             <!-- Dashboards & Comparisons -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- MTD & Comparisons -->
                 <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                     <h4 class="font-bold text-white text-xs border-b border-kansasBorder pb-2 flex justify-between items-center">
                         <span>📊 تحليل الإيراد للفترة المحددة والمقارنات</span>
@@ -203,7 +201,6 @@
                         </div>
                     </div>
 
-                    <!-- Detailed Comparison Box (LY & LM) -->
                     <div class="border-t border-kansasBorder pt-3 space-y-2">
                         <div class="text-[11px] text-kansasRed font-bold">🔍 تفاصيل المقارنة ونسب النمو / العجز:</div>
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
@@ -223,7 +220,6 @@
                     </div>
                 </div>
 
-                <!-- Current Month Performance -->
                 <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                     <h4 class="font-bold text-white text-xs border-b border-kansasBorder pb-2 flex justify-between items-center">
                         <span>📈 مؤشرات أداء الشهر الحالي</span>
@@ -246,44 +242,97 @@
                 </div>
             </div>
 
-            <!-- Chart -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <h4 class="font-bold text-white text-xs mb-3">📉 رسم بياني لأداء الإيرادات اليومية</h4>
                 <div class="h-56 relative">
                     <canvas id="revenueChart"></canvas>
                 </div>
             </div>
-
         </section>
 
-        <!-- ================= INVENTORY SECTION ================= -->
+        <!-- ================= INVENTORY SECTION (UPDATED v3.0) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-                <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-                    <span class="text-kansasRed font-bold">🔍 نطاق تحليل العجز والزيادة:</span>
-                    <input type="date" id="inv-date-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
-                    <span class="text-gray-400">إلى</span>
-                    <input type="date" id="inv-date-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
+            
+            <!-- Warning for Missing Inventory Entry -->
+            <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">⚠️</span>
+                    <span id="inv-missing-text" class="font-bold">تنبيه مخزون: يوجد أصناف لم يُدخل لها وارد يومي أو جرد لهذا التاريخ!</span>
                 </div>
-                <button onclick="renderInventoryList()" class="w-full sm:w-auto bg-kansasRed text-white px-4 py-2 rounded-xl font-bold">تحديث النطاق</button>
             </div>
 
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
-                <div class="flex justify-between items-center mb-3">
+            <!-- Section 1: Opening Balance (Once per month) -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
+                <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span class="text-kansasRed">📦</span> إدارة المخزون وتحليل العجز والزيادة
+                        <span class="text-kansasRed">1️⃣</span> تعريف الأصناف ورصيد أول المدة (تدخل مرة واحدة أول الشهر)
                     </h3>
-                    <button onclick="addNewProductModal()" class="bg-kansasRed text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ صنف جديد</button>
+                    <button onclick="addNewProduct()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
                 </div>
-                <div id="inventory-container" class="space-y-4"></div>
-                <div class="mt-5 flex justify-end">
-                    <button onclick="saveInventoryData()" class="bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">حفظ وتحديث المخزون</button>
+                <div id="opening-container" class="space-y-3">
+                    <!-- Dynamic Opening Items -->
                 </div>
             </div>
+
+            <!-- Section 2: Daily Received -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <span class="text-kansasRed">2️⃣</span> الوارد اليومي للمخزون
+                    </h3>
+                    <div class="flex items-center gap-2 text-xs">
+                        <label class="text-gray-400">تاريخ الوارد:</label>
+                        <input type="date" id="inv-daily-date" onchange="loadDailyInventory()" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
+                    </div>
+                </div>
+                <div id="daily-received-container" class="space-y-2">
+                    <!-- Dynamic Daily Received List -->
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button onclick="saveDailyReceived()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">حفظ الوارد اليومي</button>
+                </div>
+            </div>
+
+            <!-- Section 3: Transfers (In / Out) -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
+                <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <span class="text-kansasRed">3️⃣</span> التحويلات (محول منه أو إليه)
+                    </h3>
+                    <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1 rounded-xl text-xs font-bold">+ إضافة تحويل</button>
+                </div>
+                <div id="transfers-container" class="space-y-3">
+                    <!-- Dynamic Transfer rows -->
+                </div>
+            </div>
+
+            <!-- Section 4: Ending Balance & Variance Analysis -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <span class="text-kansasRed">4️⃣</span> تحليل الجرد النهائي (آخر المدة والمباع والعجز/الزيادة)
+                    </h3>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="text-gray-400">فترة التحليل:</span>
+                        <input type="date" id="analysis-date-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
+                        <span>إلى</span>
+                        <input type="date" id="analysis-date-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
+                        <button onclick="renderInventoryAnalysis()" class="bg-kansasRed text-white px-3 py-1 rounded-lg font-bold">تحديث التحليل</button>
+                    </div>
+                </div>
+                <div id="analysis-container" class="space-y-3">
+                    <!-- Dynamic Analysis Result Cards -->
+                </div>
+                <div class="flex justify-end pt-3">
+                    <button onclick="saveFullInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">حفظ وإغلاق جرد المخزون</button>
+                </div>
+            </div>
+
         </section>
 
     </main>
 
+    <!-- Firebase & Core JS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -309,54 +358,52 @@
         let currentTab = 'revenue';
         let revenueChartInstance = null;
 
-        const defaultProducts = [
-            { id: 'p1', name: 'لحم برجر', opening: 100, received: 50, transferIn: 0, transferInBranch: '', transferOut: 0, transferOutBranch: '', closing: 30, sold: 120 },
-            { id: 'p2', name: 'خبز كيزر', opening: 200, received: 100, transferIn: 10, transferInBranch: 'فرع المعادي', transferOut: 5, transferOutBranch: 'فرع مدينة نصر', closing: 55, sold: 250 }
-        ];
-
         let appData = {
             baseline: { planRev: 0, lyRev: 0, lyOrders: 0, lmRev: 0, lmOrders: 0 },
             dailyRecords: {},
-            inventory: defaultProducts
+            products: [
+                { id: 'p1', name: 'لحم برجر', unit: 'كرتونة', opening: 100 },
+                { id: 'p2', name: 'خبز كيزر', unit: 'كيس', opening: 200 }
+            ],
+            dailyReceived: {}, // { '2026-10-29': { 'p1': 20, 'p2': 50 } }
+            transfers: [],     // [ { date, type: 'in'/'out', branch, productId, qty } ]
+            closingData: {}    // { 'p1': { closing: 30, sold: 120 } }
         };
 
         window.onload = function() {
             const today = new Date();
-            const yearMonth = today.toISOString().slice(0, 7); // e.g. "2026-10"
+            const yearMonth = today.toISOString().slice(0, 7);
             const todayStr = today.toISOString().split('T')[0];
 
             document.getElementById('global-month-selector').value = yearMonth;
             updateActiveMonthTitle();
 
             document.getElementById('daily-date').value = todayStr;
+            document.getElementById('inv-daily-date').value = todayStr;
+            document.getElementById('analysis-date-from').value = yearMonth + '-01';
+            document.getElementById('analysis-date-to').value = todayStr;
+
             document.getElementById('rev-date-from').value = yearMonth + '-01';
             document.getElementById('rev-date-to').value = todayStr;
-
-            document.getElementById('inv-date-from').value = todayStr;
-            document.getElementById('inv-date-to').value = todayStr;
 
             updateDayName();
             loadLocalData();
             initChart();
             calculateAnalytics();
-            renderInventoryList();
+            renderOpeningList();
+            loadDailyInventory();
+            renderTransfersList();
+            renderInventoryAnalysis();
             checkMissingDays();
         };
 
         function changeActiveMonth() {
-            const selectedMonth = document.getElementById('global-month-selector').value; // e.g. "2026-11"
-            if(!selectedMonth) return;
-            
             updateActiveMonthTitle();
-            
-            // Set date range to selected month bounds
-            document.getElementById('rev-date-from').value = selectedMonth + '-01';
-            document.getElementById('rev-date-to').value = selectedMonth + '-30';
-            
-            // Set daily date to first of selected month
-            document.getElementById('daily-date').value = selectedMonth + '-01';
-            loadDayData();
-            calculateAnalytics();
+            loadLocalData();
+            renderOpeningList();
+            loadDailyInventory();
+            renderTransfersList();
+            renderInventoryAnalysis();
             checkMissingDays();
         }
 
@@ -365,8 +412,7 @@
             if(!val) return;
             const [y, m] = val.split('-');
             const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-            const monthName = monthsAr[parseInt(m, 10) - 1];
-            document.getElementById('active-month-title').innerText = `${monthName} ${y}`;
+            document.getElementById('active-month-title').innerText = `${monthsAr[parseInt(m, 10) - 1]} ${y}`;
         }
 
         function switchTab(tab) {
@@ -375,21 +421,24 @@
             document.getElementById('tab-inventory').classList.toggle('hidden', tab === 'revenue');
             document.getElementById('btn-revenue').className = tab === 'revenue' ? 'flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm shadow' : 'flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm';
             document.getElementById('btn-inventory').className = tab === 'inventory' ? 'flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm shadow' : 'flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm';
-            if(tab === 'inventory') renderInventoryList();
+            if(tab === 'inventory') {
+                renderOpeningList();
+                loadDailyInventory();
+                renderTransfersList();
+                renderInventoryAnalysis();
+            }
         }
 
         function toggleBaseline() {
-            const content = document.getElementById('baseline-content');
-            content.classList.toggle('hidden');
+            document.getElementById('baseline-content').classList.toggle('hidden');
         }
 
         function updateDayName() {
             const dateVal = document.getElementById('daily-date').value;
             if(!dateVal) return;
             const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-            const dayName = days[new Date(dateVal).getDay()];
-            document.getElementById('day-name-display').innerText = `اليوم: ${dayName}`;
-            document.getElementById('current-day-label').innerText = `تاريخ اليوم: ${dateVal} (${dayName})`;
+            document.getElementById('day-name-display').innerText = `اليوم: ${days[new Date(dateVal).getDay()]}`;
+            document.getElementById('current-day-label').innerText = `تاريخ اليوم: ${dateVal}`;
         }
 
         function saveBaseline() {
@@ -433,21 +482,18 @@
 
             if(appData.dailyRecords[dateVal] && (appData.dailyRecords[dateVal].revenue > 0 || appData.dailyRecords[dateVal].orders > 0)) {
                 const oldRev = appData.dailyRecords[dateVal].revenue;
-                const confirmMod = confirm(`⚠️ تنبيه تعديل:\nتاريخ ${dateVal} مسجل مسبقاً بإيراد (${oldRev} ج.م).\nهل أنت متأكد من تعديله إلى (${newRev} ج.م)؟`);
-                if(!confirmMod) return;
+                if(!confirm(`⚠️ تنبيه تعديل:\nتاريخ ${dateVal} مسجل مسبقاً بإيراد (${oldRev} ج.م).\nهل أنت متأكد من التعديل؟`)) return;
             }
 
-            appData.dailyRecords[dateVal] = { revenue: newRev, orders: newOrders, updatedAt: new Date().toISOString() };
+            appData.dailyRecords[dateVal] = { revenue: newRev, orders: newOrders };
             saveAndSync();
             calculateAnalytics();
             checkMissingDays();
-            loadDayData();
-            alert('تم حفظ وتوثيق بيانات اليوم بنجاح!');
+            alert('تم الحفظ بنجاح!');
         }
 
         function checkMissingDays() {
-            const selectedMonth = document.getElementById('global-month-selector').value; // "2026-10"
-            if(!selectedMonth) return;
+            const selectedMonth = document.getElementById('global-month-selector').value;
             const [year, month] = selectedMonth.split('-').map(Number);
             const alertBox = document.getElementById('audit-missing-alert');
             const missingList = document.getElementById('missing-days-list');
@@ -467,15 +513,15 @@
 
             if(missingDays.length > 0) {
                 alertBox.classList.remove('hidden');
-                missingList.innerText = `الأيام المفقودة لشهر ${document.getElementById('active-month-title').innerText}: [ يوم ${missingDays.join(', يوم ')} ] لم تُسجل!`;
+                missingList.innerText = `الأيام المفقودة: [ يوم ${missingDays.join(', يوم ')} ] لم تُسجل إيراداتها!`;
             } else {
                 alertBox.classList.add('hidden');
             }
         }
 
         function resetRevDateRange() {
-            const selectedMonth = document.getElementById('global-month-selector').value;
-            document.getElementById('rev-date-from').value = selectedMonth + '-01';
+            const sm = document.getElementById('global-month-selector').value;
+            document.getElementById('rev-date-from').value = sm + '-01';
             document.getElementById('rev-date-to').value = new Date().toISOString().split('T')[0];
             calculateAnalytics();
         }
@@ -505,9 +551,7 @@
 
             let mRev = 0, mOrders = 0, mDays = 0;
             Object.values(appData.dailyRecords).forEach(rec => {
-                mRev += rec.revenue || 0;
-                mOrders += rec.orders || 0;
-                mDays++;
+                mRev += rec.revenue || 0; mOrders += rec.orders || 0; mDays++;
             });
             const avgRevDay = mDays > 0 ? (mRev / mDays) : 0;
             const avgOrdDay = mDays > 0 ? (mOrders / mDays) : 0;
@@ -515,19 +559,15 @@
             document.getElementById('curr-avg-orders').innerText = avgOrdDay.toFixed(1);
             document.getElementById('projected-rev').innerText = (avgRevDay * 30).toLocaleString() + ' ج.م';
 
-            const lyRev = appData.baseline.lyRev || 0;
-            const lyOrders = appData.baseline.lyOrders || 0;
+            const lyRev = appData.baseline.lyRev || 0, lyOrders = appData.baseline.lyOrders || 0;
             const lyAvgCheck = lyOrders > 0 ? (lyRev / lyOrders) : 0;
-
-            const lmRev = appData.baseline.lmRev || 0;
-            const lmOrders = appData.baseline.lmOrders || 0;
+            const lmRev = appData.baseline.lmRev || 0, lmOrders = appData.baseline.lmOrders || 0;
             const lmAvgCheck = lmOrders > 0 ? (lmRev / lmOrders) : 0;
 
             function formatDiff(curr, base) {
                 if (base === 0) return `<span class="text-gray-400">0%</span>`;
                 const diff = ((curr - base) / base) * 100;
-                const cls = diff >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold';
-                return `<span class="${cls}">${diff >= 0 ? '+' : ''}${diff.toFixed(1)}%</span>`;
+                return `<span class="${diff >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}">${diff >= 0 ? '+' : ''}${diff.toFixed(1)}%</span>`;
             }
 
             document.getElementById('comp-ly-rev').innerHTML = `إيراد: ${formatDiff(totalRev, lyRev)}`;
@@ -541,56 +581,149 @@
             updateChart();
         }
 
-        function renderInventoryList() {
-            const container = document.getElementById('inventory-container');
-            if(!container) return;
+        // ================= INVENTORY FUNCTIONS (v3.0) =================
+        function addNewProduct() {
+            const name = prompt('اسم الصنف الجديد:');
+            if(!name) return;
+            const unit = prompt('وحدة الشد (مثال: كرتونة، كيلو، شيكارة):') || '';
+            appData.products.push({ id: 'p_' + Date.now(), name, unit, opening: 0 });
+            renderOpeningList();
+            loadDailyInventory();
+            renderInventoryAnalysis();
+            saveAndSync();
+        }
+
+        function renderOpeningList() {
+            const container = document.getElementById('opening-container');
             container.innerHTML = '';
-            const dFrom = document.getElementById('inv-date-from').value;
-            const dTo = document.getElementById('inv-date-to').value;
-
-            appData.inventory.forEach((item, index) => {
-                const theoretical = (item.opening || 0) + (item.received || 0) + (item.transferIn || 0) - (item.transferOut || 0) - (item.sold || 0);
-                const variance = (item.closing || 0) - theoretical;
-                const vClass = variance < 0 ? 'text-red-400 font-bold' : (variance > 0 ? 'text-emerald-400 font-bold' : 'text-gray-400');
-                const vText = variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون');
-
-                const card = document.createElement('div');
-                card.className = "bg-kansasDark border border-kansasBorder rounded-2xl p-4 space-y-3";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
-                        <span class="font-bold text-white text-sm">🛒 ${item.name}</span>
-                        <div class="text-right">
-                            <span class="text-xs ${vClass}">${variance > 0 ? '+' + variance : variance} (${vText})</span>
-                            <span class="text-[10px] text-gray-400 block">${dFrom} إلى ${dTo}</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">أول المدة</label>
-                            <input type="number" value="${item.opening}" onchange="appData.inventory[index].opening=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">الوارد</label>
-                            <input type="number" value="${item.received}" onchange="appData.inventory[index].received=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع</label>
-                            <input type="number" value="${item.sold}" onchange="appData.inventory[index].sold=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white text-kansasRed font-bold">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">آخر المدة</label>
-                            <input type="number" value="${item.closing}" onchange="appData.inventory[index].closing=parseFloat(this.value)||0" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white text-emerald-400 font-bold">
-                        </div>
+            appData.products.forEach((p, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-kansasDark p-3 rounded-xl border border-kansasBorder text-xs gap-3";
+                div.innerHTML = `
+                    <div class="font-bold text-white flex-1">${p.name} <span class="text-[10px] text-gray-400 font-normal">(${p.unit})</span></div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-gray-400">رصيد أول المدة:</label>
+                        <input type="number" value="${p.opening}" onchange="updateOpening(${idx}, this.value)" class="w-24 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
                     </div>
                 `;
-                container.appendChild(card);
+                container.appendChild(div);
             });
         }
 
-        function saveInventoryData() { saveAndSync(); alert('تم حفظ المخزون بنجاح!'); }
-        function addNewProductModal() {
-            const name = prompt('اسم المنتج الجديد:');
-            if(name) { appData.inventory.push({id:'p_'+Date.now(), name, opening:0, received:0, transferIn:0, transferOut:0, closing:0, sold:0}); renderInventoryList(); saveAndSync(); }
+        function updateOpening(idx, val) {
+            appData.products[idx].opening = parseFloat(val) || 0;
+            saveAndSync();
+        }
+
+        function loadDailyInventory() {
+            const dateVal = document.getElementById('inv-daily-date').value;
+            const container = document.getElementById('daily-received-container');
+            container.innerHTML = '';
+
+            if(!appData.dailyReceived[dateVal]) appData.dailyReceived[dateVal] = {};
+
+            appData.products.forEach(p => {
+                const val = appData.dailyReceived[dateVal][p.id] || 0;
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-kansasDark p-2.5 rounded-xl border border-kansasBorder text-xs gap-3";
+                div.innerHTML = `
+                    <span class="text-white font-bold flex-1">${p.name} <span class="text-[10px] text-gray-400 font-normal">(${p.unit})</span></span>
+                    <input type="number" value="${val}" placeholder="كمية الوارد" onchange="updateDailyRec('${dateVal}', '${p.id}', this.value)" class="w-28 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateDailyRec(date, prodId, val) {
+            if(!appData.dailyReceived[date]) appData.dailyReceived[date] = {};
+            appData.dailyReceived[date][prodId] = parseFloat(val) || 0;
+            saveAndSync();
+        }
+
+        function saveDailyReceived() {
+            saveAndSync();
+            alert('تم حفظ الوارد اليومي بنجاح!');
+        }
+
+        function addTransferRow() {
+            appData.transfers.push({ date: document.getElementById('inv-daily-date').value, type: 'in', branch: '', productId: appData.products[0]?.id || '', qty: 0 });
+            renderTransfersList();
+            saveAndSync();
+        }
+
+        function renderTransfersList() {
+            const container = document.getElementById('transfers-container');
+            container.innerHTML = '';
+            appData.transfers.forEach((t, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex flex-col sm:flex-row items-center gap-2 bg-kansasDark p-3 rounded-xl border border-kansasBorder text-xs";
+                
+                let prodOptions = appData.products.map(p => `<option value="${p.id}" ${t.productId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
+
+                div.innerHTML = `
+                    <input type="date" value="${t.date}" onchange="appData.transfers[${idx}].date=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                    <select onchange="appData.transfers[${idx}].type=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
+                        <option value="in" ${t.type==='in'?'selected':''}>محول إليه</option>
+                        <option value="out" ${t.type==='out'?'selected':''}>محول منه</option>
+                    </select>
+                    <input type="text" value="${t.branch}" placeholder="اسم الفرع" onchange="appData.transfers[${idx}].branch=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white flex-1">
+                    <select onchange="appData.transfers[${idx}].productId=this.value" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">${prodOptions}</select>
+                    <input type="number" value="${t.qty}" placeholder="الكمية" onchange="appData.transfers[${idx}].qty=parseFloat(this.value)||0" class="w-20 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                    <button onclick="appData.transfers.splice(${idx},1); renderTransfersList(); saveAndSync();" class="text-red-400 font-bold px-2">حذف</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderInventoryAnalysis() {
+            const container = document.getElementById('analysis-container');
+            container.innerHTML = '';
+
+            appData.products.forEach(p => {
+                if(!appData.closingData[p.id]) appData.closingData[p.id] = { closing: 0, sold: 0 };
+                const cData = appData.closingData[p.id];
+
+                // Calculate total received in range
+                let totalReceived = 0;
+                Object.values(appData.dailyReceived).forEach(dayMap => { totalReceived += dayMap[p.id] || 0; });
+
+                // Calculate transfers in/out
+                let tIn = 0, tOut = 0;
+                appData.transfers.forEach(t => {
+                    if(t.productId === p.id) {
+                        if(t.type === 'in') tIn += t.qty;
+                        else tOut += t.qty;
+                    }
+                });
+
+                const theoretical = (p.opening || 0) + totalReceived + tIn - tOut - (cData.sold || 0);
+                const variance = (cData.closing || 0) - theoretical;
+                const vClass = variance < 0 ? 'text-red-400 font-bold' : (variance > 0 ? 'text-emerald-400 font-bold' : 'text-gray-400');
+                const vText = variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون');
+
+                const div = document.createElement('div');
+                div.className = "bg-kansasDark border border-kansasBorder rounded-xl p-3 text-xs space-y-2";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-kansasBorder pb-1.5">
+                        <span class="font-bold text-white text-sm">🛒 ${p.name} <span class="text-[10px] text-gray-400">(${p.unit})</span></span>
+                        <span class="${vClass}">${variance > 0 ? '+' + variance : variance} (${vText})</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                        <div><span class="text-gray-400 block text-[10px]">أول المدة</span><span class="text-white font-bold">${p.opening}</span></div>
+                        <div><span class="text-gray-400 block text-[10px]">إجمالي الوارد</span><span class="text-white font-bold">${totalReceived}</span></div>
+                        <div><span class="text-gray-400 block text-[10px]">تحويلات (+/-)</span><span class="text-white font-bold">${tIn - tOut}</span></div>
+                        <div><span class="text-gray-400 block text-[10px]">المباع</span><input type="number" value="${cData.sold}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-full bg-kansasCard border border-kansasBorder rounded p-1 text-kansasRed font-bold"></div>
+                        <div><span class="text-gray-400 block text-[10px]">آخر المدة (جرد)</span><input type="number" value="${cData.closing}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-full bg-kansasCard border border-kansasBorder rounded p-1 text-emerald-400 font-bold"></div>
+                        <div><span class="text-gray-400 block text-[10px]">النظري</span><span class="text-white font-bold">${theoretical}</span></div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function saveFullInventoryData() {
+            saveAndSync();
+            alert('تم حفظ وتحديث جرد المخزون بنجاح!');
         }
 
         function initChart() {
@@ -610,9 +743,14 @@
             revenueChartInstance.update();
         }
 
-        function saveAndSync() { localStorage.setItem('kansas_dash_data', JSON.stringify(appData)); }
+        function saveAndSync() {
+            const activeMonth = document.getElementById('global-month-selector').value;
+            localStorage.setItem('kansas_dash_' + activeMonth, JSON.stringify(appData));
+        }
+
         function loadLocalData() {
-            const saved = localStorage.getItem('kansas_dash_data');
+            const activeMonth = document.getElementById('global-month-selector').value;
+            const saved = localStorage.getItem('kansas_dash_' + activeMonth);
             if(saved) {
                 try {
                     appData = JSON.parse(saved);
@@ -625,6 +763,10 @@
                     }
                     loadDayData();
                 } catch(e) { console.error(e); }
+            } else {
+                // Reset or keep default for new months
+                appData.dailyRecords = {};
+                loadDayData();
             }
         }
 
