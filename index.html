@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.7</title>
+    <title>كنساس داش | Kansas Dash v3.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.7</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.9</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -96,7 +96,7 @@
                     <span id="current-day-label" class="font-bold">اليوم: جار التحميل...</span>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="exportRevenueExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium">📊 Excel الإيرادات</button>
+                    <button onclick="exportRevenueExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium">تصدير Excel الإيرادات</button>
                     <button onclick="exportToPDF()" class="flex-1 sm:flex-none bg-kansasRed text-white px-3 py-2 rounded-xl text-xs font-medium">📄 PDF</button>
                 </div>
             </div>
@@ -250,7 +250,7 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (v3.7 Fixed UI) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.9 Perfect Mobile UI) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
@@ -260,7 +260,7 @@
                 </div>
             </div>
 
-            <!-- Section 1: Opening Balance & Product Setup (Accordion) with Fixed Buttons Layout -->
+            <!-- Section 1: Opening Balance & Product Setup (Fixed Mobile Layout) -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleOpeningAccordion()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -270,21 +270,21 @@
                 </div>
                 <div id="opening-content" class="hidden mt-3 pt-3 border-t border-kansasBorder space-y-3">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <button onclick="exportOpeningExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5">
-                            <span>📊</span> تصدير أول المدة (Excel)
+                        <button onclick="exportOpeningExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 rounded-xl text-xs font-bold shadow transition">
+                            تصدير أول المدة (Excel)
                         </button>
-                        <button onclick="addNewProduct()" class="w-full bg-kansasRed hover:bg-red-700 text-white py-2 px-3 rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5">
-                            <span>+</span> إضافة صنف جديد
+                        <button onclick="addNewProduct()" class="w-full bg-kansasRed hover:bg-red-700 text-white py-2 px-3 rounded-xl text-xs font-bold shadow transition">
+                            + إضافة صنف جديد
                         </button>
                     </div>
-                    <div id="opening-container" class="space-y-2"></div>
+                    <div id="opening-container" class="space-y-3"></div>
                     <div class="flex justify-end pt-2">
-                        <button onclick="saveOpeningData()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow">حفظ واعتماد رصيد أول المدة والأصناف</button>
+                        <button onclick="saveOpeningData()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow transition">حفظ واعتماد رصيد أول المدة والأصناف</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 2: Daily Received (Fully Synced with Products) -->
+            <!-- Section 2: Daily Received -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -304,13 +304,13 @@
                         <input type="date" id="rec-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
                         <span>إلى</span>
                         <input type="date" id="rec-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
-                        <button onclick="exportReceivedExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel الوارد</button>
+                        <button onclick="exportReceivedExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold transition">تصدير Excel الوارد</button>
                     </div>
-                    <button onclick="saveDailyReceived()" class="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">تأكيد وحفظ الوارد اليومي</button>
+                    <button onclick="saveDailyReceived()" class="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow transition">تأكيد وحفظ الوارد اليومي</button>
                 </div>
             </div>
 
-            <!-- Section 3: Transfers (In / Out) per Specific Day -->
+            <!-- Section 3: Transfers -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -319,7 +319,7 @@
                     <div class="flex items-center gap-2 text-xs flex-wrap">
                         <label class="text-gray-400">تاريخ التحويلات:</label>
                         <input type="date" id="transfer-unified-date" onchange="renderTransfersList()" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
-                        <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ إضافة تحويل لليوم</button>
+                        <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">+ إضافة تحويل لليوم</button>
                     </div>
                 </div>
                 <div id="transfers-container" class="space-y-3"></div>
@@ -330,13 +330,13 @@
                         <input type="date" id="trans-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
                         <span>إلى</span>
                         <input type="date" id="trans-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
-                        <button onclick="exportTransfersExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel التحويلات</button>
+                        <button onclick="exportTransfersExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold transition">تصدير Excel التحويلات</button>
                     </div>
-                    <button onclick="saveTransfersData()" class="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">تأكيد وحفظ التحويلات</button>
+                    <button onclick="saveTransfersData()" class="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow transition">تأكيد وحفظ التحويلات</button>
                 </div>
             </div>
 
-            <!-- Section 4: Final Inventory Analysis (Fully Synced with All Inputs) -->
+            <!-- Section 4: Final Inventory Analysis -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col lg:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -347,8 +347,8 @@
                         <input type="date" id="inv-analysis-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
                         <span class="text-gray-400">إلى:</span>
                         <input type="date" id="inv-analysis-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
-                        <button onclick="renderInventoryAnalysis()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-bold">تحديث</button>
-                        <button onclick="exportInventoryExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel الجرد</button>
+                        <button onclick="renderInventoryAnalysis()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-bold transition">تحديث</button>
+                        <button onclick="exportInventoryExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold transition">تصدير Excel الجرد</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -368,7 +368,7 @@
                     </table>
                 </div>
                 <div class="flex justify-end pt-3">
-                    <button onclick="saveFullInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">حفظ وإغلاق جرد المخزون</button>
+                    <button onclick="saveFullInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow transition">حفظ وإغلاق جرد المخزون</button>
                 </div>
             </div>
 
@@ -639,7 +639,7 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.7) =================
+        // ================= INVENTORY FUNCTIONS (v3.9 Perfect Mobile UI) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
@@ -667,16 +667,18 @@
             container.innerHTML = '';
             appData.products.forEach((p, idx) => {
                 const div = document.createElement('div');
-                div.className = "flex items-center justify-between bg-kansasDark p-3 rounded-xl border border-kansasBorder text-xs gap-3";
+                div.className = "bg-kansasDark p-3 rounded-xl border border-kansasBorder text-xs space-y-2.5";
                 div.innerHTML = `
-                    <div class="font-bold text-white flex-1 flex items-center gap-2">
-                        <input type="text" value="${p.name}" onchange="appData.products[${idx}].name=this.value; saveAndSync(); loadDailyInventory(); renderTransfersList(); renderInventoryAnalysis();" class="bg-kansasCard border border-kansasBorder rounded p-1 text-white flex-1 font-bold">
-                        <input type="text" value="${p.unit}" placeholder="وحدة الشد" onchange="appData.products[${idx}].unit=this.value; saveAndSync(); loadDailyInventory(); renderTransfersList(); renderInventoryAnalysis();" class="w-24 bg-kansasCard border border-kansasBorder rounded p-1 text-gray-300">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <input type="text" value="${p.name}" placeholder="اسم الصنف" onchange="appData.products[${idx}].name=this.value; saveAndSync(); loadDailyInventory(); renderTransfersList(); renderInventoryAnalysis();" class="bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white font-bold flex-1">
+                        <input type="text" value="${p.unit}" placeholder="وحدة الشد" onchange="appData.products[${idx}].unit=this.value; saveAndSync(); loadDailyInventory(); renderTransfersList(); renderInventoryAnalysis();" class="w-full sm:w-28 bg-kansasCard border border-kansasBorder rounded-lg p-2 text-gray-300">
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="text-gray-400">أول المدة:</label>
-                        <input type="number" value="${p.opening}" onchange="updateOpening(${idx}, this.value)" class="w-24 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
-                        <button onclick="deleteProduct('${p.id}')" class="text-red-400 font-bold px-2">حذف</button>
+                    <div class="flex items-center justify-between gap-2 pt-1 border-t border-kansasBorder/50">
+                        <div class="flex items-center gap-2 flex-1">
+                            <span class="text-gray-400 text-[11px]">أول المدة:</span>
+                            <input type="number" value="${p.opening}" onchange="updateOpening(${idx}, this.value)" class="w-28 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold text-center">
+                        </div>
+                        <button onclick="deleteProduct('${p.id}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold px-3 py-1.5 rounded-lg transition">حذف الصنف</button>
                     </div>
                 `;
                 container.appendChild(div);
