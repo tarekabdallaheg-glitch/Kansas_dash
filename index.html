@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.2</title>
+    <title>كنساس داش | Kansas Dash v3.3 (Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.2</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.3 Pro</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -250,7 +250,7 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (v3.2) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.3 Pro) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
@@ -270,7 +270,7 @@
                 </div>
                 <div id="opening-content" class="hidden mt-3 pt-3 border-t border-kansasBorder space-y-3">
                     <div class="flex justify-end">
-                        <button onclick="addNewProduct()" class="bg-kansasRed text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
+                        <button onclick="addNewProduct()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
                     </div>
                     <div id="opening-container" class="space-y-2"></div>
                 </div>
@@ -289,15 +289,16 @@
                     </div>
                 </div>
                 <div id="daily-received-container" class="space-y-2"></div>
-                <div class="flex flex-col sm:flex-row justify-between items-center pt-2 gap-2">
-                    <div class="flex items-center gap-2 text-xs w-full sm:w-auto">
+                
+                <div class="flex flex-col lg:flex-row justify-between items-center pt-3 border-t border-kansasBorder gap-3">
+                    <div class="flex items-center gap-2 text-xs flex-wrap w-full lg:w-auto">
                         <span class="text-gray-400">تصدير الوارد (من - إلى):</span>
-                        <input type="date" id="rec-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
+                        <input type="date" id="rec-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
                         <span>إلى</span>
-                        <input type="date" id="rec-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
-                        <button onclick="exportReceivedExcel()" class="bg-emerald-600 text-white px-3 py-1 rounded font-bold">📊 Excel الوارد</button>
+                        <input type="date" id="rec-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
+                        <button onclick="exportReceivedExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel الوارد</button>
                     </div>
-                    <button onclick="saveDailyReceived()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">تأكيد وحفظ الوارد اليومي</button>
+                    <button onclick="saveDailyReceived()" class="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">تأكيد وحفظ الوارد اليومي</button>
                 </div>
             </div>
 
@@ -307,38 +308,39 @@
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <span class="text-kansasRed">3️⃣</span> التحويلات (محول منه أو إليه)
                     </h3>
-                    <div class="flex items-center gap-2 text-xs">
+                    <div class="flex items-center gap-2 text-xs flex-wrap">
                         <label class="text-gray-400">تاريخ اليوم الموحد للتحويلات:</label>
                         <input type="date" id="transfer-unified-date" onchange="renderTransfersList()" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
-                        <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ إضافة تحويل جديد لليوم</button>
+                        <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ إضافة تحويل لليوم</button>
                     </div>
                 </div>
                 <div id="transfers-container" class="space-y-3"></div>
-                <div class="flex flex-col sm:flex-row justify-between items-center pt-2 gap-2">
-                    <div class="flex items-center gap-2 text-xs w-full sm:w-auto">
+
+                <div class="flex flex-col lg:flex-row justify-between items-center pt-3 border-t border-kansasBorder gap-3">
+                    <div class="flex items-center gap-2 text-xs flex-wrap w-full lg:w-auto">
                         <span class="text-gray-400">تصدير التحويلات (من - إلى):</span>
-                        <input type="date" id="trans-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
+                        <input type="date" id="trans-excel-from" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
                         <span>إلى</span>
-                        <input type="date" id="trans-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1 text-white">
-                        <button onclick="exportTransfersExcel()" class="bg-emerald-600 text-white px-3 py-1 rounded font-bold">📊 Excel التحويلات</button>
+                        <input type="date" id="trans-excel-to" class="bg-kansasDark border border-kansasBorder rounded p-1.5 text-white">
+                        <button onclick="exportTransfersExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel التحويلات</button>
                     </div>
-                    <button onclick="saveTransfersData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">تأكيد وحفظ التحويلات</button>
+                    <button onclick="saveTransfersData()" class="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">تأكيد وحفظ التحويلات</button>
                 </div>
             </div>
 
             <!-- Section 4: Simplified Ending Balance & Variance Analysis -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
+                <div class="flex flex-col lg:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <span class="text-kansasRed">4️⃣</span> تحليل وجرد المخزون النهائي (عجز / زيادة)
                     </h3>
                     <div class="flex items-center gap-2 text-xs flex-wrap">
                         <span class="text-gray-400">من:</span>
-                        <input type="date" id="inv-analysis-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-1 text-white">
+                        <input type="date" id="inv-analysis-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
                         <span class="text-gray-400">إلى:</span>
-                        <input type="date" id="inv-analysis-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-1 text-white">
-                        <button onclick="renderInventoryAnalysis()" class="bg-kansasRed text-white px-3 py-1.5 rounded-lg font-bold">تحديث</button>
-                        <button onclick="exportInventoryExcel()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel تحليل الجرد</button>
+                        <input type="date" id="inv-analysis-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
+                        <button onclick="renderInventoryAnalysis()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-bold">تحديث</button>
+                        <button onclick="exportInventoryExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel الجرد</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -349,7 +351,7 @@
                                 <th class="p-2.5">أول المدة</th>
                                 <th class="p-2.5">الوارد</th>
                                 <th class="p-2.5">التحويلات (+/-)</th>
-                                <th class="p-2.5">المباع</th>
+                                <th class="p-2.5">المباع (يدوي)</th>
                                 <th class="p-2.5">آخر المدة (جرد)</th>
                                 <th class="p-2.5">العجز / الزيادة</th>
                             </tr>
@@ -399,8 +401,8 @@
                 { id: 'p1', name: 'لحم برجر', unit: 'كرتونة', opening: 100 },
                 { id: 'p2', name: 'خبز كيزر', unit: 'كيس', opening: 200 }
             ],
-            dailyReceived: {}, // { '2026-10-29': { data: {p1: 20}, updatedAt: '...' } }
-            transfers: [],     // [ { date, type, branch, productId, qty } ]
+            dailyReceived: {},
+            transfers: [],
             closingData: {}
         };
 
@@ -629,7 +631,7 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.2) =================
+        // ================= INVENTORY FUNCTIONS (v3.3 Pro) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
@@ -673,6 +675,7 @@
         function updateOpening(idx, val) {
             appData.products[idx].opening = parseFloat(val) || 0;
             saveAndSync();
+            renderInventoryAnalysis();
         }
 
         function loadDailyInventory() {
@@ -682,9 +685,9 @@
             container.innerHTML = '';
 
             const existing = appData.dailyReceived[dateVal];
-            if(existing && existing.data) {
+            if(existing && existing.updatedAt) {
                 badge.className = "px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold";
-                badge.innerText = `تم تسجيله مسبقاً (${existing.updatedAt || 'مسجل'})`;
+                badge.innerText = `تم تسجيله (${existing.updatedAt})`;
             } else {
                 badge.className = "px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400 text-[10px] font-bold";
                 badge.innerText = "لم يُسجل اليوم";
@@ -723,14 +726,16 @@
 
             saveAndSync();
             loadDailyInventory();
+            renderInventoryAnalysis();
             alert(`تم تأكيد وحفظ الوارد اليومي بنجاح في (${nowStr})!`);
         }
 
         function addTransferRow() {
             const unifiedDate = document.getElementById('transfer-unified-date').value;
             if(!unifiedDate) return alert('اختر تاريخ التحويلات الموحد أولاً');
+            if(appData.products.length === 0) return alert('الرجاء إضافة أصناف أولاً من شريط إعداد الأصناف');
 
-            appData.transfers.push({ date: unifiedDate, type: 'in', branch: '', productId: appData.products[0]?.id || '', qty: 0 });
+            appData.transfers.push({ date: unifiedDate, type: 'in', branch: '', productId: appData.products[0].id, qty: 0 });
             renderTransfersList();
             saveAndSync();
         }
@@ -740,7 +745,6 @@
             const unifiedDate = document.getElementById('transfer-unified-date').value;
             container.innerHTML = '';
 
-            // Filter transfers for the selected unified date
             appData.transfers.forEach((t, idx) => {
                 if(t.date !== unifiedDate) return;
 
@@ -765,6 +769,7 @@
 
         function saveTransfersData() {
             saveAndSync();
+            renderInventoryAnalysis();
             alert('تم تأكيد وحفظ التحويلات بنجاح!');
         }
 
@@ -806,8 +811,8 @@
                     <td class="p-2.5 text-gray-300">${p.opening}</td>
                     <td class="p-2.5 text-gray-300">${totalReceived}</td>
                     <td class="p-2.5 text-gray-300">${netTransfer}</td>
-                    <td class="p-2.5"><input type="number" value="${cData.sold}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-kansasRed font-bold text-xs"></td>
-                    <td class="p-2.5"><input type="number" value="${cData.closing}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-emerald-400 font-bold text-xs"></td>
+                    <td class="p-2.5"><input type="number" value="${cData.sold}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-kansasRed font-bold text-xs"></td>
+                    <td class="p-2.5"><input type="number" value="${cData.closing}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-emerald-400 font-bold text-xs"></td>
                     <td class="p-2.5 ${vClass}">${variance > 0 ? '+' + variance : variance} (${vText})</td>
                 `;
                 tbody.appendChild(tr);
