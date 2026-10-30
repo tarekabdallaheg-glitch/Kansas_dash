@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.3 (Pro)</title>
+    <title>كنساس داش | Kansas Dash v3.4 (Pro Master)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.3 Pro</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.4 Pro</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -250,7 +250,7 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (v3.3 Pro) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.4 Pro Master) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
@@ -276,7 +276,7 @@
                 </div>
             </div>
 
-            <!-- Section 2: Daily Received -->
+            <!-- Section 2: Daily Received (Linked to Products) -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -302,14 +302,14 @@
                 </div>
             </div>
 
-            <!-- Section 3: Transfers (In / Out) with Unified Date per Day -->
+            <!-- Section 3: Transfers (In / Out) per Specific Day -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <span class="text-kansasRed">3️⃣</span> التحويلات (محول منه أو إليه)
                     </h3>
                     <div class="flex items-center gap-2 text-xs flex-wrap">
-                        <label class="text-gray-400">تاريخ اليوم الموحد للتحويلات:</label>
+                        <label class="text-gray-400">تاريخ التحويلات:</label>
                         <input type="date" id="transfer-unified-date" onchange="renderTransfersList()" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
                         <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ إضافة تحويل لليوم</button>
                     </div>
@@ -328,7 +328,7 @@
                 </div>
             </div>
 
-            <!-- Section 4: Simplified Ending Balance & Variance Analysis -->
+            <!-- Section 4: Final Inventory Analysis (Manual Sold & Closing) -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col lg:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -347,12 +347,12 @@
                     <table class="w-full text-right text-xs">
                         <thead class="bg-kansasDark text-gray-400 border-b border-kansasBorder">
                             <tr>
-                                <th class="p-2.5">الصنف</th>
+                                <th class="p-2.5">الصنف ووحدة الشد</th>
                                 <th class="p-2.5">أول المدة</th>
                                 <th class="p-2.5">الوارد</th>
                                 <th class="p-2.5">التحويلات (+/-)</th>
                                 <th class="p-2.5">المباع (يدوي)</th>
-                                <th class="p-2.5">آخر المدة (جرد)</th>
+                                <th class="p-2.5">آخر المدة (جرد يدوي)</th>
                                 <th class="p-2.5">العجز / الزيادة</th>
                             </tr>
                         </thead>
@@ -631,7 +631,7 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.3 Pro) =================
+        // ================= INVENTORY FUNCTIONS (v3.4 Pro Master) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
@@ -732,7 +732,7 @@
 
         function addTransferRow() {
             const unifiedDate = document.getElementById('transfer-unified-date').value;
-            if(!unifiedDate) return alert('اختر تاريخ التحويلات الموحد أولاً');
+            if(!unifiedDate) return alert('اختر تاريخ التحويلات أولاً');
             if(appData.products.length === 0) return alert('الرجاء إضافة أصناف أولاً من شريط إعداد الأصناف');
 
             appData.transfers.push({ date: unifiedDate, type: 'in', branch: '', productId: appData.products[0].id, qty: 0 });
