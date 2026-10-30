@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.0</title>
+    <title>كنساس داش | Kansas Dash v3.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.0</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.1</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -96,7 +96,7 @@
                     <span id="current-day-label" class="font-bold">اليوم: جار التحميل...</span>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="exportToExcel()" class="flex-1 sm:flex-none bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-medium">📊 Excel</button>
+                    <button onclick="exportRevenueExcel()" class="flex-1 sm:flex-none bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-medium">📊 Excel الإيرادات</button>
                     <button onclick="exportToPDF()" class="flex-1 sm:flex-none bg-kansasRed text-white px-3 py-2 rounded-xl text-xs font-medium">📄 PDF</button>
                 </div>
             </div>
@@ -250,27 +250,29 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (UPDATED v3.0) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.1) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
-            <!-- Warning for Missing Inventory Entry -->
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="text-base">⚠️</span>
-                    <span id="inv-missing-text" class="font-bold">تنبيه مخزون: يوجد أصناف لم يُدخل لها وارد يومي أو جرد لهذا التاريخ!</span>
+                    <span id="inv-missing-text" class="font-bold">تنبيه مخزون: يوجد تاريخ لم يُدخل له وارد يومي!</span>
                 </div>
             </div>
 
-            <!-- Section 1: Opening Balance (Once per month) -->
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
-                <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
+            <!-- Section 1: Opening Balance Accordion -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
+                <div class="flex justify-between items-center cursor-pointer" onclick="toggleOpeningAccordion()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span class="text-kansasRed">1️⃣</span> تعريف الأصناف ورصيد أول المدة (تدخل مرة واحدة أول الشهر)
+                        <span class="text-kansasRed">1️⃣</span> شريط إعداد الأصناف ورصيد أول المدة (تُدخل مرة أول الشهر)
                     </h3>
-                    <button onclick="addNewProduct()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
+                    <span id="opening-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
-                <div id="opening-container" class="space-y-3">
-                    <!-- Dynamic Opening Items -->
+                <div id="opening-content" class="hidden mt-3 pt-3 border-t border-kansasBorder space-y-3">
+                    <div class="flex justify-end">
+                        <button onclick="addNewProduct()" class="bg-kansasRed text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
+                    </div>
+                    <div id="opening-container" class="space-y-2"></div>
                 </div>
             </div>
 
@@ -285,11 +287,9 @@
                         <input type="date" id="inv-daily-date" onchange="loadDailyInventory()" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
                     </div>
                 </div>
-                <div id="daily-received-container" class="space-y-2">
-                    <!-- Dynamic Daily Received List -->
-                </div>
+                <div id="daily-received-container" class="space-y-2"></div>
                 <div class="flex justify-end pt-2">
-                    <button onclick="saveDailyReceived()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">حفظ الوارد اليومي</button>
+                    <button onclick="saveDailyReceived()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">تأكيد وحفظ الوارد اليومي</button>
                 </div>
             </div>
 
@@ -301,27 +301,42 @@
                     </h3>
                     <button onclick="addTransferRow()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1 rounded-xl text-xs font-bold">+ إضافة تحويل</button>
                 </div>
-                <div id="transfers-container" class="space-y-3">
-                    <!-- Dynamic Transfer rows -->
+                <div id="transfers-container" class="space-y-3"></div>
+                <div class="flex justify-end pt-2">
+                    <button onclick="saveTransfersData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">تأكيد وحفظ التحويلات</button>
                 </div>
             </div>
 
-            <!-- Section 4: Ending Balance & Variance Analysis -->
+            <!-- Section 4: Simplified Ending Balance & Variance Analysis -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                        <span class="text-kansasRed">4️⃣</span> تحليل الجرد النهائي (آخر المدة والمباع والعجز/الزيادة)
+                        <span class="text-kansasRed">4️⃣</span> تحليل وجرد المخزون النهائي (عجز / زيادة)
                     </h3>
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="text-gray-400">فترة التحليل:</span>
-                        <input type="date" id="analysis-date-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
-                        <span>إلى</span>
-                        <input type="date" id="analysis-date-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-1.5 text-white">
-                        <button onclick="renderInventoryAnalysis()" class="bg-kansasRed text-white px-3 py-1 rounded-lg font-bold">تحديث التحليل</button>
+                    <div class="flex items-center gap-2 text-xs flex-wrap">
+                        <span class="text-gray-400">من:</span>
+                        <input type="date" id="inv-analysis-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-1 text-white">
+                        <span class="text-gray-400">إلى:</span>
+                        <input type="date" id="inv-analysis-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-1 text-white">
+                        <button onclick="renderInventoryAnalysis()" class="bg-kansasRed text-white px-3 py-1.5 rounded-lg font-bold">تحديث</button>
+                        <button onclick="exportInventoryExcel()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold">📊 Excel المخزون</button>
                     </div>
                 </div>
-                <div id="analysis-container" class="space-y-3">
-                    <!-- Dynamic Analysis Result Cards -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs">
+                        <thead class="bg-kansasDark text-gray-400 border-b border-kansasBorder">
+                            <tr>
+                                <th class="p-2.5">الصنف</th>
+                                <th class="p-2.5">أول المدة</th>
+                                <th class="p-2.5">الوارد</th>
+                                <th class="p-2.5">التحويلات (+/-)</th>
+                                <th class="p-2.5">المباع</th>
+                                <th class="p-2.5">آخر المدة (جرد)</th>
+                                <th class="p-2.5">العجز / الزيادة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analysis-table-body" class="divide-y divide-kansasBorder"></tbody>
+                    </table>
                 </div>
                 <div class="flex justify-end pt-3">
                     <button onclick="saveFullInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow">حفظ وإغلاق جرد المخزون</button>
@@ -365,9 +380,9 @@
                 { id: 'p1', name: 'لحم برجر', unit: 'كرتونة', opening: 100 },
                 { id: 'p2', name: 'خبز كيزر', unit: 'كيس', opening: 200 }
             ],
-            dailyReceived: {}, // { '2026-10-29': { 'p1': 20, 'p2': 50 } }
-            transfers: [],     // [ { date, type: 'in'/'out', branch, productId, qty } ]
-            closingData: {}    // { 'p1': { closing: 30, sold: 120 } }
+            dailyReceived: {},
+            transfers: [],
+            closingData: {}
         };
 
         window.onload = function() {
@@ -380,8 +395,8 @@
 
             document.getElementById('daily-date').value = todayStr;
             document.getElementById('inv-daily-date').value = todayStr;
-            document.getElementById('analysis-date-from').value = yearMonth + '-01';
-            document.getElementById('analysis-date-to').value = todayStr;
+            document.getElementById('inv-analysis-from').value = yearMonth + '-01';
+            document.getElementById('inv-analysis-to').value = todayStr;
 
             document.getElementById('rev-date-from').value = yearMonth + '-01';
             document.getElementById('rev-date-to').value = todayStr;
@@ -431,6 +446,13 @@
 
         function toggleBaseline() {
             document.getElementById('baseline-content').classList.toggle('hidden');
+        }
+
+        function toggleOpeningAccordion() {
+            const content = document.getElementById('opening-content');
+            const arrow = document.getElementById('opening-arrow');
+            content.classList.toggle('hidden');
+            arrow.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
         }
 
         function updateDayName() {
@@ -489,7 +511,7 @@
             saveAndSync();
             calculateAnalytics();
             checkMissingDays();
-            alert('تم الحفظ بنجاح!');
+            alert('تم الحفظ وتأكيد البيانات بنجاح!');
         }
 
         function checkMissingDays() {
@@ -581,12 +603,21 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.0) =================
+        // ================= INVENTORY FUNCTIONS (v3.1) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
             const unit = prompt('وحدة الشد (مثال: كرتونة، كيلو، شيكارة):') || '';
             appData.products.push({ id: 'p_' + Date.now(), name, unit, opening: 0 });
+            renderOpeningList();
+            loadDailyInventory();
+            renderInventoryAnalysis();
+            saveAndSync();
+        }
+
+        function deleteProduct(id) {
+            if(!confirm('هل أنت متأكد من حذف هذا الصنف؟')) return;
+            appData.products = appData.products.filter(p => p.id !== id);
             renderOpeningList();
             loadDailyInventory();
             renderInventoryAnalysis();
@@ -602,8 +633,9 @@
                 div.innerHTML = `
                     <div class="font-bold text-white flex-1">${p.name} <span class="text-[10px] text-gray-400 font-normal">(${p.unit})</span></div>
                     <div class="flex items-center gap-2">
-                        <label class="text-gray-400">رصيد أول المدة:</label>
+                        <label class="text-gray-400">أول المدة:</label>
                         <input type="number" value="${p.opening}" onchange="updateOpening(${idx}, this.value)" class="w-24 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
+                        <button onclick="deleteProduct('${p.id}')" class="text-red-400 font-bold px-2">حذف</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -642,7 +674,7 @@
 
         function saveDailyReceived() {
             saveAndSync();
-            alert('تم حفظ الوارد اليومي بنجاح!');
+            alert('تم تأكيد وحفظ الوارد اليومي بنجاح!');
         }
 
         function addTransferRow() {
@@ -675,55 +707,81 @@
             });
         }
 
+        function saveTransfersData() {
+            saveAndSync();
+            alert('تم تأكيد وحفظ التحويلات بنجاح!');
+        }
+
         function renderInventoryAnalysis() {
-            const container = document.getElementById('analysis-container');
-            container.innerHTML = '';
+            const tbody = document.getElementById('analysis-table-body');
+            tbody.innerHTML = '';
+
+            const dFrom = document.getElementById('inv-analysis-from').value;
+            const dTo = document.getElementById('inv-analysis-to').value;
 
             appData.products.forEach(p => {
                 if(!appData.closingData[p.id]) appData.closingData[p.id] = { closing: 0, sold: 0 };
                 const cData = appData.closingData[p.id];
 
-                // Calculate total received in range
                 let totalReceived = 0;
-                Object.values(appData.dailyReceived).forEach(dayMap => { totalReceived += dayMap[p.id] || 0; });
+                Object.keys(appData.dailyReceived).forEach(dateStr => {
+                    if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
+                        totalReceived += appData.dailyReceived[dateStr][p.id] || 0;
+                    }
+                });
 
-                // Calculate transfers in/out
                 let tIn = 0, tOut = 0;
                 appData.transfers.forEach(t => {
-                    if(t.productId === p.id) {
+                    if(t.productId === p.id && (!dFrom || t.date >= dFrom) && (!dTo || t.date <= dTo)) {
                         if(t.type === 'in') tIn += t.qty;
                         else tOut += t.qty;
                     }
                 });
 
-                const theoretical = (p.opening || 0) + totalReceived + tIn - tOut - (cData.sold || 0);
+                const netTransfer = tIn - tOut;
+                const theoretical = (p.opening || 0) + totalReceived + netTransfer - (cData.sold || 0);
                 const variance = (cData.closing || 0) - theoretical;
                 const vClass = variance < 0 ? 'text-red-400 font-bold' : (variance > 0 ? 'text-emerald-400 font-bold' : 'text-gray-400');
                 const vText = variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون');
 
-                const div = document.createElement('div');
-                div.className = "bg-kansasDark border border-kansasBorder rounded-xl p-3 text-xs space-y-2";
-                div.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-kansasBorder pb-1.5">
-                        <span class="font-bold text-white text-sm">🛒 ${p.name} <span class="text-[10px] text-gray-400">(${p.unit})</span></span>
-                        <span class="${vClass}">${variance > 0 ? '+' + variance : variance} (${vText})</span>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
-                        <div><span class="text-gray-400 block text-[10px]">أول المدة</span><span class="text-white font-bold">${p.opening}</span></div>
-                        <div><span class="text-gray-400 block text-[10px]">إجمالي الوارد</span><span class="text-white font-bold">${totalReceived}</span></div>
-                        <div><span class="text-gray-400 block text-[10px]">تحويلات (+/-)</span><span class="text-white font-bold">${tIn - tOut}</span></div>
-                        <div><span class="text-gray-400 block text-[10px]">المباع</span><input type="number" value="${cData.sold}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-full bg-kansasCard border border-kansasBorder rounded p-1 text-kansasRed font-bold"></div>
-                        <div><span class="text-gray-400 block text-[10px]">آخر المدة (جرد)</span><input type="number" value="${cData.closing}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-full bg-kansasCard border border-kansasBorder rounded p-1 text-emerald-400 font-bold"></div>
-                        <div><span class="text-gray-400 block text-[10px]">النظري</span><span class="text-white font-bold">${theoretical}</span></div>
-                    </div>
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold text-white">${p.name} <span class="text-[10px] text-gray-400 font-normal">(${p.unit})</span></td>
+                    <td class="p-2.5 text-gray-300">${p.opening}</td>
+                    <td class="p-2.5 text-gray-300">${totalReceived}</td>
+                    <td class="p-2.5 text-gray-300">${netTransfer}</td>
+                    <td class="p-2.5"><input type="number" value="${cData.sold}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-kansasRed font-bold text-xs"></td>
+                    <td class="p-2.5"><input type="number" value="${cData.closing}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; renderInventoryAnalysis()" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-emerald-400 font-bold text-xs"></td>
+                    <td class="p-2.5 ${vClass}">${variance > 0 ? '+' + variance : variance} (${vText})</td>
                 `;
-                container.appendChild(div);
+                tbody.appendChild(tr);
             });
         }
 
         function saveFullInventoryData() {
             saveAndSync();
-            alert('تم حفظ وتحديث جرد المخزون بنجاح!');
+            alert('تم حفظ وإغلاق جرد المخزون بنجاح!');
+        }
+
+        function exportRevenueExcel() {
+            const wb = XLSX.utils.book_new();
+            const revData = Object.keys(appData.dailyRecords).map(d => ({
+                'التاريخ': d, 'الإيراد': appData.dailyRecords[d].revenue, 'العمليات': appData.dailyRecords[d].orders
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(revData), "الإيرادات اليومية");
+            XLSX.writeFile(wb, 'Kansas_Revenue_Report.xlsx');
+        }
+
+        function exportInventoryExcel() {
+            const wb = XLSX.utils.book_new();
+            const invSummary = appData.products.map(p => {
+                const cData = appData.closingData[p.id] || { closing: 0, sold: 0 };
+                let totalRec = 0;
+                Object.values(appData.dailyReceived).forEach(d => totalRec += d[p.id] || 0);
+                return { 'الصنف': p.name, 'الوحدة': p.unit, 'أول المدة': p.opening, 'الوارد': totalRec, 'المباع': cData.sold, 'آخر المدة': cData.closing };
+            });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(invSummary), "تحليل جرد المخزون");
+            XLSX.writeFile(wb, 'Kansas_Inventory_Report.xlsx');
         }
 
         function initChart() {
@@ -764,20 +822,14 @@
                     loadDayData();
                 } catch(e) { console.error(e); }
             } else {
-                // Reset or keep default for new months
                 appData.dailyRecords = {};
                 loadDayData();
             }
         }
 
-        function exportToExcel() {
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Object.keys(appData.dailyRecords).map(d => ({'التاريخ': d, 'الإيراد': appData.dailyRecords[d].revenue, 'العمليات': appData.dailyRecords[d].orders}))), "الإيرادات");
-            XLSX.writeFile(wb, 'Kansas_Report.xlsx');
-        }
         function exportToPDF() {
             const doc = new window.jspdf.jsPDF();
-            doc.text("Kansas Dash Report", 20, 20);
+            doc.text("Kansas Dash Operational Report", 20, 20);
             doc.save("Kansas_Report.pdf");
         }
     </script>
