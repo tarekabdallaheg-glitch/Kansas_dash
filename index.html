@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.4 (Pro Master)</title>
+    <title>كنساس داش | Kansas Dash v3.5 (Ultimate Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.4 Pro</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.5 Ultimate</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -250,7 +250,7 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (v3.4 Pro Master) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.5 Ultimate) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
@@ -260,7 +260,7 @@
                 </div>
             </div>
 
-            <!-- Section 1: Opening Balance Accordion -->
+            <!-- Section 1: Opening Balance & Product Setup (Accordion) with Save & Excel -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleOpeningAccordion()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -269,10 +269,14 @@
                     <span id="opening-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
                 <div id="opening-content" class="hidden mt-3 pt-3 border-t border-kansasBorder space-y-3">
-                    <div class="flex justify-end">
+                    <div class="flex justify-between items-center">
+                        <button onclick="exportOpeningExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">📊 Excel أول المدة</button>
                         <button onclick="addNewProduct()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
                     </div>
                     <div id="opening-container" class="space-y-2"></div>
+                    <div class="flex justify-end pt-2">
+                        <button onclick="saveOpeningData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">حفظ واعتماد أول المدة</button>
+                    </div>
                 </div>
             </div>
 
@@ -631,7 +635,7 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.4 Pro Master) =================
+        // ================= INVENTORY FUNCTIONS (v3.5 Ultimate) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
@@ -661,7 +665,10 @@
                 const div = document.createElement('div');
                 div.className = "flex items-center justify-between bg-kansasDark p-3 rounded-xl border border-kansasBorder text-xs gap-3";
                 div.innerHTML = `
-                    <div class="font-bold text-white flex-1">${p.name} <span class="text-[10px] text-gray-400 font-normal">(${p.unit})</span></div>
+                    <div class="font-bold text-white flex-1 flex items-center gap-2">
+                        <input type="text" value="${p.name}" onchange="appData.products[${idx}].name=this.value; saveAndSync(); renderInventoryAnalysis();" class="bg-kansasCard border border-kansasBorder rounded p-1 text-white flex-1 font-bold">
+                        <input type="text" value="${p.unit}" placeholder="وحدة الشد" onchange="appData.products[${idx}].unit=this.value; saveAndSync(); renderInventoryAnalysis();" class="w-24 bg-kansasCard border border-kansasBorder rounded p-1 text-gray-300">
+                    </div>
                     <div class="flex items-center gap-2">
                         <label class="text-gray-400">أول المدة:</label>
                         <input type="number" value="${p.opening}" onchange="updateOpening(${idx}, this.value)" class="w-24 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
@@ -676,6 +683,14 @@
             appData.products[idx].opening = parseFloat(val) || 0;
             saveAndSync();
             renderInventoryAnalysis();
+        }
+
+        function saveOpeningData() {
+            saveAndSync();
+            loadDailyInventory();
+            renderTransfersList();
+            renderInventoryAnalysis();
+            alert('تم حفظ واعتماد رصيد أول المدة والأصناف بنجاح!');
         }
 
         function loadDailyInventory() {
@@ -824,7 +839,18 @@
             alert('تم حفظ وإغلاق جرد المخزون بنجاح!');
         }
 
-        // Excel Export Functions with Date Range
+        // Excel Export Functions
+        function exportOpeningExcel() {
+            const wb = XLSX.utils.book_new();
+            const rows = appData.products.map(p => ({
+                'اسم الصنف': p.name,
+                'وحدة الشد': p.unit,
+                'رصيد أول المدة': p.opening
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "رصيد أول المدة");
+            XLSX.writeFile(wb, 'Kansas_Opening_Balance.xlsx');
+        }
+
         function exportReceivedExcel() {
             const f = document.getElementById('rec-excel-from').value;
             const t = document.getElementById('rec-excel-to').value;
