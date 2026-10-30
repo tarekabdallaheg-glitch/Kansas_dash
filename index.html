@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v2</title>
+    <title>كنساس داش | Kansas Dash v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v2.0</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v2.1</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -134,17 +134,28 @@
                 </div>
             </div>
 
+            <!-- Date Range Filter for Revenue Analysis -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+                    <span class="text-kansasRed font-bold">🔍 نطاق تحليل الإيراد (من - إلى):</span>
+                    <input type="date" id="rev-date-from" onchange="calculateAnalytics()" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
+                    <span class="text-gray-400">إلى</span>
+                    <input type="date" id="rev-date-to" onchange="calculateAnalytics()" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
+                </div>
+                <button onclick="resetRevDateRange()" class="w-full sm:w-auto bg-kansasDark border border-kansasBorder text-gray-300 px-3 py-2 rounded-xl font-bold">كل الشهر</button>
+            </div>
+
             <!-- Dashboards & Comparisons -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- MTD & Comparisons -->
                 <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                     <h4 class="font-bold text-white text-xs border-b border-kansasBorder pb-2 flex justify-between items-center">
-                        <span>📊 الإيراد حتى تاريخه (MTD) والمقارنات</span>
+                        <span>📊 تحليل الإيراد للفترة المحددة والمقارنات</span>
                         <span class="text-kansasRed">النمو والعجز</span>
                     </h4>
                     <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-[11px] text-gray-400 block mb-1">الإيراد حتى تاريخه</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">الإيراد للفترة</span>
                             <span id="mtd-rev" class="text-sm font-bold text-white">0.00 ج.م</span>
                         </div>
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
@@ -152,7 +163,7 @@
                             <span id="mtd-orders" class="text-sm font-bold text-white">0</span>
                         </div>
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-[11px] text-gray-400 block mb-1">متوسط الشيك الحالي</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">متوسط الشيك للفترة</span>
                             <span id="mtd-avg-check" class="text-sm font-bold text-emerald-500">0.00 ج.م</span>
                         </div>
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
@@ -163,10 +174,10 @@
 
                     <!-- Detailed Comparison Box (LY & LM) -->
                     <div class="border-t border-kansasBorder pt-3 space-y-2">
-                        <div class="text-[11px] text-kansasRed font-bold">🔍 تفاصيل المقارنة ونسب النمو / المينص:</div>
+                        <div class="text-[11px] text-kansasRed font-bold">🔍 تفاصيل المقارنة ونسب النمو / العجز:</div>
                         <div class="grid grid-cols-2 gap-2 text-[11px]">
                             <div class="bg-kansasDark p-2.5 rounded-xl border border-kansasBorder space-y-1">
-                                <span class="text-gray-300 font-bold block border-b border-kansasBorder pb-1">vs العام السابق (نفس الشهر)</span>
+                                <span class="text-gray-300 font-bold block border-b border-kansasBorder pb-1">vs العام السابق</span>
                                 <div id="comp-ly-rev" class="text-white">إيراد: 0%</div>
                                 <div id="comp-ly-orders" class="text-white">عمليات: 0%</div>
                                 <div id="comp-ly-check" class="text-white">متوسط الشيك: 0%</div>
@@ -281,6 +292,10 @@
         window.onload = function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('daily-date').value = today;
+            
+            document.getElementById('rev-date-from').value = today.substring(0, 8) + '01'; // أول الشهر
+            document.getElementById('rev-date-to').value = today;
+
             document.getElementById('inv-date-from').value = today;
             document.getElementById('inv-date-to').value = today;
 
@@ -347,12 +362,24 @@
             alert('تم حفظ بيانات اليوم بنجاح!');
         }
 
+        function resetRevDateRange() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('rev-date-from').value = today.substring(0, 8) + '01';
+            document.getElementById('rev-date-to').value = today;
+            calculateAnalytics();
+        }
+
         function calculateAnalytics() {
             let totalRev = 0, totalOrders = 0, daysCount = 0;
-            Object.values(appData.dailyRecords).forEach(rec => {
-                totalRev += rec.revenue;
-                totalOrders += rec.orders;
-                daysCount++;
+            const dFrom = document.getElementById('rev-date-from').value;
+            const dTo = document.getElementById('rev-date-to').value;
+
+            Object.keys(appData.dailyRecords).forEach(dateStr => {
+                if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
+                    totalRev += appData.dailyRecords[dateStr].revenue;
+                    totalOrders += appData.dailyRecords[dateStr].orders;
+                    daysCount++;
+                }
             });
 
             const avgCheck = totalOrders > 0 ? (totalRev / totalOrders) : 0;
@@ -364,8 +391,15 @@
             document.getElementById('mtd-avg-check').innerText = avgCheck.toFixed(2) + ' ج.م';
             document.getElementById('mtd-plan-ratio').innerText = planRatio.toFixed(1) + '%';
 
-            const avgRevDay = daysCount > 0 ? (totalRev / daysCount) : 0;
-            const avgOrdDay = daysCount > 0 ? (totalOrders / daysCount) : 0;
+            // Current Month Averages (Total Month)
+            let mRev = 0, mOrders = 0, mDays = 0;
+            Object.values(appData.dailyRecords).forEach(rec => {
+                mRev += rec.revenue;
+                mOrders += rec.orders;
+                mDays++;
+            });
+            const avgRevDay = mDays > 0 ? (mRev / mDays) : 0;
+            const avgOrdDay = mDays > 0 ? (mOrders / mDays) : 0;
             document.getElementById('curr-avg-rev').innerText = avgRevDay.toLocaleString() + ' ج.م';
             document.getElementById('curr-avg-orders').innerText = avgOrdDay.toFixed(1);
             document.getElementById('projected-rev').innerText = (avgRevDay * 30).toLocaleString() + ' ج.م';
