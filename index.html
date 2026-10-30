@@ -28,178 +28,179 @@
     </script>
     <style>
         body { background-color: #121212; color: #e5e7eb; font-family: system-ui, -apple-system, sans-serif; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen pb-16">
 
     <!-- Header / Navbar -->
-    <header class="bg-kansasCard border-b border-kansasBorder sticky top-0 z-50 px-4 py-3">
+    <header class="bg-kansasCard border-b border-kansasBorder sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
-                    <h1 class="text-lg font-bold text-white flex items-center gap-2">
-                        كنساس داش <span class="text-xs bg-kansasRed/20 text-kansasRed px-2 py-0.5 rounded">Kansas Dash</span>
+                    <h1 class="text-base font-bold text-white flex items-center gap-1.5">
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">Kansas Dash</span>
                     </h1>
-                    <p class="text-xs text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
+                    <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
             </div>
             <!-- Connection Status -->
-            <div id="sync-status" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
-                <span id="sync-text">جاري الاتصال بالسحابة...</span>
+            <div id="sync-status" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="sync-text">متصل بالسحابة</span>
             </div>
         </div>
     </header>
 
     <!-- Main Navigation Tabs -->
     <nav class="max-w-7xl mx-auto px-4 mt-4">
-        <div class="flex border-b border-kansasBorder">
-            <button onclick="switchTab('revenue')" id="btn-revenue" class="flex-1 py-3 text-center font-bold text-kansasRed border-b-2 border-kansasRed transition">
+        <div class="flex bg-kansasCard border border-kansasBorder rounded-xl p-1 shadow">
+            <button onclick="switchTab('revenue')" id="btn-revenue" class="flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow">
                 📈 الإيرادات والأداء
             </button>
-            <button onclick="switchTab('inventory')" id="btn-inventory" class="flex-1 py-3 text-center font-medium text-gray-400 border-b-2 border-transparent transition">
+            <button onclick="switchTab('inventory')" id="btn-inventory" class="flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm transition">
                 📦 المخزون وتحليل العجز
             </button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 mt-6">
+    <main class="max-w-7xl mx-auto px-4 mt-5 space-y-5">
 
         <!-- ================= PAGE 1: REVENUE & ANALYTICS ================= -->
-        <section id="tab-revenue" class="space-y-6">
+        <section id="tab-revenue" class="space-y-5">
             
             <!-- Quick Date & Export Toolbar -->
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center gap-2 text-sm text-gray-300">
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="flex items-center gap-2 text-xs text-gray-300">
                     <span class="p-2 bg-kansasRed/10 text-kansasRed rounded-lg">📅</span>
-                    <span id="current-day-label">اليوم: جار التحميل...</span>
+                    <span id="current-day-label" class="font-bold">اليوم: جار التحميل...</span>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-lg transition">
-                        📊 تصدير Excel
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="exportToExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 shadow transition">
+                        📊 Excel
                     </button>
-                    <button onclick="exportToPDF()" class="bg-kansasRed hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-lg transition">
-                        📄 تصدير PDF
+                    <button onclick="exportToPDF()" class="flex-1 sm:flex-none bg-kansasRed hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 shadow transition">
+                        📄 PDF
                     </button>
                 </div>
             </div>
 
             <!-- Baseline / Setup Accordion (One-time entry) -->
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
-                    <h3 class="font-bold text-white flex items-center gap-2">
-                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر (تدخل مرة واحدة)
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر
                     </h3>
-                    <span id="baseline-arrow" class="text-gray-400 transition transform">▼</span>
+                    <span id="baseline-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
-                <div id="baseline-content" class="hidden mt-4 pt-4 border-t border-kansasBorder grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div id="baseline-content" class="hidden mt-4 pt-4 border-t border-kansasBorder grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">خطة إيراد الشهر الحالي</label>
-                        <input type="number" id="base-plan-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
+                        <label class="block text-gray-400 mb-1">خطة إيراد الشهر الحالي</label>
+                        <input type="number" id="base-plan-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">إيراد نفس الشهر (عام سابق)</label>
-                        <input type="number" id="base-ly-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
+                        <label class="block text-gray-400 mb-1">إيراد نفس الشهر (عام سابق)</label>
+                        <input type="number" id="base-ly-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">عمليات نفس الشهر (عام سابق)</label>
-                        <input type="number" id="base-ly-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0">
+                        <label class="block text-gray-400 mb-1">عمليات نفس الشهر (عام سابق)</label>
+                        <input type="number" id="base-ly-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">إيراد الشهر السابق</label>
-                        <input type="number" id="base-lm-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
+                        <label class="block text-gray-400 mb-1">إيراد الشهر السابق</label>
+                        <input type="number" id="base-lm-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">عمليات الشهر السابق</label>
-                        <input type="number" id="base-lm-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0">
+                        <label class="block text-gray-400 mb-1">عمليات الشهر السابق</label>
+                        <input type="number" id="base-lm-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0">
                     </div>
                     <div class="flex items-end">
-                        <button onclick="saveBaseline()" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition">حفظ الأرقام الثابتة</button>
+                        <button onclick="saveBaseline()" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition">حفظ الأرقام الثابتة</button>
                     </div>
                 </div>
             </div>
 
             <!-- Daily Input Section -->
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
-                <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
+                <h3 class="font-bold text-white text-sm mb-3 flex items-center gap-2">
                     <span class="text-kansasRed">📝</span> تسجيل إيراد وعمليات اليوم
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">التاريخ واليوم</label>
-                        <input type="date" id="daily-date" onchange="loadDayData()" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm">
-                        <span id="day-name-display" class="text-xs text-kansasRed font-bold mt-1 block"></span>
+                        <label class="block text-gray-400 mb-1">التاريخ واليوم</label>
+                        <input type="date" id="daily-date" onchange="loadDayData()" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white">
+                        <span id="day-name-display" class="text-[11px] text-kansasRed font-bold mt-1 block"></span>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">إيراد اليوم (ج.م)</label>
-                        <input type="number" id="daily-revenue" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
+                        <label class="block text-gray-400 mb-1">إيراد اليوم (ج.م)</label>
+                        <input type="number" id="daily-revenue" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">عمليات اليوم (عدد الشيكات)</label>
-                        <input type="number" id="daily-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0">
+                        <label class="block text-gray-400 mb-1">عمليات اليوم (الشيكات)</label>
+                        <input type="number" id="daily-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white" placeholder="0">
                     </div>
                 </div>
                 <div class="mt-4 flex justify-end">
-                    <button onclick="saveDailyData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-lg transition">حفظ بيانات اليوم</button>
+                    <button onclick="saveDailyData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow transition">حفظ بيانات اليوم</button>
                 </div>
             </div>
 
             <!-- Dashboards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- MTD Dashboard -->
-                <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5 space-y-4">
-                    <h4 class="font-bold text-white border-b border-kansasBorder pb-2 flex justify-between items-center">
-                        <span>📊 داش بورد المقارنة حتى تاريخه (MTD)</span>
-                        <span class="text-xs text-kansasRed">مقارنة تحليلية</span>
+                <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
+                    <h4 class="font-bold text-white text-xs border-b border-kansasBorder pb-2 flex justify-between items-center">
+                        <span>📊 داش بورد المقارنة (MTD)</span>
+                        <span class="text-kansasRed">تحليلي</span>
                     </h4>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-xs text-gray-400 block">الإيراد حتى تاريخه</span>
-                            <span id="mtd-rev" class="text-lg font-bold text-white">0.00 ج.م</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">الإيراد حتى تاريخه</span>
+                            <span id="mtd-rev" class="text-sm font-bold text-white">0.00 ج.م</span>
                         </div>
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-xs text-gray-400 block">إجمالي العمليات</span>
-                            <span id="mtd-orders" class="text-lg font-bold text-white">0</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">إجمالي العمليات</span>
+                            <span id="mtd-orders" class="text-sm font-bold text-white">0</span>
                         </div>
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-xs text-gray-400 block">متوسط الشيك الحالي</span>
-                            <span id="mtd-avg-check" class="text-base font-bold text-emerald-500">0.00 ج.م</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">متوسط الشيك الحالي</span>
+                            <span id="mtd-avg-check" class="text-sm font-bold text-emerald-500">0.00 ج.م</span>
                         </div>
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-xs text-gray-400 block">نسبة التحقيق من الخطة</span>
-                            <span id="mtd-plan-ratio" class="text-base font-bold text-yellow-500">0%</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">نسبة التحقيق من الخطة</span>
+                            <span id="mtd-plan-ratio" class="text-sm font-bold text-yellow-500">0%</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Current Month Performance -->
-                <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5 space-y-4">
-                    <h4 class="font-bold text-white border-b border-kansasBorder pb-2 flex justify-between items-center">
+                <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
+                    <h4 class="font-bold text-white text-xs border-b border-kansasBorder pb-2 flex justify-between items-center">
                         <span>📈 مؤشرات أداء الشهر الحالي</span>
-                        <span class="text-xs text-emerald-500">يومي مباشر</span>
+                        <span class="text-emerald-500">يومي</span>
                     </h4>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-xs text-gray-400 block">متوسط الإيراد اليومي</span>
-                            <span id="curr-avg-rev" class="text-lg font-bold text-white">0.00 ج.م</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">متوسط الإيراد اليومي</span>
+                            <span id="curr-avg-rev" class="text-sm font-bold text-white">0.00 ج.م</span>
                         </div>
                         <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-xs text-gray-400 block">متوسط العمليات اليومي</span>
-                            <span id="curr-avg-orders" class="text-lg font-bold text-white">0</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">متوسط العمليات اليومي</span>
+                            <span id="curr-avg-orders" class="text-sm font-bold text-white">0</span>
                         </div>
                         <div class="col-span-2 bg-kansasDark p-3 rounded-xl border border-kansasBorder">
-                            <span class="text-xs text-gray-400 block">الإيراد المتوقع بنهاية الشهر</span>
-                            <span id="projected-rev" class="text-xl font-bold text-kansasRed">0.00 ج.م</span>
+                            <span class="text-[11px] text-gray-400 block mb-1">الإيراد المتوقع بنهاية الشهر</span>
+                            <span id="projected-rev" class="text-base font-bold text-kansasRed">0.00 ج.م</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Chart Section -->
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
-                <h4 class="font-bold text-white mb-4">📉 رسم بياني لأداء الإيرادات اليومية</h4>
-                <div class="h-64 relative">
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
+                <h4 class="font-bold text-white text-xs mb-3">📉 رسم بياني لأداء الإيرادات اليومية</h4>
+                <div class="h-56 relative">
                     <canvas id="revenueChart"></canvas>
                 </div>
             </div>
@@ -207,38 +208,23 @@
         </section>
 
         <!-- ================= PAGE 2: INVENTORY & VARIANCE ================= -->
-        <section id="tab-inventory" class="hidden space-y-6">
+        <section id="tab-inventory" class="hidden space-y-5">
             
-            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-white flex items-center gap-2">
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <span class="text-kansasRed">📦</span> إدارة المخزون وتحليل العجز والزيادة
                     </h3>
-                    <button onclick="addNewProductModal()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ إضافة صنف جديد</button>
+                    <button onclick="addNewProductModal()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ صنف جديد</button>
                 </div>
 
-                <!-- Inventory Table -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right text-sm">
-                        <thead class="bg-kansasDark text-gray-400 border-b border-kansasBorder">
-                            <tr>
-                                <th class="p-3">الصنف</th>
-                                <th class="p-3">أول المدة (أول الشهر)</th>
-                                <th class="p-3">الوارد (يومي)</th>
-                                <th class="p-3">محول إليه (مع الفرع)</th>
-                                <th class="p-3">محول منه (مع الفرع)</th>
-                                <th class="p-3">آخر المدة (جرد)</th>
-                                <th class="p-3">المباع</th>
-                                <th class="p-3">تحليل العجز/الزيادة</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventory-table-body" class="divide-y divide-kansasBorder">
-                            <!-- Dynamic Rows -->
-                        </tbody>
-                    </table>
+                <!-- Inventory Cards / Table for Mobile Compatibility -->
+                <div id="inventory-container" class="space-y-4">
+                    <!-- Dynamic Inventory Items -->
                 </div>
-                <div class="mt-4 flex justify-end">
-                    <button onclick="saveInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-lg transition">حفظ وتحديث جرد المخزون</button>
+
+                <div class="mt-5 flex justify-end">
+                    <button onclick="saveInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow transition">حفظ وتحديث المخزون</button>
                 </div>
             </div>
 
@@ -249,7 +235,7 @@
     <!-- Firebase SDKs & Connection Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCKIlUDTqllI9iaiwyF01JKStovqXqpcdE",
@@ -261,21 +247,19 @@
             measurementId: "G-N839XE9654"
         };
 
-        let db = null;
-        let isOnline = false;
-
         try {
             const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            isOnline = true;
-            document.getElementById('sync-status').className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20";
-            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span id="sync-text">متصل بالسحابة (Firebase)</span>';
+            const db = getFirestore(app);
+            window.appDB = db;
+            window.isOnline = true;
+            const statusEl = document.getElementById('sync-status');
+            if(statusEl) {
+                statusEl.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20";
+                statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>متصل بالسحابة</span>';
+            }
         } catch (e) {
-            console.warn("Offline fallback mode active", e);
+            console.warn("Offline mode active", e);
         }
-
-        window.appDB = db;
-        window.isOnline = isOnline;
     </script>
 
     <!-- Application Core Script -->
@@ -297,31 +281,41 @@
 
         window.onload = function() {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('daily-date').value = today;
+            const dateInput = document.getElementById('daily-date');
+            if(dateInput && !dateInput.value) dateInput.value = today;
             updateDayName();
             loadLocalData();
             initChart();
             calculateAnalytics();
-            renderInventoryTable();
+            renderInventoryList();
         };
 
         function switchTab(tab) {
             currentTab = tab;
-            document.getElementById('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
-            document.getElementById('tab-inventory').classList.toggle('hidden', tab !== 'inventory');
-            
-            document.getElementById('btn-revenue').className = tab === 'revenue' 
-                ? 'flex-1 py-3 text-center font-bold text-kansasRed border-b-2 border-kansasRed transition' 
-                : 'flex-1 py-3 text-center font-medium text-gray-400 border-b-2 border-transparent transition';
-            
-            document.getElementById('btn-inventory').className = tab === 'inventory' 
-                ? 'flex-1 py-3 text-center font-bold text-kansasRed border-b-2 border-kansasRed transition' 
-                : 'flex-1 py-3 text-center font-medium text-gray-400 border-b-2 border-transparent transition';
+            const revSec = document.getElementById('tab-revenue');
+            const invSec = document.getElementById('tab-inventory');
+            const btnRev = document.getElementById('btn-revenue');
+            const btnInv = document.getElementById('btn-inventory');
+
+            if(tab === 'revenue') {
+                revSec.classList.remove('hidden');
+                invSec.classList.add('hidden');
+                btnRev.className = "flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow";
+                btnInv.className = "flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm transition";
+            } else {
+                revSec.classList.add('hidden');
+                invSec.classList.remove('hidden');
+                btnInv.className = "flex-1 py-2.5 text-center font-bold text-white bg-kansasRed rounded-lg text-sm transition shadow";
+                btnRev.className = "flex-1 py-2.5 text-center font-medium text-gray-400 rounded-lg text-sm transition";
+                renderInventoryList();
+            }
         }
 
         function toggleBaseline() {
             const content = document.getElementById('baseline-content');
+            const arrow = document.getElementById('baseline-arrow');
             content.classList.toggle('hidden');
+            arrow.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
         }
 
         function updateDayName() {
@@ -399,44 +393,64 @@
             updateChart();
         }
 
-        function renderInventoryTable() {
-            const tbody = document.getElementById('inventory-table-body');
-            tbody.innerHTML = '';
+        function renderInventoryList() {
+            const container = document.getElementById('inventory-container');
+            if(!container) return;
+            container.innerHTML = '';
 
             appData.inventory.forEach((item, index) => {
                 const theoretical = (item.opening || 0) + (item.received || 0) + (item.transferIn || 0) - (item.transferOut || 0) - (item.sold || 0);
                 const variance = (item.closing || 0) - theoretical;
-                const varianceClass = variance < 0 ? 'text-red-500 font-bold' : (variance > 0 ? 'text-emerald-500 font-bold' : 'text-gray-400');
+                const varianceClass = variance < 0 ? 'text-red-400 font-bold' : (variance > 0 ? 'text-emerald-400 font-bold' : 'text-gray-400');
+                const statusText = variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون');
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-white">${item.name}</td>
-                    <td class="p-3"><input type="number" value="${item.opening}" onchange="updateInvItem(${index}, 'opening', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white text-xs"></td>
-                    <td class="p-3"><input type="number" value="${item.received}" onchange="updateInvItem(${index}, 'received', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white text-xs"></td>
-                    <td class="p-3 space-y-1">
-                        <input type="number" value="${item.transferIn}" onchange="updateInvItem(${index}, 'transferIn', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white text-xs" placeholder="الكمية">
-                        <input type="text" value="${item.transferInBranch || ''}" onchange="updateInvItem(${index}, 'transferInBranch', this.value)" class="w-24 bg-kansasDark border border-kansasBorder rounded p-1 text-gray-300 text-xs" placeholder="من فرع...">
-                    </td>
-                    <td class="p-3 space-y-1">
-                        <input type="number" value="${item.transferOut}" onchange="updateInvItem(${index}, 'transferOut', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white text-xs" placeholder="الكمية">
-                        <input type="text" value="${item.transferOutBranch || ''}" onchange="updateInvItem(${index}, 'transferOutBranch', this.value)" class="w-24 bg-kansasDark border border-kansasBorder rounded p-1 text-gray-300 text-xs" placeholder="إلى فرع...">
-                    </td>
-                    <td class="p-3"><input type="number" value="${item.closing}" onchange="updateInvItem(${index}, 'closing', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white text-xs"></td>
-                    <td class="p-3"><input type="number" value="${item.sold}" onchange="updateInvItem(${index}, 'sold', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white text-xs"></td>
-                    <td class="p-3 ${varianceClass} text-xs">${variance > 0 ? '+' + variance : variance} (${variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون')})</td>
+                const card = document.createElement('div');
+                card.className = "bg-kansasDark border border-kansasBorder rounded-2xl p-4 space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
+                        <span class="font-bold text-white text-sm">🛒 ${item.name}</span>
+                        <span class="text-xs ${varianceClass}">${variance > 0 ? '+' + variance : variance} (${statusText})</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-0.5">أول المدة</label>
+                            <input type="number" value="${item.opening}" onchange="updateInvItem(${index}, 'opening', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-0.5">الوارد</label>
+                            <input type="number" value="${item.received}" onchange="updateInvItem(${index}, 'received', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع</label>
+                            <input type="number" value="${item.sold}" onchange="updateInvItem(${index}, 'sold', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block mb-0.5">آخر المدة (جرد)</label>
+                            <input type="number" value="${item.closing}" onchange="updateInvItem(${index}, 'closing', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1 border-t border-kansasBorder/50">
+                        <div class="flex gap-1 items-center">
+                            <input type="number" value="${item.transferIn}" placeholder="محول إليه" onchange="updateInvItem(${index}, 'transferIn', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                            <input type="text" value="${item.transferInBranch || ''}" placeholder="اسم الفرع المحول منه" onchange="updateInvItem(${index}, 'transferInBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
+                        </div>
+                        <div class="flex gap-1 items-center">
+                            <input type="number" value="${item.transferOut}" placeholder="محول منه" onchange="updateInvItem(${index}, 'transferOut', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                            <input type="text" value="${item.transferOutBranch || ''}" placeholder="اسم الفرع المحول إليه" onchange="updateInvItem(${index}, 'transferOutBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
+                        </div>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(card);
             });
         }
 
         function updateInvItem(index, field, val) {
             appData.inventory[index][field] = (field.includes('Branch')) ? val : (parseFloat(val) || 0);
-            renderInventoryTable();
         }
 
         function saveInventoryData() {
             saveAndSync();
-            alert('تم حفظ وتحديث جرد وتحليل المخزون بنجاح!');
+            alert('تم حفظ وتحديث المخزون بنجاح!');
         }
 
         function addNewProductModal() {
@@ -454,7 +468,7 @@
                 closing: 0, 
                 sold: 0 
             });
-            renderInventoryTable();
+            renderInventoryList();
             saveAndSync();
         }
 
@@ -462,26 +476,15 @@
             const ctx = document.getElementById('revenueChart').getContext('2d');
             revenueChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'إيراد اليوم',
-                        data: [],
-                        borderColor: '#dc2626',
-                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
+                data: { labels: [], datasets: [{ label: 'إيراد اليوم', data: [], borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.15)', borderWidth: 3, fill: true, tension: 0.3 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af' } },
-                        y: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af' } }
+                        x: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+                        y: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
                     },
-                    plugins: { legend: { labels: { color: '#ffffff' } } }
+                    plugins: { legend: { labels: { color: '#ffffff', font: { size: 11 } } } }
                 }
             });
         }
@@ -490,7 +493,6 @@
             if(!revenueChartInstance) return;
             const sortedDates = Object.keys(appData.dailyRecords).sort();
             const revenues = sortedDates.map(d => appData.dailyRecords[d].revenue);
-            
             revenueChartInstance.data.labels = sortedDates;
             revenueChartInstance.data.datasets[0].data = revenues;
             revenueChartInstance.update();
@@ -520,26 +522,14 @@
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
             const revData = Object.keys(appData.dailyRecords).map(d => ({
-                'التاريخ': d,
-                'الإيراد': appData.dailyRecords[d].revenue,
-                'العمليات': appData.dailyRecords[d].orders
+                'التاريخ': d, 'الإيراد': appData.dailyRecords[d].revenue, 'العمليات': appData.dailyRecords[d].orders
             }));
-            const wsRev = XLSX.utils.json_to_sheet(revData);
-            XLSX.utils.book_append_sheet(wb, wsRev, "الإيرادات اليومية");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(revData), "الإيرادات");
 
             const invData = appData.inventory.map(i => ({
-                'الصنف': i.name,
-                'أول المدة': i.opening,
-                'الوارد': i.received,
-                'محول إليه': i.transferIn,
-                'من فرع': i.transferInBranch,
-                'محول منه': i.transferOut,
-                'إلى فرع': i.transferOutBranch,
-                'المباع': i.sold,
-                'آخر المدة': i.closing
+                'الصنف': i.name, 'أول المدة': i.opening, 'الوارد': i.received, 'المباع': i.sold, 'آخر المدة': i.closing
             }));
-            const wsInv = XLSX.utils.json_to_sheet(invData);
-            XLSX.utils.book_append_sheet(wb, wsInv, "المخزون وتحليل العجز");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(invData), "المخزون");
 
             XLSX.writeFile(wb, 'Kansas_Dash_Report.xlsx');
         }
@@ -548,7 +538,6 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             doc.text("Kansas Dash - Operational Report", 20, 20);
-            doc.text("Revenue & Inventory Management Report.", 20, 30);
             doc.save("Kansas_Dash_Report.pdf");
         }
     </script>
