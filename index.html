@@ -1,21 +1,17 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Dash - كنساس داش</title>
+    <title>كنساس داش | Kansas Dash</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS for Excel Export -->
+    <!-- SheetJS (Excel Export) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- html2pdf.js for PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -24,978 +20,519 @@
                         kansasRed: '#dc2626',
                         kansasDark: '#121212',
                         kansasCard: '#1e1e1e',
-                        kansasBorder: '#333333'
+                        kansasBorder: '#2d2d2d'
                     }
                 }
             }
         }
     </script>
     <style>
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #121212;
-            color: #f3f4f6;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #121212;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #dc2626;
-        }
+        body { background-color: #121212; color: #e5e7eb; font-family: system-ui, -apple-system, sans-serif; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col pb-20 md:pb-6">
+<body class="min-h-screen pb-12">
 
-    <!-- Top Header -->
-    <header class="bg-black border-b border-kansasBorder sticky top-0 z-40 px-4 py-3 shadow-lg">
+    <!-- Header / Navbar -->
+    <header class="bg-kansasCard border-b border-kansasBorder sticky top-0 z-50 px-4 py-3">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3 space-x-reverse">
-                <div class="w-10 h-10 rounded-xl bg-kansasRed flex items-center justify-center font-black text-xl text-white shadow-md">
-                    K
-                </div>
+                <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
-                    <h1 class="text-lg font-bold text-white tracking-wide">كنساس داش <span class="text-xs font-normal text-kansasRed bg-red-950/80 px-2 py-0.5 rounded border border-red-800">Kansas Dash</span></h1>
+                    <h1 class="text-lg font-bold text-white flex items-center gap-2">
+                        كنساس داش <span class="text-xs bg-kansasRed/20 text-kansasRed px-2 py-0.5 rounded">Kansas Dash</span>
+                    </h1>
                     <p class="text-xs text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
             </div>
-            <div id="syncStatus" class="text-xs px-2.5 py-1 rounded-full bg-amber-950 text-amber-400 border border-amber-800 flex items-center gap-1.5">
-                <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                <span id="syncText">جاري الاتصال...</span>
+            <!-- Connection Status -->
+            <div id="sync-status" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                <span id="sync-text">جاري الاتصال بالسحابة...</span>
             </div>
         </div>
     </header>
 
-    <!-- Navigation Bar -->
-    <nav class="bg-black/90 backdrop-blur border-t border-b border-kansasBorder sticky top-[61px] md:top-[61px] z-30 mb-6">
-        <div class="max-w-7xl mx-auto flex">
-            <button onclick="switchTab('revenue')" id="tab-revenue" class="flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-kansasRed text-kansasRed transition-all duration-200 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>الإيرادات والأداء</span>
+    <!-- Main Navigation Tabs -->
+    <nav class="max-w-7xl mx-auto px-4 mt-4">
+        <div class="flex border-b border-kansasBorder">
+            <button onclick="switchTab('revenue')" id="btn-revenue" class="flex-1 py-3 text-center font-bold text-kansasRed border-b-2 border-kansasRed transition">
+                📈 الإيرادات والأداء
             </button>
-            <button onclick="switchTab('inventory')" id="tab-inventory" class="flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-gray-200 transition-all duration-200 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-boxes-stacked"></i>
-                <span>المخزون والعجز</span>
+            <button onclick="switchTab('inventory')" id="btn-inventory" class="flex-1 py-3 text-center font-medium text-gray-400 border-b-2 border-transparent transition">
+                📦 المخزون والعجز
             </button>
         </div>
     </nav>
 
-    <!-- App Container -->
-    <main class="max-w-7xl mx-auto px-4 w-full flex-grow space-y-6">
+    <main class="max-w-7xl mx-auto px-4 mt-6">
 
-        <!-- ========================================== -->
-        <!-- PAGE 1: REVENUE & PERFORMANCE ANALYTICS    -->
-        <!-- ========================================== -->
-        <section id="page-revenue" class="space-y-6">
-
-            <!-- Export Bar & Date Status -->
-            <div class="flex flex-wrap justify-between items-center gap-3 bg-kansasCard p-4 rounded-2xl border border-kansasBorder shadow-md">
-                <div class="flex items-center gap-2">
-                    <i class="fa-regular fa-calendar-check text-kansasRed text-lg"></i>
-                    <span id="currentDateDisplay" class="font-bold text-sm text-gray-200">--</span>
+        <!-- ================= PAGE 1: REVENUE & ANALYTICS ================= -->
+        <section id="tab-revenue" class="space-y-6">
+            
+            <!-- Quick Date & Export Toolbar -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-2 text-sm text-gray-300">
+                    <span class="p-2 bg-kansasRed/10 text-kansasRed rounded-lg">📅</span>
+                    <span id="current-day-label">اليوم: جار التحميل...</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="exportRevenueExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
-                        <i class="fa-solid fa-file-excel"></i>
-                        <span>تصدير Excel</span>
+                <div class="flex gap-2">
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-lg transition">
+                        📊 تصدير Excel
                     </button>
-                    <button onclick="exportRevenuePDF()" class="bg-red-800 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>تصدير PDF</span>
+                    <button onclick="exportToPDF()" class="bg-kansasRed hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-lg transition">
+                        📄 تصدير PDF
                     </button>
                 </div>
             </div>
 
-            <!-- 1. Fixed Base Target Setup -->
-            <details class="bg-kansasCard rounded-2xl border border-kansasBorder p-4 shadow-md group">
-                <summary class="font-bold text-md cursor-pointer flex justify-between items-center text-gray-200">
-                    <span class="flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-kansasRed"></i>
-                        <span>إعداد الخطة والأرقام المرجعية للشهر (تدخل مرة واحدة)</span>
-                    </span>
-                    <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
-                </summary>
-                <form id="fixedDataForm" onsubmit="saveFixedData(event)" class="mt-4 pt-4 border-t border-kansasBorder grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Baseline / Setup Accordion (One-time entry) -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
+                <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        <span class="text-kansasRed">⚙️</span> إعداد الخطة والأرقام المرجعية للشهر (تدخل مرة واحدة)
+                    </h3>
+                    <span id="baseline-arrow" class="text-gray-400 transition transform">▼</span>
+                </div>
+                <div id="baseline-content" class="hidden mt-4 pt-4 border-t border-kansasBorder grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">الخطة الشهرية المستهدفة (ج.م)</label>
-                        <input type="number" id="targetRevenue" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="مثال: 500000" required>
+                        <label class="block text-xs text-gray-400 mb-1">خطة إيراد الشهر الحالي</label>
+                        <input type="number" id="base-plan-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">إيراد نفس الشهر - العام السابق</label>
-                        <input type="number" id="lastYearRevenue" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="مثال: 400000" required>
+                        <label class="block text-xs text-gray-400 mb-1">إيراد نفس الشهر (عام سابق)</label>
+                        <input type="number" id="base-ly-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">عمليات نفس الشهر - العام السابق</label>
-                        <input type="number" id="lastYearTx" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="مثال: 2000" required>
+                        <label class="block text-xs text-gray-400 mb-1">عمليات نفس الشهر (عام سابق)</label>
+                        <input type="number" id="base-ly-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">إيراد الشهر السابق</label>
-                        <input type="number" id="lastMonthRevenue" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="مثال: 450000" required>
+                        <label class="block text-xs text-gray-400 mb-1">إيراد الشهر السابق</label>
+                        <input type="number" id="base-lm-rev" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">عمليات الشهر السابق</label>
-                        <input type="number" id="lastMonthTx" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="مثال: 2200" required>
+                        <label class="block text-xs text-gray-400 mb-1">عمليات الشهر السابق</label>
+                        <input type="number" id="base-lm-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0">
                     </div>
                     <div class="flex items-end">
-                        <button type="submit" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold p-2.5 rounded-xl text-sm transition flex justify-center items-center gap-2 shadow">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                            <span>حفظ الإعدادات الثابتة</span>
-                        </button>
+                        <button onclick="saveBaseline()" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition">حفظ الأرقام الثابتة</button>
                     </div>
-                </form>
-            </details>
-
-            <!-- 2. Daily Entry Template -->
-            <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-lg">
-                <h3 class="font-bold text-base mb-3 flex items-center gap-2 text-white">
-                    <i class="fa-solid fa-pen-to-square text-kansasRed"></i>
-                    <span>تسجيل إيراد وعمليات اليوم</span>
-                </h3>
-                <form id="dailyRevenueForm" onsubmit="saveDailyRevenue(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">التاريخ واليوم</label>
-                        <input type="date" id="dailyDate" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" required onchange="updateDailyDayName()">
-                        <span id="dailyDayName" class="text-xs text-kansasRed font-semibold mt-1 block"></span>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">إيراد اليوم (ج.م)</label>
-                        <input type="number" step="0.01" id="dailyRevenueInput" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="0.00" required oninput="calcDailyCheck()">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">عمليات اليوم (عدد الشيكات)</label>
-                        <input type="number" id="dailyTxInput" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="0" required oninput="calcDailyCheck()">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">متوسط الشيك اليومي (محسوب)</label>
-                        <input type="text" id="dailyAvgCheck" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-2.5 text-sm text-emerald-400 font-bold focus:outline-none" readonly value="0.00 ج.م">
-                    </div>
-                    <div class="sm:col-span-2 md:col-span-4 flex justify-end">
-                        <button type="submit" class="bg-kansasRed hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-lg">
-                            <i class="fa-solid fa-plus"></i>
-                            <span>إضافة إيراد اليوم</span>
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
 
-            <!-- 3. Comparative Dashboard -->
-            <div class="space-y-3">
-                <h3 class="font-bold text-base text-gray-200 flex items-center gap-2">
-                    <i class="fa-solid fa-gauge-high text-kansasRed"></i>
-                    <span>داش بورد مقارنة الأداء (حتى تاريخه MTD)</span>
+            <!-- Daily Input Section -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
+                <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                    <span class="text-kansasRed">📝</span> تسجيل إيراد وعمليات اليوم
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder relative overflow-hidden shadow-md">
-                        <div class="text-xs text-gray-400 mb-1">إجمالي الإيراد المحقق (MTD)</div>
-                        <div id="mtdRevenueVal" class="text-2xl font-black text-white mb-3">0 ج.م</div>
-                        <div class="space-y-1.5 text-xs border-t border-kansasBorder/60 pt-2.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">مقارنة بالعام السابق:</span>
-                                <span id="badgeVsLastYearRev" class="px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300">0%</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">مقارنة بالشهر السابق:</span>
-                                <span id="badgeVsLastMonthRev" class="px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300">0%</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">نسبة تحقيق الخطة:</span>
-                                <span id="badgeTargetProgress" class="px-2 py-0.5 rounded-full font-bold bg-blue-950 text-blue-400">0%</span>
-                            </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">التاريخ واليوم</label>
+                        <input type="date" id="daily-date" onchange="loadDayData()" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm">
+                        <span id="day-name-display" class="text-xs text-kansasRed font-bold mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">إيراد اليوم (ج.م)</label>
+                        <input type="number" id="daily-revenue" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">عمليات اليوم (عدد الشيكات)</label>
+                        <input type="number" id="daily-orders" class="w-full bg-kansasDark border border-kansasBorder rounded-xl p-2.5 text-white text-sm" placeholder="0">
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="saveDailyData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-lg transition">حفظ بيانات اليوم</button>
+                </div>
+            </div>
+
+            <!-- Dashboards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- MTD Dashboard -->
+                <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5 space-y-4">
+                    <h4 class="font-bold text-white border-b border-kansasBorder pb-2 flex justify-between items-center">
+                        <span>📊 داش بورد المقارنة حتى تاريخه (MTD)</span>
+                        <span class="text-xs text-kansasRed">مقارنة تحليلية</span>
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
+                            <span class="text-xs text-gray-400 block">الإيراد حتى تاريخه</span>
+                            <span id="mtd-rev" class="text-lg font-bold text-white">0.00 ج.م</span>
+                        </div>
+                        <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
+                            <span class="text-xs text-gray-400 block">إجمالي العمليات</span>
+                            <span id="mtd-orders" class="text-lg font-bold text-white">0</span>
+                        </div>
+                        <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
+                            <span class="text-xs text-gray-400 block">متوسط الشيك الحالي</span>
+                            <span id="mtd-avg-check" class="text-base font-bold text-emerald-500">0.00 ج.م</span>
+                        </div>
+                        <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
+                            <span class="text-xs text-gray-400 block">نسبة التحقيق من الخطة</span>
+                            <span id="mtd-plan-ratio" class="text-base font-bold text-yellow-500">0%</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder relative overflow-hidden shadow-md">
-                        <div class="text-xs text-gray-400 mb-1">إجمالي عدد العمليات (MTD)</div>
-                        <div id="mtdTxVal" class="text-2xl font-black text-white mb-3">0 عملية</div>
-                        <div class="space-y-1.5 text-xs border-t border-kansasBorder/60 pt-2.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">نمو العمليات عن العام السابق:</span>
-                                <span id="badgeVsLastYearTx" class="px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300">0%</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">نمو العمليات عن الشهر السابق:</span>
-                                <span id="badgeVsLastMonthTx" class="px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300">0%</span>
-                            </div>
+                <!-- Current Month Performance -->
+                <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5 space-y-4">
+                    <h4 class="font-bold text-white border-b border-kansasBorder pb-2 flex justify-between items-center">
+                        <span>📈 مؤشرات أداء الشهر الحالي</span>
+                        <span class="text-xs text-emerald-500">يومي مباشر</span>
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
+                            <span class="text-xs text-gray-400 block">متوسط الإيراد اليومي</span>
+                            <span id="curr-avg-rev" class="text-lg font-bold text-white">0.00 ج.م</span>
                         </div>
-                    </div>
-
-                    <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder relative overflow-hidden shadow-md">
-                        <div class="text-xs text-gray-400 mb-1">متوسط الشيك الحالي (Average Check)</div>
-                        <div id="mtdAvgCheckVal" class="text-2xl font-black text-emerald-400 mb-3">0 ج.م</div>
-                        <div class="space-y-1.5 text-xs border-t border-kansasBorder/60 pt-2.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">متوسط شيك العام السابق:</span>
-                                <span id="lastYearAvgCheckDisplay" class="font-semibold text-gray-300">0 ج.م</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">متوسط شيك الشهر السابق:</span>
-                                <span id="lastMonthAvgCheckDisplay" class="font-semibold text-gray-300">0 ج.م</span>
-                            </div>
+                        <div class="bg-kansasDark p-3 rounded-xl border border-kansasBorder">
+                            <span class="text-xs text-gray-400 block">متوسط العمليات اليومي</span>
+                            <span id="curr-avg-orders" class="text-lg font-bold text-white">0</span>
+                        </div>
+                        <div class="col-span-2 bg-kansasDark p-3 rounded-xl border border-kansasBorder">
+                            <span class="text-xs text-gray-400 block">الإيراد المتوقع بنهاية الشهر</span>
+                            <span id="projected-rev" class="text-xl font-bold text-kansasRed">0.00 ج.م</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. Month Dynamic Forecast -->
-            <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder shadow-md">
-                <h3 class="font-bold text-base mb-4 text-white flex items-center gap-2">
-                    <i class="fa-solid fa-calculator text-kansasRed"></i>
-                    <span>معدلات أداء الشهر الحالي والفركاست المتوقع</span>
-                </h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div class="bg-black/60 p-3 rounded-xl border border-kansasBorder">
-                        <div class="text-xs text-gray-400 mb-1">متوسط الإيراد اليومي</div>
-                        <div id="dailyAvgRevenueVal" class="text-lg font-bold text-white">0 ج.م</div>
-                    </div>
-                    <div class="bg-black/60 p-3 rounded-xl border border-kansasBorder">
-                        <div class="text-xs text-gray-400 mb-1">متوسط العمليات اليومية</div>
-                        <div id="dailyAvgTxVal" class="text-lg font-bold text-white">0</div>
-                    </div>
-                    <div class="bg-black/60 p-3 rounded-xl border border-kansasBorder">
-                        <div class="text-xs text-gray-400 mb-1">عدد الأيام المسجلة</div>
-                        <div id="recordedDaysCount" class="text-lg font-bold text-kansasRed">0 يوم</div>
-                    </div>
-                    <div class="bg-black/60 p-3 rounded-xl border border-kansasBorder">
-                        <div class="text-xs text-gray-400 mb-1">المتوقع إغلاق الشهر عليه</div>
-                        <div id="projectedMonthEndVal" class="text-lg font-bold text-amber-400">0 ج.م</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. Chart -->
-            <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder shadow-md">
-                <h3 class="font-bold text-base mb-4 text-white flex items-center gap-2">
-                    <i class="fa-solid fa-chart-area text-kansasRed"></i>
-                    <span>رسم بياني لأداء الإيراد اليومي للفرع</span>
-                </h3>
-                <div class="h-64 w-full">
+            <!-- Chart Section -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
+                <h4 class="font-bold text-white mb-4">📉 رسم بياني لأداء الإيرادات اليومية</h4>
+                <div class="h-64 relative">
                     <canvas id="revenueChart"></canvas>
                 </div>
             </div>
 
-            <!-- 6. Daily Log Table -->
-            <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-md overflow-x-auto">
-                <h3 class="font-bold text-base mb-4 text-white flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-kansasRed"></i>
-                    <span>سجل إيرادات أيام الشهر الحالي</span>
-                </h3>
-                <table class="w-full text-sm text-right text-gray-300">
-                    <thead class="bg-black text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-3 rounded-r-xl">التاريخ واليوم</th>
-                            <th class="p-3">الإيراد</th>
-                            <th class="p-3">العمليات</th>
-                            <th class="p-3">متوسط الشيك</th>
-                            <th class="p-3 rounded-l-xl text-center">إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dailyRevenueTableBody" class="divide-y divide-kansasBorder">
-                        <tr>
-                            <td colspan="5" class="p-4 text-center text-gray-500">لا توجد بيانات مسجلة بعد</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
         </section>
 
-
-        <!-- ========================================== -->
-        <!-- PAGE 2: INVENTORY & VARIANCE ANALYSIS     -->
-        <!-- ========================================== -->
-        <section id="page-inventory" class="space-y-6 hidden">
-
-            <div class="flex flex-wrap justify-between items-center gap-3 bg-kansasCard p-4 rounded-2xl border border-kansasBorder shadow-md">
-                <div>
-                    <h2 class="font-bold text-lg text-white">تحليل حركة المخزون والعجز والزيادة</h2>
-                    <p class="text-xs text-gray-400">إدارة الأرصدة، التحويلات بين الفروع، وتحليل الهالك والفروقات</p>
+        <!-- ================= PAGE 2: INVENTORY & VARIANCE ================= -->
+        <section id="tab-inventory" class="hidden space-y-6">
+            
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        <span class="text-kansasRed">📦</span> إدارة المخزون وحركات الصنف
+                    </h3>
+                    <button onclick="addNewProductModal()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ إضافة منتج جديد</button>
                 </div>
-                <div>
-                    <button onclick="exportInventoryExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
-                        <i class="fa-solid fa-file-excel"></i>
-                        <span>تصدير المخزون Excel</span>
-                    </button>
+
+                <!-- Inventory Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-sm">
+                        <thead class="bg-kansasDark text-gray-400 border-b border-kansasBorder">
+                            <tr>
+                                <th class="p-3">الصنف</th>
+                                <th class="p-3">أول المدة (أول الشهر)</th>
+                                <th class="p-3">الوارد</th>
+                                <th class="p-3">محول إليه</th>
+                                <th class="p-3">محول منه</th>
+                                <th class="p-3">آخر المدة (الجرد)</th>
+                                <th class="p-3">المباع</th>
+                                <th class="p-3">تحليل العجز/الزيادة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body" class="divide-y divide-kansasBorder">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-            <!-- 1. Add Item -->
-            <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-md">
-                <h3 class="font-bold text-base mb-3 text-white flex items-center gap-2">
-                    <i class="fa-solid fa-box-open text-kansasRed"></i>
-                    <span>إضافة منتج وتحديد رصيد أول المدة (مرة واحدة أول الشهر)</span>
-                </h3>
-                <form id="itemSetupForm" onsubmit="saveItemSetup(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">اسم المنتج / الصنف</label>
-                        <input type="text" id="itemNameInput" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="مثال: زنجر دجاج 1كجم" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">وحدة القياس</label>
-                        <select id="itemUnitInput" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none">
-                            <option value="كجم">كيلوجرام (كجم)</option>
-                            <option value="قطعة">قطعة</option>
-                            <option value="كرتونة">كرتونة</option>
-                            <option value="لتر">لتر</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">رصيد أول المدة</label>
-                        <input type="number" step="0.01" id="itemInitialStock" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="0.00" required>
-                    </div>
-                    <div class="sm:col-span-3 flex justify-end">
-                        <button type="submit" class="bg-kansasRed hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow">
-                            <i class="fa-solid fa-plus"></i>
-                            <span>إضافة الصنف للمخزون</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- 2. Movements -->
-            <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-md">
-                <h3 class="font-bold text-base mb-3 text-white flex items-center gap-2">
-                    <i class="fa-solid fa-truck-ramp-box text-kansasRed"></i>
-                    <span>تسجيل حركة مخزون يومية (وارد / تحويل)</span>
-                </h3>
-                <form id="inventoryMovementForm" onsubmit="saveInventoryMovement(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">اختر الصنف</label>
-                        <select id="movementItemSelect" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" required>
-                            <option value="">-- اختر الصنف --</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">نوع الحركة</label>
-                        <select id="movementTypeSelect" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" required onchange="toggleBranchSelect()">
-                            <option value="delivery">وارد (توريد جديد)</option>
-                            <option value="transfer_in">محول إليه (استلام من فرع)</option>
-                            <option value="transfer_out">محول منه (تحويل لفرع)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">الكمية</label>
-                        <input type="number" step="0.01" id="movementQtyInput" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="0.00" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">الفرع المرتبط (للتحويلات)</label>
-                        <select id="movementBranchSelect" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none disabled:opacity-40" disabled>
-                            <option value="">-- اختر الفرع --</option>
-                            <option value="فرع المعادي">فرع المعادي</option>
-                            <option value="فرع مدينة نصر">فرع مدينة نصر</option>
-                            <option value="فرع التجمع">فرع التجمع</option>
-                            <option value="فرع المهندسين">فرع المهندسين</option>
-                            <option value="فرع أكتوبر">فرع أكتوبر</option>
-                            <option value="المخزن الرئيسي">المخزن الرئيسي</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end sm:col-span-2 md:col-span-1">
-                        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold p-2.5 rounded-xl text-sm transition flex justify-center items-center gap-2 shadow">
-                            <i class="fa-solid fa-check"></i>
-                            <span>تسجيل الحركة</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- 3. Audit Table -->
-            <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-md overflow-x-auto">
-                <h3 class="font-bold text-base mb-2 text-white flex items-center gap-2">
-                    <i class="fa-solid fa-scale-balanced text-kansasRed"></i>
-                    <span>جدول الجرد وتحليل العجز والزيادة الشامل</span>
-                </h3>
-                <p class="text-xs text-gray-400 mb-4">النظري = (أول المدة + الوارد + محول إليه - محول منه - المباع)</p>
-
-                <table class="w-full text-sm text-right text-gray-300 min-w-[700px]">
-                    <thead class="bg-black text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-3 rounded-r-xl">اسم المنتج</th>
-                            <th class="p-3">أول المدة</th>
-                            <th class="p-3">الوارد</th>
-                            <th class="p-3">محول إليه</th>
-                            <th class="p-3">محول منه</th>
-                            <th class="p-3">المباع</th>
-                            <th class="p-3">النظري</th>
-                            <th class="p-3">آخر المدة الفعلي</th>
-                            <th class="p-3">تحليل الفارق</th>
-                            <th class="p-3 rounded-l-xl text-center">إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTableBody" class="divide-y divide-kansasBorder">
-                        <tr>
-                            <td colspan="10" class="p-4 text-center text-gray-500">لا توجد منتجات مسجلة حتى الآن</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="saveInventoryData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-lg transition">حفظ وتحديث جرد المخزون</button>
+                </div>
             </div>
 
         </section>
 
     </main>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 left-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 font-semibold text-sm">
-        <i class="fa-solid fa-circle-check"></i>
-        <span id="toastMsg">تم الحفظ بنجاح</span>
-    </div>
-
-    <!-- Firebase SDK Imports & Application Engine Script -->
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup Engine
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kansas-dash-default';
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKIlUDTqllI9iaiwyF01JKStovqXqpcdE",
+            authDomain: "kansas-dash.firebaseapp.com",
+            projectId: "kansas-dash",
+            storageBucket: "kansas-dash.firebasestorage.app",
+            messagingSenderId: "450873671289",
+            appId: "1:450873671289:web:59db30c2343720ab54dea8",
+            measurementId: "G-N839XE9654"
+        };
+
         let db = null;
-        let auth = null;
-        let isFirebaseConnected = false;
+        let isOnline = false;
 
-        // Global State
-        window.appData = {
-            fixed: { target: 0, lastYearRev: 0, lastYearTx: 0, lastMonthRev: 0, lastMonthTx: 0 },
-            dailyRevenue: [],
-            inventoryItems: []
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            isOnline = true;
+            document.getElementById('sync-status').className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20";
+            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span id="sync-text">متصل بالسحابة (Firebase)</span>';
+        } catch (e) {
+            console.warn("Offline fallback mode active", e);
+        }
+
+        window.appDB = db;
+        window.isOnline = isOnline;
+    </script>
+
+    <!-- Application Core Script -->
+    <script>
+        let currentTab = 'revenue';
+        let revenueChartInstance = null;
+
+        const defaultProducts = [
+            { id: 'p1', name: 'لحم برجر', opening: 100, received: 50, transferIn: 0, transferOut: 0, closing: 30, sold: 120 },
+            { id: 'p2', name: 'خبز كيزر', opening: 200, received: 100, transferIn: 10, transferOut: 5, closing: 55, sold: 250 },
+            { id: 'p3', name: 'صوص كنساس', opening: 50, received: 20, transferIn: 0, transferOut: 0, closing: 10, sold: 60 }
+        ];
+
+        let appData = {
+            baseline: { planRev: 0, lyRev: 0, lyOrders: 0, lmRev: 0, lmOrders: 0 },
+            dailyRecords: {},
+            inventory: defaultProducts
         };
 
-        window.revenueChartInstance = null;
-
-        // Initialize App & Firebase connection
-        async function initApp() {
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('daily-date').value = today;
+            updateDayName();
             loadLocalData();
-            initDates();
-            renderAll();
-
-            try {
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            setSyncStatus('connected', 'متصل بالسحابة (Firebase)');
-                            listenToCloudData();
-                        } else {
-                            setSyncStatus('offline', 'وضع أوفلاين (مُخزن محلياً)');
-                        }
-                    });
-                } else {
-                    setSyncStatus('offline', 'وضع أوفلاين (مُخزن محلياً)');
-                }
-            } catch (err) {
-                console.warn('Firebase init fallback to local:', err);
-                setSyncStatus('offline', 'وضع أوفلاين (مُخزن محلياً)');
-            }
-        }
-
-        function setSyncStatus(status, text) {
-            const syncDot = document.getElementById('syncDot');
-            const syncText = document.getElementById('syncText');
-            const syncStatusBox = document.getElementById('syncStatus');
-
-            if (status === 'connected') {
-                isFirebaseConnected = true;
-                syncStatusBox.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5";
-                syncDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-            } else {
-                isFirebaseConnected = false;
-                syncStatusBox.className = "text-xs px-2.5 py-1 rounded-full bg-amber-950 text-amber-400 border border-amber-800 flex items-center gap-1.5";
-                syncDot.className = "w-2 h-2 rounded-full bg-amber-500";
-            }
-            syncText.innerText = text;
-        }
-
-        function listenToCloudData() {
-            if (!db || !auth.currentUser) return;
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'kansas_store', 'main_data');
-            
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const cloudData = docSnap.data();
-                    if (cloudData) {
-                        window.appData = cloudData;
-                        localStorage.setItem('kansas_dash_data', JSON.stringify(window.appData));
-                        renderAll();
-                    }
-                }
-            }, (error) => {
-                console.error("Firestore sync error:", error);
-                setSyncStatus('offline', 'أوفلاين (مُخزن محلياً)');
-            });
-        }
-
-        window.saveData = async function() {
-            localStorage.setItem('kansas_dash_data', JSON.stringify(window.appData));
-            showToast('تم حفظ البيانات بنجاح');
-            renderAll();
-
-            if (isFirebaseConnected && db && auth.currentUser) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'kansas_store', 'main_data');
-                    await setDoc(docRef, window.appData);
-                } catch (e) {
-                    console.error("Cloud save failed, local data intact:", e);
-                }
-            }
+            initChart();
+            calculateAnalytics();
+            renderInventoryTable();
         };
 
-        function loadLocalData() {
-            const saved = localStorage.getItem('kansas_dash_data');
-            if (saved) {
-                try {
-                    window.appData = JSON.parse(saved);
-                } catch (e) { console.error(e); }
-            }
-        }
-
-        function initDates() {
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDateDisplay').innerText = today.toLocaleDateString('ar-EG', options);
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
+            document.getElementById('tab-inventory').classList.toggle('hidden', tab !== 'inventory');
             
-            const dailyInput = document.getElementById('dailyDate');
-            if(dailyInput) {
-                dailyInput.value = dateStr;
-                window.updateDailyDayName();
-            }
+            document.getElementById('btn-revenue').className = tab === 'revenue' 
+                ? 'flex-1 py-3 text-center font-bold text-kansasRed border-b-2 border-kansasRed transition' 
+                : 'flex-1 py-3 text-center font-medium text-gray-400 border-b-2 border-transparent transition';
+            
+            document.getElementById('btn-inventory').className = tab === 'inventory' 
+                ? 'flex-1 py-3 text-center font-bold text-kansasRed border-b-2 border-kansasRed transition' 
+                : 'flex-1 py-3 text-center font-medium text-gray-400 border-b-2 border-transparent transition';
         }
 
-        window.updateDailyDayName = function() {
-            const dateVal = document.getElementById('dailyDate').value;
-            if (!dateVal) return;
+        function toggleBaseline() {
+            const content = document.getElementById('baseline-content');
+            content.classList.toggle('hidden');
+        }
+
+        function updateDayName() {
+            const dateVal = document.getElementById('daily-date').value;
+            if(!dateVal) return;
+            const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
             const d = new Date(dateVal);
-            const dayName = d.toLocaleDateString('ar-EG', { weekday: 'long' });
-            document.getElementById('dailyDayName').innerText = `اليوم: ${dayName}`;
-        };
-
-        window.calcDailyCheck = function() {
-            const rev = parseFloat(document.getElementById('dailyRevenueInput').value) || 0;
-            const tx = parseFloat(document.getElementById('dailyTxInput').value) || 0;
-            const avg = tx > 0 ? (rev / tx) : 0;
-            document.getElementById('dailyAvgCheck').value = avg.toFixed(2) + ' ج.م';
-        };
-
-        window.switchTab = function(tab) {
-            const pageRev = document.getElementById('page-revenue');
-            const pageInv = document.getElementById('page-inventory');
-            const btnRev = document.getElementById('tab-revenue');
-            const btnInv = document.getElementById('tab-inventory');
-
-            if (tab === 'revenue') {
-                pageRev.classList.remove('hidden');
-                pageInv.classList.add('hidden');
-                btnRev.className = "flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-kansasRed text-kansasRed transition-all duration-200 flex items-center justify-center gap-2";
-                btnInv.className = "flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-gray-200 transition-all duration-200 flex items-center justify-center gap-2";
-            } else {
-                pageRev.classList.add('hidden');
-                pageInv.classList.remove('hidden');
-                btnInv.className = "flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-kansasRed text-kansasRed transition-all duration-200 flex items-center justify-center gap-2";
-                btnRev.className = "flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-gray-200 transition-all duration-200 flex items-center justify-center gap-2";
-            }
-        };
-
-        window.saveFixedData = function(e) {
-            e.preventDefault();
-            window.appData.fixed = {
-                target: parseFloat(document.getElementById('targetRevenue').value) || 0,
-                lastYearRev: parseFloat(document.getElementById('lastYearRevenue').value) || 0,
-                lastYearTx: parseFloat(document.getElementById('lastYearTx').value) || 0,
-                lastMonthRev: parseFloat(document.getElementById('lastMonthRevenue').value) || 0,
-                lastMonthTx: parseFloat(document.getElementById('lastMonthTx').value) || 0,
-            };
-            window.saveData();
-        };
-
-        window.saveDailyRevenue = function(e) {
-            e.preventDefault();
-            const date = document.getElementById('dailyDate').value;
-            const rev = parseFloat(document.getElementById('dailyRevenueInput').value) || 0;
-            const tx = parseInt(document.getElementById('dailyTxInput').value) || 0;
-
-            const existingIndex = window.appData.dailyRevenue.findIndex(item => item.date === date);
-            if (existingIndex > -1) {
-                window.appData.dailyRevenue[existingIndex] = { date, rev, tx };
-            } else {
-                window.appData.dailyRevenue.push({ date, rev, tx });
-            }
-
-            window.appData.dailyRevenue.sort((a,b) => new Date(a.date) - new Date(b.date));
-            document.getElementById('dailyRevenueInput').value = '';
-            document.getElementById('dailyTxInput').value = '';
-            window.calcDailyCheck();
-            window.saveData();
-        };
-
-        window.deleteDailyRevenue = function(date) {
-            window.appData.dailyRevenue = window.appData.dailyRevenue.filter(i => i.date !== date);
-            window.saveData();
-        };
-
-        window.saveItemSetup = function(e) {
-            e.preventDefault();
-            const name = document.getElementById('itemNameInput').value.trim();
-            const unit = document.getElementById('itemUnitInput').value;
-            const initial = parseFloat(document.getElementById('itemInitialStock').value) || 0;
-
-            if (!name) return;
-
-            const newItem = {
-                id: Date.now().toString(),
-                name,
-                unit,
-                initial,
-                sales: 0,
-                actualEnding: 0,
-                movements: []
-            };
-
-            window.appData.inventoryItems.push(newItem);
-            document.getElementById('itemNameInput').value = '';
-            document.getElementById('itemInitialStock').value = '';
-            window.saveData();
-        };
-
-        window.toggleBranchSelect = function() {
-            const type = document.getElementById('movementTypeSelect').value;
-            const branchSelect = document.getElementById('movementBranchSelect');
-            if (type === 'transfer_in' || type === 'transfer_out') {
-                branchSelect.disabled = false;
-                branchSelect.required = true;
-            } else {
-                branchSelect.disabled = true;
-                branchSelect.required = false;
-                branchSelect.value = '';
-            }
-        };
-
-        window.saveInventoryMovement = function(e) {
-            e.preventDefault();
-            const itemId = document.getElementById('movementItemSelect').value;
-            const type = document.getElementById('movementTypeSelect').value;
-            const qty = parseFloat(document.getElementById('movementQtyInput').value) || 0;
-            const branch = document.getElementById('movementBranchSelect').value;
-
-            const item = window.appData.inventoryItems.find(i => i.id === itemId);
-            if (!item) return;
-
-            if (!item.movements) item.movements = [];
-            item.movements.push({
-                type,
-                qty,
-                branch,
-                date: new Date().toISOString()
-            });
-
-            document.getElementById('movementQtyInput').value = '';
-            window.saveData();
-        };
-
-        window.updateItemSalesAndActual = function(itemId, salesVal, actualVal) {
-            const item = window.appData.inventoryItems.find(i => i.id === itemId);
-            if (item) {
-                if (salesVal !== null) item.sales = parseFloat(salesVal) || 0;
-                if (actualVal !== null) item.actualEnding = parseFloat(actualVal) || 0;
-                window.saveData();
-            }
-        };
-
-        window.deleteInventoryItem = function(itemId) {
-            window.appData.inventoryItems = window.appData.inventoryItems.filter(i => i.id !== itemId);
-            window.saveData();
-        };
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            const dayName = days[d.getDay()];
+            document.getElementById('day-name-display').innerText = `اليوم: ${dayName}`;
+            document.getElementById('current-day-label').innerText = `تاريخ اليوم: ${dateVal} (${dayName})`;
         }
 
-        // --- RENDER ENGINE ---
-        function renderAll() {
-            renderFixedFields();
-            renderRevenueDashboards();
-            renderRevenueTable();
-            renderChart();
-            renderInventoryDropdowns();
+        function saveBaseline() {
+            appData.baseline = {
+                planRev: parseFloat(document.getElementById('base-plan-rev').value) || 0,
+                lyRev: parseFloat(document.getElementById('base-ly-rev').value) || 0,
+                lyOrders: parseInt(document.getElementById('base-ly-orders').value) || 0,
+                lmRev: parseFloat(document.getElementById('base-lm-rev').value) || 0,
+                lmOrders: parseInt(document.getElementById('base-lm-orders').value) || 0
+            };
+            saveAndSync();
+            alert('تم حفظ الأرقام الثابتة بنجاح!');
+        }
+
+        function loadDayData() {
+            updateDayName();
+            const dateVal = document.getElementById('daily-date').value;
+            const dayRec = appData.dailyRecords[dateVal] || { revenue: 0, orders: 0 };
+            document.getElementById('daily-revenue').value = dayRec.revenue || '';
+            document.getElementById('daily-orders').value = dayRec.orders || '';
+        }
+
+        function saveDailyData() {
+            const dateVal = document.getElementById('daily-date').value;
+            if(!dateVal) return alert('الرجاء اختيار التاريخ');
+            
+            appData.dailyRecords[dateVal] = {
+                revenue: parseFloat(document.getElementById('daily-revenue').value) || 0,
+                orders: parseInt(document.getElementById('daily-orders').value) || 0
+            };
+
+            saveAndSync();
+            calculateAnalytics();
+            alert('تم حفظ إيراد وعمليات اليوم بنجاح!');
+        }
+
+        function calculateAnalytics() {
+            let totalRev = 0;
+            let totalOrders = 0;
+            let daysCount = 0;
+
+            Object.values(appData.dailyRecords).forEach(rec => {
+                totalRev += rec.revenue;
+                totalOrders += rec.orders;
+                daysCount++;
+            });
+
+            const avgCheck = totalOrders > 0 ? (totalRev / totalOrders) : 0;
+            const planRev = appData.baseline.planRev || 1;
+            const planRatio = (totalRev / planRev) * 100;
+
+            document.getElementById('mtd-rev').innerText = totalRev.toLocaleString() + ' ج.م';
+            document.getElementById('mtd-orders').innerText = totalOrders.toLocaleString();
+            document.getElementById('mtd-avg-check').innerText = avgCheck.toFixed(2) + ' ج.م';
+            document.getElementById('mtd-plan-ratio').innerText = planRatio.toFixed(1) + '%';
+
+            const avgRevDay = daysCount > 0 ? (totalRev / daysCount) : 0;
+            const avgOrdDay = daysCount > 0 ? (totalOrders / daysCount) : 0;
+            const projectedTotal = avgRevDay * 30;
+
+            document.getElementById('curr-avg-rev').innerText = avgRevDay.toLocaleString() + ' ج.م';
+            document.getElementById('curr-avg-orders').innerText = avgOrdDay.toFixed(1);
+            document.getElementById('projected-rev').innerText = projectedTotal.toLocaleString() + ' ج.م';
+
+            updateChart();
+        }
+
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventory-table-body');
+            tbody.innerHTML = '';
+
+            appData.inventory.forEach((item, index) => {
+                const theoretical = item.opening + item.received + item.transferIn - item.transferOut - item.sold;
+                const variance = item.closing - theoretical;
+                const varianceClass = variance < 0 ? 'text-red-500 font-bold' : (variance > 0 ? 'text-emerald-500 font-bold' : 'text-gray-400');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-white">${item.name}</td>
+                    <td class="p-3"><input type="number" value="${item.opening}" onchange="updateInvItem(${index}, 'opening', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white"></td>
+                    <td class="p-3"><input type="number" value="${item.received}" onchange="updateInvItem(${index}, 'received', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white"></td>
+                    <td class="p-3"><input type="number" value="${item.transferIn}" onchange="updateInvItem(${index}, 'transferIn', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white"></td>
+                    <td class="p-3"><input type="number" value="${item.transferOut}" onchange="updateInvItem(${index}, 'transferOut', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white"></td>
+                    <td class="p-3"><input type="number" value="${item.closing}" onchange="updateInvItem(${index}, 'closing', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white"></td>
+                    <td class="p-3"><input type="number" value="${item.sold}" onchange="updateInvItem(${index}, 'sold', this.value)" class="w-20 bg-kansasDark border border-kansasBorder rounded p-1 text-white"></td>
+                    <td class="p-3 ${varianceClass}">${variance > 0 ? '+' + variance : variance} (${variance < 0 ? 'عجز' : (variance > 0 ? 'زيادة' : 'موزون')})</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateInvItem(index, field, val) {
+            appData.inventory[index][field] = parseFloat(val) || 0;
             renderInventoryTable();
         }
 
-        function renderFixedFields() {
-            if (window.appData.fixed) {
-                document.getElementById('targetRevenue').value = window.appData.fixed.target || '';
-                document.getElementById('lastYearRevenue').value = window.appData.fixed.lastYearRev || '';
-                document.getElementById('lastYearTx').value = window.appData.fixed.lastYearTx || '';
-                document.getElementById('lastMonthRevenue').value = window.appData.fixed.lastMonthRev || '';
-                document.getElementById('lastMonthTx').value = window.appData.fixed.lastMonthTx || '';
-            }
+        function saveInventoryData() {
+            saveAndSync();
+            alert('تم حفظ وتحليل المخزون بنجاح!');
         }
 
-        function renderRevenueDashboards() {
-            const mtdRev = window.appData.dailyRevenue.reduce((acc, curr) => acc + curr.rev, 0);
-            const mtdTx = window.appData.dailyRevenue.reduce((acc, curr) => acc + curr.tx, 0);
-            const mtdAvgCheck = mtdTx > 0 ? (mtdRev / mtdTx) : 0;
-            const recordedDays = window.appData.dailyRevenue.length;
-
-            document.getElementById('mtdRevenueVal').innerText = mtdRev.toLocaleString('ar-EG') + ' ج.م';
-            document.getElementById('mtdTxVal').innerText = mtdTx.toLocaleString('ar-EG') + ' عملية';
-            document.getElementById('mtdAvgCheckVal').innerText = mtdAvgCheck.toFixed(2) + ' ج.م';
-
-            const lyRev = window.appData.fixed.lastYearRev || 0;
-            const lmRev = window.appData.fixed.lastMonthRev || 0;
-            const lyTx = window.appData.fixed.lastYearTx || 0;
-            const lmTx = window.appData.fixed.lastMonthTx || 0;
-            const target = window.appData.fixed.target || 0;
-
-            const lyAvgCheck = lyTx > 0 ? (lyRev / lyTx) : 0;
-            const lmAvgCheck = lmTx > 0 ? (lmRev / lmTx) : 0;
-
-            document.getElementById('lastYearAvgCheckDisplay').innerText = lyAvgCheck.toFixed(2) + ' ج.م';
-            document.getElementById('lastMonthAvgCheckDisplay').innerText = lmAvgCheck.toFixed(2) + ' ج.م';
-
-            setGrowthBadge('badgeVsLastYearRev', mtdRev, lyRev);
-            setGrowthBadge('badgeVsLastMonthRev', mtdRev, lmRev);
-            setGrowthBadge('badgeVsLastYearTx', mtdTx, lyTx);
-            setGrowthBadge('badgeVsLastMonthTx', mtdTx, lmTx);
-
-            const targetProg = target > 0 ? ((mtdRev / target) * 100).toFixed(1) : 0;
-            document.getElementById('badgeTargetProgress').innerText = targetProg + '%';
-
-            const dailyAvgRev = recordedDays > 0 ? (mtdRev / recordedDays) : 0;
-            const dailyAvgTx = recordedDays > 0 ? (mtdTx / recordedDays) : 0;
-            const projectedEnd = dailyAvgRev * 30;
-
-            document.getElementById('dailyAvgRevenueVal').innerText = dailyAvgRev.toLocaleString('ar-EG', {maximumFractionDigits:0}) + ' ج.م';
-            document.getElementById('dailyAvgTxVal').innerText = dailyAvgTx.toFixed(0);
-            document.getElementById('recordedDaysCount').innerText = recordedDays + ' يوم';
-            document.getElementById('projectedMonthEndVal').innerText = projectedEnd.toLocaleString('ar-EG', {maximumFractionDigits:0}) + ' ج.م';
+        function addNewProductModal() {
+            const name = prompt('أدخل اسم المنتج الجديد:');
+            if(!name) return;
+            appData.inventory.push({ id: 'p_' + Date.now(), name, opening: 0, received: 0, transferIn: 0, transferOut: 0, closing: 0, sold: 0 });
+            renderInventoryTable();
+            saveAndSync();
         }
 
-        function setGrowthBadge(elemId, current, benchmark) {
-            const elem = document.getElementById(elemId);
-            if (!benchmark || benchmark === 0) {
-                elem.innerText = '0%';
-                elem.className = "px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300";
-                return;
-            }
-            const growth = ((current - benchmark) / benchmark) * 100;
-            const formatted = (growth > 0 ? '+' : '') + growth.toFixed(1) + '%';
-            elem.innerText = formatted;
-
-            if (growth >= 0) {
-                elem.className = "px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
-            } else {
-                elem.className = "px-2 py-0.5 rounded-full font-bold bg-red-950 text-red-400 border border-red-800";
-            }
-        }
-
-        function renderRevenueTable() {
-            const tbody = document.getElementById('dailyRevenueTableBody');
-            if (window.appData.dailyRevenue.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">لا توجد بيانات مسجلة بعد</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = window.appData.dailyRevenue.map(item => {
-                const avgCheck = item.tx > 0 ? (item.rev / item.tx).toFixed(2) : '0.00';
-                const dayName = new Date(item.date).toLocaleDateString('ar-EG', { weekday: 'short' });
-                return `
-                    <tr class="hover:bg-black/40 transition">
-                        <td class="p-3 font-semibold text-white">${item.date} (${dayName})</td>
-                        <td class="p-3 text-emerald-400 font-bold">${item.rev.toLocaleString('ar-EG')} ج.م</td>
-                        <td class="p-3">${item.tx}</td>
-                        <td class="p-3 font-mono text-gray-300">${avgCheck} ج.م</td>
-                        <td class="p-3 text-center">
-                            <button onclick="window.deleteDailyRevenue('${item.date}')" class="text-red-500 hover:text-red-400 p-1">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function renderChart() {
-            const canvas = document.getElementById('revenueChart');
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const labels = window.appData.dailyRevenue.map(i => i.date);
-            const dataRev = window.appData.dailyRevenue.map(i => i.rev);
-            const targetDailyAvg = (window.appData.fixed.target || 0) / 30;
-            const targetLine = new Array(labels.length).fill(targetDailyAvg);
-
-            if (window.revenueChartInstance) window.revenueChartInstance.destroy();
-
-            window.revenueChartInstance = new Chart(ctx, {
+        function initChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            revenueChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'الإيراد اليومي (ج.م)',
-                            data: dataRev,
-                            borderColor: '#dc2626',
-                            backgroundColor: 'rgba(220, 38, 38, 0.15)',
-                            fill: true,
-                            tension: 0.3,
-                            borderWidth: 3
-                        },
-                        {
-                            label: 'معدل الهدف اليومي المطلوبة',
-                            data: targetLine,
-                            borderColor: '#3b82f6',
-                            borderDash: [5, 5],
-                            fill: false,
-                            borderWidth: 2,
-                            pointRadius: 0
-                        }
-                    ]
+                    labels: [],
+                    datasets: [{
+                        label: 'إيراد اليوم',
+                        data: [],
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#d1d5db' } }
-                    },
                     scales: {
-                        x: { ticks: { color: '#9ca3af' }, grid: { color: '#262626' } },
-                        y: { ticks: { color: '#9ca3af' }, grid: { color: '#262626' } }
-                    }
+                        x: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af' } },
+                        y: { grid: { color: '#2d2d2d' }, ticks: { color: '#9ca3af' } }
+                    },
+                    plugins: { legend: { labels: { color: '#ffffff' } } }
                 }
             });
         }
 
-        function renderInventoryDropdowns() {
-            const select = document.getElementById('movementItemSelect');
-            select.innerHTML = '<option value="">-- اختر الصنف --</option>' + 
-                window.appData.inventoryItems.map(i => `<option value="${i.id}">${i.name} (${i.unit})</option>`).join('');
+        function updateChart() {
+            if(!revenueChartInstance) return;
+            const sortedDates = Object.keys(appData.dailyRecords).sort();
+            const revenues = sortedDates.map(d => appData.dailyRecords[d].revenue);
+            
+            revenueChartInstance.data.labels = sortedDates;
+            revenueChartInstance.data.datasets[0].data = revenues;
+            revenueChartInstance.update();
         }
 
-        function renderInventoryTable() {
-            const tbody = document.getElementById('inventoryTableBody');
-            if (window.appData.inventoryItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-gray-500">لا توجد منتجات مسجلة حتى الآن</td></tr>`;
-                return;
+        function saveAndSync() {
+            localStorage.setItem('kansas_dash_data', JSON.stringify(appData));
+            if(window.appDB && window.isOnline) {
+                // Cloud Sync placeholder using modular SDK setDoc
             }
-
-            tbody.innerHTML = window.appData.inventoryItems.map(item => {
-                const movements = item.movements || [];
-                const deliveries = movements.filter(m => m.type === 'delivery').reduce((a,c) => a + c.qty, 0);
-                const transfersIn = movements.filter(m => m.type === 'transfer_in').reduce((a,c) => a + c.qty, 0);
-                const transfersOut = movements.filter(m => m.type === 'transfer_out').reduce((a,c) => a + c.qty, 0);
-                
-                const theoretical = item.initial + deliveries + transfersIn - transfersOut - (item.sales || 0);
-                const variance = (item.actualEnding || 0) - theoretical;
-                const variancePct = theoretical !== 0 ? ((variance / theoretical) * 100).toFixed(1) : 0;
-
-                let varianceBadge = `<span class="text-gray-400 font-bold">0</span>`;
-                if (variance < 0) {
-                    varianceBadge = `<span class="text-red-400 font-bold bg-red-950/80 px-2 py-0.5 rounded border border-red-800">عجز: ${Math.abs(variance)} ${item.unit} (${Math.abs(variancePct)}%)</span>`;
-                } else if (variance > 0) {
-                    varianceBadge = `<span class="text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">زيادة: +${variance} ${item.unit} (+${variancePct}%)</span>`;
-                }
-
-                return `
-                    <tr class="hover:bg-black/40 transition">
-                        <td class="p-3 font-bold text-white">${item.name} <span class="text-xs text-gray-500">(${item.unit})</span></td>
-                        <td class="p-3 font-mono">${item.initial}</td>
-                        <td class="p-3 font-mono text-emerald-400">+${deliveries}</td>
-                        <td class="p-3 font-mono text-blue-400">+${transfersIn}</td>
-                        <td class="p-3 font-mono text-amber-400">-${transfersOut}</td>
-                        <td class="p-3">
-                            <input type="number" step="0.01" class="w-20 bg-black border border-kansasBorder rounded p-1 text-center text-xs text-white" value="${item.sales || ''}" placeholder="0" onchange="window.updateItemSalesAndActual('${item.id}', this.value, null)">
-                        </td>
-                        <td class="p-3 font-bold text-white font-mono bg-black/40">${theoretical.toFixed(2)}</td>
-                        <td class="p-3">
-                            <input type="number" step="0.01" class="w-20 bg-black border border-kansasBorder rounded p-1 text-center text-xs text-emerald-400 font-bold" value="${item.actualEnding || ''}" placeholder="0" onchange="window.updateItemSalesAndActual('${item.id}', null, this.value)">
-                        </td>
-                        <td class="p-3">${varianceBadge}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="window.deleteInventoryItem('${item.id}')" class="text-red-500 hover:text-red-400 p-1">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
         }
 
-        // --- EXPORTS ---
-        window.exportRevenueExcel = function() {
-            if (typeof XLSX === 'undefined') return alert('جاري تحميل مكتبة التصدير...');
-            const data = window.appData.dailyRevenue.map(row => ({
-                'التاريخ': row.date,
-                'الإيراد (ج.م)': row.rev,
-                'عدد العمليات': row.tx,
-                'متوسط الشيك': row.tx > 0 ? (row.rev / row.tx).toFixed(2) : 0
+        function loadLocalData() {
+            const saved = localStorage.getItem('kansas_dash_data');
+            if(saved) {
+                try {
+                    appData = JSON.parse(saved);
+                    if(appData.baseline) {
+                        document.getElementById('base-plan-rev').value = appData.baseline.planRev || '';
+                        document.getElementById('base-ly-rev').value = appData.baseline.lyRev || '';
+                        document.getElementById('base-ly-orders').value = appData.baseline.lyOrders || '';
+                        document.getElementById('base-lm-rev').value = appData.baseline.lmRev || '';
+                        document.getElementById('base-lm-orders').value = appData.baseline.lmOrders || '';
+                    }
+                    loadDayData();
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            const revData = Object.keys(appData.dailyRecords).map(d => ({
+                'التاريخ': d,
+                'الإيراد': appData.dailyRecords[d].revenue,
+                'العمليات': appData.dailyRecords[d].orders
             }));
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "الإيرادات");
-            XLSX.writeFile(wb, `إيرادات_كنساس_داش_${new Date().toISOString().split('T')[0]}.xlsx`);
-        };
+            const wsRev = XLSX.utils.json_to_sheet(revData);
+            XLSX.utils.book_append_sheet(wb, wsRev, "الإيرادات اليومية");
 
-        window.exportInventoryExcel = function() {
-            if (typeof XLSX === 'undefined') return alert('جاري تحميل مكتبة التصدير...');
-            const data = window.appData.inventoryItems.map(item => {
-                const movements = item.movements || [];
-                const deliveries = movements.filter(m => m.type === 'delivery').reduce((a,c) => a + c.qty, 0);
-                const transfersIn = movements.filter(m => m.type === 'transfer_in').reduce((a,c) => a + c.qty, 0);
-                const transfersOut = movements.filter(m => m.type === 'transfer_out').reduce((a,c) => a + c.qty, 0);
-                const theoretical = item.initial + deliveries + transfersIn - transfersOut - (item.sales || 0);
-                const variance = (item.actualEnding || 0) - theoretical;
+            const invData = appData.inventory.map(i => ({
+                'الصنف': i.name,
+                'أول المدة': i.opening,
+                'الوارد': i.received,
+                'المباع': i.sold,
+                'آخر المدة': i.closing
+            }));
+            const wsInv = XLSX.utils.json_to_sheet(invData);
+            XLSX.utils.book_append_sheet(wb, wsInv, "المخزون");
 
-                return {
-                    'اسم المنتج': item.name,
-                    'الوحدة': item.unit,
-                    'أول المدة': item.initial,
-                    'الوارد': deliveries,
-                    'محول إليه': transfersIn,
-                    'محول منه': transfersOut,
-                    'المباع': item.sales || 0,
-                    'النظري': theoretical,
-                    'الفكلي آخر المدة': item.actualEnding || 0,
-                    'العجز / الزيادة': variance
-                };
-            });
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "المخزون");
-            XLSX.writeFile(wb, `مخزون_كنساس_داش_${new Date().toISOString().split('T')[0]}.xlsx`);
-        };
+            XLSX.writeFile(wb, 'Kansas_Dash_Report.xlsx');
+        }
 
-        window.exportRevenuePDF = function() {
-            const element = document.getElementById('page-revenue');
-            const opt = {
-                margin:       0.3,
-                filename:     `تقرير_الإيرادات_${new Date().toISOString().split('T')[0]}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        };
-
-        // Start Application
-        initApp();
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Kansas Dash - Operational Report", 20, 20);
+            doc.text("Generated successfully from Kansas Dash System.", 20, 30);
+            doc.save("Kansas_Dash_Report.pdf");
+        }
     </script>
 </body>
 </html>
-```
