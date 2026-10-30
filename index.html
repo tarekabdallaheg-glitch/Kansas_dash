@@ -210,6 +210,17 @@
         <!-- ================= PAGE 2: INVENTORY & VARIANCE ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
+            <!-- Date Filter for Analysis -->
+            <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <span class="text-kansasRed font-bold">🔍 نطاق تحليل العجز:</span>
+                    <input type="date" id="inv-date-from" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
+                    <span class="text-gray-400">إلى</span>
+                    <input type="date" id="inv-date-to" class="bg-kansasDark border border-kansasBorder rounded-lg p-2 text-white">
+                </div>
+                <button onclick="renderInventoryList()" class="w-full sm:w-auto bg-kansasRed hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold transition">تحديث التحليل</button>
+            </div>
+
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -218,7 +229,7 @@
                     <button onclick="addNewProductModal()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ صنف جديد</button>
                 </div>
 
-                <!-- Inventory Cards / Table for Mobile Compatibility -->
+                <!-- Inventory Container -->
                 <div id="inventory-container" class="space-y-4">
                     <!-- Dynamic Inventory Items -->
                 </div>
@@ -283,6 +294,10 @@
             const today = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('daily-date');
             if(dateInput && !dateInput.value) dateInput.value = today;
+            
+            document.getElementById('inv-date-from').value = today;
+            document.getElementById('inv-date-to').value = today;
+
             updateDayName();
             loadLocalData();
             initChart();
@@ -398,6 +413,9 @@
             if(!container) return;
             container.innerHTML = '';
 
+            const dateFrom = document.getElementById('inv-date-from').value;
+            const dateTo = document.getElementById('inv-date-to').value;
+
             appData.inventory.forEach((item, index) => {
                 const theoretical = (item.opening || 0) + (item.received || 0) + (item.transferIn || 0) - (item.transferOut || 0) - (item.sold || 0);
                 const variance = (item.closing || 0) - theoretical;
@@ -409,34 +427,37 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-center border-b border-kansasBorder pb-2">
                         <span class="font-bold text-white text-sm">🛒 ${item.name}</span>
-                        <span class="text-xs ${varianceClass}">${variance > 0 ? '+' + variance : variance} (${statusText})</span>
+                        <div class="text-right">
+                            <span class="text-xs ${varianceClass}">${variance > 0 ? '+' + variance : variance} (${statusText})</span>
+                            <span class="text-[10px] text-gray-400 block">فترة التحليل: ${dateFrom} إلى ${dateTo}</span>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">أول المدة</label>
+                            <label class="text-[10px] text-gray-400 block mb-0.5">أول المدة (أول الشهر)</label>
                             <input type="number" value="${item.opening}" onchange="updateInvItem(${index}, 'opening', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">الوارد</label>
+                            <label class="text-[10px] text-gray-400 block mb-0.5">الوارد اليومي</label>
                             <input type="number" value="${item.received}" onchange="updateInvItem(${index}, 'received', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع</label>
-                            <input type="number" value="${item.sold}" onchange="updateInvItem(${index}, 'sold', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                            <label class="text-[10px] text-gray-400 block mb-0.5">المباع (خلال الفترة)</label>
+                            <input type="number" value="${item.sold}" onchange="updateInvItem(${index}, 'sold', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white font-bold text-kansasRed">
                         </div>
                         <div>
                             <label class="text-[10px] text-gray-400 block mb-0.5">آخر المدة (جرد)</label>
-                            <input type="number" value="${item.closing}" onchange="updateInvItem(${index}, 'closing', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white">
+                            <input type="number" value="${item.closing}" onchange="updateInvItem(${index}, 'closing', this.value)" class="w-full bg-kansasCard border border-kansasBorder rounded-lg p-2 text-white font-bold text-emerald-400">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1 border-t border-kansasBorder/50">
                         <div class="flex gap-1 items-center">
-                            <input type="number" value="${item.transferIn}" placeholder="محول إليه" onchange="updateInvItem(${index}, 'transferIn', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
-                            <input type="text" value="${item.transferInBranch || ''}" placeholder="اسم الفرع المحول منه" onchange="updateInvItem(${index}, 'transferInBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
+                            <input type="number" value="${item.transferIn}" placeholder="كمية" onchange="updateInvItem(${index}, 'transferIn', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                            <input type="text" value="${item.transferInBranch || ''}" placeholder="محول إليه (من فرع...)" onchange="updateInvItem(${index}, 'transferInBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
                         </div>
                         <div class="flex gap-1 items-center">
-                            <input type="number" value="${item.transferOut}" placeholder="محول منه" onchange="updateInvItem(${index}, 'transferOut', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
-                            <input type="text" value="${item.transferOutBranch || ''}" placeholder="اسم الفرع المحول إليه" onchange="updateInvItem(${index}, 'transferOutBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
+                            <input type="number" value="${item.transferOut}" placeholder="كمية" onchange="updateInvItem(${index}, 'transferOut', this.value)" class="w-16 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                            <input type="text" value="${item.transferOutBranch || ''}" placeholder="محول منه (إلى فرع...)" onchange="updateInvItem(${index}, 'transferOutBranch', this.value)" class="flex-1 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-gray-300">
                         </div>
                     </div>
                 `;
@@ -450,7 +471,7 @@
 
         function saveInventoryData() {
             saveAndSync();
-            alert('تم حفظ وتحديث المخزون بنجاح!');
+            alert('تم حفظ وتحديث المخزون وتحليل العجز بنجاح!');
         }
 
         function addNewProductModal() {
