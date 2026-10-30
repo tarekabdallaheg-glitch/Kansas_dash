@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كنساس داش | Kansas Dash v3.5 (Ultimate Pro)</title>
+    <title>كنساس داش | Kansas Dash v3.6 (Master Sync)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -35,7 +35,7 @@
                 <div class="bg-kansasRed text-white font-bold p-2 rounded-xl text-lg shadow-lg">K</div>
                 <div>
                     <h1 class="text-base font-bold text-white flex items-center gap-1.5">
-                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.5 Ultimate</span>
+                        كنساس داش <span class="text-[10px] bg-kansasRed/20 text-kansasRed px-1.5 py-0.5 rounded">v3.6 Pro</span>
                     </h1>
                     <p class="text-[11px] text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
@@ -96,7 +96,7 @@
                     <span id="current-day-label" class="font-bold">اليوم: جار التحميل...</span>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="exportRevenueExcel()" class="flex-1 sm:flex-none bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-medium">📊 Excel الإيرادات</button>
+                    <button onclick="exportRevenueExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium">📊 Excel الإيرادات</button>
                     <button onclick="exportToPDF()" class="flex-1 sm:flex-none bg-kansasRed text-white px-3 py-2 rounded-xl text-xs font-medium">📄 PDF</button>
                 </div>
             </div>
@@ -250,7 +250,7 @@
             </div>
         </section>
 
-        <!-- ================= INVENTORY SECTION (v3.5 Ultimate) ================= -->
+        <!-- ================= INVENTORY SECTION (v3.6 Master Sync) ================= -->
         <section id="tab-inventory" class="hidden space-y-5">
             
             <div id="inv-missing-alert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-400 flex items-center justify-between">
@@ -260,7 +260,7 @@
                 </div>
             </div>
 
-            <!-- Section 1: Opening Balance & Product Setup (Accordion) with Save & Excel -->
+            <!-- Section 1: Opening Balance & Product Setup (Accordion) with Pro Styled Excel Button -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-3">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleOpeningAccordion()">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -269,18 +269,20 @@
                     <span id="opening-arrow" class="text-gray-400 text-xs transition transform">▼</span>
                 </div>
                 <div id="opening-content" class="hidden mt-3 pt-3 border-t border-kansasBorder space-y-3">
-                    <div class="flex justify-between items-center">
-                        <button onclick="exportOpeningExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">📊 Excel أول المدة</button>
-                        <button onclick="addNewProduct()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
+                        <button onclick="exportOpeningExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1.5">
+                            <span>📊</span> تصدير أول المدة (Excel)
+                        </button>
+                        <button onclick="addNewProduct()" class="bg-kansasRed hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow">+ إضافة صنف جديد</button>
                     </div>
                     <div id="opening-container" class="space-y-2"></div>
                     <div class="flex justify-end pt-2">
-                        <button onclick="saveOpeningData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">حفظ واعتماد أول المدة</button>
+                        <button onclick="saveOpeningData()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow">حفظ واعتماد رصيد أول المدة والأصناف</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 2: Daily Received (Linked to Products) -->
+            <!-- Section 2: Daily Received (Fully Synced with Products) -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -332,7 +334,7 @@
                 </div>
             </div>
 
-            <!-- Section 4: Final Inventory Analysis (Manual Sold & Closing) -->
+            <!-- Section 4: Final Inventory Analysis (Fully Synced with All Inputs) -->
             <div class="bg-kansasCard border border-kansasBorder rounded-2xl p-4 space-y-4">
                 <div class="flex flex-col lg:flex-row justify-between items-center border-b border-kansasBorder pb-2 gap-2">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -353,8 +355,8 @@
                             <tr>
                                 <th class="p-2.5">الصنف ووحدة الشد</th>
                                 <th class="p-2.5">أول المدة</th>
-                                <th class="p-2.5">الوارد</th>
-                                <th class="p-2.5">التحويلات (+/-)</th>
+                                <th class="p-2.5">إجمالي الوارد</th>
+                                <th class="p-2.5">صافي التحويلات (+/-)</th>
                                 <th class="p-2.5">المباع (يدوي)</th>
                                 <th class="p-2.5">آخر المدة (جرد يدوي)</th>
                                 <th class="p-2.5">العجز / الزيادة</th>
@@ -635,7 +637,7 @@
             updateChart();
         }
 
-        // ================= INVENTORY FUNCTIONS (v3.5 Ultimate) =================
+        // ================= INVENTORY FUNCTIONS (v3.6 Master Sync) =================
         function addNewProduct() {
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
@@ -666,8 +668,8 @@
                 div.className = "flex items-center justify-between bg-kansasDark p-3 rounded-xl border border-kansasBorder text-xs gap-3";
                 div.innerHTML = `
                     <div class="font-bold text-white flex-1 flex items-center gap-2">
-                        <input type="text" value="${p.name}" onchange="appData.products[${idx}].name=this.value; saveAndSync(); renderInventoryAnalysis();" class="bg-kansasCard border border-kansasBorder rounded p-1 text-white flex-1 font-bold">
-                        <input type="text" value="${p.unit}" placeholder="وحدة الشد" onchange="appData.products[${idx}].unit=this.value; saveAndSync(); renderInventoryAnalysis();" class="w-24 bg-kansasCard border border-kansasBorder rounded p-1 text-gray-300">
+                        <input type="text" value="${p.name}" onchange="appData.products[${idx}].name=this.value; saveAndSync(); loadDailyInventory(); renderTransfersList(); renderInventoryAnalysis();" class="bg-kansasCard border border-kansasBorder rounded p-1 text-white flex-1 font-bold">
+                        <input type="text" value="${p.unit}" placeholder="وحدة الشد" onchange="appData.products[${idx}].unit=this.value; saveAndSync(); loadDailyInventory(); renderTransfersList(); renderInventoryAnalysis();" class="w-24 bg-kansasCard border border-kansasBorder rounded p-1 text-gray-300">
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="text-gray-400">أول المدة:</label>
@@ -690,7 +692,7 @@
             loadDailyInventory();
             renderTransfersList();
             renderInventoryAnalysis();
-            alert('تم حفظ واعتماد رصيد أول المدة والأصناف بنجاح!');
+            alert('تم حفظ واعتماد رصيد أول المدة والأصناف وترابطها مع النظام بنجاح!');
         }
 
         function loadDailyInventory() {
@@ -726,6 +728,7 @@
             if(!appData.dailyReceived[date]) appData.dailyReceived[date] = { data: {}, updatedAt: '' };
             appData.dailyReceived[date].data[prodId] = parseFloat(val) || 0;
             saveAndSync();
+            renderInventoryAnalysis();
         }
 
         function saveDailyReceived() {
@@ -769,14 +772,14 @@
                 let prodOptions = appData.products.map(p => `<option value="${p.id}" ${t.productId === p.id ? 'selected' : ''}>${p.name} (${p.unit})</option>`).join('');
 
                 div.innerHTML = `
-                    <select onchange="appData.transfers[${idx}].type=this.value; saveAndSync();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
+                    <select onchange="appData.transfers[${idx}].type=this.value; saveAndSync(); renderInventoryAnalysis();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white font-bold">
                         <option value="in" ${t.type==='in'?'selected':''}>محول إليه (استلام)</option>
                         <option value="out" ${t.type==='out'?'selected':''}>محول منه (إرسال)</option>
                     </select>
                     <input type="text" value="${t.branch}" placeholder="اسم الفرع المحول معه" onchange="appData.transfers[${idx}].branch=this.value; saveAndSync();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white flex-1">
-                    <select onchange="appData.transfers[${idx}].productId=this.value; saveAndSync();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">${prodOptions}</select>
-                    <input type="number" value="${t.qty}" placeholder="الكمية" onchange="appData.transfers[${idx}].qty=parseFloat(this.value)||0; saveAndSync();" class="w-20 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
-                    <button onclick="appData.transfers.splice(${idx},1); renderTransfersList(); saveAndSync();" class="text-red-400 font-bold px-2">حذف</button>
+                    <select onchange="appData.transfers[${idx}].productId=this.value; saveAndSync(); renderInventoryAnalysis();" class="bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">${prodOptions}</select>
+                    <input type="number" value="${t.qty}" placeholder="الكمية" onchange="appData.transfers[${idx}].qty=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-20 bg-kansasCard border border-kansasBorder rounded-lg p-1.5 text-white">
+                    <button onclick="appData.transfers.splice(${idx},1); renderTransfersList(); saveAndSync(); renderInventoryAnalysis();" class="text-red-400 font-bold px-2">حذف</button>
                 `;
                 container.appendChild(div);
             });
@@ -823,9 +826,9 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="p-2.5 font-bold text-white">${p.name} <span class="text-[10px] text-gray-400 font-normal">(${p.unit})</span></td>
-                    <td class="p-2.5 text-gray-300">${p.opening}</td>
-                    <td class="p-2.5 text-gray-300">${totalReceived}</td>
-                    <td class="p-2.5 text-gray-300">${netTransfer}</td>
+                    <td class="p-2.5 text-gray-300 font-bold">${p.opening}</td>
+                    <td class="p-2.5 text-gray-300 font-bold">${totalReceived}</td>
+                    <td class="p-2.5 text-gray-300 font-bold">${netTransfer}</td>
                     <td class="p-2.5"><input type="number" value="${cData.sold}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-kansasRed font-bold text-xs"></td>
                     <td class="p-2.5"><input type="number" value="${cData.closing}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-16 bg-kansasDark border border-kansasBorder rounded p-1 text-emerald-400 font-bold text-xs"></td>
                     <td class="p-2.5 ${vClass}">${variance > 0 ? '+' + variance : variance} (${vText})</td>
