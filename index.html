@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- html2pdf.js for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -34,7 +36,6 @@
             background-color: #121212;
             color: #f3f4f6;
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -65,23 +66,23 @@
                     <p class="text-xs text-gray-400">إدارة الإيرادات والمخزون الذكية</p>
                 </div>
             </div>
-            <div id="syncStatus" class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>متصل بالفرع</span>
+            <div id="syncStatus" class="text-xs px-2.5 py-1 rounded-full bg-amber-950 text-amber-400 border border-amber-800 flex items-center gap-1.5">
+                <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span id="syncText">جاري الاتصال...</span>
             </div>
         </div>
     </header>
 
-    <!-- Navigation Bar (Top Desktop / Sticky Mobile Bottom Tab) -->
+    <!-- Navigation Bar -->
     <nav class="bg-black/90 backdrop-blur border-t border-b border-kansasBorder sticky top-[61px] md:top-[61px] z-30 mb-6">
         <div class="max-w-7xl mx-auto flex">
             <button onclick="switchTab('revenue')" id="tab-revenue" class="flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-kansasRed text-kansasRed transition-all duration-200 flex items-center justify-center gap-2">
                 <i class="fa-solid fa-chart-line"></i>
-                <span>الصفحة 1: الإيرادات والأداء</span>
+                <span>الإيرادات والأداء</span>
             </button>
             <button onclick="switchTab('inventory')" id="tab-inventory" class="flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-gray-200 transition-all duration-200 flex items-center justify-center gap-2">
                 <i class="fa-solid fa-boxes-stacked"></i>
-                <span>الصفحة 2: المخزون والعجز</span>
+                <span>المخزون والعجز</span>
             </button>
         </div>
     </nav>
@@ -101,18 +102,18 @@
                     <span id="currentDateDisplay" class="font-bold text-sm text-gray-200">--</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="exportRevenueExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                    <button onclick="exportRevenueExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
                         <i class="fa-solid fa-file-excel"></i>
                         <span>تصدير Excel</span>
                     </button>
-                    <button onclick="exportRevenuePDF()" class="bg-red-800 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                    <button onclick="exportRevenuePDF()" class="bg-red-800 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
                         <i class="fa-solid fa-file-pdf"></i>
                         <span>تصدير PDF</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 1. Fixed Base Target & Past Benchmarks Setup (Saved Once) -->
+            <!-- 1. Fixed Base Target Setup -->
             <details class="bg-kansasCard rounded-2xl border border-kansasBorder p-4 shadow-md group">
                 <summary class="font-bold text-md cursor-pointer flex justify-between items-center text-gray-200">
                     <span class="flex items-center gap-2">
@@ -143,7 +144,7 @@
                         <input type="number" id="lastMonthTx" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="مثال: 2200" required>
                     </div>
                     <div class="flex items-end">
-                        <button type="submit" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold p-2.5 rounded-xl text-sm transition flex justify-center items-center gap-2">
+                        <button type="submit" class="w-full bg-kansasRed hover:bg-red-700 text-white font-bold p-2.5 rounded-xl text-sm transition flex justify-center items-center gap-2 shadow">
                             <i class="fa-solid fa-floppy-disk"></i>
                             <span>حفظ الإعدادات الثابتة</span>
                         </button>
@@ -154,7 +155,7 @@
             <!-- 2. Daily Entry Template -->
             <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-lg">
                 <h3 class="font-bold text-base mb-3 flex items-center gap-2 text-white">
-                    <i class="fa-solid fa-[#dc2626] fa-pen-to-square text-kansasRed"></i>
+                    <i class="fa-solid fa-pen-to-square text-kansasRed"></i>
                     <span>تسجيل إيراد وعمليات اليوم</span>
                 </h3>
                 <form id="dailyRevenueForm" onsubmit="saveDailyRevenue(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -184,15 +185,13 @@
                 </form>
             </div>
 
-            <!-- 3. Comparative Dashboard (MTD Performance & Growth % Badges) -->
+            <!-- 3. Comparative Dashboard -->
             <div class="space-y-3">
                 <h3 class="font-bold text-base text-gray-200 flex items-center gap-2">
                     <i class="fa-solid fa-gauge-high text-kansasRed"></i>
                     <span>داش بورد مقارنة الأداء (حتى تاريخه MTD)</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <!-- MTD Revenue Card -->
                     <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder relative overflow-hidden shadow-md">
                         <div class="text-xs text-gray-400 mb-1">إجمالي الإيراد المحقق (MTD)</div>
                         <div id="mtdRevenueVal" class="text-2xl font-black text-white mb-3">0 ج.م</div>
@@ -212,7 +211,6 @@
                         </div>
                     </div>
 
-                    <!-- MTD Transactions Card -->
                     <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder relative overflow-hidden shadow-md">
                         <div class="text-xs text-gray-400 mb-1">إجمالي عدد العمليات (MTD)</div>
                         <div id="mtdTxVal" class="text-2xl font-black text-white mb-3">0 عملية</div>
@@ -228,7 +226,6 @@
                         </div>
                     </div>
 
-                    <!-- MTD Average Check Card -->
                     <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder relative overflow-hidden shadow-md">
                         <div class="text-xs text-gray-400 mb-1">متوسط الشيك الحالي (Average Check)</div>
                         <div id="mtdAvgCheckVal" class="text-2xl font-black text-emerald-400 mb-3">0 ج.م</div>
@@ -243,11 +240,10 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <!-- 4. Current Month Dynamic Averages Dashboard -->
+            <!-- 4. Month Dynamic Forecast -->
             <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder shadow-md">
                 <h3 class="font-bold text-base mb-4 text-white flex items-center gap-2">
                     <i class="fa-solid fa-calculator text-kansasRed"></i>
@@ -273,7 +269,7 @@
                 </div>
             </div>
 
-            <!-- 5. Interactive Chart Section -->
+            <!-- 5. Chart -->
             <div class="bg-kansasCard p-5 rounded-2xl border border-kansasBorder shadow-md">
                 <h3 class="font-bold text-base mb-4 text-white flex items-center gap-2">
                     <i class="fa-solid fa-chart-area text-kansasRed"></i>
@@ -302,7 +298,7 @@
                     </thead>
                     <tbody id="dailyRevenueTableBody" class="divide-y divide-kansasBorder">
                         <tr>
-                            <td colspan="5" class="p-4 text-center text-gray-500">لا توجد بيانات مسجلة لهذا الشهر بعد</td>
+                            <td colspan="5" class="p-4 text-center text-gray-500">لا توجد بيانات مسجلة بعد</td>
                         </tr>
                     </tbody>
                 </table>
@@ -316,21 +312,20 @@
         <!-- ========================================== -->
         <section id="page-inventory" class="space-y-6 hidden">
 
-            <!-- Title & Actions Header -->
             <div class="flex flex-wrap justify-between items-center gap-3 bg-kansasCard p-4 rounded-2xl border border-kansasBorder shadow-md">
                 <div>
                     <h2 class="font-bold text-lg text-white">تحليل حركة المخزون والعجز والزيادة</h2>
                     <p class="text-xs text-gray-400">إدارة الأرصدة، التحويلات بين الفروع، وتحليل الهالك والفروقات</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="exportInventoryExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                <div>
+                    <button onclick="exportInventoryExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
                         <i class="fa-solid fa-file-excel"></i>
                         <span>تصدير المخزون Excel</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 1. Add New Item / Initial Stock Setup -->
+            <!-- 1. Add Item -->
             <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-md">
                 <h3 class="font-bold text-base mb-3 text-white flex items-center gap-2">
                     <i class="fa-solid fa-box-open text-kansasRed"></i>
@@ -355,7 +350,7 @@
                         <input type="number" step="0.01" id="itemInitialStock" class="w-full bg-black border border-kansasBorder rounded-xl p-2.5 text-sm text-white focus:border-kansasRed focus:outline-none" placeholder="0.00" required>
                     </div>
                     <div class="sm:col-span-3 flex justify-end">
-                        <button type="submit" class="bg-kansasRed hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition flex items-center gap-2">
+                        <button type="submit" class="bg-kansasRed hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow">
                             <i class="fa-solid fa-plus"></i>
                             <span>إضافة الصنف للمخزون</span>
                         </button>
@@ -363,7 +358,7 @@
                 </form>
             </div>
 
-            <!-- 2. Daily Movements Entry (Deliveries, Transfers In/Out) -->
+            <!-- 2. Movements -->
             <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-md">
                 <h3 class="font-bold text-base mb-3 text-white flex items-center gap-2">
                     <i class="fa-solid fa-truck-ramp-box text-kansasRed"></i>
@@ -401,7 +396,7 @@
                         </select>
                     </div>
                     <div class="flex items-end sm:col-span-2 md:col-span-1">
-                        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold p-2.5 rounded-xl text-sm transition flex justify-center items-center gap-2">
+                        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold p-2.5 rounded-xl text-sm transition flex justify-center items-center gap-2 shadow">
                             <i class="fa-solid fa-check"></i>
                             <span>تسجيل الحركة</span>
                         </button>
@@ -409,26 +404,26 @@
                 </form>
             </div>
 
-            <!-- 3. Audit & Variance Analysis Main Sheet -->
+            <!-- 3. Audit Table -->
             <div class="bg-kansasCard rounded-2xl border border-kansasBorder p-5 shadow-md overflow-x-auto">
                 <h3 class="font-bold text-base mb-2 text-white flex items-center gap-2">
                     <i class="fa-solid fa-scale-balanced text-kansasRed"></i>
                     <span>جدول الجرد وتحليل العجز والزيادة الشامل</span>
                 </h3>
-                <p class="text-xs text-gray-400 mb-4">يتم حساب الرصيد النظري تلقائياً: (أول المدة + الوارد + محول إليه - محول منه - المباع)</p>
+                <p class="text-xs text-gray-400 mb-4">النظري = (أول المدة + الوارد + محول إليه - محول منه - المباع)</p>
 
                 <table class="w-full text-sm text-right text-gray-300 min-w-[700px]">
                     <thead class="bg-black text-gray-400 text-xs uppercase">
                         <tr>
                             <th class="p-3 rounded-r-xl">اسم المنتج</th>
                             <th class="p-3">أول المدة</th>
-                            <th class="p-3">إجمالي الوارد</th>
+                            <th class="p-3">الوارد</th>
                             <th class="p-3">محول إليه</th>
                             <th class="p-3">محول منه</th>
-                            <th class="p-3">المباع (إدخال)</th>
+                            <th class="p-3">المباع</th>
                             <th class="p-3">النظري</th>
                             <th class="p-3">آخر المدة الفعلي</th>
-                            <th class="p-3">تحليل العجز/الزيادة</th>
+                            <th class="p-3">تحليل الفارق</th>
                             <th class="p-3 rounded-l-xl text-center">إجراءات</th>
                         </tr>
                     </thead>
@@ -450,23 +445,122 @@
         <span id="toastMsg">تم الحفظ بنجاح</span>
     </div>
 
-    <!-- Application Script -->
-    <script>
-        // State Management
-        let appData = {
+    <!-- Firebase SDK Imports & Application Engine Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Setup Engine
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kansas-dash-default';
+        let db = null;
+        let auth = null;
+        let isFirebaseConnected = false;
+
+        // Global State
+        window.appData = {
             fixed: { target: 0, lastYearRev: 0, lastYearTx: 0, lastMonthRev: 0, lastMonthTx: 0 },
             dailyRevenue: [],
-            inventoryItems: [] // { id, name, unit, initial, sales, actualEnding, movements: [] }
+            inventoryItems: []
         };
 
-        let revenueChartInstance = null;
+        window.revenueChartInstance = null;
 
-        // Initialize App on Load
-        window.onload = function() {
+        // Initialize App & Firebase connection
+        async function initApp() {
             loadLocalData();
             initDates();
             renderAll();
+
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            setSyncStatus('connected', 'متصل بالسحابة (Firebase)');
+                            listenToCloudData();
+                        } else {
+                            setSyncStatus('offline', 'وضع أوفلاين (مُخزن محلياً)');
+                        }
+                    });
+                } else {
+                    setSyncStatus('offline', 'وضع أوفلاين (مُخزن محلياً)');
+                }
+            } catch (err) {
+                console.warn('Firebase init fallback to local:', err);
+                setSyncStatus('offline', 'وضع أوفلاين (مُخزن محلياً)');
+            }
+        }
+
+        function setSyncStatus(status, text) {
+            const syncDot = document.getElementById('syncDot');
+            const syncText = document.getElementById('syncText');
+            const syncStatusBox = document.getElementById('syncStatus');
+
+            if (status === 'connected') {
+                isFirebaseConnected = true;
+                syncStatusBox.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5";
+                syncDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+            } else {
+                isFirebaseConnected = false;
+                syncStatusBox.className = "text-xs px-2.5 py-1 rounded-full bg-amber-950 text-amber-400 border border-amber-800 flex items-center gap-1.5";
+                syncDot.className = "w-2 h-2 rounded-full bg-amber-500";
+            }
+            syncText.innerText = text;
+        }
+
+        function listenToCloudData() {
+            if (!db || !auth.currentUser) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'kansas_store', 'main_data');
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const cloudData = docSnap.data();
+                    if (cloudData) {
+                        window.appData = cloudData;
+                        localStorage.setItem('kansas_dash_data', JSON.stringify(window.appData));
+                        renderAll();
+                    }
+                }
+            }, (error) => {
+                console.error("Firestore sync error:", error);
+                setSyncStatus('offline', 'أوفلاين (مُخزن محلياً)');
+            });
+        }
+
+        window.saveData = async function() {
+            localStorage.setItem('kansas_dash_data', JSON.stringify(window.appData));
+            showToast('تم حفظ البيانات بنجاح');
+            renderAll();
+
+            if (isFirebaseConnected && db && auth.currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'kansas_store', 'main_data');
+                    await setDoc(docRef, window.appData);
+                } catch (e) {
+                    console.error("Cloud save failed, local data intact:", e);
+                }
+            }
         };
+
+        function loadLocalData() {
+            const saved = localStorage.getItem('kansas_dash_data');
+            if (saved) {
+                try {
+                    window.appData = JSON.parse(saved);
+                } catch (e) { console.error(e); }
+            }
+        }
 
         function initDates() {
             const today = new Date();
@@ -475,51 +569,34 @@
             document.getElementById('currentDateDisplay').innerText = today.toLocaleDateString('ar-EG', options);
             
             const dailyInput = document.getElementById('dailyDate');
-            dailyInput.value = dateStr;
-            updateDailyDayName();
-        }
-
-        function updateDailyDayName() {
-            const dateVal = document.getElementById('dailyDate').value;
-            if(!dateVal) return;
-            const d = new Date(dateVal);
-            const dayName = d.toLocaleDateString('ar-EG', { weekday: 'long' });
-            document.getElementById('dailyDayName').innerText = `اليوم: ${dayName}`;
-        }
-
-        // Local Storage Sync (Acts as instant fallback & sync container)
-        function loadLocalData() {
-            const saved = localStorage.getItem('kansas_dash_data');
-            if(saved) {
-                try {
-                    appData = JSON.parse(saved);
-                } catch(e) { console.error(e); }
+            if(dailyInput) {
+                dailyInput.value = dateStr;
+                window.updateDailyDayName();
             }
         }
 
-        function saveData() {
-            localStorage.setItem('kansas_dash_data', JSON.stringify(appData));
-            showToast('تم حفظ البيانات بنجاح سحابياً ومحلياً');
-            renderAll();
-        }
+        window.updateDailyDayName = function() {
+            const dateVal = document.getElementById('dailyDate').value;
+            if (!dateVal) return;
+            const d = new Date(dateVal);
+            const dayName = d.toLocaleDateString('ar-EG', { weekday: 'long' });
+            document.getElementById('dailyDayName').innerText = `اليوم: ${dayName}`;
+        };
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+        window.calcDailyCheck = function() {
+            const rev = parseFloat(document.getElementById('dailyRevenueInput').value) || 0;
+            const tx = parseFloat(document.getElementById('dailyTxInput').value) || 0;
+            const avg = tx > 0 ? (rev / tx) : 0;
+            document.getElementById('dailyAvgCheck').value = avg.toFixed(2) + ' ج.م';
+        };
 
-        // Tab Switching
-        function switchTab(tab) {
+        window.switchTab = function(tab) {
             const pageRev = document.getElementById('page-revenue');
             const pageInv = document.getElementById('page-inventory');
             const btnRev = document.getElementById('tab-revenue');
             const btnInv = document.getElementById('tab-inventory');
 
-            if(tab === 'revenue') {
+            if (tab === 'revenue') {
                 pageRev.classList.remove('hidden');
                 pageInv.classList.add('hidden');
                 btnRev.className = "flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-kansasRed text-kansasRed transition-all duration-200 flex items-center justify-center gap-2";
@@ -530,63 +607,52 @@
                 btnInv.className = "flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-kansasRed text-kansasRed transition-all duration-200 flex items-center justify-center gap-2";
                 btnRev.className = "flex-1 py-3 px-4 text-center font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-gray-200 transition-all duration-200 flex items-center justify-center gap-2";
             }
-        }
+        };
 
-        // --- PAGE 1: REVENUE FUNCTIONS ---
-
-        function saveFixedData(e) {
+        window.saveFixedData = function(e) {
             e.preventDefault();
-            appData.fixed = {
+            window.appData.fixed = {
                 target: parseFloat(document.getElementById('targetRevenue').value) || 0,
                 lastYearRev: parseFloat(document.getElementById('lastYearRevenue').value) || 0,
                 lastYearTx: parseFloat(document.getElementById('lastYearTx').value) || 0,
                 lastMonthRev: parseFloat(document.getElementById('lastMonthRevenue').value) || 0,
                 lastMonthTx: parseFloat(document.getElementById('lastMonthTx').value) || 0,
             };
-            saveData();
-        }
+            window.saveData();
+        };
 
-        function calcDailyCheck() {
-            const rev = parseFloat(document.getElementById('dailyRevenueInput').value) || 0;
-            const tx = parseFloat(document.getElementById('dailyTxInput').value) || 0;
-            const avg = tx > 0 ? (rev / tx) : 0;
-            document.getElementById('dailyAvgCheck').value = avg.toFixed(2) + ' ج.م';
-        }
-
-        function saveDailyRevenue(e) {
+        window.saveDailyRevenue = function(e) {
             e.preventDefault();
             const date = document.getElementById('dailyDate').value;
             const rev = parseFloat(document.getElementById('dailyRevenueInput').value) || 0;
             const tx = parseInt(document.getElementById('dailyTxInput').value) || 0;
 
-            const existingIndex = appData.dailyRevenue.findIndex(item => item.date === date);
-            if(existingIndex > -1) {
-                appData.dailyRevenue[existingIndex] = { date, rev, tx };
+            const existingIndex = window.appData.dailyRevenue.findIndex(item => item.date === date);
+            if (existingIndex > -1) {
+                window.appData.dailyRevenue[existingIndex] = { date, rev, tx };
             } else {
-                appData.dailyRevenue.push({ date, rev, tx });
+                window.appData.dailyRevenue.push({ date, rev, tx });
             }
 
-            appData.dailyRevenue.sort((a,b) => new Date(a.date) - new Date(b.date));
+            window.appData.dailyRevenue.sort((a,b) => new Date(a.date) - new Date(b.date));
             document.getElementById('dailyRevenueInput').value = '';
             document.getElementById('dailyTxInput').value = '';
-            calcDailyCheck();
-            saveData();
-        }
+            window.calcDailyCheck();
+            window.saveData();
+        };
 
-        function deleteDailyRevenue(date) {
-            appData.dailyRevenue = appData.dailyRevenue.filter(i => i.date !== date);
-            saveData();
-        }
+        window.deleteDailyRevenue = function(date) {
+            window.appData.dailyRevenue = window.appData.dailyRevenue.filter(i => i.date !== date);
+            window.saveData();
+        };
 
-        // --- PAGE 2: INVENTORY FUNCTIONS ---
-
-        function saveItemSetup(e) {
+        window.saveItemSetup = function(e) {
             e.preventDefault();
             const name = document.getElementById('itemNameInput').value.trim();
             const unit = document.getElementById('itemUnitInput').value;
             const initial = parseFloat(document.getElementById('itemInitialStock').value) || 0;
 
-            if(!name) return;
+            if (!name) return;
 
             const newItem = {
                 id: Date.now().toString(),
@@ -598,16 +664,16 @@
                 movements: []
             };
 
-            appData.inventoryItems.push(newItem);
+            window.appData.inventoryItems.push(newItem);
             document.getElementById('itemNameInput').value = '';
             document.getElementById('itemInitialStock').value = '';
-            saveData();
-        }
+            window.saveData();
+        };
 
-        function toggleBranchSelect() {
+        window.toggleBranchSelect = function() {
             const type = document.getElementById('movementTypeSelect').value;
             const branchSelect = document.getElementById('movementBranchSelect');
-            if(type === 'transfer_in' || type === 'transfer_out') {
+            if (type === 'transfer_in' || type === 'transfer_out') {
                 branchSelect.disabled = false;
                 branchSelect.required = true;
             } else {
@@ -615,18 +681,19 @@
                 branchSelect.required = false;
                 branchSelect.value = '';
             }
-        }
+        };
 
-        function saveInventoryMovement(e) {
+        window.saveInventoryMovement = function(e) {
             e.preventDefault();
             const itemId = document.getElementById('movementItemSelect').value;
             const type = document.getElementById('movementTypeSelect').value;
             const qty = parseFloat(document.getElementById('movementQtyInput').value) || 0;
             const branch = document.getElementById('movementBranchSelect').value;
 
-            const item = appData.inventoryItems.find(i => i.id === itemId);
-            if(!item) return;
+            const item = window.appData.inventoryItems.find(i => i.id === itemId);
+            if (!item) return;
 
+            if (!item.movements) item.movements = [];
             item.movements.push({
                 type,
                 qty,
@@ -635,26 +702,33 @@
             });
 
             document.getElementById('movementQtyInput').value = '';
-            saveData();
-        }
+            window.saveData();
+        };
 
-        function updateItemSalesAndActual(itemId, salesVal, actualVal) {
-            const item = appData.inventoryItems.find(i => i.id === itemId);
-            if(item) {
-                if(salesVal !== null) item.sales = parseFloat(salesVal) || 0;
-                if(actualVal !== null) item.actualEnding = parseFloat(actualVal) || 0;
-                saveData();
+        window.updateItemSalesAndActual = function(itemId, salesVal, actualVal) {
+            const item = window.appData.inventoryItems.find(i => i.id === itemId);
+            if (item) {
+                if (salesVal !== null) item.sales = parseFloat(salesVal) || 0;
+                if (actualVal !== null) item.actualEnding = parseFloat(actualVal) || 0;
+                window.saveData();
             }
+        };
+
+        window.deleteInventoryItem = function(itemId) {
+            window.appData.inventoryItems = window.appData.inventoryItems.filter(i => i.id !== itemId);
+            window.saveData();
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
         }
 
-        function deleteInventoryItem(itemId) {
-            appData.inventoryItems = appData.inventoryItems.filter(i => i.id !== itemId);
-            saveData();
-        }
-
-
-        // --- RENDERING & CALCULATIONS ENGINE ---
-
+        // --- RENDER ENGINE ---
         function renderAll() {
             renderFixedFields();
             renderRevenueDashboards();
@@ -665,31 +739,30 @@
         }
 
         function renderFixedFields() {
-            if(appData.fixed) {
-                document.getElementById('targetRevenue').value = appData.fixed.target || '';
-                document.getElementById('lastYearRevenue').value = appData.fixed.lastYearRev || '';
-                document.getElementById('lastYearTx').value = appData.fixed.lastYearTx || '';
-                document.getElementById('lastMonthRevenue').value = appData.fixed.lastMonthRev || '';
-                document.getElementById('lastMonthTx').value = appData.fixed.lastMonthTx || '';
+            if (window.appData.fixed) {
+                document.getElementById('targetRevenue').value = window.appData.fixed.target || '';
+                document.getElementById('lastYearRevenue').value = window.appData.fixed.lastYearRev || '';
+                document.getElementById('lastYearTx').value = window.appData.fixed.lastYearTx || '';
+                document.getElementById('lastMonthRevenue').value = window.appData.fixed.lastMonthRev || '';
+                document.getElementById('lastMonthTx').value = window.appData.fixed.lastMonthTx || '';
             }
         }
 
         function renderRevenueDashboards() {
-            const mtdRev = appData.dailyRevenue.reduce((acc, curr) => acc + curr.rev, 0);
-            const mtdTx = appData.dailyRevenue.reduce((acc, curr) => acc + curr.tx, 0);
+            const mtdRev = window.appData.dailyRevenue.reduce((acc, curr) => acc + curr.rev, 0);
+            const mtdTx = window.appData.dailyRevenue.reduce((acc, curr) => acc + curr.tx, 0);
             const mtdAvgCheck = mtdTx > 0 ? (mtdRev / mtdTx) : 0;
-            const recordedDays = appData.dailyRevenue.length;
+            const recordedDays = window.appData.dailyRevenue.length;
 
             document.getElementById('mtdRevenueVal').innerText = mtdRev.toLocaleString('ar-EG') + ' ج.م';
             document.getElementById('mtdTxVal').innerText = mtdTx.toLocaleString('ar-EG') + ' عملية';
             document.getElementById('mtdAvgCheckVal').innerText = mtdAvgCheck.toFixed(2) + ' ج.م';
 
-            // Fixed benchmarks comparisons
-            const lyRev = appData.fixed.lastYearRev || 0;
-            const lmRev = appData.fixed.lastMonthRev || 0;
-            const lyTx = appData.fixed.lastYearTx || 0;
-            const lmTx = appData.fixed.lastMonthTx || 0;
-            const target = appData.fixed.target || 0;
+            const lyRev = window.appData.fixed.lastYearRev || 0;
+            const lmRev = window.appData.fixed.lastMonthRev || 0;
+            const lyTx = window.appData.fixed.lastYearTx || 0;
+            const lmTx = window.appData.fixed.lastMonthTx || 0;
+            const target = window.appData.fixed.target || 0;
 
             const lyAvgCheck = lyTx > 0 ? (lyRev / lyTx) : 0;
             const lmAvgCheck = lmTx > 0 ? (lmRev / lmTx) : 0;
@@ -697,21 +770,17 @@
             document.getElementById('lastYearAvgCheckDisplay').innerText = lyAvgCheck.toFixed(2) + ' ج.م';
             document.getElementById('lastMonthAvgCheckDisplay').innerText = lmAvgCheck.toFixed(2) + ' ج.م';
 
-            // Growth Badges calculations
             setGrowthBadge('badgeVsLastYearRev', mtdRev, lyRev);
             setGrowthBadge('badgeVsLastMonthRev', mtdRev, lmRev);
             setGrowthBadge('badgeVsLastYearTx', mtdTx, lyTx);
             setGrowthBadge('badgeVsLastMonthTx', mtdTx, lmTx);
 
-            // Target progress %
             const targetProg = target > 0 ? ((mtdRev / target) * 100).toFixed(1) : 0;
-            const badgeTarget = document.getElementById('badgeTargetProgress');
-            badgeTarget.innerText = targetProg + '%';
+            document.getElementById('badgeTargetProgress').innerText = targetProg + '%';
 
-            // Month Dynamic Averages
             const dailyAvgRev = recordedDays > 0 ? (mtdRev / recordedDays) : 0;
             const dailyAvgTx = recordedDays > 0 ? (mtdTx / recordedDays) : 0;
-            const projectedEnd = dailyAvgRev * 30; // Assuming 30 days month average
+            const projectedEnd = dailyAvgRev * 30;
 
             document.getElementById('dailyAvgRevenueVal').innerText = dailyAvgRev.toLocaleString('ar-EG', {maximumFractionDigits:0}) + ' ج.م';
             document.getElementById('dailyAvgTxVal').innerText = dailyAvgTx.toFixed(0);
@@ -721,7 +790,7 @@
 
         function setGrowthBadge(elemId, current, benchmark) {
             const elem = document.getElementById(elemId);
-            if(!benchmark || benchmark === 0) {
+            if (!benchmark || benchmark === 0) {
                 elem.innerText = '0%';
                 elem.className = "px-2 py-0.5 rounded-full font-bold bg-gray-800 text-gray-300";
                 return;
@@ -730,7 +799,7 @@
             const formatted = (growth > 0 ? '+' : '') + growth.toFixed(1) + '%';
             elem.innerText = formatted;
 
-            if(growth >= 0) {
+            if (growth >= 0) {
                 elem.className = "px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
             } else {
                 elem.className = "px-2 py-0.5 rounded-full font-bold bg-red-950 text-red-400 border border-red-800";
@@ -739,12 +808,12 @@
 
         function renderRevenueTable() {
             const tbody = document.getElementById('dailyRevenueTableBody');
-            if(appData.dailyRevenue.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">لا توجد بيانات مسجلة لهذا الشهر بعد</td></tr>`;
+            if (window.appData.dailyRevenue.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">لا توجد بيانات مسجلة بعد</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = appData.dailyRevenue.map(item => {
+            tbody.innerHTML = window.appData.dailyRevenue.map(item => {
                 const avgCheck = item.tx > 0 ? (item.rev / item.tx).toFixed(2) : '0.00';
                 const dayName = new Date(item.date).toLocaleDateString('ar-EG', { weekday: 'short' });
                 return `
@@ -754,7 +823,7 @@
                         <td class="p-3">${item.tx}</td>
                         <td class="p-3 font-mono text-gray-300">${avgCheck} ج.م</td>
                         <td class="p-3 text-center">
-                            <button onclick="deleteDailyRevenue('${item.date}')" class="text-red-500 hover:text-red-400 p-1">
+                            <button onclick="window.deleteDailyRevenue('${item.date}')" class="text-red-500 hover:text-red-400 p-1">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
@@ -764,15 +833,17 @@
         }
 
         function renderChart() {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            const labels = appData.dailyRevenue.map(i => i.date);
-            const dataRev = appData.dailyRevenue.map(i => i.rev);
-            const targetDailyAvg = (appData.fixed.target || 0) / 30;
+            const canvas = document.getElementById('revenueChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const labels = window.appData.dailyRevenue.map(i => i.date);
+            const dataRev = window.appData.dailyRevenue.map(i => i.rev);
+            const targetDailyAvg = (window.appData.fixed.target || 0) / 30;
             const targetLine = new Array(labels.length).fill(targetDailyAvg);
 
-            if(revenueChartInstance) revenueChartInstance.destroy();
+            if (window.revenueChartInstance) window.revenueChartInstance.destroy();
 
-            revenueChartInstance = new Chart(ctx, {
+            window.revenueChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -801,7 +872,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: '#d1d5db', font: { family: 'system-ui' } } }
+                        legend: { labels: { color: '#d1d5db' } }
                     },
                     scales: {
                         x: { ticks: { color: '#9ca3af' }, grid: { color: '#262626' } },
@@ -814,33 +885,30 @@
         function renderInventoryDropdowns() {
             const select = document.getElementById('movementItemSelect');
             select.innerHTML = '<option value="">-- اختر الصنف --</option>' + 
-                appData.inventoryItems.map(i => `<option value="${i.id}">${i.name} (${i.unit})</option>`).join('');
+                window.appData.inventoryItems.map(i => `<option value="${i.id}">${i.name} (${i.unit})</option>`).join('');
         }
 
         function renderInventoryTable() {
             const tbody = document.getElementById('inventoryTableBody');
-            if(appData.inventoryItems.length === 0) {
+            if (window.appData.inventoryItems.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-gray-500">لا توجد منتجات مسجلة حتى الآن</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = appData.inventoryItems.map(item => {
-                // Calculate totals from movements
-                const deliveries = item.movements.filter(m => m.type === 'delivery').reduce((a,c) => a + c.qty, 0);
-                const transfersIn = item.movements.filter(m => m.type === 'transfer_in').reduce((a,c) => a + c.qty, 0);
-                const transfersOut = item.movements.filter(m => m.type === 'transfer_out').reduce((a,c) => a + c.qty, 0);
+            tbody.innerHTML = window.appData.inventoryItems.map(item => {
+                const movements = item.movements || [];
+                const deliveries = movements.filter(m => m.type === 'delivery').reduce((a,c) => a + c.qty, 0);
+                const transfersIn = movements.filter(m => m.type === 'transfer_in').reduce((a,c) => a + c.qty, 0);
+                const transfersOut = movements.filter(m => m.type === 'transfer_out').reduce((a,c) => a + c.qty, 0);
                 
-                // Theoretical Stock = Initial + Deliveries + TransfersIn - TransfersOut - Sales
                 const theoretical = item.initial + deliveries + transfersIn - transfersOut - (item.sales || 0);
-                
-                // Variance = Actual Ending - Theoretical
                 const variance = (item.actualEnding || 0) - theoretical;
                 const variancePct = theoretical !== 0 ? ((variance / theoretical) * 100).toFixed(1) : 0;
 
                 let varianceBadge = `<span class="text-gray-400 font-bold">0</span>`;
-                if(variance < 0) {
+                if (variance < 0) {
                     varianceBadge = `<span class="text-red-400 font-bold bg-red-950/80 px-2 py-0.5 rounded border border-red-800">عجز: ${Math.abs(variance)} ${item.unit} (${Math.abs(variancePct)}%)</span>`;
-                } else if(variance > 0) {
+                } else if (variance > 0) {
                     varianceBadge = `<span class="text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">زيادة: +${variance} ${item.unit} (+${variancePct}%)</span>`;
                 }
 
@@ -852,15 +920,15 @@
                         <td class="p-3 font-mono text-blue-400">+${transfersIn}</td>
                         <td class="p-3 font-mono text-amber-400">-${transfersOut}</td>
                         <td class="p-3">
-                            <input type="number" step="0.01" class="w-20 bg-black border border-kansasBorder rounded p-1 text-center text-xs text-white" value="${item.sales || ''}" placeholder="0" onchange="updateItemSalesAndActual('${item.id}', this.value, null)">
+                            <input type="number" step="0.01" class="w-20 bg-black border border-kansasBorder rounded p-1 text-center text-xs text-white" value="${item.sales || ''}" placeholder="0" onchange="window.updateItemSalesAndActual('${item.id}', this.value, null)">
                         </td>
                         <td class="p-3 font-bold text-white font-mono bg-black/40">${theoretical.toFixed(2)}</td>
                         <td class="p-3">
-                            <input type="number" step="0.01" class="w-20 bg-black border border-kansasBorder rounded p-1 text-center text-xs text-emerald-400 font-bold" value="${item.actualEnding || ''}" placeholder="0" onchange="updateItemSalesAndActual('${item.id}', null, this.value)">
+                            <input type="number" step="0.01" class="w-20 bg-black border border-kansasBorder rounded p-1 text-center text-xs text-emerald-400 font-bold" value="${item.actualEnding || ''}" placeholder="0" onchange="window.updateItemSalesAndActual('${item.id}', null, this.value)">
                         </td>
                         <td class="p-3">${varianceBadge}</td>
                         <td class="p-3 text-center">
-                            <button onclick="deleteInventoryItem('${item.id}')" class="text-red-500 hover:text-red-400 p-1">
+                            <button onclick="window.deleteInventoryItem('${item.id}')" class="text-red-500 hover:text-red-400 p-1">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
@@ -869,50 +937,64 @@
             }).join('');
         }
 
-        // --- EXPORT FUNCTIONS (EXCEL & PDF) ---
+        // --- EXPORTS ---
+        window.exportRevenueExcel = function() {
+            if (typeof XLSX === 'undefined') return alert('جاري تحميل مكتبة التصدير...');
+            const data = window.appData.dailyRevenue.map(row => ({
+                'التاريخ': row.date,
+                'الإيراد (ج.م)': row.rev,
+                'عدد العمليات': row.tx,
+                'متوسط الشيك': row.tx > 0 ? (row.rev / row.tx).toFixed(2) : 0
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "الإيرادات");
+            XLSX.writeFile(wb, `إيرادات_كنساس_داش_${new Date().toISOString().split('T')[0]}.xlsx`);
+        };
 
-        function exportRevenueExcel() {
-            let csv = '\uFEFFالتاريخ,الإيراد (ج.م),عدد العمليات,متوسط الشيك\n';
-            appData.dailyRevenue.forEach(row => {
-                const avg = row.tx > 0 ? (row.rev / row.tx).toFixed(2) : 0;
-                csv += `"${row.date}",${row.rev},${row.tx},${avg}\n`;
-            });
-            downloadCSV(csv, `تقارير_إيرادات_كنساس_داش_${new Date().toISOString().split('T')[0]}.csv`);
-        }
-
-        function exportInventoryExcel() {
-            let csv = '\uFEFFاسم المنتج,الوحدة,أول المدة,الوارد,محول إليه,محول منه,المباع,النظري,آخر المدة الفعلي,الفارق\n';
-            appData.inventoryItems.forEach(item => {
-                const deliveries = item.movements.filter(m => m.type === 'delivery').reduce((a,c) => a + c.qty, 0);
-                const transfersIn = item.movements.filter(m => m.type === 'transfer_in').reduce((a,c) => a + c.qty, 0);
-                const transfersOut = item.movements.filter(m => m.type === 'transfer_out').reduce((a,c) => a + c.qty, 0);
+        window.exportInventoryExcel = function() {
+            if (typeof XLSX === 'undefined') return alert('جاري تحميل مكتبة التصدير...');
+            const data = window.appData.inventoryItems.map(item => {
+                const movements = item.movements || [];
+                const deliveries = movements.filter(m => m.type === 'delivery').reduce((a,c) => a + c.qty, 0);
+                const transfersIn = movements.filter(m => m.type === 'transfer_in').reduce((a,c) => a + c.qty, 0);
+                const transfersOut = movements.filter(m => m.type === 'transfer_out').reduce((a,c) => a + c.qty, 0);
                 const theoretical = item.initial + deliveries + transfersIn - transfersOut - (item.sales || 0);
                 const variance = (item.actualEnding || 0) - theoretical;
 
-                csv += `"${item.name}","${item.unit}",${item.initial},${deliveries},${transfersIn},${transfersOut},${item.sales||0},${theoretical},${item.actualEnding||0},${variance}\n`;
+                return {
+                    'اسم المنتج': item.name,
+                    'الوحدة': item.unit,
+                    'أول المدة': item.initial,
+                    'الوارد': deliveries,
+                    'محول إليه': transfersIn,
+                    'محول منه': transfersOut,
+                    'المباع': item.sales || 0,
+                    'النظري': theoretical,
+                    'الفكلي آخر المدة': item.actualEnding || 0,
+                    'العجز / الزيادة': variance
+                };
             });
-            downloadCSV(csv, `تقرير_مخزون_كنساس_داش_${new Date().toISOString().split('T')[0]}.csv`);
-        }
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "المخزون");
+            XLSX.writeFile(wb, `مخزون_كنساس_داش_${new Date().toISOString().split('T')[0]}.xlsx`);
+        };
 
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-        }
-
-        function exportRevenuePDF() {
+        window.exportRevenuePDF = function() {
             const element = document.getElementById('page-revenue');
             const opt = {
-                margin:       0.5,
-                filename:     `تقرير_الأداء_والإيرادات_${new Date().toISOString().split('T')[0]}.pdf`,
+                margin:       0.3,
+                filename:     `تقرير_الإيرادات_${new Date().toISOString().split('T')[0]}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
             html2pdf().set(opt).from(element).save();
-        }
+        };
+
+        // Start Application
+        initApp();
     </script>
 </body>
 </html>
