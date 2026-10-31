@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Premium v4.4</title>
+    <title>Kansas Premium v4.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -64,7 +64,7 @@
     <div id="welcome-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-700">
         <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl text-center space-y-4 shadow-2xl transform scale-95 transition-all duration-500" id="welcome-card">
             <div class="w-16 h-16 bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black shadow-lg shadow-amber-500/40">K</div>
-            <h1 class="text-xl font-black text-white tracking-wide">Welcome to Kansas Premium</h1>
+            <h1 class="text-xl font-black text-white tracking-wide">KANSAS PREMIUM</h1>
             <p class="text-xs text-slate-400">جاري تحميل بيئة العمل التشغيلية الذكية...</p>
         </div>
     </div>
@@ -79,10 +79,10 @@
                     <div class="bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 font-black p-2.5 rounded-2xl text-base shadow-lg shadow-amber-500/20">K</div>
                     <div>
                         <h1 class="text-base font-black flex items-center gap-2">
-                            <span class="gold-text tracking-wide text-lg">KANSAS PREMIUM</span> 
-                            <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 rounded font-black">v4.4</span>
+                            <span class="gold-text tracking-wide text-sm sm:text-base">KANSAS PREMIUM</span> 
+                            <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 rounded font-black">v4.5</span>
                         </h1>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">نظام الإدارة التشغيلية والتحليل الاستراتيجي | <span class="text-amber-500 font-bold">Tarek Abdallah</span></p>
+                        <p class="text-[10px] text-slate-400 font-medium">Enterprise Operations & Analytics | <span class="text-amber-500 font-bold">Tarek Abdallah</span></p>
                     </div>
                 </div>
                 
@@ -91,7 +91,7 @@
                         <span id="theme-icon">🌙</span>
                     </button>
                     <button onclick="lockSystem()" class="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="قفل وتسجيل خروج">
-                        🔒 قفل النظام
+                        🔒 قفل
                     </button>
                     <div id="sync-status" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -134,12 +134,12 @@
             <!-- ================= REVENUE SECTION ================= -->
             <section id="tab-revenue" class="space-y-6">
                 
-                <!-- Revenue Booster AI Tips (New Addition) -->
+                <!-- Revenue Booster AI Tips -->
                 <div class="bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 rounded-2xl p-5 text-xs flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3.5">
                         <span class="text-2xl animate-bounce">💡</span>
                         <div class="space-y-1">
-                            <span class="font-black block text-sm text-amber-600 dark:text-amber-400">نصائح تشغيلية لتحفيز زيادة الإيرادات (Revenue Boosters):</span>
+                            <span class="font-black block text-sm text-amber-600 dark:text-amber-400">نصائح تشغيلية مكثفة لتحفيز الإيرادات (Revenue Boosters):</span>
                             <span id="booster-tip-text" class="text-slate-700 dark:text-slate-300 leading-relaxed font-semibold">تفعيل عروض الـ Combo الإضافية للوجبات العائلية أثناء أوقات الذروة يرفع متوسط الشيك بنسبة 15%.</span>
                         </div>
                     </div>
@@ -150,7 +150,7 @@
                     <div class="flex items-center gap-3.5">
                         <span class="text-2xl">⚡</span>
                         <div class="space-y-1">
-                            <span class="font-black block text-sm text-slate-900 dark:text-white">تحليلات الأداء الحي:</span>
+                            <span class="font-black block text-sm text-slate-900 dark:text-white">تحليلات الأداء الحي والتوجيه التشغيلي:</span>
                             <span id="insight-text" class="text-slate-600 dark:text-slate-300 leading-relaxed font-medium">جارٍ تحليل أداء الشفت وزخم المبيعات...</span>
                         </div>
                     </div>
@@ -178,11 +178,11 @@
                     </div>
                 </div>
 
-                <!-- Baseline & Historical Daily Settings -->
+                <!-- Baseline & Historical Daily Settings (Mutual Exclusion Mode) -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-200 dark:border-kansasBorder rounded-2xl p-5 shadow-sm transition-colors no-print">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
                         <h3 class="font-bold text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">⚙️</span> إعداد الخطة، الأرقام المرجعية، ومقارنة السنة السابقة
+                            <span class="text-amber-500">⚙️</span> إعداد الخطة، الأرقام المرجعية، ومقارنة السنة السابقة (Mutual Mode)
                         </h3>
                         <span id="baseline-arrow" class="text-slate-400 text-xs transition transform">▼</span>
                     </div>
@@ -204,7 +204,7 @@
                         
                         <div class="pt-3 border-t border-slate-200 dark:border-kansasBorder space-y-3">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                                <span class="font-bold text-xs text-slate-900 dark:text-white">📅 طريقة إدخال إيراد السنة السابقة:</span>
+                                <span class="font-bold text-xs text-slate-900 dark:text-white">📅 طريقة إدخال إيراد السنة السابقة (اختيار يلغي الآخر تلقائياً):</span>
                                 <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-kansasBorder">
                                     <button onclick="setLyInputMode('total')" id="btn-ly-total" class="px-3 py-1.5 rounded-lg font-bold text-xs bg-amber-500 text-slate-950 shadow-sm transition">إجمالي الشهر دفعة واحدة</button>
                                     <button onclick="setLyInputMode('daily')" id="btn-ly-daily" class="px-3 py-1.5 rounded-lg font-medium text-xs text-slate-600 dark:text-slate-300 transition">إدخال يدوي يوم بيوم</button>
@@ -225,6 +225,7 @@
                             </div>
 
                             <div id="ly-daily-mode-box" class="hidden space-y-2">
+                                <p class="text-[11px] text-amber-500 font-bold">⚠️ تم تفعيل وضع الإدخال اليدوي يوم بيوم؛ لتفعيل جدول المقارنة التفصيلي أسفل الصفحة.</p>
                                 <div class="max-h-60 overflow-y-auto border border-slate-200 dark:border-kansasBorder rounded-xl p-2 bg-slate-50 dark:bg-slate-900 space-y-2" id="historical-days-container"></div>
                             </div>
                         </div>
@@ -320,11 +321,12 @@
                     </div>
                 </div>
 
+                <!-- Comparisons + Intensive Operational Guidance -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="bg-white dark:bg-kansasCard border border-slate-200 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors flex flex-col justify-between">
                         <div class="space-y-3">
                             <h4 class="font-bold text-xs border-b border-slate-200 dark:border-kansasBorder pb-3 text-slate-900 dark:text-white flex items-center gap-2">
-                                <span>📊 المقارنة بالسنة السابقة وتوجيهات الأداء</span>
+                                <span>📊 المقارنة بالسنة السابقة وتوجيهات التشغيل الذكية</span>
                             </h4>
                             <div class="grid grid-cols-3 gap-2 text-xs">
                                 <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-kansasBorder text-center">
@@ -341,15 +343,15 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="ai-advice-ly" class="bg-amber-500/10 border border-amber-500/20 p-3.5 rounded-xl text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                            💡 جاري تقييم أداء الإيراد والعمليات مقارنة بالسنة السابقة...
+                        <div id="ai-advice-ly" class="bg-amber-500/10 border border-amber-500/20 p-3.5 rounded-xl text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed space-y-1">
+                            💡 <strong>توجيه ذكي مكثف:</strong> جاري تحليل الفجوة بين العام الحالي والعام السابق لتقديم استراتيجيات رفع الإيراد وحجم الطلبات...
                         </div>
                     </div>
 
                     <div class="bg-white dark:bg-kansasCard border border-slate-200 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors flex flex-col justify-between">
                         <div class="space-y-3">
                             <h4 class="font-bold text-xs border-b border-slate-200 dark:border-kansasBorder pb-3 text-slate-900 dark:text-white flex items-center gap-2">
-                                <span>📈 المقارنة بالشهر السابق وتوجيهات الأداء</span>
+                                <span>📈 المقارنة بالشهر السابق وتوجيهات التشغيل الذكية</span>
                             </h4>
                             <div class="grid grid-cols-3 gap-2 text-xs">
                                 <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-kansasBorder text-center">
@@ -366,8 +368,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="ai-advice-lm" class="bg-blue-500/10 border border-blue-500/20 p-3.5 rounded-xl text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                            💡 جاري تقييم أداء الإيراد والعمليات مقارنة بالشهر السابق...
+                        <div id="ai-advice-lm" class="bg-blue-500/10 border border-blue-500/20 p-3.5 rounded-xl text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed space-y-1">
+                            💡 <strong>توجيه ذكي مكثف:</strong> جاري تقييم الاستمرارية ونسبة النمو الشهري مقارنة بالشهر السابق...
                         </div>
                     </div>
                 </div>
@@ -431,12 +433,12 @@
                     </div>
 
                     <div class="bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/30 p-4 rounded-2xl space-y-1.5 text-xs">
-                        <span class="font-black text-amber-500 block">🚀 إرشادات تحليل تشغيلي لتجاوز السنة والشهر السابقين:</span>
+                        <span class="font-black text-amber-500 block">🚀 إرشادات تحليل تشغيلي مكثفة لتجاوز السنة والشهر السابقين:</span>
                         <p id="geo-guidance-text" class="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">جاري حساب خطط التجاوز التشغيلي...</p>
                     </div>
                 </div>
 
-                <!-- Custom Period Comparison Matrix -->
+                <!-- Custom Period Comparison Matrix (Active with Daily Manual LY Mode) -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-200 dark:border-kansasBorder rounded-2xl p-5 shadow-sm transition-colors space-y-4 no-print">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 dark:border-kansasBorder pb-3">
                         <h4 class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
@@ -446,6 +448,7 @@
                     </div>
 
                     <div id="custom-matrix-container" class="hidden space-y-4 pt-2">
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">حدد نطاق التاريخ الحالي ونطاق الفترة المقابلة في السنة السابقة لتوليد جدول يوم بيوم (إيراد، عمليات، نمو/تراجع):</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                             <div>
                                 <label class="block text-slate-600 dark:text-slate-300 mb-1 font-semibold">من تاريخ (الحالي):</label>
@@ -465,7 +468,7 @@
                         </div>
 
                         <div id="matrix-results-box" class="hidden space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                                 <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-kansasBorder text-center">
                                     <span class="text-[11px] text-slate-400 font-semibold block">إجمالي إيراد الفترة</span>
                                     <span id="matrix-sum-rev" class="text-sm font-black text-slate-900 dark:text-white">0 ج.م</span>
@@ -475,8 +478,12 @@
                                     <span id="matrix-sum-ord" class="text-sm font-black text-slate-900 dark:text-white">0</span>
                                 </div>
                                 <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-kansasBorder text-center">
-                                    <span class="text-[11px] text-slate-400 font-semibold block">نمو الإيراد مقارنة بالسابق</span>
+                                    <span class="text-[11px] text-slate-400 font-semibold block">نمو الإيراد (فترة)</span>
                                     <span id="matrix-growth-pct" class="text-sm font-black text-emerald-500">0%</span>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-kansasBorder text-center">
+                                    <span class="text-[11px] text-slate-400 font-semibold block">نمو العمليات (فترة)</span>
+                                    <span id="matrix-orders-growth-pct" class="text-sm font-black text-emerald-500">0%</span>
                                 </div>
                             </div>
 
@@ -490,7 +497,8 @@
                                             <th class="p-2.5">التاريخ (السابق)</th>
                                             <th class="p-2.5">إيراد سابق</th>
                                             <th class="p-2.5">عمليات سابقة</th>
-                                            <th class="p-2.5">نسبة النمو</th>
+                                            <th class="p-2.5">نمو الإيراد</th>
+                                            <th class="p-2.5">نمو العمليات</th>
                                         </tr>
                                     </thead>
                                     <tbody id="matrix-table-body" class="divide-y divide-slate-200 dark:divide-kansasBorder font-medium"></tbody>
@@ -615,7 +623,7 @@
     <!-- Copyright Footer -->
     <footer class="mt-12 py-5 bg-white dark:bg-kansasCard border-t border-slate-200 dark:border-kansasBorder text-center text-xs text-slate-500 dark:text-slate-400 transition-colors no-print">
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <span>© 2026 <strong class="gold-text">KANSAS</strong> - جميع الحقوق محفوظة</span>
+            <span>© 2026 <strong class="gold-text">KANSAS PREMIUM</strong> - جميع الحقوق محفوظة</span>
             <span class="font-bold">Designed & Developed by <span class="gold-text font-black">Tarek Abdallah</span></span>
         </div>
     </footer>
@@ -722,7 +730,7 @@
 
             document.getElementById('matrix-date-from').value = yearMonth + '-01';
             document.getElementById('matrix-date-to').value = todayStr;
-            document.getElementById('matrix-ly-from').value = yearMonth + '-01';
+            document.getElementById('matrix-ly-from').value = '2025-10-01';
 
             updateDayName();
             loadLocalData();
@@ -859,6 +867,7 @@
                 generateHistoricalDays();
             }
             saveAndSync();
+            calculateAnalytics();
         }
 
         function toggleOpeningAccordion() {
@@ -1128,15 +1137,15 @@
             document.getElementById('comp-lm-check').innerHTML = formatDiff(avgCheck, lmAvgCheck);
 
             const lyDiff = lyPeriodRev > 0 ? ((totalRev - lyPeriodRev) / lyPeriodRev) * 100 : 0;
-            document.getElementById('ai-advice-ly').innerHTML = `💡 <strong>توجيه ذكي:</strong> ${lyDiff >= 0 ? 'أداء إيراداتك أعلى من العام الماضي بنسبة ' + lyDiff.toFixed(1) + '%، حافظ على هذا الزخم.' : 'أداء إيراداتك أقل من العام الماضي، ركز على رفع متوسط حجم الشيكات.'}`;
+            document.getElementById('ai-advice-ly').innerHTML = `💡 <strong>توجيه ذكي مكثف:</strong> ${lyDiff >= 0 ? 'الأداء أعلى من العام السابق بنسبة ' + lyDiff.toFixed(1) + '%.' : 'الأداء أقل من العام السابق.'} <strong>إرشاد:</strong> ركز على زيادة التوافد في أوقات الذروة ورفع حجم الشيك من خلال العروض الترويجية المجمعة لتجاوز الفجوة تماماً.`;
 
             const lmDiff = lmRev > 0 ? ((totalRev - lmRev) / lmRev) * 100 : 0;
-            document.getElementById('ai-advice-lm').innerHTML = `💡 <strong>توجيه ذكي:</strong> ${lmDiff >= 0 ? 'نمو ممتاز مقارنة بالشهر السابق.' : 'هناك تراجع طفيف عن الشهر السابق، يُنصح بتفعيل عروض سريعة.'}`;
+            document.getElementById('ai-advice-lm').innerHTML = `💡 <strong>توجيه ذكي مكثف:</strong> ${lmDiff >= 0 ? 'نمو ممتاز مقارنة بالشهر السابق.' : 'تراجع طفيف عن الشهر السابق.'} <strong>إرشاد:</strong> راجع كفاءة أداء المحطة وسرعة الخدمة لضمان استقرار التدفق النقدي وصعود الإيراد.`;
 
             let insight = "الأداء التشغيلي مستقر والطاقة الاستيعابية للشفت تعمل بكفاءة عالية.";
-            if(planRatio >= 100) insight = "🔥 أداء استثنائي! إيراد الفترة تجاوز المستهدف بنجاح.";
-            else if(projectedMonthRev >= planRev) insight = "🚀 مؤشرات قوية: المطعم في طريقه لتجاوز خطة الشهر الإجمالية!";
-            else if(avgCheck < 120 && totalOrders > 0) insight = "⚠️ تنبيه ذكي: متوسط قيمة الشيك منخفض، يُنصح بتوجيه الكاشير لزيادة الـ Up-selling.";
+            if(planRatio >= 100) insight = "🔥 أداء استثنائي! إيراد الفترة تجاوز المستهدف بنجاح. استمر في الحفاظ على نفس الزخم التشغيلي.";
+            else if(projectedMonthRev >= planRev) insight = "🚀 مؤشرات قوية: المطعم في طريقه لتجاوز خطة الشهر الإجمالية بناءً على المتوسط الحالي!";
+            else if(avgCheck < 120 && totalOrders > 0) insight = "⚠️ تنبيه ذكي: متوسط قيمة الشيك منخفض، يُنصح بتوجيه فريق الكاشير لتفعيل سياسة الـ Up-selling فوراً.";
             document.getElementById('insight-text').innerText = insight;
 
             const maxVal = Math.max(totalRev, planRev, lyPeriodRev, lmRev, 1);
@@ -1155,14 +1164,14 @@
             document.getElementById('geo-lm-lbl').innerText = lmRev.toLocaleString() + ' ج.م';
             document.getElementById('geo-bar-lm').style.width = Math.min((lmRev / maxVal) * 100, 100) + '%';
 
-            document.getElementById('geo-guidance-text').innerHTML = `لتجاوز إيراد السنة السابقة (${lyPeriodRev.toLocaleString()} ج.م)، يجب الحفاظ على حد أدنى إيراد يومي قدره <strong>${(lyPeriodRev / 30).toLocaleString(undefined, {maximumFractionDigits:0})} ج.م</strong> وتكثيف حملات التوصيل.`;
+            document.getElementById('geo-guidance-text').innerHTML = `لتجاوز إيراد السنة السابقة (${lyPeriodRev.toLocaleString()} ج.م)، يجب الحفاظ على حد أدنى إيراد يومي قدره <strong>${(lyPeriodRev / 30).toLocaleString(undefined, {maximumFractionDigits:0})} ج.م</strong>، وتحفيز فريق العمل لزيادة عدد الطلبات اليومية بنسبة 10%.`;
 
             updateChart();
             updateDailyTargetProgress();
         }
 
         function toggleCustomMatrix() {
-            const box = document.getElementById('matrix-results-box');
+            const box = document.getElementById('custom-matrix-container');
             box.classList.toggle('hidden');
         }
 
@@ -1176,7 +1185,7 @@
             tbody.innerHTML = '';
 
             let currentSumRev = 0, currentSumOrd = 0;
-            let prevSumRev = 0;
+            let prevSumRev = 0, prevSumOrd = 0;
 
             const startD = new Date(dFrom);
             const endD = new Date(dTo);
@@ -1204,8 +1213,10 @@
                 currentSumRev += currRec.revenue;
                 currentSumOrd += currRec.orders;
                 prevSumRev += prevRec.revenue;
+                prevSumOrd += (prevRec.orders || 0);
 
-                const dayGrowth = prevRec.revenue > 0 ? (((currRec.revenue - prevRec.revenue) / prevRec.revenue) * 100).toFixed(1) : '0';
+                const dayRevGrowth = prevRec.revenue > 0 ? (((currRec.revenue - prevRec.revenue) / prevRec.revenue) * 100).toFixed(1) : '0';
+                const dayOrdGrowth = (prevRec.orders && prevRec.orders > 0) ? (((currRec.orders - prevRec.orders) / prevRec.orders) * 100).toFixed(1) : '0';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -1215,7 +1226,8 @@
                     <td class="p-2.5 text-slate-400">${prevStr}</td>
                     <td class="p-2.5 text-purple-500 font-bold">${prevRec.revenue.toLocaleString()} ج.م</td>
                     <td class="p-2.5">${Math.round(prevRec.orders)}</td>
-                    <td class="p-2.5"><span class="${parseFloat(dayGrowth)>=0?'text-emerald-500':'text-red-500'} font-bold">${dayGrowth}%</span></td>
+                    <td class="p-2.5"><span class="${parseFloat(dayRevGrowth)>=0?'text-emerald-500':'text-red-500'} font-bold">${(parseFloat(dayRevGrowth)>=0?'+':'') + dayRevGrowth}%</span></td>
+                    <td class="p-2.5"><span class="${parseFloat(dayOrdGrowth)>=0?'text-emerald-500':'text-red-500'} font-bold">${(parseFloat(dayOrdGrowth)>=0?'+':'') + dayOrdGrowth}%</span></td>
                 `;
                 tbody.appendChild(tr);
 
@@ -1223,12 +1235,16 @@
                 lyLoopDate.setDate(lyLoopDate.getDate() + 1);
             }
 
-            const totalGrowthPct = prevSumRev > 0 ? (((currentSumRev - prevSumRev) / prevSumRev) * 100).toFixed(1) : '0';
+            const totalRevGrowthPct = prevSumRev > 0 ? (((currentSumRev - prevSumRev) / prevSumRev) * 100).toFixed(1) : '0';
+            const totalOrdGrowthPct = prevSumOrd > 0 ? (((currentSumOrd - prevSumOrd) / prevSumOrd) * 100).toFixed(1) : '0';
+
             document.getElementById('matrix-sum-rev').innerText = currentSumRev.toLocaleString() + ' ج.م';
             document.getElementById('matrix-sum-ord').innerText = currentSumOrd.toLocaleString();
-            document.getElementById('matrix-growth-pct').innerText = (parseFloat(totalGrowthPct) >= 0 ? '+' : '') + totalGrowthPct + '%';
+            document.getElementById('matrix-growth-pct').innerText = (parseFloat(totalRevGrowthPct) >= 0 ? '+' : '') + totalRevGrowthPct + '%';
+            document.getElementById('matrix-orders-growth-pct').innerText = (parseFloat(totalOrdGrowthPct) >= 0 ? '+' : '') + totalOrdGrowthPct + '%';
+            
             document.getElementById('matrix-results-box').classList.remove('hidden');
-            showToast('تم توليد جدول تحليل النمو بنجاح', 'success');
+            showToast('تم توليد جدول المقارنة اليومية بنجاح', 'success');
         }
 
         function addNewProduct() {
