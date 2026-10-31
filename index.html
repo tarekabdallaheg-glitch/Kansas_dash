@@ -662,11 +662,8 @@
         let currentTab = 'revenue';
         let revenueChartInstance = null;
         let lyInputModeState = 'total';
-        const MASTER_PIN = "ks@123456";
+        const MASTER_PIN = "1234";
 
-        // ===== STORAGE MODEL =====
-        // products: global list shared across all months (kansas_pro_global)
-        // appData: data of ONE month only (kansas_pro_YYYY-MM)
         let products = [];
         let currentMonthKey = '';
         let appData = defaultMonthData();
@@ -707,7 +704,6 @@
             if(raw) {
                 try {
                     const saved = JSON.parse(raw);
-                    // Migration from older versions where products lived inside the month
                     if(saved.products && !localStorage.getItem('kansas_pro_global')) {
                         products = saved.products.map(p => ({ id: p.id, name: p.name, unit: p.unit }));
                         saveAndSync();
@@ -747,7 +743,6 @@
             return { opening, totalRec, transferNet, sold, closing, variance };
         }
 
-        // ===== PIN =====
         function applyLockState() {
             const modal = document.getElementById('pin-lock-modal');
             let unlocked = false;
@@ -764,7 +759,7 @@
                 document.getElementById('pin-lock-modal').style.display = 'none';
                 showToast('تم فتح النظام بنجاح', 'success');
             } else {
-                showToast('رمز الحماية غير صحيح (اكتبه تاني)', 'error');
+                showToast('رمز الحماية غير صحيح (اكتبه 1234)', 'error');
             }
         }
 
@@ -779,7 +774,6 @@
             return new Date(Date.UTC(y, m - 1, d));
         }
 
-        // ===== INIT =====
         window.onload = function() {
             applyLockState();
             initTheme();
@@ -874,7 +868,6 @@
         }
 
         function changeActiveMonth() {
-            // save the month we are leaving before switching (prevents data mixing)
             saveAndSync();
             const newMonth = document.getElementById('global-month-selector').value;
             if(!newMonth) return;
@@ -911,17 +904,6 @@
             saveAndSync();
             calculateAnalytics();
             renderDayByDayComparison();
-        }
-
-        function generateHistoricalDays() {
-            const sm = document.getElementById('global-month-selector').value;
-            if(!sm) return;
-            const [y, m] = sm.split('-').map(Number);
-            const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            for(let d = 1; d <= daysInMonth; d++) {
-                const dayKey = String(d).padStart(2, '0');
-                if(!appData.historicalLyDaily[dayKey]) appData.historicalLyDaily[dayKey] = { rev: 0, orders: 0 };
-            }
         }
 
         function renderHistoricalDaysInputs() {
@@ -1087,7 +1069,6 @@
             const planTotalRatio = planRev > 0 ? (totalRev / planRev) * 100 : 0;
             const projectedMonthRev = dailyAvgRev * 30;
 
-            // MoM
             const prevMonthRev = appData.baseline.prevMonthRev || 0;
             const prevMonthOrders = appData.baseline.prevMonthOrders || 0;
             const prevDailyRev = prevMonthRev > 0 ? (prevMonthRev / 30) : 0;
@@ -1109,7 +1090,6 @@
             updateDiffAndPctUI('mom-ord-diff', 'mom-ord-pct', momOrdDiff, momOrdPct, 'عملية', 0);
             updateDiffAndPctUI('mom-chk-diff', 'mom-check-pct', momChkDiff, momCheckPct, 'ج.م', 2);
 
-            // YoY
             const lyTotalRev = appData.baseline.lyTotalRev || 0;
             const lyTotalOrders = appData.baseline.lyTotalOrders || 0;
             const targetLyDailyRev = lyTotalRev > 0 ? (lyTotalRev / 30) : 0;
@@ -1131,7 +1111,6 @@
             updateDiffAndPctUI('ly-ord-diff', 'actual-vs-ly-ord-pct', lyOrdDiff, lyOrdPct, 'عملية', 0);
             updateDiffAndPctUI('ly-chk-diff', 'actual-vs-ly-check-pct', lyChkDiff, lyCheckPct, 'ج.م', 2);
 
-            // Plan
             document.getElementById('target-plan-rev').innerText = (planRev > 0 ? (planRev / 30) : 0).toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
             document.getElementById('target-plan-total').innerText = planRev.toLocaleString() + ' ج.م';
             document.getElementById('actual-total-rev-lbl').innerText = totalRev.toLocaleString() + ' ج.م';
@@ -1259,7 +1238,6 @@
             chkPctEl.className = `font-bold block text-[11px] ${sumChkDiffPct >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
         }
 
-        // ===== INVENTORY =====
         function checkInventoryMissingDays() {
             const sm = document.getElementById('global-month-selector').value;
             if(!sm) return;
@@ -1485,7 +1463,6 @@
             });
         }
 
-        // ===== EXCEL EXPORTS =====
         function exportOpeningExcelFiltered() {
             const data = products.map(p => ({ 'اسم الصنف': p.name, 'الوحدة': p.unit, 'رصيد أول المدة': getOpening(p.id) }));
             const ws = XLSX.utils.json_to_sheet(data);
@@ -1504,4 +1481,182 @@
                     const rec = appData.dailyReceived[date].data || {};
                     products.forEach(p => {
                         if(rec[p.id]) data.push({ 'التاريخ': date, 'اسم الصنف': p.name, 'الوحدة': p.unit, 'الوارد': rec[p.id] });
-       
+                    });
+                }
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Daily_Received");
+            XLSX.writeFile(wb, "Kansas_Daily_Received.xlsx");
+            showToast('تم تصدير شيت الوارد بنجاح', 'success');
+        }
+
+        function exportTransfersExcelFiltered() {
+            const f = document.getElementById('inv-trans-from').value;
+            const t = document.getElementById('inv-trans-to').value;
+            const data = [];
+            Object.keys(appData.transfers).forEach(date => {
+                if((!f || date >= f) && (!t || date <= t)) {
+                    (appData.transfers[date].rows || []).forEach(r => {
+                        const p = products.find(prod => prod.id === r.productId);
+                        data.push({
+                            'التاريخ': date,
+                            'نوع التحويل': r.type === 'in' ? 'وارد من فرع' : 'صادر لفرع',
+                            'اسم الفرع': r.branch || '',
+                            'اسم الصنف': p ? p.name : '',
+                            'الكمية': r.qty || 0
+                        });
+                    });
+                }
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Transfers");
+            XLSX.writeFile(wb, "Kansas_Transfers.xlsx");
+            showToast('تم تصدير شيت التحويلات بنجاح', 'success');
+        }
+
+        function exportInventoryAnalysisExcel() {
+            const data = products.map(p => {
+                const s = getProductStats(p);
+                return {
+                    'اسم الصنف': p.name,
+                    'الوحدة': p.unit,
+                    'أول المدة': s.opening,
+                    'الوارد': s.totalRec,
+                    'التحويلات (صافي)': s.transferNet,
+                    'المباع': s.sold,
+                    'آخر المدة (الفعلي)': s.closing,
+                    'العجز / الزيادة': s.variance
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory_Analysis");
+            XLSX.writeFile(wb, "Kansas_Inventory_Analysis.xlsx");
+            showToast('تم تصدير شيت جرد المخزون بنجاح', 'success');
+        }
+
+        function exportRevenuePageExcel() {
+            const data = [];
+            const dFrom = document.getElementById('rev-date-from').value;
+            const dTo = document.getElementById('rev-date-to').value;
+
+            Object.keys(appData.dailyRecords).sort().forEach(dateStr => {
+                if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
+                    const rec = appData.dailyRecords[dateStr];
+                    const avgCheck = rec.orders > 0 ? (rec.revenue / rec.orders) : 0;
+                    data.push({
+                        'التاريخ': dateStr,
+                        'الإيراد (ج.م)': rec.revenue,
+                        'عدد العمليات': rec.orders,
+                        'متوسط الشيك (ج.م)': parseFloat(avgCheck.toFixed(2))
+                    });
+                }
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Revenue_Report");
+            XLSX.writeFile(wb, "Kansas_Revenue_Report.xlsx");
+            showToast('تم تصدير تقرير الإيرادات بنجاح', 'success');
+        }
+
+        function exportRevenuePagePdf() {
+            window.print();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            revenueChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'إيراد اليوم (الفعلي)',
+                            data: [],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'متوسط إيراد اليوم المقابل (السنة السابقة)',
+                            data: [],
+                            borderColor: '#3b82f6',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.3,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { weight: 'bold' } } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { weight: 'bold' } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#94a3b8', font: { weight: 'bold' } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if(!revenueChartInstance) return;
+            const labels = [];
+            const curData = [];
+            const lyData = [];
+
+            const dFrom = document.getElementById('rev-date-from').value;
+            const dTo = document.getElementById('rev-date-to').value;
+
+            const sortedDates = Object.keys(appData.dailyRecords).sort();
+            sortedDates.forEach(dateStr => {
+                if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
+                    labels.push(dateStr.split('-').slice(1).join('/'));
+                    const rec = appData.dailyRecords[dateStr];
+                    curData.push(rec.revenue || 0);
+
+                    const dayPart = dateStr.split('-')[2];
+                    let lyRev = 0;
+                    if(appData.baseline.lyMode === 'daily' && appData.historicalLyDaily && appData.historicalLyDaily[dayPart]) {
+                        lyRev = appData.historicalLyDaily[dayPart].rev || 0;
+                    } else {
+                        lyRev = (appData.baseline.lyTotalRev || 0) / 30;
+                    }
+                    lyData.push(lyRev);
+                }
+            });
+
+            revenueChartInstance.data.labels = labels;
+            revenueChartInstance.data.datasets[0].data = curData;
+            revenueChartInstance.data.datasets[1].data = lyData;
+            revenueChartInstance.update();
+
+            updateSmartInsights(curData);
+        }
+
+        function updateSmartInsights(curData) {
+            const insEl = document.getElementById('insight-text');
+            if(curData.length === 0) {
+                insEl.innerText = "لم يتم تسجيل أي بيانات إيراد للفترة المحددة حتى الآن.";
+                return;
+            }
+            const total = curData.reduce((a, b) => a + b, 0);
+            const avg = total / curData.length;
+            const lastVal = curData[curData.length - 1];
+
+            if(lastVal > avg * 1.15) {
+                insEl.innerText = `أداء ممتاز! إيراد اليوم الأخير (${lastVal.toLocaleString()} ج.م) أعلى من المتوسط اليومي (${Math.round(avg).toLocaleString()} ج.م) بنسبة تزيد عن 15%. حافظ على زخم التشغيل وسرعة التحضير.`;
+            } else if(lastVal < avg * 0.85) {
+                insEl.innerText = `تنبيه تشغيلي: إيراد اليوم الأخير (${lastVal.toLocaleString()} ج.م) منخفض عن المتوسط اليومي (${Math.round(avg).toLocaleString()} ج.م). يُوصى بتنشيط العروض السريعة وتوجيه كابتن الصالة لرفع متوسط الشيك.`;
+            } else {
+                insEl.innerText = `الأداء مستقر ومقارب للمعدل اليومي العام (${Math.round(avg).toLocaleString()} ج.م). التركيز على تقليل وقت التحضير سيساعد في استيعاب عدد شيكات أكبر.`;
+            }
+        }
+    </script>
+</body>
+</html>
