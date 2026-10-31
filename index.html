@@ -1,1663 +1,1469 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark" id="html-root">
+<html lang="ar" dir="rtl" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Premium v7.5</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        kansasGold: '#f59e0b',
-                        kansasDark: '#090d16',
-                        kansasCard: '#131c2e',
-                        kansasBorder: '#1e293b',
-                        kansasLightBg: '#f1f5f9',
-                        kansasLightCard: '#ffffff',
-                        kansasLightBorder: '#cbd5e1'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: system-ui, -apple-system, sans-serif; transition: background-color 0.4s, color 0.4s; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .gold-text {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .dark input, .dark select { background-color: #0b1120 !important; color: #ffffff !important; border-color: #1e293b !important; }
-        .dark input::placeholder { color: #94a3b8 !important; }
-        .light .bg-kansasLightCard { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
-        .light input, .light select { background-color: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
-        .light input::placeholder { color: #64748b !important; }
-        @media print {
-            body * { visibility: hidden; }
-            #printable-area, #printable-area * { visibility: visible; }
-            #printable-area { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Kansas Premium v9</title>
+<style>
+:root{--bg:#eef2f7;--card:#ffffff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--inp:#f8fafc;--gold:#d97706;--gold2:#f59e0b;--shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06)}
+.dark{--bg:#070b13;--card:#111a2b;--card2:#0c1424;--text:#f1f5f9;--muted:#8b9bb4;--border:#1f2c44;--inp:#0b1222;--gold:#f59e0b;--gold2:#fbbf24;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35)}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--text);font-size:13px;padding-bottom:48px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.card.flat{box-shadow:none}
+.muted{color:var(--muted);font-size:11.5px;font-weight:600}
+.h{font-weight:900;font-size:15px;margin:0 0 12px;letter-spacing:.1px}
+.eyebrow{font-size:10.5px;font-weight:800;letter-spacing:1.2px;color:var(--gold);text-transform:uppercase}
+.inp{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--inp);color:var(--text);font-weight:700;font-size:13px;font-family:inherit;transition:border-color .15s}
+.inp:focus{outline:none;border-color:var(--gold2)}
+.inp.sm{width:140px}
+.inp.xs{width:110px;text-align:center}
+.inp:disabled{opacity:.55}
+.btn{padding:9px 15px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;transition:transform .08s,filter .15s;white-space:nowrap}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.98)}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#0f172a;border-color:transparent}
+.btn-green{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-color:transparent}
+.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border-color:transparent}
+.btn-slate{background:#334155;color:#fff;border-color:transparent}
+.btn-ghost{background:transparent}
+.btn-sm{padding:6px 10px;font-size:11px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g6{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.hidden{display:none!important}
+.up{color:#10b981;font-weight:800}
+.down{color:#ef4444;font-weight:800}
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:900;padding:3px 9px;border-radius:99px;background:var(--card2);border:1px solid var(--border);color:var(--muted)}
+.chip.up{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35);color:#10b981}
+.chip.down{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35);color:#ef4444}
+.badge{font-size:11px;font-weight:900;padding:4px 10px;border-radius:99px;border:1px solid}
+.badge.open{color:#10b981;border-color:#10b981}
+.badge.closed{color:var(--gold);border-color:var(--gold)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th{font-weight:800;color:var(--muted);font-size:11px}
+tr:last-child td{border-bottom:none}
+
+/* Hero */
+.hero{position:relative;overflow:hidden;border-radius:22px;padding:24px;color:#f8fafc;background:linear-gradient(135deg,#0f172a 0%,#1e293b 55%,#334155 100%);box-shadow:0 18px 40px rgba(15,23,42,.35)}
+.hero::after{content:"";position:absolute;inset:auto -60px -90px auto;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.35),transparent 70%);pointer-events:none}
+.hero .eyebrow{color:#fbbf24}
+.hero .muted{color:#a9b6cc}
+.hero h2{margin:6px 0 4px;font-size:22px;font-weight:900}
+.status{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:12px;padding:6px 14px;border-radius:99px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
+.status i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.hero-sum{margin:14px 0 0;font-size:14px;line-height:1.85;max-width:820px;color:#e2e8f0}
+
+/* KPIs */
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.kpi .lbl{font-size:11px;font-weight:800;color:var(--muted)}
+.kpi .val{font-size:20px;font-weight:900;letter-spacing:.2px}
+.kpi .sub{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);font-weight:700}
+
+/* Rings */
+.rings{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ring{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.ring .cap{font-size:11px;font-weight:800;color:var(--muted)}
+
+/* Insights */
+.ins{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;background:var(--card2);border:1px solid var(--border);line-height:1.7;font-size:12.5px}
+.ins .ic{font-size:15px;line-height:1.4}
+.ins.good{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.07)}
+.ins.warn{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.07)}
+.ins.tip{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
+.ins-list{display:flex;flex-direction:column;gap:8px}
+
+.chart-box{position:relative;height:270px}
+.alert{border-radius:14px;padding:11px 14px;font-weight:800;font-size:12px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:#ef4444}
+.note{border-radius:14px;padding:11px 14px;font-weight:800;font-size:12px;border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.1);color:var(--gold)}
+details{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 18px;box-shadow:var(--shadow)}
+details summary{cursor:pointer;font-weight:900;font-size:13px;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸ ";color:var(--gold)}
+details[open] summary::before{content:"▾ "}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:5px;box-shadow:var(--shadow)}
+.tabs .btn{flex:1;border:none;background:transparent}
+.tabs .on{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#0f172a}
+
+.bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width .5s}
+.lock{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.lock .card{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;text-align:center;padding:26px}
+.toasts{position:fixed;bottom:16px;left:16px;display:flex;flex-direction:column;gap:6px;z-index:99}
+.toast{padding:11px 16px;border-radius:12px;color:#fff;font-weight:800;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+@media (max-width:640px){.rings{grid-template-columns:1fr}.hero h2{font-size:18px}.kpi .val{font-size:17px}}
+@media print{.no-print{display:none!important}body{background:#fff;color:#000}.card,.kpi,details{box-shadow:none;border:1px solid #ccc}.hero{background:#fff;color:#000}.hero *{color:#000!important}}
+</style>
 </head>
-<body class="min-h-screen pb-16 flex flex-col justify-between bg-kansasLightBg dark:bg-kansasDark text-slate-900 dark:text-slate-100">
+<body>
 
-    <!-- Security PIN Lock Modal -->
-    <div id="pin-lock-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder p-8 rounded-3xl w-full max-w-sm text-center space-y-5 shadow-2xl">
-            <div class="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">🔒</div>
-            <div>
-                <h2 class="text-lg font-black text-slate-900 dark:text-white tracking-wide">KANSAS PREMIUM</h2>
-                <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">الرجاء إدخال رمز الحماية السري</p>
-            </div>
-            <div>
-                <input type="text" id="unlock-pin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="الرمز" class="w-full text-center text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-kansasBorder rounded-2xl p-3.5 font-bold text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition shadow-sm" onkeydown="if(event.key === 'Enter') verifyPin()">
-            </div>
-            <button type="button" onclick="verifyPin()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black py-3 rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition">
-                فتح النظام الآمن
-            </button>
+<!-- ===== شاشة الحماية ===== -->
+<div id="lock" class="lock">
+    <div class="card">
+        <div style="font-size:34px">🔒</div>
+        <div class="eyebrow">Kansas Premium</div>
+        <p class="muted" style="margin:0">الرجاء إدخال رمز الحماية السري</p>
+        <input id="unlock-pin" class="inp" type="password" inputmode="numeric" autocomplete="off" placeholder="الرمز" onkeydown="if(event.key==='Enter')verifyPin()">
+        <button class="btn btn-gold" onclick="verifyPin()">فتح النظام</button>
+    </div>
+</div>
+
+<!-- ===== التطبيق ===== -->
+<div id="app" class="hidden">
+<div class="wrap">
+
+    <header class="card flat row between" style="padding:14px 18px">
+        <div>
+            <div class="h" style="margin:0;color:var(--gold)">KANSAS PREMIUM</div>
+            <div class="muted">Designed & Developed by Tarek Abdallah · v9</div>
         </div>
+        <div class="row no-print">
+            <button class="btn" onclick="toggleTheme()" id="theme-btn">☀️ فاتح</button>
+            <button class="btn btn-slate" onclick="exportBackup()">💾 نسخة احتياطية</button>
+            <label class="btn" style="cursor:pointer">📂 استيراد<input type="file" accept="application/json" class="hidden" onchange="importBackup(this)"></label>
+            <button class="btn btn-red" onclick="lockSystem()">🔒 قفل</button>
+        </div>
+    </header>
+
+    <div id="backup-alert" class="note hidden no-print"></div>
+
+    <div class="card flat row between no-print" style="padding:12px 18px">
+        <div>
+            <div class="eyebrow">الشهر التشغيلي</div>
+            <div class="h" id="active-month-title" style="margin:2px 0 0"></div>
+        </div>
+        <input type="month" id="month-input" class="inp sm" onchange="changeMonth()">
     </div>
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-5 left-5 z-50 space-y-2 pointer-events-none"></div>
+    <nav class="tabs no-print">
+        <button class="btn on" id="tab-btn-revenue" onclick="switchTab('revenue')">📈 نظرة عامة على الإيرادات</button>
+        <button class="btn" id="tab-btn-inventory" onclick="switchTab('inventory')">📦 المخزون</button>
+    </nav>
 
-    <div id="printable-area">
-        <!-- Top Bar -->
-        <header class="bg-white/95 dark:bg-kansasCard/90 backdrop-blur-md border-b border-slate-300 dark:border-kansasBorder sticky top-0 z-40 px-3 sm:px-6 py-2.5 shadow-md transition-colors">
-            <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
-                <div class="flex items-center space-x-2.5 space-x-reverse">
-                    <div class="bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-black p-2 rounded-xl text-xs shadow-md shadow-amber-500/20">K</div>
-                    <div>
-                        <h1 class="text-xs sm:text-sm font-black flex items-center gap-1.5 flex-wrap">
-                            <span class="gold-text tracking-wide drop-shadow-sm">KANSAS PREMIUM</span>
-                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v7.5</span>
-                        </h1>
-                        <p class="text-[9px] text-slate-500 dark:text-slate-400 font-bold tracking-tight">Designed & Developed by Tarek Abdallah</p>
-                    </div>
-                </div>
+    <!-- ================= الإيرادات ================= -->
+    <section id="tab-revenue" class="wrap" style="padding:0">
 
-                <div class="flex items-center gap-1.5 no-print">
-                    <div id="sync-status" class="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="sync-text">متصل</span>
-                    </div>
-                    <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-kansasBorder text-xs transition flex items-center shadow-sm hover:border-amber-500" title="تغيير الثيم">
-                        <span id="theme-icon">🌙</span>
-                    </button>
-                    <button onclick="lockSystem()" class="px-2.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30 text-[11px] font-bold transition flex items-center shadow-sm" title="قفل النظام">
-                        🔒
-                    </button>
+        <div class="hero">
+            <div class="row between" style="align-items:flex-start">
+                <div>
+                    <div class="eyebrow">قراءة الشهر</div>
+                    <h2 id="hero-title">—</h2>
+                    <div class="muted" id="hero-range"></div>
                 </div>
+                <span class="status" id="hero-status"><i></i><span></span></span>
             </div>
-        </header>
+            <p class="hero-sum" id="hero-sum"></p>
+        </div>
 
-        <!-- Month Selector Bar -->
-        <div class="max-w-7xl mx-auto px-6 mt-5 no-print">
-            <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs transition-colors shadow-sm">
-                <div class="flex items-center gap-3">
-                    <span class="p-2.5 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-xl text-sm shadow-inner font-bold">📅</span>
-                    <div>
-                        <span class="text-slate-500 dark:text-slate-400 block text-[11px] font-bold">الشهر التشغيلي النشط:</span>
-                        <span id="active-month-title" class="text-sm font-black text-slate-900 dark:text-white">أكتوبر 2026</span>
-                    </div>
+        <div id="rev-alert" class="alert hidden"></div>
+
+        <div class="grid g6" id="kpis"></div>
+
+        <div class="grid g2">
+            <div class="card">
+                <div class="row between" style="margin-bottom:6px">
+                    <div class="h" style="margin:0">🎯 الخطة والتوقع</div>
+                    <span class="muted" id="plan-note"></span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <input type="month" id="global-month-selector" onchange="changeActiveMonth()" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-kansasBorder rounded-xl px-3.5 py-2.5 font-black text-xs text-slate-900 dark:text-slate-200 shadow-sm focus:border-amber-500 transition">
-                </div>
+                <div class="rings" id="rings"></div>
+                <div class="muted" style="margin-top:12px;line-height:1.7" id="plan-detail"></div>
+            </div>
+            <div class="card">
+                <div class="h">🧭 قراءة المطعم والتوصيات</div>
+                <div class="ins-list" id="insights"></div>
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
-        <nav class="max-w-7xl mx-auto px-6 mt-4 no-print">
-            <div class="flex bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-1.5 shadow-sm transition-colors gap-1.5">
-                <button onclick="switchTab('revenue')" id="btn-revenue" class="flex-1 py-3 text-center font-black text-slate-950 bg-gradient-to-r from-amber-500 to-amber-400 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">
-                    📈 الإيرادات والذكاء التشغيلي
-                </button>
-                <button onclick="switchTab('inventory')" id="btn-inventory" class="flex-1 py-3 text-center font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs transition">
-                    📦 إدارة المخزون والجرد
-                </button>
+        <div class="card">
+            <div class="row between" style="margin-bottom:12px">
+                <div class="h" style="margin:0">📝 تسجيل إيراد وعمليات يوم</div>
+                <span id="sales-badge" class="badge open">مفتوح</span>
             </div>
-        </nav>
-
-        <main class="max-w-7xl mx-auto px-6 mt-6 space-y-6">
-
-            <!-- ================= REVENUE SECTION ================= -->
-            <section id="tab-revenue" class="space-y-6">
-
-                <div id="revenue-missing-alert" class="hidden bg-red-500/15 border-2 border-red-500/50 rounded-2xl p-4 text-xs text-red-900 dark:text-red-300 font-bold flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-2.5">
-                        <span class="text-base">⚠️</span>
-                        <div>
-                            <span class="block mb-0.5 font-black">تنبيه رقابي للإيرادات السابقة:</span>
-                            <span id="revenue-missing-list" class="text-[11px] opacity-90 font-semibold">يوجد أيام سابقة لم يُسجل لها إيراد وعمليات!</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-amber-500/20 via-amber-500/5 to-transparent border border-amber-500/40 rounded-2xl p-5 text-xs flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3.5">
-                        <span class="text-2xl animate-bounce">💡</span>
-                        <div class="space-y-1">
-                            <span class="font-black block text-sm text-amber-700 dark:text-amber-400">نصائح تشغيلية مكثفة لتحفيز الإيرادات (Revenue Boosters):</span>
-                            <span id="booster-tip-text" class="text-slate-800 dark:text-slate-300 leading-relaxed font-bold">تفعيل عروض الـ Combo الإضافية للوجبات العائلية أثناء أوقات الذروة يرفع متوسط الشيك بنسبة 15%.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="smart-insights-box" class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 text-xs flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3.5">
-                        <span class="text-2xl">⚡</span>
-                        <div class="space-y-1">
-                            <span class="font-black block text-sm text-slate-900 dark:text-white">تحليلات الأداء الحي والتوجيه التشغيلي:</span>
-                            <span id="insight-text" class="text-slate-700 dark:text-slate-300 leading-relaxed font-bold">جارٍ تحليل أداء الشفت وزخم المبيعات...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-sm transition-colors">
-                    <div class="flex items-center gap-2.5 text-xs text-slate-800 dark:text-slate-300 font-bold">
-                        <span class="p-2.5 bg-amber-500/15 text-amber-600 rounded-xl">🗓️</span>
-                        <span id="current-day-label">اليوم: جار التحميل...</span>
-                    </div>
-                    <div class="flex gap-2 w-full sm:w-auto no-print flex-wrap">
-                        <button onclick="exportRevenuePageExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">📊 تصدير Excel (الإيرادات)</button>
-                        <button onclick="exportRevenuePagePdf()" class="bg-amber-600 hover:bg-amber-700 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-sm transition flex items-center gap-1.5">📄 طباعة / حفظ كـ PDF</button>
-                    </div>
-                </div>
-
-                <!-- Baseline & Historical Daily Settings -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 shadow-sm transition-colors no-print">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleBaseline()">
-                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">⚙️</span> إعداد الخطة، الأرقام المرجعية، ومقارنة الشهور والسنوات السابقة
-                        </h3>
-                        <span id="baseline-arrow" class="text-slate-500 text-xs transition transform font-bold">▼</span>
-                    </div>
-                    <div id="baseline-content" class="hidden mt-4 pt-4 border-t border-slate-300 dark:border-kansasBorder space-y-4 text-xs">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">خطة إيراد الشهر الحالي</label>
-                                <input type="number" id="base-plan-rev" class="w-full bg-slate-50 dark:bg-slate-900 border rounded-xl p-2.5 font-bold" placeholder="0.00">
-                            </div>
-                        </div>
-
-                        <div class="pt-3 border-t border-slate-300 dark:border-kansasBorder space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl">
-                            <h4 class="font-black text-xs text-purple-600 dark:text-purple-400">📊 بيانات الشهر السابق (للمقارنة الشهرية Month-over-Month):</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي إيراد الشهر السابق</label>
-                                    <input type="number" id="base-prev-month-rev" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0.00">
-                                </div>
-                                <div>
-                                    <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي عمليات الشهر السابق</label>
-                                    <input type="number" id="base-prev-month-orders" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="pt-3 border-t border-slate-300 dark:border-kansasBorder space-y-3">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                                <span class="font-black text-xs text-slate-900 dark:text-white">📅 طريقة إدخال إيراد السنة السابقة (الشهر المقابل):</span>
-                                <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-300 dark:border-kansasBorder">
-                                    <button onclick="setLyInputMode('total')" id="btn-ly-total" class="px-3 py-1.5 rounded-lg font-bold text-xs bg-amber-500 text-slate-950 shadow-sm transition">إجمالي الشهر دفعة واحدة</button>
-                                    <button onclick="setLyInputMode('daily')" id="btn-ly-daily" class="px-3 py-1.5 rounded-lg font-bold text-xs text-slate-700 dark:text-slate-300 transition">إدخال يدوي يوم بيوم</button>
-                                </div>
-                            </div>
-
-                            <div id="ly-total-mode-box" class="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-300 dark:border-kansasBorder space-y-3">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي إيراد الشهر المقابل (السنة السابقة)</label>
-                                        <input type="number" id="base-ly-total-rev" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0.00">
-                                    </div>
-                                    <div>
-                                        <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي عدد عمليات الشهر المقابل (السنة السابقة)</label>
-                                        <input type="number" id="base-ly-total-orders" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="ly-daily-mode-box" class="hidden space-y-2">
-                                <p class="text-[11px] text-amber-600 dark:text-amber-400 font-bold">⚠️ وضع الإدخال اليدوي يوم بيوم للشهر المقابل مفعل أدناه:</p>
-                                <div class="max-h-60 overflow-y-auto border border-slate-300 dark:border-kansasBorder rounded-xl p-2 bg-slate-50 dark:bg-slate-900 space-y-2" id="historical-days-container"></div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end pt-2">
-                            <button onclick="saveBaseline()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl transition shadow-sm">حفظ واعتماد الإعدادات</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Daily Entry -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 shadow-sm transition-colors">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">📝</span> تسجيل إيراد وعمليات اليوم
-                        </h3>
-                        <div id="day-lock-status-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال والتعديل</div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
-                        <div>
-                            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">التاريخ واليوم</label>
-                            <input type="date" id="daily-date" onchange="loadDayData()" class="w-full bg-slate-50 dark:bg-slate-900 border rounded-xl p-3 font-bold shadow-sm">
-                            <span id="day-name-display" class="text-[11px] text-amber-600 dark:text-amber-400 font-black mt-1.5 block"></span>
-                        </div>
-                        <div>
-                            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إيراد اليوم (ج.م) *مطلوب</label>
-                            <input type="number" id="daily-revenue" class="w-full bg-slate-50 dark:bg-slate-900 border rounded-xl p-3 font-bold shadow-sm" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">عمليات اليوم (الشيكات) *مطلوب</label>
-                            <input type="number" id="daily-orders" class="w-full bg-slate-50 dark:bg-slate-900 border rounded-xl p-3 font-bold shadow-sm" placeholder="0">
-                        </div>
-                    </div>
-
-                    <div class="mt-4 flex justify-end items-center gap-3 no-print">
-                        <button onclick="unlockCurrentDay()" id="unlock-day-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح التعديل</button>
-                        <button onclick="saveDailyDataStrict()" id="save-day-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-2">💾 حفظ وقفل إيراد اليوم وعملياته</button>
-                    </div>
-                </div>
-
-                <!-- Date Range Filter -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-sm transition-colors no-print">
-                    <div class="flex items-center gap-2.5 w-full sm:w-auto flex-wrap font-bold">
-                        <span class="text-amber-600 dark:text-amber-400 font-black">🔍 نطاق تحليل الإيراد (من - إلى):</span>
-                        <input type="date" id="rev-date-from" onchange="calculateAnalytics()" class="bg-slate-50 dark:bg-slate-900 border rounded-xl p-2 font-bold">
-                        <span class="text-slate-700 dark:text-slate-300">إلى</span>
-                        <input type="date" id="rev-date-to" onchange="calculateAnalytics()" class="bg-slate-50 dark:bg-slate-900 border rounded-xl p-2 font-bold">
-                    </div>
-                    <button onclick="resetRevDateRange()" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-800 border text-slate-800 dark:text-slate-200 px-4 py-2 rounded-xl font-bold">الشهر الحالي</button>
-                </div>
-
-                <!-- Analytics Hub Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-xl p-3.5 shadow-sm text-center">
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">متوسط الإيراد اليومي</span>
-                        <span id="mtd-daily-avg-rev" class="text-base sm:text-lg font-black text-amber-600 dark:text-amber-400">0 ج.م</span>
-                    </div>
-                    <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-xl p-3.5 shadow-sm text-center">
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">متوسط العمليات اليومي</span>
-                        <span id="mtd-daily-avg-ord" class="text-base sm:text-lg font-black text-slate-900 dark:text-white">0 عملية</span>
-                    </div>
-                    <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-xl p-3.5 shadow-sm text-center">
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">متوسط قيمة الشيك</span>
-                        <span id="mtd-avg-check" class="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400">0.00 ج.م</span>
-                    </div>
-                    <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-xl p-3.5 shadow-sm text-center">
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">متوقع غلق الشهر</span>
-                        <span id="mtd-projected-rev" class="text-base sm:text-lg font-black text-purple-600 dark:text-purple-400">0 ج.م</span>
-                    </div>
-                </div>
-
-                <!-- TARGET COMPARISON CARDS -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center border-b pb-3">
-                                <h4 class="font-black text-xs text-purple-600 dark:text-purple-400">📊 مقارنة الشهر السابق (MoM)</h4>
-                                <span class="text-[10px] bg-purple-500/15 text-purple-700 px-2 py-0.5 rounded font-bold">تطور الأداء</span>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2 text-xs">
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
-                                    <span class="text-[9px] text-slate-500 block font-bold">مطلوب يومي</span>
-                                    <span id="prev-daily-rev-lbl" class="font-black block text-xs">0 ج.م</span>
-                                    <div class="pt-1 border-t text-[9px]"><strong id="mom-rev-diff" class="block font-bold">فرق: 0</strong><strong id="mom-rev-pct">0%</strong></div>
-                                </div>
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
-                                    <span class="text-[9px] text-slate-500 block font-bold">عمليات</span>
-                                    <span id="prev-daily-ord-lbl" class="font-black block text-xs">0</span>
-                                    <div class="pt-1 border-t text-[9px]"><strong id="mom-ord-diff" class="block font-bold">فرق: 0</strong><strong id="mom-ord-pct">0%</strong></div>
-                                </div>
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
-                                    <span class="text-[9px] text-slate-500 block font-bold">شيك</span>
-                                    <span id="prev-avg-check-lbl" class="font-black block text-xs">0 ج.م</span>
-                                    <div class="pt-1 border-t text-[9px]"><strong id="mom-chk-diff" class="block font-bold">فرق: 0</strong><strong id="mom-check-pct">0%</strong></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center border-b pb-3">
-                                <h4 class="font-black text-xs text-amber-600 dark:text-amber-400">🎯 الهدف الأولي (السنة السابقة YoY)</h4>
-                                <span class="text-[10px] bg-amber-500/15 text-amber-700 px-2 py-0.5 rounded font-bold">نفس الشهر القديم</span>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2 text-xs">
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
-                                    <span class="text-[9px] text-slate-500 block font-bold">مطلوب يومي</span>
-                                    <span id="target-ly-rev" class="font-black block text-xs">0 ج.م</span>
-                                    <div class="pt-1 border-t text-[9px]"><strong id="ly-rev-diff" class="block font-bold">فرق: 0</strong><strong id="actual-vs-ly-rev-pct">0%</strong></div>
-                                </div>
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
-                                    <span class="text-[9px] text-slate-500 block font-bold">عمليات</span>
-                                    <span id="target-ly-orders" class="font-black block text-xs">0</span>
-                                    <div class="pt-1 border-t text-[9px]"><strong id="ly-ord-diff" class="block font-bold">فرق: 0</strong><strong id="actual-vs-ly-ord-pct">0%</strong></div>
-                                </div>
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
-                                    <span class="text-[9px] text-slate-500 block font-bold">شيك</span>
-                                    <span id="target-ly-check" class="font-black block text-xs">0 ج.م</span>
-                                    <div class="pt-1 border-t text-[9px]"><strong id="ly-chk-diff" class="block font-bold">فرق: 0</strong><strong id="actual-vs-ly-check-pct">0%</strong></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center border-b pb-3">
-                                <h4 class="font-black text-xs text-blue-600 dark:text-blue-400">🎯 الهدف التشغيلي (خطة الشهر)</h4>
-                                <span class="text-[10px] bg-blue-500/15 text-blue-700 px-2 py-0.5 rounded font-bold">خطة معتمدة</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-center">
-                                    <span class="text-[10px] text-slate-500 block mb-1 font-bold">يومي مطلوب</span>
-                                    <span id="target-plan-rev" class="font-black text-xs">0 ج.م</span>
-                                </div>
-                                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-center">
-                                    <span class="text-[10px] text-slate-500 block mb-1 font-bold">إجمالي الخطة</span>
-                                    <span id="target-plan-total" class="font-black text-xs">0 ج.م</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border flex justify-between items-center text-xs">
-                            <div>
-                                <span class="text-slate-500 block text-[9px] font-bold">المحقق حتى الآن:</span>
-                                <span id="actual-total-rev-lbl" class="font-black text-xs">0 ج.م</span>
-                            </div>
-                            <div class="text-left">
-                                <span class="text-slate-500 block text-[9px] font-bold">نسبة التحقيق:</span>
-                                <span id="actual-vs-plan-pct" class="font-black text-amber-600 text-xs">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Visual Benchmark Bars -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm">
-                    <h4 class="font-black text-xs flex items-center gap-2 text-slate-900 dark:text-white">
-                        <span class="text-amber-500">📊</span> خط المعايير المقارنة الملونة (خطة الشهر، إيراد سابق، سنة سابقة، والإيراد الحالي)
-                    </h4>
-                    <div class="space-y-3 text-xs font-bold">
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-blue-600">خطة الشهر (المستهدف الإجمالي):</span>
-                                <span id="bench-plan-lbl">0 ج.م</span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
-                                <div id="bench-plan-bar" class="bg-blue-500 h-full w-0 transition-all duration-500"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-purple-600">إيراد الشهر السابق (مقارنة MoM):</span>
-                                <span id="bench-mom-lbl">0 ج.م</span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
-                                <div id="bench-mom-bar" class="bg-purple-500 h-full w-0 transition-all duration-500"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-amber-600">إيراد السنة السابقة (مقارنة YoY):</span>
-                                <span id="bench-yoy-lbl">0 ج.م</span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
-                                <div id="bench-yoy-bar" class="bg-amber-500 h-full w-0 transition-all duration-500"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="text-emerald-600">⚡ خط الإيراد الحالي (الفعلي المحقق):</span>
-                                <span id="bench-actual-bar-lbl">0 ج.م</span>
-                            </div>
-                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
-                                <div id="bench-actual-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- DUAL-DATE RANGE COMPARISON SHEET -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-slate-300 dark:border-kansasBorder pb-4 gap-4">
-                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">📊</span> شيت مقارنة الفترة المحددة (السنة الحالية مقابل السنة السابقة يوم بيوم)
-                        </h3>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-300 dark:border-kansasBorder text-xs font-bold">
-                        <div class="space-y-2">
-                            <span class="text-amber-600 dark:text-amber-400 font-black block">🗓️ نطاق تاريخ السنة الحالية:</span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-slate-500">من:</span>
-                                <input type="date" id="comp-cur-from" onchange="renderDayByDayComparison()" class="bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold flex-1">
-                                <span class="text-slate-500">إلى:</span>
-                                <input type="date" id="comp-cur-to" onchange="renderDayByDayComparison()" class="bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold flex-1">
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <span class="text-blue-600 dark:text-blue-400 font-black block">📅 نطاق تاريخ السنة السابقة المقابلة:</span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-slate-500">من:</span>
-                                <input type="date" id="comp-ly-from" onchange="renderDayByDayComparison()" class="bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold flex-1">
-                                <span class="text-slate-500">إلى:</span>
-                                <input type="date" id="comp-ly-to" onchange="renderDayByDayComparison()" class="bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold flex-1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-100 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-300 dark:border-kansasBorder text-xs">
-                        <div class="text-center space-y-1">
-                            <span class="text-[10px] text-slate-500 block font-bold">إجمالي إيراد الفترة (الحالي vs السابق)</span>
-                            <span id="comp-sum-rev-val" class="font-black text-slate-900 dark:text-white text-sm block">0 ج.م</span>
-                            <span id="comp-sum-rev-pct" class="font-bold block text-[11px]">الفرق: 0%</span>
-                        </div>
-                        <div class="text-center space-y-1 border-t md:border-t-0 md:border-r border-slate-300 pt-2 md:pt-0">
-                            <span class="text-[10px] text-slate-500 block font-bold">إجمالي العمليات (الحالي vs السابق)</span>
-                            <span id="comp-sum-ord-val" class="font-black text-slate-900 dark:text-white text-sm block">0</span>
-                            <span id="comp-sum-ord-pct" class="font-bold block text-[11px]">الفرق: 0%</span>
-                        </div>
-                        <div class="text-center space-y-1 border-t md:border-t-0 md:border-r border-slate-300 pt-2 md:pt-0">
-                            <span class="text-[10px] text-slate-500 block font-bold">متوسط الشيك (الحالي vs السابق)</span>
-                            <span id="comp-sum-chk-val" class="font-black text-slate-900 dark:text-white text-sm block">0.00 ج.م</span>
-                            <span id="comp-sum-chk-pct" class="font-bold block text-[11px]">الفرق: 0%</span>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right text-xs">
-                            <thead class="bg-slate-200 dark:bg-slate-900 text-slate-900 dark:text-slate-300 border-b font-black">
-                                <tr>
-                                    <th class="p-3">تاريخ اليوم (الحالي)</th>
-                                    <th class="p-3">إيراد حالي</th>
-                                    <th class="p-3">تاريخ المقابل (السنة السابقة)</th>
-                                    <th class="p-3">إيراد سابق</th>
-                                    <th class="p-3">فرق الإيراد (+/-)</th>
-                                    <th class="p-3">عمليات (حالي / سابق)</th>
-                                    <th class="p-3">متوسط شيك (حالي / سابق)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="day-by-day-table-body" class="divide-y font-bold"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Chart -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 shadow-sm">
-                    <h4 class="font-black text-xs mb-4 text-slate-900 dark:text-white">📉 الرسم البياني الهندسي لأداء الإيرادات المقارن</h4>
-                    <div class="h-72 relative">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================= INVENTORY SECTION ================= -->
-            <section id="tab-inventory" class="hidden space-y-6">
-                <div id="inv-missing-alert" class="hidden bg-amber-500/15 border-2 border-amber-500/50 rounded-2xl p-4 text-xs text-amber-900 dark:text-amber-300 font-bold flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-2.5">
-                        <span class="text-base">⚠️</span>
-                        <div>
-                            <span class="block mb-0.5 font-black">تنبيه رقابي للمخزون:</span>
-                            <span id="inv-missing-list" class="text-[11px] opacity-90 font-semibold">يوجد أيام لم يُسجل لها وارد خلال الشهر المختار!</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 1: Opening Balance -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleOpeningAccordion()">
-                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">📋</span> شريط إعداد الأصناف ورصيد أول المدة
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span id="opening-lock-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال</span>
-                            <span id="opening-arrow" class="text-slate-500 text-xs transition transform font-bold">▼</span>
-                        </div>
-                    </div>
-                    <div id="opening-content" class="hidden pt-4 border-t border-slate-300 dark:border-kansasBorder space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 no-print items-end bg-slate-50 dark:bg-slate-900 p-3 rounded-2xl border border-slate-300 dark:border-kansasBorder">
-                            <div>
-                                <label class="block text-[11px] font-bold mb-1">من تاريخ:</label>
-                                <input type="date" id="inv-open-from" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 text-xs font-bold">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold mb-1">إلى تاريخ:</label>
-                                <input type="date" id="inv-open-to" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 text-xs font-bold">
-                            </div>
-                            <button onclick="exportOpeningExcelFiltered()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">📊 تحميل شيت أول المدة</button>
-                        </div>
-                        <div class="flex justify-between items-center no-print">
-                            <button onclick="addNewProduct()" class="border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 py-2 px-4 rounded-xl text-xs font-black transition">+ إضافة صنف جديد</button>
-                            <button onclick="unlockOpeningData()" id="unlock-opening-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح التعديل للأصناف</button>
-                        </div>
-                        <!-- تم إصلاح تخطيط حاوية الأصناف هنا لتجنب الخروج عن القالب -->
-                        <div id="opening-container" class="space-y-3 w-full overflow-hidden"></div>
-                        <div class="flex justify-end pt-2">
-                            <button onclick="saveOpeningData()" id="save-opening-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition">💾 تأكيد وحفظ الأصناف ورصيد أول المدة</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 2: Daily Received -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
-                    <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-3 gap-3">
-                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">📥</span> الوارد اليومي للمخزون
-                        </h3>
-                        <div id="rec-lock-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال</div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs font-bold bg-slate-50 dark:bg-slate-900 p-3 rounded-2xl border border-slate-300 dark:border-kansasBorder items-end">
-                        <div>
-                            <label class="block text-[11px] mb-1">من تاريخ (إكسل):</label>
-                            <input type="date" id="inv-rec-from" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] mb-1">إلى تاريخ (إكسل):</label>
-                            <input type="date" id="inv-rec-to" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold">
-                        </div>
-                        <button onclick="exportDailyReceivedExcelFiltered()" class="no-print bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">📊 إكسل الوارد (بفترة)</button>
-                        <div>
-                            <label class="block text-[11px] text-amber-600 dark:text-amber-400 mb-1">تاريخ إدخال اليوم:</label>
-                            <input type="date" id="inv-daily-date" onchange="loadDailyInventory()" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold text-amber-600">
-                        </div>
-                    </div>
-
-                    <div id="daily-received-container" class="space-y-2.5 w-full overflow-hidden"></div>
-                    <div class="flex justify-end items-center gap-3 pt-3">
-                        <button onclick="unlockDailyReceived()" id="unlock-rec-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح تعديل الوارد</button>
-                        <button onclick="saveDailyReceived()" id="save-rec-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition">💾 تأكيد وحفظ وقفل الوارد اليومي</button>
-                    </div>
-                </div>
-
-                <!-- Section 3: Transfers -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
-                    <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-3 gap-3">
-                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">🔄</span> التحويلات (بين الفروع)
-                        </h3>
-                        <div id="trans-lock-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال</div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs font-bold bg-slate-50 dark:bg-slate-900 p-3 rounded-2xl border border-slate-300 dark:border-kansasBorder items-end">
-                        <div>
-                            <label class="block text-[11px] mb-1">من تاريخ (إكسل):</label>
-                            <input type="date" id="inv-trans-from" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] mb-1">إلى تاريخ (إكسل):</label>
-                            <input type="date" id="inv-trans-to" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold">
-                        </div>
-                        <button onclick="exportTransfersExcelFiltered()" class="no-print bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">📊 إكسل التحويلات (بفترة)</button>
-                        <div>
-                            <label class="block text-[11px] text-amber-600 dark:text-amber-400 mb-1">تاريخ التحويل الحالي:</label>
-                            <input type="date" id="transfer-unified-date" onchange="renderTransfersList()" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold text-amber-600">
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <button onclick="addTransferRow()" id="add-trans-btn" class="border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-xl text-xs font-black transition">+ إضافة تحويل جديد</button>
-                    </div>
-                    <div id="transfers-container" class="space-y-3 w-full overflow-hidden"></div>
-                    <div class="flex justify-end items-center gap-3 pt-3">
-                        <button onclick="unlockTransfersData()" id="unlock-trans-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح تعديل التحويلات</button>
-                        <button onclick="saveTransfersData()" id="save-trans-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition">💾 تأكيد وحفظ وقفل التحويلات</button>
-                    </div>
-                </div>
-
-                <!-- Section 4: Inventory Analysis -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b pb-4 gap-4">
-                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">📦</span> تحليل وجرد المخزون النهائي وطباعة التقرير
-                        </h3>
-                        <div class="flex items-center gap-2 no-print flex-wrap text-xs font-bold">
-                            <span>من:</span>
-                            <input type="date" id="inv-print-from" class="bg-slate-50 dark:bg-slate-900 border rounded-xl p-1.5">
-                            <span>إلى:</span>
-                            <input type="date" id="inv-print-to" class="bg-slate-50 dark:bg-slate-900 border rounded-xl p-1.5">
-                            <button onclick="exportInventoryAnalysisExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl transition">📊 إكسل الجرد</button>
-                            <button onclick="window.print()" class="bg-amber-600 hover:bg-amber-700 text-slate-950 font-black px-4 py-2 rounded-xl transition">📄 طباعة المخزون</button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right text-xs">
-                            <thead class="bg-slate-200 dark:bg-slate-900 border-b font-black">
-                                <tr>
-                                    <th class="p-3">الصنف</th>
-                                    <th class="p-3">أول المدة</th>
-                                    <th class="p-3">الوارد</th>
-                                    <th class="p-3">التحويلات (صافي)</th>
-                                    <th class="p-3">المباع</th>
-                                    <th class="p-3">آخر المدة</th>
-                                    <th class="p-3">العجز / الزيادة</th>
-                                </tr>
-                            </thead>
-                            <tbody id="analysis-table-body" class="divide-y font-bold"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <footer class="mt-12 py-5 bg-white dark:bg-kansasCard border-t text-center text-xs font-bold">
-        <div class="max-w-7xl mx-auto px-6 flex justify-between">
-            <span>© 2026 KANSAS PREMIUM</span>
-            <span>Designed & Developed by Tarek Abdallah</span>
+            <div class="grid g3">
+                <div><div class="muted" style="margin-bottom:5px">التاريخ</div><input type="date" id="sales-day" class="inp" onchange="loadSalesDay()"></div>
+                <div><div class="muted" style="margin-bottom:5px">الإيراد (ج.م)</div><input type="number" min="0" step="0.01" id="sales-rev" class="inp"></div>
+                <div><div class="muted" style="margin-bottom:5px">عدد العمليات</div><input type="number" min="0" step="1" id="sales-ord" class="inp"></div>
+            </div>
+            <div class="row" style="margin-top:12px">
+                <button class="btn btn-gold" id="sales-save" onclick="saveSalesDay()">💾 حفظ وقفل اليوم</button>
+                <button class="btn" id="sales-unlock" onclick="unlockSales()">🔓 فتح التعديل</button>
+            </div>
         </div>
-    </footer>
 
-    <script>
-        let currentTab = 'revenue';
-        let revenueChartInstance = null;
-        let lyInputModeState = 'total';
-        const MASTER_PIN = "1234";
+        <div class="card flat row between no-print" style="padding:12px 18px">
+            <div class="row">
+                <span class="muted">نطاق التحليل:</span>
+                <input type="date" id="rev-from" class="inp sm" onchange="renderAll()">
+                <span class="muted">إلى</span>
+                <input type="date" id="rev-to" class="inp sm" onchange="renderAll()">
+                <button class="btn btn-ghost" onclick="resetRevRange()">الشهر الحالي</button>
+            </div>
+            <div class="row">
+                <button class="btn btn-green" onclick="exportRevenueXlsx()">📊 إكسل</button>
+                <button class="btn btn-gold" onclick="window.print()">📄 طباعة / PDF</button>
+            </div>
+        </div>
 
-        let products = [];
-        let currentMonthKey = '';
-        let appData = defaultMonthData();
+        <div class="grid g2">
+            <div class="card">
+                <div class="h">📅 أداء أيام الأسبوع</div>
+                <div class="chart-box" style="height:230px"><canvas id="weekday-chart"></canvas></div>
+                <div class="muted" id="weekday-note" style="margin-top:10px;line-height:1.7"></div>
+            </div>
+            <div class="card">
+                <div class="h">📉 الإيراد اليومي مقابل السنة اللي فاتت</div>
+                <div class="chart-box" style="height:230px"><canvas id="rev-chart"></canvas></div>
+            </div>
+        </div>
 
-        function defaultMonthData() {
-            return {
-                baseline: { planRev: 0, prevMonthRev: 0, prevMonthOrders: 0, lyTotalRev: 0, lyTotalOrders: 0, lyMode: 'total' },
-                historicalLyDaily: {},
-                dailyRecords: {},
-                opening: {},
-                dailyReceived: {},
-                transfers: {},
-                closingData: {},
-                lockedDays: {},
-                lockedOpening: false,
-                lockedReceived: {},
-                lockedTransfers: {}
-            };
-        }
+        <details>
+            <summary>⚙️ إعدادات الشهر (الخطة + الشهر السابق + السنة السابقة)</summary>
+            <div class="grid g3" style="margin-top:14px">
+                <div><div class="muted" style="margin-bottom:5px">خطة إيراد الشهر</div><input type="number" min="0" id="s-plan" class="inp"></div>
+                <div><div class="muted" style="margin-bottom:5px">إجمالي إيراد الشهر السابق</div><input type="number" min="0" id="s-prev-rev" class="inp"></div>
+                <div><div class="muted" style="margin-bottom:5px">إجمالي عمليات الشهر السابق</div><input type="number" min="0" id="s-prev-ord" class="inp"></div>
+                <div><div class="muted" style="margin-bottom:5px">إجمالي إيراد نفس الشهر السنة اللي فاتت</div><input type="number" min="0" id="s-ly-rev" class="inp"></div>
+                <div><div class="muted" style="margin-bottom:5px">إجمالي عمليات نفس الشهر السنة اللي فاتت</div><input type="number" min="0" id="s-ly-ord" class="inp"></div>
+            </div>
+            <div class="row" style="margin-top:14px"><button class="btn btn-gold" onclick="saveSettings()">حفظ الإعدادات</button></div>
+        </details>
 
-        function saveAndSync() {
-            if(!currentMonthKey) return;
-            localStorage.setItem('kansas_pro_' + currentMonthKey, JSON.stringify(appData));
-            localStorage.setItem('kansas_pro_global', JSON.stringify({ products }));
-        }
+        <details>
+            <summary>📅 بيانات السنة السابقة يوم بيوم (للشهر النشط)</summary>
+            <div class="muted" style="margin:12px 0">بتتحفظ بتاريخ السنة السابقة. لو يوم مش متسجل بتُستخدم القيمة الشهرية الموزعة على أيام الشهر.</div>
+            <div class="tbl-wrap"><table>
+                <thead><tr><th>يوم</th><th>تاريخ السنة السابقة</th><th>إيراد</th><th>عمليات</th></tr></thead>
+                <tbody id="ly-grid"></tbody>
+            </table></div>
+            <div class="row" style="margin-top:14px"><button class="btn btn-gold" onclick="saveLyDays()">حفظ بيانات السنة السابقة</button></div>
+        </details>
 
-        function loadGlobal() {
-            const raw = localStorage.getItem('kansas_pro_global');
-            if(raw) {
-                try { products = JSON.parse(raw).products || []; } catch(e) { products = []; }
-            }
-        }
+        <details>
+            <summary>📊 جدول المقارنة يوماً بيوم (الحالي مقابل السابق)</summary>
+            <div class="grid g2" style="margin:14px 0">
+                <div class="row"><span class="muted">الحالية من</span><input type="date" id="cmp-cur-from" class="inp sm" onchange="renderAll()"><span class="muted">إلى</span><input type="date" id="cmp-cur-to" class="inp sm" onchange="renderAll()"></div>
+                <div class="row"><span class="muted">السابقة من</span><input type="date" id="cmp-ly-from" class="inp sm" onchange="renderAll()"><span class="muted">إلى</span><input type="date" id="cmp-ly-to" class="inp sm" onchange="renderAll()"></div>
+            </div>
+            <div class="tbl-wrap"><table>
+                <thead><tr><th>تاريخ الحالي</th><th>إيراد حالي</th><th>تاريخ السابق</th><th>إيراد سابق</th><th>الفرق</th><th>عمليات حالي / سابق</th></tr></thead>
+                <tbody id="cmp-body"></tbody>
+            </table></div>
+        </details>
+    </section>
 
-        function loadMonth(monthKey) {
-            currentMonthKey = monthKey;
-            appData = defaultMonthData();
-            const raw = localStorage.getItem('kansas_pro_' + monthKey);
-            if(raw) {
-                try {
-                    const saved = JSON.parse(raw);
-                    if(saved.products && !localStorage.getItem('kansas_pro_global')) {
-                        products = saved.products.map(p => ({ id: p.id, name: p.name, unit: p.unit }));
-                        saveAndSync();
-                    }
-                    if(saved.products && !saved.opening) {
-                        saved.opening = {};
-                        saved.products.forEach(p => { saved.opening[p.id] = p.opening || 0; });
-                    }
-                    appData = Object.assign(defaultMonthData(), saved);
-                } catch(e) { console.error('Load error', e); }
-            }
-            if(products.length === 0) {
-                products = [{ id: 'p1', name: 'لحم برجر', unit: 'كرتونة' }];
-                saveAndSync();
-            }
-        }
+    <!-- ================= المخزون ================= -->
+    <section id="tab-inventory" class="wrap hidden" style="padding:0">
 
-        function getOpening(pid) { return (appData.opening && appData.opening[pid]) || 0; }
+        <!-- 1) الأصناف ورصيد أول الشهر -->
+        <div class="card">
+            <div class="row between" style="margin-bottom:6px">
+                <div class="h" style="margin:0">📋 الأصناف ورصيد أول الشهر</div>
+                <span id="open-badge" class="badge open">مفتوح</span>
+            </div>
+            <div class="muted" style="margin-bottom:12px">رصيد أول الشهر بيتدخل مرة واحدة في أول الشهر. لو الصنف جديد أو مش متسجل له رصيد، الخانة هتفضل فاضية لحد ما تدخله.</div>
+            <div id="open-warn" class="note hidden" style="margin-bottom:12px"></div>
+            <div class="tbl-wrap"><table>
+                <thead><tr><th>الصنف</th><th>الوحدة</th><th>رصيد أول الشهر</th><th></th></tr></thead>
+                <tbody id="open-body"></tbody>
+            </table></div>
+            <div class="row" style="margin-top:14px">
+                <input id="new-prod-name" class="inp sm" placeholder="اسم الصنف">
+                <input id="new-prod-unit" class="inp sm" placeholder="الوحدة (كرتونة، كيلو..)">
+                <button class="btn btn-gold" onclick="addProduct()">+ إضافة صنف</button>
+            </div>
+            <div class="row" style="margin-top:14px">
+                <button class="btn btn-ghost" id="open-suggest" onclick="suggestOpening()">✨ اقتراح من آخر جرد للشهر اللي فات</button>
+                <button class="btn btn-gold" id="open-save" onclick="saveOpening()">🔒 حفظ وقفل رصيد الشهر</button>
+                <button class="btn" id="open-unlock" onclick="unlockOpening()">🔓 فتح تعديل الرصيد</button>
+            </div>
+        </div>
 
-        function getProductStats(p) {
-            const cData = appData.closingData[p.id] || { closing: 0, sold: 0 };
-            let totalRec = 0;
-            Object.values(appData.dailyReceived).forEach(d => totalRec += ((d.data && d.data[p.id]) || 0));
-            let transferNet = 0;
-            Object.values(appData.transfers).forEach(day => {
-                (day.rows || []).forEach(r => {
-                    if(r.productId !== p.id) return;
-                    if(r.type === 'in') transferNet += (r.qty || 0);
-                    else transferNet -= (r.qty || 0);
-                });
-            });
-            const opening = getOpening(p.id);
-            const sold = cData.sold || 0;
-            const closing = cData.closing || 0;
-            const theoretical = opening + totalRec + transferNet - sold;
-            const variance = closing - theoretical;
-            return { opening, totalRec, transferNet, sold, closing, variance };
-        }
+        <!-- 2) حركة اليوم -->
+        <div class="card">
+            <div class="row between" style="margin-bottom:12px">
+                <div class="row">
+                    <div class="h" style="margin:0">📥 حركة اليوم</div>
+                    <span class="muted">التاريخ:</span>
+                    <input type="date" id="day-input" class="inp sm" onchange="renderDay()">
+                </div>
+                <span id="day-badge" class="badge open">مفتوح</span>
+            </div>
+            <div class="muted" style="margin-bottom:12px">
+                ادخل <b>الوارد</b> يومياً. <b>المباع</b> و<b>الجرد الفعلي</b> ادخلهم بس لما تحب تحلل يوم معين، وسيبهم فاضيين لو مش محتاجهم.
+            </div>
+            <div class="tbl-wrap"><table>
+                <thead><tr><th>الصنف</th><th>أول اليوم</th><th>الوارد</th><th>المباع</th><th>الجرد الفعلي</th><th>النظري</th><th>الفرق</th></tr></thead>
+                <tbody id="day-body"></tbody>
+            </table></div>
+            <div class="row" style="margin-top:14px">
+                <button class="btn btn-gold" id="day-save" onclick="saveDay()">💾 حفظ وقفل حركة اليوم</button>
+                <button class="btn" id="day-unlock" onclick="unlockDay()">🔓 فتح تعديل اليوم</button>
+            </div>
 
-        function applyLockState() {
-            const modal = document.getElementById('pin-lock-modal');
-            let unlocked = false;
-            try { unlocked = sessionStorage.getItem('kansas_unlocked') === 'true'; } catch(e) {}
-            modal.style.display = unlocked ? 'none' : 'flex';
-        }
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+                <div class="row between" style="margin-bottom:10px">
+                    <div class="h" style="margin:0">🔄 التحويلات بين الفروع لليوم ده</div>
+                </div>
+                <div class="grid g3" id="trans-form">
+                    <select id="trans-type" class="inp"><option value="in">وارد من فرع</option><option value="out">صادر لفرع</option></select>
+                    <input id="trans-branch" class="inp" placeholder="اسم الفرع">
+                    <select id="trans-prod" class="inp"></select>
+                    <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp sm" placeholder="الكمية"><button class="btn btn-gold" onclick="addTransfer()">+ إضافة</button></div>
+                </div>
+                <div class="tbl-wrap" style="margin-top:12px"><table>
+                    <thead><tr><th>النوع</th><th>الفرع</th><th>الصنف</th><th>الكمية</th><th></th></tr></thead>
+                    <tbody id="trans-body"></tbody>
+                </table></div>
+            </div>
+        </div>
 
-        function verifyPin() {
-            const input = document.getElementById('unlock-pin');
-            const typed = (input.value || '').replace(/\s/g, '');
-            if(typed === MASTER_PIN) {
-                try { sessionStorage.setItem('kansas_unlocked', 'true'); } catch(e) {}
-                input.value = '';
-                document.getElementById('pin-lock-modal').style.display = 'none';
-                showToast('تم فتح النظام بنجاح', 'success');
-            } else {
-                showToast('رمز الحماية غير صحيح (اكتبه 1234)', 'error');
-            }
-        }
+        <!-- 3) التحليل لأي فترة -->
+        <div class="card">
+            <div class="row between" style="margin-bottom:12px">
+                <div class="h" style="margin:0">📦 تحليل المخزون لأي فترة</div>
+                <div class="row no-print">
+                    <button class="btn btn-sm" onclick="quickRange('day')">اليوم المختار</button>
+                    <button class="btn btn-sm" onclick="quickRange('mtd')">من أول الشهر لليوم المختار</button>
+                    <button class="btn btn-sm" onclick="quickRange('month')">الشهر كله</button>
+                </div>
+            </div>
+            <div class="row no-print" style="margin-bottom:12px">
+                <span class="muted">من</span><input type="date" id="an-from" class="inp sm" onchange="renderAnalysis()">
+                <span class="muted">إلى</span><input type="date" id="an-to" class="inp sm" onchange="renderAnalysis()">
+                <button class="btn btn-green" onclick="exportAnalysisXlsx()">📊 إكسل</button>
+                <button class="btn btn-gold" onclick="window.print()">📄 طباعة</button>
+            </div>
+            <div id="an-note" class="note hidden" style="margin-bottom:12px"></div>
+            <div id="an-alert" class="alert hidden" style="margin-bottom:12px"></div>
+            <div class="tbl-wrap"><table>
+                <thead><tr><th>الصنف</th><th>أول الفترة</th><th>الوارد</th><th>التحويلات (صافي)</th><th>المباع</th><th>النظري</th><th>الجرد الفعلي</th><th>الفرق</th></tr></thead>
+                <tbody id="an-body"></tbody>
+            </table></div>
+            <div class="muted" style="margin-top:12px;line-height:1.7">
+                النظري = أول الفترة + الوارد + صافي التحويلات − المباع. الجرد الفعلي = آخر جرد مسجل داخل الفترة، والحركات بتتحسب لحد يوم هذا الجرد.
+            </div>
+        </div>
+    </section>
 
-        function lockSystem() {
-            try { sessionStorage.removeItem('kansas_unlocked'); } catch(e) {}
-            location.reload();
-        }
+</div>
+</div>
 
-        function parseUTCExactDate(dateStr) {
-            if(!dateStr) return null;
-            const [y, m, d] = dateStr.split('-').map(Number);
-            return new Date(Date.UTC(y, m - 1, d));
-        }
+<div class="toasts" id="toasts"></div>
 
-        window.onload = function() {
-            applyLockState();
-            initTheme();
-            const today = new Date();
-            const yearMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-            document.getElementById('global-month-selector').value = yearMonth;
-            updateActiveMonthTitle();
+<script>
+/* ============================================================
+   الإعدادات
+   ============================================================ */
+const PIN = '1234';                 // رمز الحماية (غيّره لو عايز)
+const STORE_KEY = 'kansas_v8';      // مفتاح التخزين (نفس المفتاح عشان البيانات تفضل)
 
-            document.getElementById('daily-date').value = todayStr;
-            document.getElementById('inv-daily-date').value = todayStr;
-            document.getElementById('transfer-unified-date').value = todayStr;
+/* ---------- أدوات مساعدة ---------- */
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+const int = v => { const n = parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : 0; };
+const fmt = (n, d = 0) => (Number.isFinite(n) ? n : 0).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (n, d = 1) => (n === null || !Number.isFinite(n)) ? '—' : (n >= 0 ? '+' : '') + (n * 100).toFixed(d) + '%';
+const pad = n => String(n).padStart(2, '0');
+const safeCell = v => (typeof v === 'string' && /^[=+\-@]/.test(v)) ? "'" + v : v;
+const uid = () => 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const DAYS_AR = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 
-            document.getElementById('inv-open-from').value = yearMonth + '-01';
-            document.getElementById('inv-open-to').value = todayStr;
-            document.getElementById('inv-rec-from').value = yearMonth + '-01';
-            document.getElementById('inv-rec-to').value = todayStr;
-            document.getElementById('inv-trans-from').value = yearMonth + '-01';
-            document.getElementById('inv-trans-to').value = todayStr;
-            document.getElementById('inv-print-from').value = yearMonth + '-01';
-            document.getElementById('inv-print-to').value = todayStr;
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const monthKey = day => day.slice(0, 7);
+const daysIn = key => { const [y, m] = key.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).getUTCDate(); };
+const monthStart = key => key + '-01';
+const monthEnd = key => `${key}-${pad(daysIn(key))}`;
+const clampToday = key => { const e = monthEnd(key), t = todayStr(); return e < t ? e : t; };
+const shiftMonth = (key, delta) => { const [y, m] = key.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + delta, 1)); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}`; };
+const addDays = (day, n) => { const [y, m, d] = day.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
+const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+const weekdayOf = day => { const [y, m, d] = day.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); };
+const lyDay = day => (Number(day.slice(0, 4)) - 1) + day.slice(4);
+const curOf = lyD => (Number(lyD.slice(0, 4)) + 1) + lyD.slice(4);
+const inRange = (d, from, to) => (!from || d >= from) && (!to || d <= to);
+function eachDay(from, to, fn) {
+    if (!from || !to) return;
+    let i = 0;
+    for (let d = from; d <= to && i < 4000; d = addDays(d, 1), i++) fn(d);
+}
 
-            document.getElementById('rev-date-from').value = yearMonth + '-01';
-            document.getElementById('rev-date-to').value = todayStr;
+function toast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.style.background = type === 'success' ? '#059669' : '#dc2626';
+    t.textContent = msg;
+    $('toasts').appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+}
 
-            document.getElementById('comp-cur-from').value = yearMonth + '-01';
-            document.getElementById('comp-cur-to').value = todayStr;
+/* ============================================================
+   التخزين والترحيل
+   ============================================================ */
+const emptyDB = () => ({
+    v: 9,
+    products: [],          // [{id, name, unit}]
+    openings: {},          // { 'YYYY-MM': { pid: رصيد أول الشهر } }
+    receipts: {},          // { day: { pid: وارد } }
+    counts: {},            // { day: { pid: { sold, closing } } }
+    transfers: [],         // [{id, day, type, branch, product_id, qty}]
+    sales: {}, monthly: {}, lyDaily: {},
+    locks: { sales: {}, day: {}, open: {} },
+    lastBackup: null
+});
 
-            const lyFromStr = (today.getFullYear() - 1) + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-01';
-            const lyToStr = (today.getFullYear() - 1) + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-            document.getElementById('comp-ly-from').value = lyFromStr;
-            document.getElementById('comp-ly-to').value = lyToStr;
+// يحوّل بيانات v8.x (stock/initial_opening) للشكل الجديد
+function migrate(d) {
+    if (!d.stock) return d;
+    d.receipts = d.receipts || {};
+    d.counts = d.counts || {};
+    d.openings = d.openings || {};
+    const days = Object.keys(d.stock).sort();
+    const firstMonth = days.length ? monthKey(days[0]) : monthKey(todayStr());
+    days.forEach(day => {
+        Object.entries(d.stock[day]).forEach(([pid, r]) => {
+            (d.receipts[day] = d.receipts[day] || {})[pid] = r.received || 0;
+            const sold = r.sold || 0, closing = r.closing ?? null;
+            if (sold || closing !== null) (d.counts[day] = d.counts[day] || {})[pid] = { sold, closing };
+        });
+    });
+    d.openings[firstMonth] = d.openings[firstMonth] || {};
+    (d.products || []).forEach(p => { d.openings[firstMonth][p.id] = num(p.initial_opening); delete p.initial_opening; });
+    d.locks = d.locks || {};
+    d.locks.day = Object.assign({}, d.locks.stock || {}, d.locks.transfers || {});
+    d.locks.open = d.locks.open || {};
+    if (d.locks.opening) d.locks.open[firstMonth] = true;
+    delete d.stock;
+    return d;
+}
 
-            loadGlobal();
-            loadMonth(yearMonth);
-            initChart();
+function normalize(d) {
+    d = migrate(d);
+    const base = emptyDB();
+    const out = Object.assign(base, d);
+    out.locks = Object.assign({ sales: {}, day: {}, open: {} }, d.locks || {});
+    ['sales', 'day', 'open'].forEach(k => { out.locks[k] = out.locks[k] || {}; });
+    return out;
+}
+
+let S = emptyDB();
+let activeMonth = monthKey(todayStr());
+let activeTab = 'revenue';
+let revChart = null, wdChart = null;
+
+function loadDB() {
+    try {
+        const raw = localStorage.getItem(STORE_KEY);
+        return raw ? normalize(JSON.parse(raw)) : emptyDB();
+    } catch (e) {
+        toast('تعذر قراءة البيانات المحفوظة', 'error');
+        return emptyDB();
+    }
+}
+
+function saveDB() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
+    catch (e) { toast('تعذر الحفظ (مساحة المتصفح ممتلئة؟)', 'error'); }
+}
+
+function cfg(key) {
+    return S.monthly[key] || { plan_rev: 0, prev_rev: 0, prev_orders: 0, ly_rev: 0, ly_orders: 0 };
+}
+
+function confirmFuture(day) {
+    return day <= todayStr() || confirm('التاريخ ده في المستقبل. متأكد إنه صح؟');
+}
+
+/* ---------- القفل والدخول ---------- */
+function isUnlocked() {
+    try { return sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) { return false; }
+}
+
+function verifyPin() {
+    const v = ($('unlock-pin').value || '').replace(/\s/g, '');
+    if (v === PIN) {
+        try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
+        $('unlock-pin').value = '';
+        showApp();
+    } else {
+        toast('رمز الحماية غير صحيح', 'error');
+    }
+}
+
+function lockSystem() {
+    try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
+    location.reload();
+}
+
+function showApp() {
+    $('lock').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    S = loadDB();
+    saveDB(); // يحفظ الشكل الجديد بعد الترحيل
+    $('month-input').value = activeMonth;
+    $('sales-day').value = todayStr();
+    $('day-input').value = todayStr();
+    $('trans-prod').value = '';
+    setMonthDefaults();
+    loadSalesDay();
+    renderAll();
+}
+
+function setMonthDefaults() {
+    $('active-month-title').textContent = `${MONTHS_AR[Number(activeMonth.slice(5)) - 1]} ${activeMonth.slice(0, 4)}`;
+    $('rev-from').value = monthStart(activeMonth);
+    $('rev-to').value = clampToday(activeMonth);
+    $('cmp-cur-from').value = monthStart(activeMonth);
+    $('cmp-cur-to').value = clampToday(activeMonth);
+    $('cmp-ly-from').value = lyDay(monthStart(activeMonth));
+    $('cmp-ly-to').value = lyDay(clampToday(activeMonth));
+    $('an-from').value = monthStart(activeMonth);
+    $('an-to').value = clampToday(activeMonth);
+}
+
+function changeMonth() {
+    const v = $('month-input').value;
+    if (!v) return;
+    activeMonth = v;
+    setMonthDefaults();
+    $('day-input').value = clampToday(activeMonth);
+    loadSalesDay();
+    renderAll();
+}
+
+function resetRevRange() {
+    $('rev-from').value = monthStart(activeMonth);
+    $('rev-to').value = clampToday(activeMonth);
+    renderAll();
+}
+
+function switchTab(tab) {
+    activeTab = tab;
+    $('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
+    $('tab-inventory').classList.toggle('hidden', tab !== 'inventory');
+    $('tab-btn-revenue').classList.toggle('on', tab === 'revenue');
+    $('tab-btn-inventory').classList.toggle('on', tab === 'inventory');
+    if (tab === 'revenue') setTimeout(() => { revChart && revChart.resize(); wdChart && wdChart.resize(); }, 0);
+}
+
+function toggleTheme() {
+    applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    renderCharts();
+}
+function applyTheme(t) {
+    document.documentElement.className = t;
+    $('theme-btn').textContent = t === 'dark' ? '☀️ فاتح' : '🌙 داكن';
+    try { localStorage.setItem('kansas_theme', t); } catch (e) {}
+}
+
+/* ---------- النسخ الاحتياطي ---------- */
+function exportBackup() {
+    const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'kansas-backup-' + todayStr() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    S.lastBackup = todayStr();
+    saveDB();
+    toast('تم تنزيل النسخة الاحتياطية');
+    renderBackupAlert();
+}
+
+function importBackup(input) {
+    const f = input.files[0];
+    if (!f) return;
+    if (!confirm('الاستيراد هيستبدل كل البيانات الحالية في المتصفح. متأكد؟')) { input.value = ''; return; }
+    const r = new FileReader();
+    r.onload = () => {
+        try {
+            const d = JSON.parse(r.result);
+            if (!d || typeof d !== 'object') throw new Error('bad');
+            S = normalize(d);
+            saveDB();
+            toast('تم استيراد النسخة');
             renderAll();
-        };
-
-        function renderAll() {
-            fillBaselineInputs();
-            setLyModeUI(appData.baseline.lyMode || 'total');
-            updateDayName();
-            loadDayData();
-            calculateAnalytics();
-            renderOpeningList();
-            loadDailyInventory();
-            renderTransfersList();
-            renderInventoryAnalysis();
-            renderDayByDayComparison();
-            checkRevenueMissingDays();
-            checkInventoryMissingDays();
+        } catch (e) {
+            toast('ملف النسخة غير صالح', 'error');
         }
+        input.value = '';
+    };
+    r.readAsText(f);
+}
 
-        function fillBaselineInputs() {
-            const b = appData.baseline;
-            document.getElementById('base-plan-rev').value = b.planRev || '';
-            document.getElementById('base-prev-month-rev').value = b.prevMonthRev || '';
-            document.getElementById('base-prev-month-orders').value = b.prevMonthOrders || '';
-            document.getElementById('base-ly-total-rev').value = b.lyTotalRev || '';
-            document.getElementById('base-ly-total-orders').value = b.lyTotalOrders || '';
+function renderBackupAlert() {
+    const el = $('backup-alert');
+    const days = S.lastBackup ? daysBetween(S.lastBackup, todayStr()) : null;
+    if (days === null || days >= 7) {
+        el.classList.remove('hidden');
+        el.textContent = days === null
+            ? 'لم تأخذ نسخة احتياطية بعد. البيانات محفوظة على هذا المتصفح بس، خد نسخة دورياً.'
+            : `آخر نسخة احتياطية من ${days} يوم. خد نسخة جديدة.`;
+    } else {
+        el.classList.add('hidden');
+    }
+}
+
+/* ============================================================
+   محرك الإيرادات
+   ============================================================ */
+function salesIn(from, to) {
+    let rev = 0, ord = 0, days = 0;
+    Object.keys(S.sales).forEach(d => {
+        if (!inRange(d, from, to)) return;
+        const r = S.sales[d];
+        rev += r.revenue; ord += r.orders;
+        if (r.revenue > 0 || r.orders > 0) days++;
+    });
+    return { rev, ord, days };
+}
+
+function lyValue(curDay) {
+    const l = S.lyDaily[lyDay(curDay)];
+    if (l) return { rev: l.rev, ord: l.orders };
+    const c = cfg(monthKey(curDay));
+    const dim = daysIn(monthKey(curDay));
+    return { rev: c.ly_rev / dim, ord: c.ly_orders / dim };
+}
+
+function lyMonthTotal(key) {
+    let rev = 0, ord = 0, days = 0;
+    eachDay(monthStart(key), monthEnd(key), d => {
+        const l = S.lyDaily[lyDay(d)];
+        if (l) { rev += l.rev; ord += l.orders; days++; }
+    });
+    if (days > 0) return { rev, ord, src: `يومي (${days} يوم مسجل)` };
+    const c = cfg(key);
+    return { rev: c.ly_rev, ord: c.ly_orders, src: 'من الإعدادات الشهرية' };
+}
+
+function prevMonthAvg(key) {
+    const p = shiftMonth(key, -1);
+    const t = salesIn(monthStart(p), monthEnd(p));
+    if (t.days > 0) return { rev: t.rev / t.days, ord: t.ord / t.days, src: `البيانات اليومية (${t.days} يوم)` };
+    const c = cfg(key);
+    const dim = daysIn(p);
+    return { rev: c.prev_rev / dim, ord: c.prev_orders / dim, src: 'الإعدادات الشهرية' };
+}
+
+function missingRevenueDays() {
+    const end = addDays(todayStr(), -1);
+    const last = monthEnd(activeMonth) < end ? monthEnd(activeMonth) : end;
+    const out = [];
+    if (last < monthStart(activeMonth)) return out;
+    eachDay(monthStart(activeMonth), last, d => { if (!S.sales[d]) out.push(Number(d.slice(8))); });
+    return out;
+}
+
+function analyzeRevenue(from, to) {
+    const t = salesIn(from, to);
+    const avgRev = t.days ? t.rev / t.days : 0;
+    const avgOrd = t.days ? t.ord / t.days : 0;
+    const avgChk = t.ord ? t.rev / t.ord : 0;
+
+    let lyRev = 0, lyOrd = 0, lyDays = 0;
+    const weekday = Array.from({ length: 7 }, () => ({ sum: 0, n: 0 }));
+    const recorded = [];
+    Object.keys(S.sales).sort().forEach(d => {
+        if (!inRange(d, from, to)) return;
+        const r = S.sales[d];
+        if (!(r.revenue > 0 || r.orders > 0)) return;
+        recorded.push({ d, rev: r.revenue });
+        const l = lyValue(d);
+        lyRev += l.rev; lyOrd += l.ord; lyDays++;
+        if (r.revenue > 0) { const w = weekday[weekdayOf(d)]; w.sum += r.revenue; w.n++; }
+    });
+    const growthLy = lyRev > 0 ? (t.rev - lyRev) / lyRev : null;
+    const lyChk = lyOrd > 0 ? lyRev / lyOrd : 0;
+    const chkGrowth = (lyChk > 0 && avgChk > 0) ? (avgChk - lyChk) / lyChk : null;
+
+    const dim = daysIn(activeMonth);
+    const today = todayStr();
+    const elapsed = activeMonth < monthKey(today) ? dim : (activeMonth === monthKey(today) ? Number(today.slice(8)) : 0);
+    const m = salesIn(monthStart(activeMonth), monthEnd(activeMonth));
+    const c = cfg(activeMonth);
+    const planPct = c.plan_rev > 0 ? m.rev / c.plan_rev : null;
+    const expected = c.plan_rev > 0 && elapsed > 0 ? (c.plan_rev / dim) * elapsed : 0;
+    const pace = expected > 0 ? m.rev / expected : null;
+    const projected = m.days ? (m.rev / m.days) * dim : 0;
+    const projPlan = c.plan_rev > 0 ? projected / c.plan_rev : null;
+
+    const prev = prevMonthAvg(activeMonth);
+    const growthPrev = prev.rev > 0 && avgRev > 0 ? (avgRev - prev.rev) / prev.rev : null;
+
+    const wdAvg = weekday.map(w => w.n ? w.sum / w.n : null);
+    const valid = wdAvg.map((v, i) => ({ v, i })).filter(x => x.v !== null);
+    const best = valid.length ? valid.reduce((a, b) => b.v > a.v ? b : a) : null;
+    const worst = valid.length > 1 ? valid.reduce((a, b) => b.v < a.v ? b : a) : null;
+
+    const last3 = recorded.slice(-3);
+    const last3Avg = last3.length ? last3.reduce((a, b) => a + b.rev, 0) / last3.length : null;
+    const last3Vs = (last3Avg !== null && avgRev > 0) ? (last3Avg - avgRev) / avgRev : null;
+
+    return { t, avgRev, avgOrd, avgChk, lyRev, lyOrd, lyDays, growthLy, lyChk, chkGrowth,
+        dim, elapsed, m, c, planPct, expected, pace, projected, projPlan,
+        prev, growthPrev, wdAvg, best, worst, last3Vs, last3Avg, missing: missingRevenueDays(), recorded };
+}
+
+function statusOf(a) {
+    if (a.t.days === 0) return { label: 'لا توجد بيانات بعد', color: '#94a3b8' };
+    const paceOk = a.pace === null || a.pace >= 0.95;
+    const growthOk = a.growthLy === null || a.growthLy >= 0;
+    const risk = (a.pace !== null && a.pace < 0.85) || (a.growthLy !== null && a.growthLy < -0.1);
+    if (risk) return { label: 'تحت الضغط ⚠️', color: '#ef4444' };
+    if (paceOk && growthOk) return { label: 'أداء ممتاز ✅', color: '#10b981' };
+    return { label: 'مستقر ℹ️', color: '#f59e0b' };
+}
+
+function buildInsights(a) {
+    const out = [];
+    if (a.t.days === 0) {
+        out.push({ type: 'tip', icon: '💡', text: 'ابدأ بتسجيل إيراد الأيام الأولى، والتحليل هيظهر تلقائياً بعد أول يوم مسجل.' });
+        return out;
+    }
+    if (a.pace !== null) {
+        if (a.pace >= 1) out.push({ type: 'good', icon: '✅', text: `إيرادك لحد النهارده ${fmt(a.m.rev)} ج.م، وده ${(a.pace * 100).toFixed(0)}% من المتوقع في الخطة لنفس الفترة. أنت قدامها.` });
+        else out.push({ type: a.pace < 0.85 ? 'warn' : 'tip', icon: a.pace < 0.85 ? '⚠️' : '💡', text: `إيرادك لحد النهارده ${fmt(a.m.rev)} ج.م، وده ${(a.pace * 100).toFixed(0)}% من المتوقع لنفس الفترة. محتاج تسرّع عشان توصل للخطة.` });
+    }
+    if (a.projPlan !== null) {
+        const gap = a.c.plan_rev - a.projected;
+        if (a.projPlan >= 1) out.push({ type: 'good', icon: '🏁', text: `لو الأيام الجاية ماشية بنفس المعدل، الشهر هيقفل على ${fmt(a.projected)} ج.م، وده ${(a.projPlan * 100).toFixed(0)}% من الخطة.` });
+        else out.push({ type: 'warn', icon: '📉', text: `المتوقع لغلق الشهر ${fmt(a.projected)} ج.م، أي ${(a.projPlan * 100).toFixed(0)}% من الخطة. الفرق المطلوب تعويضه ${fmt(gap)} ج.م.` });
+    }
+    if (a.growthLy !== null) {
+        const g = a.growthLy;
+        out.push({ type: g >= 0 ? 'good' : 'warn', icon: g >= 0 ? '📈' : '📉',
+            text: `مقارنة بنفس الأيام من السنة اللي فاتت، الإيراد ${g >= 0 ? 'زاد' : 'قل'} بنسبة ${(Math.abs(g) * 100).toFixed(1)}% (${pct(g)}).` });
+    }
+    if (a.chkGrowth !== null) {
+        const cg = a.chkGrowth;
+        out.push({ type: cg >= 0 ? 'good' : 'tip', icon: '🧾',
+            text: `متوسط قيمة الشيك ${fmt(a.avgChk, 2)} ج.م، ${cg >= 0 ? 'أعلى' : 'أقل'} من السنة اللي فاتت بنسبة ${(Math.abs(cg) * 100).toFixed(1)}%. ${cg < 0 ? 'ممكن تفكر في combo أو إضافة للشيك لرفعه.' : 'حافظ على الأصناف اللي رفعت الشيك.'}` });
+    }
+    if (a.growthPrev !== null) {
+        out.push({ type: a.growthPrev >= 0 ? 'good' : 'tip', icon: '🗓️',
+            text: `متوسط اليوم الحالي ${a.growthPrev >= 0 ? 'أعلى' : 'أقل'} من الشهر السابق بنسبة ${(Math.abs(a.growthPrev) * 100).toFixed(1)}%.` });
+    }
+    if (a.best && a.worst && a.best.v > 0) {
+        out.push({ type: 'info', icon: '📅', text: `أقوى يوم ${DAYS_AR[a.best.i]} بمتوسط ${fmt(a.best.v)} ج.م، وأضعف يوم ${DAYS_AR[a.worst.i]} بمتوسط ${fmt(a.worst.v)} ج.م.` });
+        if (a.worst.v < a.avgRev * 0.85) {
+            out.push({ type: 'tip', icon: '🎯', text: `يوم ${DAYS_AR[a.worst.i]} أقل من متوسطك بأكثر من 15%. جرّب عرض أو حملة مخصوصة له.` });
         }
+    }
+    if (a.last3Vs !== null) {
+        const v = a.last3Vs;
+        out.push({ type: v >= 0 ? 'good' : 'tip', icon: v >= 0 ? '🔥' : '🔎',
+            text: `آخر 3 أيام مسجلة متوسطها ${fmt(a.last3Avg)} ج.م، وده ${v >= 0 ? 'أعلى' : 'أقل'} من متوسطك بنسبة ${(Math.abs(v) * 100).toFixed(1)}%.` });
+    }
+    if (a.missing.length) {
+        out.push({ type: 'warn', icon: '🕳️', text: `فيه ${a.missing.length} يوم سابق بدون إيراد مسجل (${a.missing.slice(0, 8).join('، ')}${a.missing.length > 8 ? '…' : ''}). الأرقام دي تقريبية لحد ما تكمّلهم.` });
+    }
+    if (a.lyDays === 0 && a.t.days > 0) {
+        out.push({ type: 'tip', icon: 'ℹ️', text: 'مفيش بيانات للسنة اللي فاتت لنفس الفترة. سجّلها من "بيانات السنة السابقة" عشان تشوف المقارنة الحقيقية.' });
+    }
+    return out;
+}
 
-        function setLyModeUI(mode) {
-            document.getElementById('ly-total-mode-box').classList.toggle('hidden', mode === 'daily');
-            document.getElementById('ly-daily-mode-box').classList.toggle('hidden', mode === 'total');
-            if(mode === 'daily') renderHistoricalDaysInputs();
+function chipFor(v, label = '') {
+    if (v === null || !Number.isFinite(v)) return `<span class="chip">— ${label}</span>`;
+    return `<span class="chip ${v >= 0 ? 'up' : 'down'}">${pct(v)} ${label}</span>`;
+}
+
+function ring(v, caption, sub) {
+    const r = 46, circ = 2 * Math.PI * r;
+    const shown = v === null ? 0 : Math.max(0, Math.min(v, 1.5));
+    const dash = (shown / 1.5) * circ;
+    const color = v === null ? '#64748b' : (v >= 1 ? '#10b981' : (v >= 0.85 ? '#f59e0b' : '#ef4444'));
+    const text = v === null ? '—' : (v * 100).toFixed(0) + '%';
+    return `<div class="ring">
+        <div style="position:relative;width:112px;height:112px">
+            <svg viewBox="0 0 120 120" style="transform:rotate(-90deg);width:112px;height:112px">
+                <circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--border)" stroke-width="11"/>
+                <circle cx="60" cy="60" r="${r}" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round"
+                    stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:${color}">${text}</div>
+        </div>
+        <div class="cap">${esc(caption)}</div>
+        <div class="muted" style="font-size:10.5px">${esc(sub)}</div>
+    </div>`;
+}
+
+function renderHero(a, from, to) {
+    const st = statusOf(a);
+    $('hero-title').textContent = `${MONTHS_AR[Number(activeMonth.slice(5)) - 1]} ${activeMonth.slice(0, 4)}`;
+    $('hero-range').textContent = `الفترة المعروضة: ${from || '—'} إلى ${to || '—'} · ${a.t.days} يوم مسجل`;
+    const pill = $('hero-status');
+    pill.querySelector('i').style.background = st.color;
+    pill.querySelector('i').style.boxShadow = `0 0 12px ${st.color}`;
+    pill.querySelector('span').textContent = st.label;
+
+    if (a.t.days === 0) { $('hero-sum').textContent = 'لسه مفيش إيراد مسجل للفترة دي. أول ما تسجل أيام، هيظهر هنا ملخص كامل لأداء المطعم.'; return; }
+    const parts = [`حققت ${fmt(a.t.rev)} ج.م من ${a.t.ord} عملية في ${a.t.days} يوم مسجل، بمتوسط ${fmt(a.avgRev)} ج.م يومياً`];
+    if (a.growthLy !== null) parts.push(`وده ${a.growthLy >= 0 ? 'أعلى' : 'أقل'} من نفس الأيام السنة اللي فاتت بنسبة ${(Math.abs(a.growthLy) * 100).toFixed(1)}%`);
+    if (a.c.plan_rev > 0) parts.push(`والمتوقع لغلق الشهر ${fmt(a.projected)} ج.م (${a.projPlan !== null ? (a.projPlan * 100).toFixed(0) + '% من الخطة' : ''})`);
+    $('hero-sum').textContent = parts.join('، ') + '.';
+}
+
+function renderKpis(a) {
+    const k = (lbl, val, subHtml) => `<div class="kpi"><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="sub">${subHtml}</div></div>`;
+    $('kpis').innerHTML = [
+        k('إيراد الفترة', fmt(a.t.rev) + ' <small class="muted">ج.م</small>', chipFor(a.growthLy, 'vs LY')),
+        k('متوسط الإيراد اليومي', fmt(a.avgRev) + ' <small class="muted">ج.م</small>', chipFor(a.growthPrev, 'vs الشهر السابق')),
+        k('العمليات', fmt(a.t.ord), `متوسط ${fmt(a.avgOrd, 1)} يومياً`),
+        k('متوسط الشيك', fmt(a.avgChk, 2) + ' <small class="muted">ج.م</small>', chipFor(a.chkGrowth, 'vs LY')),
+        k('نسبة الخطة', a.planPct === null ? '—' : (a.planPct * 100).toFixed(1) + '%',
+            a.c.plan_rev > 0 ? `من ${fmt(a.c.plan_rev)} ج.م` : '<span class="muted">لم تُحدد خطة</span>'),
+        k('متوقع غلق الشهر', fmt(a.projected) + ' <small class="muted">ج.م</small>',
+            a.projPlan === null ? '<span class="muted">حدد الخطة</span>' : `<span class="chip ${a.projPlan >= 1 ? 'up' : 'down'}">${(a.projPlan * 100).toFixed(0)}% من الخطة</span>`)
+    ].join('');
+}
+
+function renderRings(a) {
+    $('rings').innerHTML =
+        ring(a.planPct, 'تحقيق الخطة', a.c.plan_rev > 0 ? `${fmt(a.m.rev)} من ${fmt(a.c.plan_rev)}` : 'حدد الخطة من الإعدادات') +
+        ring(a.pace, 'وتيرة الشهر', a.expected > 0 ? `${fmt(a.m.rev)} من متوقع ${fmt(a.expected)}` : 'لا توجد وتيرة بعد') +
+        ring(a.projPlan, 'المتوقع مقابل الخطة', a.projPlan !== null ? `${fmt(a.projected)} ج.م متوقعة` : 'حدد الخطة');
+    $('plan-note').textContent = `${a.elapsed} من ${a.dim} يوم`;
+    $('plan-detail').textContent = a.c.plan_rev > 0
+        ? `الخطة الشهرية ${fmt(a.c.plan_rev)} ج.م، يعني ${fmt(a.c.plan_rev / a.dim)} ج.م يومياً. المتوقع لحد النهارده ${fmt(a.expected)} ج.م. التوقع بيتحسب من متوسط الأيام المسجلة × عدد أيام الشهر الفعلي (${a.dim} يوم).`
+        : 'حدد خطة الشهر من الإعدادات عشان تظهر نسب التحقيق والوتيرة.';
+}
+
+function renderInsights(a) {
+    $('insights').innerHTML = buildInsights(a).map(i => `<div class="ins ${i.type}"><span class="ic">${i.icon}</span><span>${esc(i.text)}</span></div>`).join('');
+}
+
+function renderWeekdayNote(a) {
+    if (!a.best) { $('weekday-note').textContent = 'محتاج أيام كفاية عشان يظهر الأداء حسب أيام الأسبوع.'; return; }
+    const lines = [`أقوى يوم: ${DAYS_AR[a.best.i]} (${fmt(a.best.v)} ج.م)`];
+    if (a.worst) lines.push(`أضعف يوم: ${DAYS_AR[a.worst.i]} (${fmt(a.worst.v)} ج.م)`);
+    $('weekday-note').textContent = lines.join(' · ');
+}
+
+function renderCompare() {
+    const curDates = [], lyDates = [];
+    eachDay($('cmp-cur-from').value, $('cmp-cur-to').value, d => curDates.push(d));
+    eachDay($('cmp-ly-from').value, $('cmp-ly-to').value, d => lyDates.push(d));
+    const n = Math.max(curDates.length, lyDates.length);
+    const rows = [];
+    for (let i = 0; i < n; i++) {
+        const cd = curDates[i], ld = lyDates[i];
+        const cr = cd && S.sales[cd] ? S.sales[cd] : { revenue: 0, orders: 0 };
+        const lv = ld ? lyValue(curOf(ld)) : { rev: 0, ord: 0 };
+        const diff = cr.revenue - lv.rev;
+        const dp = lv.rev > 0 ? diff / lv.rev : null;
+        rows.push(`<tr>
+            <td>${cd ? esc(cd) : '-'}</td>
+            <td>${fmt(cr.revenue)}</td>
+            <td>${ld ? esc(ld) : '-'}</td>
+            <td>${fmt(lv.rev)}</td>
+            <td class="${diff >= 0 ? 'up' : 'down'}">${diff >= 0 ? '+' : ''}${fmt(diff)} <span class="muted">(${pct(dp)})</span></td>
+            <td>${cr.orders} / ${fmt(lv.ord)}</td>
+        </tr>`);
+    }
+    $('cmp-body').innerHTML = rows.join('');
+}
+
+function renderLyGrid() {
+    const rows = [];
+    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => {
+        const ly = lyDay(d);
+        const v = S.lyDaily[ly];
+        rows.push(`<tr>
+            <td>${Number(d.slice(8))}</td>
+            <td>${esc(ly)}</td>
+            <td><input type="number" min="0" step="any" class="inp sm" data-ly-rev="${esc(d)}" value="${v ? v.rev : ''}"></td>
+            <td><input type="number" min="0" step="1" class="inp sm" data-ly-ord="${esc(d)}" value="${v ? v.orders : ''}"></td>
+        </tr>`);
+    });
+    $('ly-grid').innerHTML = rows.join('');
+}
+
+function renderSettings() {
+    const c = cfg(activeMonth);
+    $('s-plan').value = c.plan_rev || '';
+    $('s-prev-rev').value = c.prev_rev || '';
+    $('s-prev-ord').value = c.prev_orders || '';
+    $('s-ly-rev').value = c.ly_rev || '';
+    $('s-ly-ord').value = c.ly_orders || '';
+}
+
+/* ---------- الرسوم ---------- */
+function chartColors() {
+    const dark = document.documentElement.classList.contains('dark');
+    return { tick: dark ? '#8b9bb4' : '#64748b', grid: dark ? 'rgba(148,163,184,.12)' : 'rgba(100,116,139,.15)' };
+}
+
+function renderCharts() {
+    if (!revChart || !wdChart) return;
+    const c = chartColors();
+    [revChart, wdChart].forEach(ch => {
+        ch.options.scales.x.ticks.color = c.tick;
+        ch.options.scales.y.ticks.color = c.tick;
+        ch.options.scales.x.grid.color = c.grid;
+        ch.options.scales.y.grid.color = c.grid;
+        ch.options.plugins.legend.labels.color = c.tick;
+        ch.update();
+    });
+}
+
+function updateRevChart(from, to) {
+    const labels = [], cur = [], ly = [];
+    Object.keys(S.sales).sort().forEach(d => {
+        if (!inRange(d, from, to)) return;
+        labels.push(d.slice(5));
+        cur.push(S.sales[d].revenue);
+        ly.push(lyValue(d).rev);
+    });
+    if (!revChart) return;
+    revChart.data.labels = labels;
+    revChart.data.datasets[0].data = cur;
+    revChart.data.datasets[1].data = ly;
+    revChart.update();
+}
+
+function updateWeekdayChart(a) {
+    if (!wdChart) return;
+    wdChart.data.datasets[0].data = a.wdAvg.map(v => v === null ? 0 : Math.round(v));
+    wdChart.data.datasets[0].backgroundColor = a.wdAvg.map((v, i) =>
+        (a.best && i === a.best.i) ? '#10b981' : (a.worst && i === a.worst.i ? '#ef4444' : 'rgba(245,158,11,.75)'));
+    wdChart.update();
+}
+
+function createCharts() {
+    const c = chartColors();
+    const axis = { ticks: { color: c.tick }, grid: { color: c.grid } };
+    revChart = new Chart($('rev-chart'), {
+        type: 'line',
+        data: { labels: [], datasets: [
+            { label: 'إيراد اليوم', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.14)', fill: true, tension: .35, borderWidth: 3, pointRadius: 2 },
+            { label: 'السنة اللي فاتت', data: [], borderColor: '#3b82f6', borderDash: [6, 5], fill: false, tension: .35, borderWidth: 2, pointRadius: 0 }
+        ] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: c.tick } } }, scales: { x: axis, y: axis } }
+    });
+    wdChart = new Chart($('weekday-chart'), {
+        type: 'bar',
+        data: { labels: DAYS_AR, datasets: [{ label: 'متوسط الإيراد', data: [], backgroundColor: 'rgba(245,158,11,.75)', borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: axis, y: axis } }
+    });
+}
+
+function renderRevenue() {
+    const from = $('rev-from').value, to = $('rev-to').value;
+    const a = analyzeRevenue(from, to);
+    renderHero(a, from, to);
+    renderKpis(a);
+    renderRings(a);
+    renderInsights(a);
+    renderWeekdayNote(a);
+    renderCompare();
+    const al = $('rev-alert');
+    if (a.missing.length) { al.classList.remove('hidden'); al.textContent = 'أيام سابقة بدون إيراد مسجل: ' + a.missing.join(', '); }
+    else al.classList.add('hidden');
+    updateRevChart(from, to);
+    updateWeekdayChart(a);
+}
+
+function renderSalesForm() {
+    const d = $('sales-day').value;
+    const locked = !!S.locks.sales[d];
+    $('sales-rev').disabled = locked;
+    $('sales-ord').disabled = locked;
+    $('sales-save').classList.toggle('hidden', locked);
+    $('sales-unlock').classList.toggle('hidden', !locked);
+    $('sales-badge').textContent = locked ? 'مغلق ومحفوظ' : 'مفتوح';
+    $('sales-badge').className = 'badge ' + (locked ? 'closed' : 'open');
+}
+
+function loadSalesDay() {
+    const r = S.sales[$('sales-day').value];
+    $('sales-rev').value = r ? r.revenue : '';
+    $('sales-ord').value = r ? r.orders : '';
+    renderSalesForm();
+}
+
+function saveSalesDay() {
+    const d = $('sales-day').value;
+    if (!d) return toast('اختر التاريخ', 'error');
+    if (S.locks.sales[d]) return toast('اليوم ده مقفول. افتح التعديل الأول', 'error');
+    const rv = $('sales-rev').value, ov = $('sales-ord').value;
+    if (rv === '' || ov === '') return toast('أدخل الإيراد وعدد العمليات', 'error');
+    const revenue = num(rv), orders = int(ov);
+    if (revenue < 0) return toast('الإيراد لا يكون بالسالب', 'error');
+    if (!confirmFuture(d)) return;
+    if (revenue > 0 && orders === 0 && !confirm('عدد العمليات صفر والإيراد أكبر من صفر. متأكد؟')) return;
+    if (revenue === 0 && orders > 0 && !confirm('الإيراد صفر وفيه عمليات. متأكد؟')) return;
+    S.sales[d] = { revenue, orders };
+    S.locks.sales[d] = true;
+    saveDB();
+    toast('تم حفظ وقفل إيراد اليوم');
+    renderAll();
+}
+
+function unlockSales() {
+    const d = $('sales-day').value;
+    if (!confirm('هل تريد فتح تعديل إيراد هذا اليوم؟')) return;
+    delete S.locks.sales[d];
+    saveDB();
+    toast('تم فتح اليوم للتعديل');
+    renderAll();
+}
+
+function saveSettings() {
+    S.monthly[activeMonth] = {
+        plan_rev: num($('s-plan').value),
+        prev_rev: num($('s-prev-rev').value),
+        prev_orders: int($('s-prev-ord').value),
+        ly_rev: num($('s-ly-rev').value),
+        ly_orders: int($('s-ly-ord').value)
+    };
+    saveDB();
+    toast('تم حفظ الإعدادات');
+    renderAll();
+}
+
+function saveLyDays() {
+    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => {
+        const rv = document.querySelector(`[data-ly-rev="${d}"]`).value;
+        const ov = document.querySelector(`[data-ly-ord="${d}"]`).value;
+        const ly = lyDay(d);
+        if (rv === '' && ov === '') { delete S.lyDaily[ly]; return; }
+        S.lyDaily[ly] = { rev: num(rv), orders: int(ov) };
+    });
+    saveDB();
+    toast('تم حفظ بيانات السنة السابقة');
+    renderAll();
+}
+
+/* ============================================================
+   المخزون: منطق مبسط
+   - رصيد أول الشهر: مرة واحدة في الشهر
+   - الوارد والتحويلات: يومياً
+   - المباع والجرد: بس وقت التحليل
+   ============================================================ */
+const openingFor = (pid, month) => ((S.openings[month] || {})[pid]) ?? 0;
+const hasOpening = (pid, month) => !!(S.openings[month] && S.openings[month][pid] !== undefined);
+const rcpt = (day, pid) => ((S.receipts[day] || {})[pid]) || 0;
+const cnt = (day, pid) => ((S.counts[day] || {})[pid]) || { sold: 0, closing: null };
+
+// أول اليوم = آخر جرد مسجل قبله داخل نفس الشهر، وإلا رصيد أول الشهر
+function openingAt(pid, day) {
+    const m = monthKey(day);
+    let best = null;
+    for (const d in S.counts) {
+        if (d < day && monthKey(d) === m) {
+            const c = S.counts[d][pid];
+            if (c && c.closing !== null && c.closing !== undefined && (best === null || d > best)) best = d;
         }
+    }
+    return best === null ? openingFor(pid, m) : S.counts[best][pid].closing;
+}
 
-        function showToast(msg, type='success') {
-            const c = document.getElementById('toast-container');
-            const t = document.createElement('div');
-            t.className = `px-4 py-3 rounded-2xl text-xs font-bold ${type==='success'?'bg-emerald-600 text-white':'bg-red-600 text-white'}`;
-            t.innerText = msg;
-            c.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+function transfersNet(pid, from, to) {
+    let net = 0;
+    S.transfers.forEach(t => {
+        if (t.product_id === pid && inRange(t.day, from, to)) net += t.type === 'in' ? t.qty : -t.qty;
+    });
+    return net;
+}
+
+function productUsed(pid) {
+    return S.transfers.some(t => t.product_id === pid)
+        || Object.values(S.receipts).some(d => d[pid] !== undefined)
+        || Object.values(S.counts).some(d => d[pid] !== undefined)
+        || Object.values(S.openings).some(m => m[pid] !== undefined);
+}
+
+function isDayLocked(d) { return !!S.locks.day[d]; }
+
+/* ---------- الأصناف ورصيد أول الشهر ---------- */
+function renderOpening() {
+    const m = activeMonth;
+    const locked = !!S.locks.open[m];
+    const missing = S.products.filter(p => !hasOpening(p.id, m)).map(p => p.name);
+
+    $('open-body').innerHTML = S.products.map(p => {
+        const has = hasOpening(p.id, m);
+        return `<tr>
+            <td><input class="inp" data-pid="${esc(p.id)}" data-field="name" value="${esc(p.name)}"></td>
+            <td><input class="inp sm" data-pid="${esc(p.id)}" data-field="unit" value="${esc(p.unit)}"></td>
+            <td><input class="inp xs" type="number" step="any" id="op-${esc(p.id)}" value="${has ? openingFor(p.id, m) : ''}" placeholder="0" ${locked ? 'disabled' : ''}></td>
+            <td>${productUsed(p.id) ? '<span class="muted">مستخدم</span>' : `<button class="btn btn-red btn-sm" onclick="deleteProduct('${esc(p.id)}')">حذف</button>`}</td>
+        </tr>`;
+    }).join('') || '<tr><td class="muted" colspan="4">أضف أصنافك الأول</td></tr>';
+
+    $('open-badge').textContent = locked ? 'مغلق ومحفوظ' : 'مفتوح';
+    $('open-badge').className = 'badge ' + (locked ? 'closed' : 'open');
+    $('open-save').classList.toggle('hidden', locked);
+    $('open-unlock').classList.toggle('hidden', !locked);
+    $('open-suggest').classList.toggle('hidden', locked);
+
+    const w = $('open-warn');
+    if (S.products.length && missing.length && !locked) {
+        w.classList.remove('hidden');
+        w.textContent = 'لسه ما اتدخلش رصيد أول الشهر للأصناف: ' + missing.join('، ');
+    } else w.classList.add('hidden');
+
+    const current = $('trans-prod').value;
+    $('trans-prod').innerHTML = S.products.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+    if (current) $('trans-prod').value = current;
+}
+
+function addProduct() {
+    const name = $('new-prod-name').value.trim();
+    const unit = $('new-prod-unit').value.trim();
+    if (!name) return toast('اكتب اسم الصنف', 'error');
+    if (name.length > 120 || unit.length > 40) return toast('الاسم أو الوحدة طويل جداً', 'error');
+    if (S.products.some(p => p.name === name && p.unit === unit)) return toast('الصنف ده موجود قبل كده', 'error');
+    S.products.push({ id: uid(), name, unit });
+    saveDB();
+    $('new-prod-name').value = ''; $('new-prod-unit').value = '';
+    toast('تمت إضافة الصنف. ادخل رصيد أول الشهر له');
+    renderAll();
+}
+
+function deleteProduct(id) {
+    if (productUsed(id)) return toast('الصنف ده عليه حركات، مينفعش يتحذف', 'error');
+    const p = S.products.find(x => x.id === id);
+    if (!p || !confirm(`حذف الصنف "${p.name}"؟`)) return;
+    S.products = S.products.filter(x => x.id !== id);
+    saveDB();
+    toast('تم حذف الصنف');
+    renderAll();
+}
+
+// آخر جرد مسجل للشهر اللي فات، أو رصيد أول الشهر اللي فات لو مفيش
+function suggestOpening() {
+    const prev = shiftMonth(activeMonth, -1);
+    let filled = 0;
+    S.products.forEach(p => {
+        let latest = null, val = null;
+        for (const d in S.counts) {
+            if (monthKey(d) !== prev) continue;
+            const c = S.counts[d][p.id];
+            if (c && c.closing !== null && c.closing !== undefined && (latest === null || d > latest)) { latest = d; val = c.closing; }
         }
+        if (val === null && hasOpening(p.id, prev)) val = openingFor(p.id, prev);
+        if (val !== null) { const el = $('op-' + p.id); if (el) { el.value = val; filled++; } }
+    });
+    toast(filled ? `تم ملء ${filled} صنف. راجع الأرقام واضغط حفظ` : 'مفيش بيانات للشهر اللي فات', filled ? 'success' : 'error');
+}
 
-        function initTheme() {
-            const savedTheme = localStorage.getItem('kansas_pro_theme') || 'dark';
-            document.getElementById('html-root').className = savedTheme;
-            document.getElementById('theme-icon').innerText = savedTheme === 'dark' ? '🌙' : '☀️';
+function saveOpening() {
+    const m = activeMonth;
+    if (S.locks.open[m]) return;
+    if (!S.products.length) return toast('أضف أصنافاً الأول', 'error');
+    const values = {};
+    for (const p of S.products) {
+        const v = $('op-' + p.id).value;
+        if (v === '') return toast(`ادخل رصيد أول الشهر للصنف: ${p.name}`, 'error');
+        const n = num(v);
+        if (n < 0) return toast('الرصيد لا يكون بالسالب', 'error');
+        values[p.id] = n;
+    }
+    S.openings[m] = Object.assign(S.openings[m] || {}, values);
+    S.locks.open[m] = true;
+    saveDB();
+    toast('تم حفظ وقفل رصيد أول الشهر');
+    renderAll();
+}
+
+function unlockOpening() {
+    if (!confirm('فتح رصيد أول الشهر للتعديل؟ تغييره هيأثر على كل حسابات الشهر ده.')) return;
+    delete S.locks.open[activeMonth];
+    saveDB();
+    toast('تم فتح الرصيد للتعديل');
+    renderAll();
+}
+
+document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (!t.dataset || !t.dataset.pid) return;
+    const p = S.products.find(x => x.id === t.dataset.pid);
+    if (!p) return;
+    const field = t.dataset.field;
+    const value = t.value.trim();
+    if (field === 'name' && (!value || value.length > 120)) { toast('اسم الصنف غير صالح', 'error'); return renderAll(); }
+    if (field === 'unit' && value.length > 40) { toast('الوحدة طويلة جداً', 'error'); return renderAll(); }
+    p[field] = value;
+    saveDB();
+    toast('تم التحديث');
+    renderAll();
+});
+
+/* ---------- حركة اليوم ---------- */
+function renderDay() {
+    const d = $('day-input').value;
+    const locked = isDayLocked(d);
+
+    // نحافظ على اللي اتكتب ولسه متحفظش
+    const draft = {};
+    if (!locked) S.products.forEach(p => {
+        const r = $('rc-' + p.id);
+        if (r) draft[p.id] = { rc: r.value, sd: $('sd-' + p.id).value, cl: $('cl-' + p.id).value };
+    });
+
+    $('day-body').innerHTML = S.products.map(p => {
+        const c = cnt(d, p.id);
+        const dv = draft[p.id];
+        const rcV = dv ? dv.rc : (rcpt(d, p.id) || '');
+        const sdV = dv ? dv.sd : (c.sold || '');
+        const clV = dv ? dv.cl : (c.closing !== null ? c.closing : '');
+        const dis = locked ? 'disabled' : '';
+        return `<tr>
+            <td>${esc(p.name)} <span class="muted">(${esc(p.unit)})</span></td>
+            <td id="op0-${esc(p.id)}">${fmt(openingAt(p.id, d), 2)}</td>
+            <td><input class="inp xs" type="number" min="0" step="any" id="rc-${esc(p.id)}" value="${esc(rcV)}" placeholder="0" ${dis} oninput="liveDay()"></td>
+            <td><input class="inp xs" type="number" min="0" step="any" id="sd-${esc(p.id)}" value="${esc(sdV)}" placeholder="—" ${dis} oninput="liveDay()"></td>
+            <td><input class="inp xs" type="number" min="0" step="any" id="cl-${esc(p.id)}" value="${esc(clV)}" placeholder="—" ${dis} oninput="liveDay()"></td>
+            <td id="th-${esc(p.id)}">-</td>
+            <td id="vr-${esc(p.id)}">-</td>
+        </tr>`;
+    }).join('') || '<tr><td class="muted" colspan="7">أضف أصنافاً من قسم الأصناف فوق</td></tr>';
+
+    $('day-badge').textContent = locked ? 'مغلق ومحفوظ' : 'مفتوح';
+    $('day-badge').className = 'badge ' + (locked ? 'closed' : 'open');
+    $('day-save').classList.toggle('hidden', locked);
+    $('day-unlock').classList.toggle('hidden', !locked);
+    $('trans-form').classList.toggle('hidden', locked);
+
+    liveDay();
+    renderTransfers();
+}
+
+// الحساب الحي: النظري والفرق لكل صنف
+function liveDay() {
+    const d = $('day-input').value;
+    S.products.forEach(p => {
+        const rc = $('rc-' + p.id);
+        if (!rc) return;
+        const received = num(rc.value);
+        const sold = num($('sd-' + p.id).value);
+        const cv = $('cl-' + p.id).value;
+        const closing = cv === '' ? null : num(cv);
+        const theo = openingAt(p.id, d) + received + transfersNet(p.id, d, d) - sold;
+        const th = $('th-' + p.id);
+        th.textContent = fmt(theo, 2);
+        th.className = theo < 0 ? 'down' : '';
+        const vr = $('vr-' + p.id);
+        if (closing === null) { vr.textContent = '-'; vr.className = ''; }
+        else {
+            const diff = closing - theo;
+            vr.textContent = (diff > 0 ? '+' : '') + fmt(diff, 2);
+            vr.className = Math.abs(diff) < 0.005 ? '' : (diff > 0 ? 'up' : 'down');
         }
-
-        function toggleTheme() {
-            const htmlRoot = document.getElementById('html-root');
-            const isDark = htmlRoot.classList.contains('dark');
-            htmlRoot.className = isDark ? 'light' : 'dark';
-            localStorage.setItem('kansas_pro_theme', isDark ? 'light' : 'dark');
-            document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
-        }
-
-        function changeActiveMonth() {
-            saveAndSync();
-            const newMonth = document.getElementById('global-month-selector').value;
-            if(!newMonth) return;
-            loadMonth(newMonth);
-            updateActiveMonthTitle();
-            renderAll();
-        }
-
-        function updateActiveMonthTitle() {
-            const val = document.getElementById('global-month-selector').value;
-            if(!val) return;
-            const [y, m] = val.split('-');
-            const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-            document.getElementById('active-month-title').innerText = `${monthsAr[parseInt(m, 10) - 1]} ${y}`;
-        }
-
-        function switchTab(tab) {
-            currentTab = tab;
-            document.getElementById('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
-            document.getElementById('tab-inventory').classList.toggle('hidden', tab === 'revenue');
-            const active = 'flex-1 py-3 text-center font-black text-slate-950 bg-gradient-to-r from-amber-500 to-amber-400 rounded-xl text-xs shadow-lg shadow-amber-500/20';
-            const inactive = 'flex-1 py-3 text-center font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs transition';
-            document.getElementById('btn-revenue').className = tab === 'revenue' ? active : inactive;
-            document.getElementById('btn-inventory').className = tab === 'inventory' ? active : inactive;
-        }
-
-        function toggleBaseline() { document.getElementById('baseline-content').classList.toggle('hidden'); }
-        function toggleOpeningAccordion() { document.getElementById('opening-content').classList.toggle('hidden'); }
-
-        function setLyInputMode(mode) {
-            lyInputModeState = mode;
-            appData.baseline.lyMode = mode;
-            setLyModeUI(mode);
-            saveAndSync();
-            calculateAnalytics();
-            renderDayByDayComparison();
-        }
-
-        function renderHistoricalDaysInputs() {
-            const container = document.getElementById('historical-days-container');
-            container.innerHTML = '';
-            const sm = document.getElementById('global-month-selector').value;
-            if(!sm) return;
-            const [y, m] = sm.split('-').map(Number);
-            const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            for(let d = 1; d <= daysInMonth; d++) {
-                const dayKey = String(d).padStart(2, '0');
-                if(!appData.historicalLyDaily[dayKey]) appData.historicalLyDaily[dayKey] = { rev: 0, orders: 0 };
-                const data = appData.historicalLyDaily[dayKey];
-                const div = document.createElement('div');
-                div.className = "flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-xl border gap-2";
-                div.innerHTML = `
-                    <span class="font-bold text-xs">يوم ${d}:</span>
-                    <input type="number" value="${data.rev || ''}" placeholder="إيراد" onchange="updateLyDay('${dayKey}', 'rev', this.value)" class="border p-1.5 rounded font-bold text-xs flex-1">
-                    <input type="number" value="${data.orders || ''}" placeholder="عمليات" onchange="updateLyDay('${dayKey}', 'orders', this.value)" class="w-20 border p-1.5 rounded font-bold text-xs">
-                `;
-                container.appendChild(div);
-            }
-        }
-
-        function updateLyDay(dayKey, field, val) {
-            if(!appData.historicalLyDaily[dayKey]) appData.historicalLyDaily[dayKey] = { rev: 0, orders: 0 };
-            appData.historicalLyDaily[dayKey][field] = parseFloat(val) || 0;
-            saveAndSync();
-            calculateAnalytics();
-            renderDayByDayComparison();
-        }
-
-        function updateDayName() {
-            const dateVal = document.getElementById('daily-date').value;
-            if(!dateVal) return;
-            const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-            const dt = parseUTCExactDate(dateVal);
-            document.getElementById('day-name-display').innerText = `اليوم: ${days[dt.getUTCDay()]}`;
-            document.getElementById('current-day-label').innerText = `تاريخ اليوم: ${dateVal}`;
-
-            const isLocked = appData.lockedDays && appData.lockedDays[dateVal];
-            document.getElementById('daily-revenue').disabled = isLocked;
-            document.getElementById('daily-orders').disabled = isLocked;
-            document.getElementById('save-day-btn').classList.toggle('hidden', isLocked);
-            document.getElementById('unlock-day-btn').classList.toggle('hidden', !isLocked);
-
-            const badge = document.getElementById('day-lock-status-badge');
-            if(isLocked) {
-                badge.innerText = "مغلق ومحفوظ";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 font-bold";
-            } else {
-                badge.innerText = "مفتوح للإدخال والتعديل";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold";
-            }
-        }
-
-        function loadDayData() {
-            updateDayName();
-            const dateVal = document.getElementById('daily-date').value;
-            const rec = appData.dailyRecords[dateVal];
-            document.getElementById('daily-revenue').value = rec ? rec.revenue : '';
-            document.getElementById('daily-orders').value = rec ? rec.orders : '';
-        }
-
-        function saveDailyDataStrict() {
-            const dateVal = document.getElementById('daily-date').value;
-            const revVal = document.getElementById('daily-revenue').value;
-            const ordVal = document.getElementById('daily-orders').value;
-
-            if(!dateVal) { showToast('الرجاء اختيار التاريخ', 'error'); return; }
-            if(revVal === '' || ordVal === '') { showToast('خطأ: يجب إدخال كل من الإيراد وعمليات اليوم معاً!', 'error'); return; }
-
-            appData.dailyRecords[dateVal] = { revenue: parseFloat(revVal) || 0, orders: parseInt(ordVal, 10) || 0 };
-            appData.lockedDays[dateVal] = true;
-
-            saveAndSync();
-            calculateAnalytics();
-            renderDayByDayComparison();
-            checkRevenueMissingDays();
-            updateDayName();
-            showToast('تم حفظ وقفل بيانات اليوم بنجاح', 'success');
-        }
-
-        function unlockCurrentDay() {
-            const dateVal = document.getElementById('daily-date').value;
-            if(!dateVal) return;
-            if(confirm('هل تريد بالتأكيد فتح هذا اليوم للتعديل؟')) {
-                appData.lockedDays[dateVal] = false;
-                saveAndSync();
-                updateDayName();
-                showToast('تم فتح اليوم للتعديل', 'success');
-            }
-        }
-
-        function checkRevenueMissingDays() {
-            const sm = document.getElementById('global-month-selector').value;
-            if(!sm) return;
-            const [y, m] = sm.split('-').map(Number);
-            const today = new Date();
-            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-            const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            const missingDays = [];
-
-            for(let d = 1; d <= daysInMonth; d++) {
-                const dayStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                if(dayStr <= todayStr) {
-                    const rec = appData.dailyRecords[dayStr];
-                    if(!rec || rec.revenue === undefined || rec.revenue === null || rec.orders === undefined || rec.orders === null) {
-                        missingDays.push(d);
-                    }
-                }
-            }
-
-            const alertBox = document.getElementById('revenue-missing-alert');
-            const listEl = document.getElementById('revenue-missing-list');
-            if(missingDays.length > 0) {
-                alertBox.classList.remove('hidden');
-                listEl.innerText = `الأيام السابقة التي لم يُدخل لها إيراد وعمليات: ${missingDays.join(', ')}`;
-            } else {
-                alertBox.classList.add('hidden');
-            }
-        }
-
-        function saveBaseline() {
-            appData.baseline.planRev = parseFloat(document.getElementById('base-plan-rev').value) || 0;
-            appData.baseline.prevMonthRev = parseFloat(document.getElementById('base-prev-month-rev').value) || 0;
-            appData.baseline.prevMonthOrders = parseInt(document.getElementById('base-prev-month-orders').value) || 0;
-            appData.baseline.lyTotalRev = parseFloat(document.getElementById('base-ly-total-rev').value) || 0;
-            appData.baseline.lyTotalOrders = parseInt(document.getElementById('base-ly-total-orders').value) || 0;
-            saveAndSync();
-            calculateAnalytics();
-            renderDayByDayComparison();
-            showToast('تم حفظ الإعدادات بنجاح', 'success');
-        }
-
-        function resetRevDateRange() {
-            const sm = document.getElementById('global-month-selector').value;
-            const today = new Date();
-            document.getElementById('rev-date-from').value = sm + '-01';
-            document.getElementById('rev-date-to').value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-            calculateAnalytics();
-        }
-
-        function calculateAnalytics() {
-            let totalRev = 0, totalOrders = 0, daysCount = 0;
-            const dFrom = document.getElementById('rev-date-from').value;
-            const dTo = document.getElementById('rev-date-to').value;
-
-            Object.keys(appData.dailyRecords).forEach(dateStr => {
-                if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
-                    const rec = appData.dailyRecords[dateStr];
-                    totalRev += rec.revenue || 0;
-                    totalOrders += rec.orders || 0;
-                    if(rec.revenue > 0 || rec.orders > 0) daysCount++;
-                }
-            });
-
-            const activeDays = daysCount > 0 ? daysCount : 1;
-            const dailyAvgRev = totalRev / activeDays;
-            const dailyAvgOrd = totalOrders / activeDays;
-            const avgCheck = totalOrders > 0 ? (totalRev / totalOrders) : 0;
-            const planRev = appData.baseline.planRev || 0;
-            const planTotalRatio = planRev > 0 ? (totalRev / planRev) * 100 : 0;
-            const projectedMonthRev = dailyAvgRev * 30;
-
-            const prevMonthRev = appData.baseline.prevMonthRev || 0;
-            const prevMonthOrders = appData.baseline.prevMonthOrders || 0;
-            const prevDailyRev = prevMonthRev > 0 ? (prevMonthRev / 30) : 0;
-            const prevDailyOrd = prevMonthOrders > 0 ? (prevMonthOrders / 30) : 0;
-            const prevAvgCheck = prevMonthOrders > 0 ? (prevMonthRev / prevMonthOrders) : 0;
-
-            document.getElementById('prev-daily-rev-lbl').innerText = prevDailyRev.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
-            document.getElementById('prev-daily-ord-lbl').innerText = Math.round(prevDailyOrd).toLocaleString();
-            document.getElementById('prev-avg-check-lbl').innerText = prevAvgCheck.toFixed(2) + ' ج.م';
-
-            const momRevDiff = dailyAvgRev - prevDailyRev;
-            const momRevPct = prevDailyRev > 0 ? (momRevDiff / prevDailyRev) * 100 : 0;
-            const momOrdDiff = dailyAvgOrd - prevDailyOrd;
-            const momOrdPct = prevDailyOrd > 0 ? (momOrdDiff / prevDailyOrd) * 100 : 0;
-            const momChkDiff = avgCheck - prevAvgCheck;
-            const momCheckPct = prevAvgCheck > 0 ? (momChkDiff / prevAvgCheck) * 100 : 0;
-
-            updateDiffAndPctUI('mom-rev-diff', 'mom-rev-pct', momRevDiff, momRevPct, 'ج.م');
-            updateDiffAndPctUI('mom-ord-diff', 'mom-ord-pct', momOrdDiff, momOrdPct, 'عملية', 0);
-            updateDiffAndPctUI('mom-chk-diff', 'mom-check-pct', momChkDiff, momCheckPct, 'ج.م', 2);
-
-            const lyTotalRev = appData.baseline.lyTotalRev || 0;
-            const lyTotalOrders = appData.baseline.lyTotalOrders || 0;
-            const targetLyDailyRev = lyTotalRev > 0 ? (lyTotalRev / 30) : 0;
-            const targetLyDailyOrders = lyTotalOrders > 0 ? (lyTotalOrders / 30) : 0;
-            const targetLyCheck = lyTotalOrders > 0 ? (lyTotalRev / lyTotalOrders) : 0;
-
-            document.getElementById('target-ly-rev').innerText = targetLyDailyRev.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
-            document.getElementById('target-ly-orders').innerText = Math.round(targetLyDailyOrders).toLocaleString();
-            document.getElementById('target-ly-check').innerText = targetLyCheck.toFixed(2) + ' ج.م';
-
-            const lyRevDiff = dailyAvgRev - targetLyDailyRev;
-            const lyRevPct = targetLyDailyRev > 0 ? (lyRevDiff / targetLyDailyRev) * 100 : 0;
-            const lyOrdDiff = dailyAvgOrd - targetLyDailyOrders;
-            const lyOrdPct = targetLyDailyOrders > 0 ? (lyOrdDiff / targetLyDailyOrders) * 100 : 0;
-            const lyChkDiff = avgCheck - targetLyCheck;
-            const lyCheckPct = targetLyCheck > 0 ? (lyChkDiff / targetLyCheck) * 100 : 0;
-
-            updateDiffAndPctUI('ly-rev-diff', 'actual-vs-ly-rev-pct', lyRevDiff, lyRevPct, 'ج.م');
-            updateDiffAndPctUI('ly-ord-diff', 'actual-vs-ly-ord-pct', lyOrdDiff, lyOrdPct, 'عملية', 0);
-            updateDiffAndPctUI('ly-chk-diff', 'actual-vs-ly-check-pct', lyChkDiff, lyCheckPct, 'ج.م', 2);
-
-            document.getElementById('target-plan-rev').innerText = (planRev > 0 ? (planRev / 30) : 0).toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
-            document.getElementById('target-plan-total').innerText = planRev.toLocaleString() + ' ج.م';
-            document.getElementById('actual-total-rev-lbl').innerText = totalRev.toLocaleString() + ' ج.م';
-            document.getElementById('actual-vs-plan-pct').innerText = planTotalRatio.toFixed(1) + '%';
-
-            document.getElementById('bench-plan-lbl').innerText = planRev.toLocaleString() + ' ج.م';
-            document.getElementById('bench-mom-lbl').innerText = prevMonthRev.toLocaleString() + ' ج.م';
-            document.getElementById('bench-yoy-lbl').innerText = lyTotalRev.toLocaleString() + ' ج.م';
-            document.getElementById('bench-actual-bar-lbl').innerText = totalRev.toLocaleString() + ' ج.م';
-
-            const maxBench = Math.max(planRev, prevMonthRev, lyTotalRev, totalRev, 1);
-            document.getElementById('bench-plan-bar').style.width = Math.min(100, (planRev / maxBench) * 100) + '%';
-            document.getElementById('bench-mom-bar').style.width = Math.min(100, (prevMonthRev / maxBench) * 100) + '%';
-            document.getElementById('bench-yoy-bar').style.width = Math.min(100, (lyTotalRev / maxBench) * 100) + '%';
-            document.getElementById('bench-actual-bar').style.width = Math.min(100, (totalRev / maxBench) * 100) + '%';
-
-            document.getElementById('mtd-daily-avg-rev').innerText = dailyAvgRev.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
-            document.getElementById('mtd-daily-avg-ord').innerText = Math.round(dailyAvgOrd).toLocaleString() + ' عملية';
-            document.getElementById('mtd-avg-check').innerText = avgCheck.toFixed(2) + ' ج.م';
-            document.getElementById('mtd-projected-rev').innerText = projectedMonthRev.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
-
-            updateChart();
-        }
-
-        function updateDiffAndPctUI(diffId, pctId, diffVal, pctVal, unit, decimals = 0) {
-            const diffEl = document.getElementById(diffId);
-            const pctEl = document.getElementById(pctId);
-            const sign = diffVal >= 0 ? '+' : '';
-            diffEl.innerText = `فرق: ${sign}${diffVal.toLocaleString(undefined, {maximumFractionDigits: decimals})} ${unit}`;
-            pctEl.innerText = `${sign}${pctVal.toFixed(1)}%`;
-
-            if(diffVal < 0) {
-                diffEl.className = "block font-bold text-red-500";
-                pctEl.className = "font-bold text-red-500";
-            } else {
-                diffEl.className = "block font-bold text-emerald-500";
-                pctEl.className = "font-bold text-emerald-500";
-            }
-        }
-
-        function renderDayByDayComparison() {
-            const tbody = document.getElementById('day-by-day-table-body');
-            tbody.innerHTML = '';
-            const curFromStr = document.getElementById('comp-cur-from').value;
-            const curToStr = document.getElementById('comp-cur-to').value;
-            const lyFromStr = document.getElementById('comp-ly-from').value;
-            const lyToStr = document.getElementById('comp-ly-to').value;
-
-            if(!curFromStr || !curToStr || !lyFromStr || !lyToStr) return;
-
-            let curDate = parseUTCExactDate(curFromStr);
-            const curEndDate = parseUTCExactDate(curToStr);
-            const lyDate = parseUTCExactDate(lyFromStr);
-            const lyEndDate = parseUTCExactDate(lyToStr);
-
-            let curSumRev = 0, lySumRev = 0, curSumOrd = 0, lySumOrd = 0;
-            const currentLyPointer = new Date(lyDate.getTime());
-
-            while(curDate <= curEndDate) {
-                const curDateStr = curDate.toISOString().split('T')[0];
-                const curRec = appData.dailyRecords[curDateStr] || { revenue: 0, orders: 0 };
-
-                let lyDateStr = "-";
-                let lyRev = 0, lyOrd = 0;
-
-                if(currentLyPointer <= lyEndDate) {
-                    lyDateStr = currentLyPointer.toISOString().split('T')[0];
-                    const dayPart = lyDateStr.split('-')[2];
-
-                    if(appData.baseline.lyMode === 'daily' && appData.historicalLyDaily && appData.historicalLyDaily[dayPart]) {
-                        lyRev = appData.historicalLyDaily[dayPart].rev || 0;
-                        lyOrd = appData.historicalLyDaily[dayPart].orders || 0;
-                    } else if(appData.baseline.lyMode === 'total') {
-                        lyRev = (appData.baseline.lyTotalRev || 0) / 30;
-                        lyOrd = (appData.baseline.lyTotalOrders || 0) / 30;
-                    }
-                    currentLyPointer.setUTCDate(currentLyPointer.getUTCDate() + 1);
-                }
-
-                curSumRev += curRec.revenue;
-                lySumRev += lyRev;
-                curSumOrd += curRec.orders;
-                lySumOrd += lyOrd;
-
-                const revDiff = curRec.revenue - lyRev;
-                const revDiffPct = lyRev > 0 ? (revDiff / lyRev) * 100 : 0;
-                const curCheck = curRec.orders > 0 ? (curRec.revenue / curRec.orders) : 0;
-                const lyCheck = lyOrd > 0 ? (lyRev / lyOrd) : 0;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-bold">${curDateStr}</td>
-                    <td class="p-3 font-black text-amber-600">${curRec.revenue.toLocaleString()} ج.م</td>
-                    <td class="p-3 font-bold text-blue-600">${lyDateStr}</td>
-                    <td class="p-3 font-bold">${lyRev.toLocaleString(undefined, {maximumFractionDigits:0})} ج.م</td>
-                    <td class="p-3 font-black ${revDiff >= 0 ? 'text-emerald-500' : 'text-red-500'}">${revDiff >= 0 ? '+' : ''}${revDiff.toLocaleString(undefined, {maximumFractionDigits:0})} (${revDiffPct.toFixed(1)}%)</td>
-                    <td class="p-3 font-bold">${curRec.orders} / ${Math.round(lyOrd)}</td>
-                    <td class="p-3 font-bold">${curCheck.toFixed(2)} / ${lyCheck.toFixed(2)} ج.م</td>
-                `;
-                tbody.appendChild(tr);
-                curDate.setUTCDate(curDate.getUTCDate() + 1);
-            }
-
-            const sumRevDiff = curSumRev - lySumRev;
-            const sumRevDiffPct = lySumRev > 0 ? (sumRevDiff / lySumRev) * 100 : 0;
-            const sumOrdDiff = curSumOrd - lySumOrd;
-            const sumOrdDiffPct = lySumOrd > 0 ? (sumOrdDiff / lySumOrd) * 100 : 0;
-            const curAvgChk = curSumOrd > 0 ? (curSumRev / curSumOrd) : 0;
-            const lyAvgChk = lySumOrd > 0 ? (lySumRev / lySumOrd) : 0;
-            const sumChkDiffPct = lyAvgChk > 0 ? ((curAvgChk - lyAvgChk) / lyAvgChk) * 100 : 0;
-
-            document.getElementById('comp-sum-rev-val').innerText = `${curSumRev.toLocaleString()} ج.م (السابق: ${lySumRev.toLocaleString(undefined, {maximumFractionDigits:0})})`;
-            const revPctEl = document.getElementById('comp-sum-rev-pct');
-            revPctEl.innerText = `الفرق: ${sumRevDiff >= 0 ? '+' : ''}${sumRevDiff.toLocaleString(undefined, {maximumFractionDigits:0})} (${sumRevDiffPct.toFixed(1)}%)`;
-            revPctEl.className = `font-bold block text-[11px] ${sumRevDiff >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
-
-            document.getElementById('comp-sum-ord-val').innerText = `${curSumOrd} (السابق: ${Math.round(lySumOrd)})`;
-            const ordPctEl = document.getElementById('comp-sum-ord-pct');
-            ordPctEl.innerText = `الفرق: ${sumOrdDiff >= 0 ? '+' : ''}${Math.round(sumOrdDiff)} (${sumOrdDiffPct.toFixed(1)}%)`;
-            ordPctEl.className = `font-bold block text-[11px] ${sumOrdDiff >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
-
-            document.getElementById('comp-sum-chk-val').innerText = `${curAvgChk.toFixed(2)} ج.م (السابق: ${lyAvgChk.toFixed(2)})`;
-            const chkPctEl = document.getElementById('comp-sum-chk-pct');
-            chkPctEl.innerText = `الفرق: ${sumChkDiffPct >= 0 ? '+' : ''}${sumChkDiffPct.toFixed(1)}%`;
-            chkPctEl.className = `font-bold block text-[11px] ${sumChkDiffPct >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
-        }
-
-        function checkInventoryMissingDays() {
-            const sm = document.getElementById('global-month-selector').value;
-            if(!sm) return;
-            const [y, m] = sm.split('-').map(Number);
-            const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            const missingDays = [];
-            for(let d = 1; d <= daysInMonth; d++) {
-                const dayStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                if(!appData.dailyReceived[dayStr] || Object.keys(appData.dailyReceived[dayStr].data || {}).length === 0) {
-                    missingDays.push(d);
-                }
-            }
-            const alertBox = document.getElementById('inv-missing-alert');
-            const listEl = document.getElementById('inv-missing-list');
-            if(missingDays.length > 0) {
-                alertBox.classList.remove('hidden');
-                listEl.innerText = `الأيام الناقصة: ${missingDays.join(', ')}`;
-            } else {
-                alertBox.classList.add('hidden');
-            }
-        }
-
-        function addNewProduct() {
-            if(appData.lockedOpening) { showToast('المخزون وأول المدة مغلق للحماية، يرجى فتح التعديل أولاً', 'error'); return; }
-            const name = prompt('اسم الصنف الجديد:');
-            if(!name) return;
-            const unit = prompt('وحدة القياس (كرتونة، كيلو..):') || '';
-            const id = 'p_' + Date.now();
-            products.push({ id, name, unit });
-            appData.opening[id] = 0;
-            saveAndSync();
-            renderOpeningList();
-            loadDailyInventory();
-            renderTransfersList();
-            renderInventoryAnalysis();
-            showToast('تمت إضافة الصنف بنجاح', 'success');
-        }
-
-        function renderOpeningList() {
-            const c = document.getElementById('opening-container');
-            c.innerHTML = '';
-            const isLocked = appData.lockedOpening || false;
-
-            document.getElementById('save-opening-btn').classList.toggle('hidden', isLocked);
-            document.getElementById('unlock-opening-btn').classList.toggle('hidden', !isLocked);
-            const badge = document.getElementById('opening-lock-badge');
-            if(isLocked) {
-                badge.innerText = "مغلق ومحفوظ";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 font-bold";
-            } else {
-                badge.innerText = "مفتوح للإدخال";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold";
-            }
-
-            products.forEach((p, idx) => {
-                const div = document.createElement('div');
-                div.className = "flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs w-full";
-                div.innerHTML = `
-                    <input type="text" value="${p.name}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].name=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl flex-1 font-bold w-full">
-                    <input type="text" value="${p.unit}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].unit=this.value; saveAndSync();" class="w-full sm:w-24 border p-2 rounded-xl font-bold">
-                    <input type="number" value="${getOpening(p.id)}" ${isLocked ? 'disabled' : ''} onchange="appData.opening['${p.id}']=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-full sm:w-24 border p-2 rounded-xl font-black text-center">
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        function saveOpeningData() {
-            appData.lockedOpening = true;
-            saveAndSync();
-            renderOpeningList();
-            showToast('تم تأكيد وحفظ وقفل الأصناف ورصيد أول المدة بنجاح', 'success');
-        }
-
-        function unlockOpeningData() {
-            if(confirm('هل تريد فتح تعديل الأصناف ورصيد أول المدة؟')) {
-                appData.lockedOpening = false;
-                saveAndSync();
-                renderOpeningList();
-                showToast('تم فتح تعديل الأصناف', 'success');
-            }
-        }
-
-        function loadDailyInventory() {
-            const dateVal = document.getElementById('inv-daily-date').value;
-            const c = document.getElementById('daily-received-container');
-            c.innerHTML = '';
-            if(!appData.dailyReceived[dateVal]) appData.dailyReceived[dateVal] = { data: {} };
-
-            const isLocked = appData.lockedReceived[dateVal] || false;
-
-            document.getElementById('save-rec-btn').classList.toggle('hidden', isLocked);
-            document.getElementById('unlock-rec-btn').classList.toggle('hidden', !isLocked);
-            const badge = document.getElementById('rec-lock-badge');
-            if(isLocked) {
-                badge.innerText = "مغلق ومحفوظ";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 font-bold";
-            } else {
-                badge.innerText = "مفتوح للإدخال";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold";
-            }
-
-            products.forEach(p => {
-                const val = appData.dailyReceived[dateVal].data[p.id] || 0;
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs w-full";
-                div.innerHTML = `
-                    <span class="font-bold">${p.name} (${p.unit})</span>
-                    <input type="number" value="${val}" ${isLocked ? 'disabled' : ''} onchange="appData.dailyReceived['${dateVal}'].data['${p.id}']=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); checkInventoryMissingDays();" class="w-28 border p-2 rounded-xl font-black text-center">
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        function saveDailyReceived() {
-            const dateVal = document.getElementById('inv-daily-date').value;
-            appData.lockedReceived[dateVal] = true;
-            saveAndSync();
-            checkInventoryMissingDays();
-            loadDailyInventory();
-            renderInventoryAnalysis();
-            showToast('تم تأكيد وحفظ وقفل الوارد اليومي بنجاح', 'success');
-        }
-
-        function unlockDailyReceived() {
-            const dateVal = document.getElementById('inv-daily-date').value;
-            if(confirm('هل تريد فتح تعديل الوارد اليومي لهذا اليوم؟')) {
-                appData.lockedReceived[dateVal] = false;
-                saveAndSync();
-                loadDailyInventory();
-                showToast('تم فتح تعديل الوارد اليومي', 'success');
-            }
-        }
-
-        function addTransferRow() {
-            const d = document.getElementById('transfer-unified-date').value;
-            if(!d) return;
-            if(appData.lockedTransfers[d]) {
-                showToast('تحويلات هذا اليوم مغلقة للحماية، يرجى فتح التعديل أولاً', 'error');
-                return;
-            }
-            if(products.length === 0) { showToast('أضف صنفاً أولاً', 'error'); return; }
-            if(!appData.transfers[d]) appData.transfers[d] = { rows: [] };
-            appData.transfers[d].rows.push({ type: 'in', branch: '', productId: products[0].id, qty: 0 });
-            saveAndSync();
-            renderTransfersList();
-            renderInventoryAnalysis();
-        }
-
-        function renderTransfersList() {
-            const d = document.getElementById('transfer-unified-date').value;
-            const c = document.getElementById('transfers-container');
-            c.innerHTML = '';
-            const tData = appData.transfers[d];
-            const isLocked = appData.lockedTransfers[d] || false;
-
-            document.getElementById('save-trans-btn').classList.toggle('hidden', isLocked);
-            document.getElementById('unlock-trans-btn').classList.toggle('hidden', !isLocked);
-            document.getElementById('add-trans-btn').classList.toggle('hidden', isLocked);
-            const badge = document.getElementById('trans-lock-badge');
-            if(isLocked) {
-                badge.innerText = "مغلق ومحفوظ";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 font-bold";
-            } else {
-                badge.innerText = "مفتوح للإدخال";
-                badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold";
-            }
-
-            if(!tData || !tData.rows) return;
-            tData.rows.forEach((t, idx) => {
-                const prodOpts = products.map(p => `<option value="${p.id}" ${t.productId===p.id?'selected':''}>${p.name}</option>`).join('');
-                const div = document.createElement('div');
-                div.className = "grid grid-cols-1 sm:grid-cols-4 gap-2 items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs w-full";
-                div.innerHTML = `
-                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].type=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold w-full">
-                        <option value="in" ${t.type==='in'?'selected':''}>وارد من فرع</option>
-                        <option value="out" ${t.type==='out'?'selected':''}>صادر لفرع</option>
-                    </select>
-                    <input type="text" ${isLocked ? 'disabled' : ''} value="${t.branch || ''}" placeholder="اسم الفرع" onchange="appData.transfers['${d}'].rows[${idx}].branch=this.value; saveAndSync();" class="border p-2 rounded-xl font-bold w-full">
-                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].productId=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold w-full">${prodOpts}</select>
-                    <input type="number" ${isLocked ? 'disabled' : ''} value="${t.qty || 0}" placeholder="الكمية" onchange="appData.transfers['${d}'].rows[${idx}].qty=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-black text-center w-full">
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        function saveTransfersData() {
-            const d = document.getElementById('transfer-unified-date').value;
-            appData.lockedTransfers[d] = true;
-            saveAndSync();
-            renderTransfersList();
-            renderInventoryAnalysis();
-            showToast('تم تأكيد وحفظ وقفل التحويلات بنجاح', 'success');
-        }
-
-        function unlockTransfersData() {
-            const d = document.getElementById('transfer-unified-date').value;
-            if(confirm('هل تريد فتح تعديل التحويلات لهذا اليوم؟')) {
-                appData.lockedTransfers[d] = false;
-                saveAndSync();
-                renderTransfersList();
-                showToast('تم فتح تعديل التحويلات', 'success');
-            }
-        }
-
-        function renderInventoryAnalysis() {
-            const tbody = document.getElementById('analysis-table-body');
-            tbody.innerHTML = '';
-            products.forEach(p => {
-                if(!appData.closingData[p.id]) appData.closingData[p.id] = { closing: 0, sold: 0 };
-                const s = getProductStats(p);
-                const cData = appData.closingData[p.id];
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-bold">${p.name} (${p.unit})</td>
-                    <td class="p-3 font-bold">${s.opening}</td>
-                    <td class="p-3 font-bold">${s.totalRec}</td>
-                    <td class="p-3 font-bold ${s.transferNet >= 0 ? 'text-blue-500' : 'text-purple-500'}">${s.transferNet > 0 ? '+' : ''}${s.transferNet}</td>
-                    <td class="p-3"><input type="number" value="${cData.sold || 0}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); showToast('تم تحديث المباع', 'success');" class="w-16 border p-1 rounded font-black text-center"></td>
-                    <td class="p-3"><input type="number" value="${cData.closing || 0}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); showToast('تم تحديث آخر المدة', 'success');" class="w-16 border p-1 rounded font-black text-center"></td>
-                    <td class="p-3 font-bold ${s.variance >= 0 ? 'text-emerald-500' : 'text-red-500'}">${s.variance}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function exportOpeningExcelFiltered() {
-            const data = products.map(p => ({ 'اسم الصنف': p.name, 'الوحدة': p.unit, 'رصيد أول المدة': getOpening(p.id) }));
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Opening_Balance");
-            XLSX.writeFile(wb, "Kansas_Opening_Balance.xlsx");
-            showToast('تم تصدير شيت أول المدة بنجاح', 'success');
-        }
-
-        function exportDailyReceivedExcelFiltered() {
-            const f = document.getElementById('inv-rec-from').value;
-            const t = document.getElementById('inv-rec-to').value;
-            const data = [];
-            Object.keys(appData.dailyReceived).forEach(date => {
-                if((!f || date >= f) && (!t || date <= t)) {
-                    const rec = appData.dailyReceived[date].data || {};
-                    products.forEach(p => {
-                        if(rec[p.id]) data.push({ 'التاريخ': date, 'اسم الصنف': p.name, 'الوحدة': p.unit, 'الوارد': rec[p.id] });
-                    });
-                }
-            });
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Daily_Received");
-            XLSX.writeFile(wb, "Kansas_Daily_Received.xlsx");
-            showToast('تم تصدير شيت الوارد بنجاح', 'success');
-        }
-
-        function exportTransfersExcelFiltered() {
-            const f = document.getElementById('inv-trans-from').value;
-            const t = document.getElementById('inv-trans-to').value;
-            const data = [];
-            Object.keys(appData.transfers).forEach(date => {
-                if((!f || date >= f) && (!t || date <= t)) {
-                    (appData.transfers[date].rows || []).forEach(r => {
-                        const p = products.find(prod => prod.id === r.productId);
-                        data.push({
-                            'التاريخ': date,
-                            'نوع التحويل': r.type === 'in' ? 'وارد من فرع' : 'صادر لفرع',
-                            'اسم الفرع': r.branch || '',
-                            'اسم الصنف': p ? p.name : '',
-                            'الكمية': r.qty || 0
-                        });
-                    });
-                }
-            });
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Transfers");
-            XLSX.writeFile(wb, "Kansas_Transfers.xlsx");
-            showToast('تم تصدير شيت التحويلات بنجاح', 'success');
-        }
-
-        function exportInventoryAnalysisExcel() {
-            const data = products.map(p => {
-                const s = getProductStats(p);
-                return {
-                    'اسم الصنف': p.name,
-                    'الوحدة': p.unit,
-                    'أول المدة': s.opening,
-                    'الوارد': s.totalRec,
-                    'التحويلات (صافي)': s.transferNet,
-                    'المباع': s.sold,
-                    'آخر المدة (الفعلي)': s.closing,
-                    'العجز / الزيادة': s.variance
-                };
-            });
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Inventory_Analysis");
-            XLSX.writeFile(wb, "Kansas_Inventory_Analysis.xlsx");
-            showToast('تم تصدير شيت جرد المخزون بنجاح', 'success');
-        }
-
-        function exportRevenuePageExcel() {
-            const data = [];
-            const dFrom = document.getElementById('rev-date-from').value;
-            const dTo = document.getElementById('rev-date-to').value;
-
-            Object.keys(appData.dailyRecords).sort().forEach(dateStr => {
-                if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
-                    const rec = appData.dailyRecords[dateStr];
-                    const avgCheck = rec.orders > 0 ? (rec.revenue / rec.orders) : 0;
-                    data.push({
-                        'التاريخ': dateStr,
-                        'الإيراد (ج.م)': rec.revenue,
-                        'عدد العمليات': rec.orders,
-                        'متوسط الشيك (ج.م)': parseFloat(avgCheck.toFixed(2))
-                    });
-                }
-            });
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Revenue_Report");
-            XLSX.writeFile(wb, "Kansas_Revenue_Report.xlsx");
-            showToast('تم تصدير تقرير الإيرادات بنجاح', 'success');
-        }
-
-        function exportRevenuePagePdf() {
-            window.print();
-        }
-
-        function initChart() {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            revenueChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [
-                        {
-                            label: 'إيراد اليوم (الفعلي)',
-                            data: [],
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                            fill: true,
-                            tension: 0.3,
-                            borderWidth: 3
-                        },
-                        {
-                            label: 'متوسط إيراد اليوم المقابل (السنة السابقة)',
-                            data: [],
-                            borderColor: '#3b82f6',
-                            borderDash: [5, 5],
-                            fill: false,
-                            tension: 0.3,
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#94a3b8', font: { weight: 'bold' } } } },
-                    scales: {
-                        x: { ticks: { color: '#94a3b8', font: { weight: 'bold' } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { ticks: { color: '#94a3b8', font: { weight: 'bold' } }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
-                }
-            });
-        }
-
-        function updateChart() {
-            if(!revenueChartInstance) return;
-            const labels = [];
-            const curData = [];
-            const lyData = [];
-
-            const dFrom = document.getElementById('rev-date-from').value;
-            const dTo = document.getElementById('rev-date-to').value;
-
-            const sortedDates = Object.keys(appData.dailyRecords).sort();
-            sortedDates.forEach(dateStr => {
-                if((!dFrom || dateStr >= dFrom) && (!dTo || dateStr <= dTo)) {
-                    labels.push(dateStr.split('-').slice(1).join('/'));
-                    const rec = appData.dailyRecords[dateStr];
-                    curData.push(rec.revenue || 0);
-
-                    const dayPart = dateStr.split('-')[2];
-                    let lyRev = 0;
-                    if(appData.baseline.lyMode === 'daily' && appData.historicalLyDaily && appData.historicalLyDaily[dayPart]) {
-                        lyRev = appData.historicalLyDaily[dayPart].rev || 0;
-                    } else {
-                        lyRev = (appData.baseline.lyTotalRev || 0) / 30;
-                    }
-                    lyData.push(lyRev);
-                }
-            });
-
-            revenueChartInstance.data.labels = labels;
-            revenueChartInstance.data.datasets[0].data = curData;
-            revenueChartInstance.data.datasets[1].data = lyData;
-            revenueChartInstance.update();
-
-            updateSmartInsights(curData);
-        }
-
-        function updateSmartInsights(curData) {
-            const insEl = document.getElementById('insight-text');
-            if(curData.length === 0) {
-                insEl.innerText = "لم يتم تسجيل أي بيانات إيراد للفترة المحددة حتى الآن.";
-                return;
-            }
-            const total = curData.reduce((a, b) => a + b, 0);
-            const avg = total / curData.length;
-            const lastVal = curData[curData.length - 1];
-
-            if(lastVal > avg * 1.15) {
-                insEl.innerText = `أداء ممتاز! إيراد اليوم الأخير (${lastVal.toLocaleString()} ج.م) أعلى من المتوسط اليومي (${Math.round(avg).toLocaleString()} ج.م) بنسبة تزيد عن 15%. حافظ على زخم التشغيل وسرعة التحضير.`;
-            } else if(lastVal < avg * 0.85) {
-                insEl.innerText = `تنبيه تشغيلي: إيراد اليوم الأخير (${lastVal.toLocaleString()} ج.م) منخفض عن المتوسط اليومي (${Math.round(avg).toLocaleString()} ج.م). يُوصى بتنشيط العروض السريعة وتوجيه كابتن الصالة لرفع متوسط الشيك.`;
-            } else {
-                insEl.innerText = `الأداء مستقر ومقارب للمعدل اليومي العام (${Math.round(avg).toLocaleString()} ج.م). التركيز على تقليل وقت التحضير سيساعد في استيعاب عدد شيكات أكبر.`;
-            }
-        }
-    </script>
+    });
+}
+
+function saveDay() {
+    const d = $('day-input').value;
+    if (!d) return toast('اختر التاريخ', 'error');
+    if (isDayLocked(d)) return toast('حركة اليوم مقفولة. افتح التعديل الأول', 'error');
+    if (!S.products.length) return toast('أضف أصنافاً الأول', 'error');
+    if (!confirmFuture(d)) return;
+
+    const rec = {}, cn = {};
+    for (const p of S.products) {
+        const rcv = num($('rc-' + p.id).value);
+        const sdv = $('sd-' + p.id).value, clv = $('cl-' + p.id).value;
+        const sold = sdv === '' ? 0 : num(sdv);
+        const closing = clv === '' ? null : num(clv);
+        if (rcv < 0 || sold < 0 || (closing !== null && closing < 0)) return toast('القيم لا تكون بالسالب', 'error');
+        if (rcv > 0) rec[p.id] = rcv;
+        if (sold > 0 || closing !== null) cn[p.id] = { sold, closing };
+    }
+
+    if (Object.keys(rec).length) S.receipts[d] = rec; else delete S.receipts[d];
+    if (Object.keys(cn).length) S.counts[d] = cn; else delete S.counts[d];
+    S.locks.day[d] = true;
+    saveDB();
+    toast('تم حفظ وقفل حركة اليوم');
+    renderAll();
+}
+
+function unlockDay() {
+    const d = $('day-input').value;
+    if (!confirm('فتح حركة هذا اليوم للتعديل؟')) return;
+    delete S.locks.day[d];
+    saveDB();
+    toast('تم فتح اليوم للتعديل');
+    renderAll();
+}
+
+/* ---------- التحويلات (لنفس يوم الحركة) ---------- */
+function renderTransfers() {
+    const d = $('day-input').value;
+    const locked = isDayLocked(d);
+    const pName = id => (S.products.find(p => p.id === id) || {}).name || '';
+    $('trans-body').innerHTML = S.transfers.filter(t => t.day === d).map(t => `<tr>
+        <td>${t.type === 'in' ? 'وارد من فرع' : 'صادر لفرع'}</td>
+        <td>${esc(t.branch)}</td>
+        <td>${esc(pName(t.product_id))}</td>
+        <td>${fmt(t.qty, 2)}</td>
+        <td>${locked ? '' : `<button class="btn btn-red btn-sm" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}</td>
+    </tr>`).join('') || '<tr><td class="muted" colspan="5">لا توجد تحويلات في اليوم ده</td></tr>';
+}
+
+function addTransfer() {
+    const d = $('day-input').value;
+    if (!d) return toast('اختر التاريخ', 'error');
+    if (isDayLocked(d)) return toast('حركة اليوم مقفولة. افتح التعديل الأول', 'error');
+    const type = $('trans-type').value;
+    const branch = $('trans-branch').value.trim();
+    const product_id = $('trans-prod').value;
+    const qty = num($('trans-qty').value);
+    if (!product_id) return toast('أضف صنفاً الأول', 'error');
+    if (qty <= 0) return toast('الكمية لازم تكون أكبر من صفر', 'error');
+    if (branch.length > 120) return toast('اسم الفرع طويل جداً', 'error');
+    if (!confirmFuture(d)) return;
+    S.transfers.push({ id: uid(), day: d, type, branch, product_id, qty });
+    saveDB();
+    $('trans-branch').value = ''; $('trans-qty').value = '';
+    toast('تمت إضافة التحويل');
+    renderAll();
+}
+
+function deleteTransfer(id) {
+    const t = S.transfers.find(x => x.id === id);
+    if (!t) return;
+    if (isDayLocked(t.day)) return toast('حركة اليوم مقفولة', 'error');
+    if (!confirm('حذف هذا التحويل؟')) return;
+    S.transfers = S.transfers.filter(x => x.id !== id);
+    saveDB();
+    toast('تم الحذف');
+    renderAll();
+}
+
+/* ---------- التحليل لأي فترة ---------- */
+function quickRange(kind) {
+    const day = $('day-input').value || todayStr();
+    if (kind === 'day') { $('an-from').value = day; $('an-to').value = day; }
+    if (kind === 'mtd') { $('an-from').value = monthStart(monthKey(day)); $('an-to').value = day; }
+    if (kind === 'month') { $('an-from').value = monthStart(activeMonth); $('an-to').value = clampToday(activeMonth); }
+    renderAnalysis();
+}
+
+// التحليل داخل شهر واحد (رصيد أول الشهر بيتطبق على الشهر ده بس)
+function analysisRows(from, to) {
+    return S.products.map(p => {
+        let closing = null, closeDay = null;
+        eachDay(from, to, d => {
+            const c = cnt(d, p.id);
+            if (c.closing !== null) { closing = c.closing; closeDay = d; }
+        });
+        const sumEnd = closeDay || to;
+        let rec = 0, sold = 0;
+        eachDay(from, sumEnd, d => { rec += rcpt(d, p.id); sold += cnt(d, p.id).sold; });
+        const net = transfersNet(p.id, from, sumEnd);
+        const opening = openingAt(p.id, from);
+        const theo = opening + rec + net - sold;
+        const variance = closing === null ? null : closing - theo;
+        return { p, opening, rec, net, sold, theo, closing, closeDay, variance };
+    });
+}
+
+function renderAnalysis() {
+    let from = $('an-from').value, to = $('an-to').value;
+    const note = $('an-note');
+    if (!from || !to) { note.classList.add('hidden'); $('an-body').innerHTML = ''; return; }
+    if (from > to) { [from, to] = [to, from]; }
+    if (monthKey(from) !== monthKey(to)) {
+        to = monthEnd(monthKey(from));
+        note.classList.remove('hidden');
+        note.textContent = 'التحليل بيتم داخل شهر واحد. الفترة اتقصّت لآخر الشهر.';
+    } else note.classList.add('hidden');
+
+    const rows = analysisRows(from, to);
+    $('an-body').innerHTML = rows.map(r => `<tr>
+        <td>${esc(r.p.name)} <span class="muted">(${esc(r.p.unit)})</span></td>
+        <td>${fmt(r.opening, 2)}</td>
+        <td>${fmt(r.rec, 2)}</td>
+        <td class="${r.net >= 0 ? 'up' : 'down'}">${r.net > 0 ? '+' : ''}${fmt(r.net, 2)}</td>
+        <td>${fmt(r.sold, 2)}</td>
+        <td class="${r.theo < 0 ? 'down' : ''}">${fmt(r.theo, 2)}</td>
+        <td>${r.closing === null ? '<span class="muted">لم يُسجل جرد</span>' : fmt(r.closing, 2) + ' <span class="muted">(' + esc(r.closeDay) + ')</span>'}</td>
+        <td>${r.variance === null ? '-' : `<span class="${Math.abs(r.variance) < 0.005 ? '' : (r.variance > 0 ? 'up' : 'down')}">${(r.variance > 0 ? '+' : '') + fmt(r.variance, 2)}</span>`}</td>
+    </tr>`).join('') || '<tr><td class="muted" colspan="8">لا توجد أصناف</td></tr>';
+
+    const bad = rows.filter(r => r.variance !== null && Math.abs(r.variance) >= 0.005);
+    const an = $('an-alert');
+    if (bad.length) {
+        an.classList.remove('hidden');
+        an.textContent = 'فيه فروقات: ' + bad.map(r => `${r.p.name} (${r.variance > 0 ? '+' : ''}${fmt(r.variance, 2)})`).join('، ');
+    } else an.classList.add('hidden');
+}
+
+function exportAnalysisXlsx() {
+    let from = $('an-from').value, to = $('an-to').value;
+    if (!from || !to) return toast('اختر الفترة', 'error');
+    if (from > to) [from, to] = [to, from];
+    if (monthKey(from) !== monthKey(to)) to = monthEnd(monthKey(from));
+    const rows = analysisRows(from, to).map(r => ({
+        'الصنف': safeCell(r.p.name), 'الوحدة': safeCell(r.p.unit),
+        'أول الفترة': r.opening, 'الوارد': r.rec, 'صافي التحويلات': r.net,
+        'المباع': r.sold, 'النظري': r.theo, 'الجرد الفعلي': r.closing ?? '', 'الفرق': r.variance ?? ''
+    }));
+    if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+    XLSX.writeFile(wb, `Kansas_Inventory_${from}_${to}.xlsx`);
+}
+
+function exportRevenueXlsx() {
+    const from = $('rev-from').value, to = $('rev-to').value;
+    const rows = Object.keys(S.sales).sort().filter(d => inRange(d, from, to)).map(d => {
+        const r = S.sales[d];
+        return { 'التاريخ': d, 'الإيراد': r.revenue, 'العمليات': r.orders, 'متوسط الشيك': r.orders ? Number((r.revenue / r.orders).toFixed(2)) : 0 };
+    });
+    if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Revenue');
+    XLSX.writeFile(wb, 'Kansas_Revenue.xlsx');
+}
+
+function renderInventory() {
+    renderOpening();
+    renderDay();
+    renderAnalysis();
+}
+
+/* ---------- الرسم العام ---------- */
+function renderAll() {
+    renderSettings();
+    renderLyGrid();
+    renderSalesForm();
+    renderRevenue();
+    renderInventory();
+    renderBackupAlert();
+}
+
+/* ---------- البداية ---------- */
+window.addEventListener('load', () => {
+    let t = 'dark';
+    try { t = localStorage.getItem('kansas_theme') || 'dark'; } catch (e) {}
+    applyTheme(t);
+    createCharts();
+    if (isUnlocked()) showApp();
+    else $('lock').classList.remove('hidden');
+});
+</script>
 </body>
 </html>
