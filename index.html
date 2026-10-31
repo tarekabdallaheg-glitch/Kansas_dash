@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Premium v6.4</title>
+    <title>Kansas Premium v6.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -75,7 +75,7 @@
                     <div>
                         <h1 class="text-xs sm:text-sm font-black flex items-center gap-1.5 flex-wrap">
                             <span class="gold-text tracking-wide drop-shadow-sm">KANSAS PREMIUM</span> 
-                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v6.4</span>
+                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v6.5</span>
                         </h1>
                         <p class="text-[9px] text-slate-500 dark:text-slate-400 font-bold tracking-tight">Designed & Developed by Tarek Abdallah</p>
                     </div>
@@ -302,7 +302,7 @@
                     </div>
                 </div>
 
-                <!-- TARGET COMPARISON CARDS (Updated with explicit Target vs Actual Daily & Overall Plan Achievement) -->
+                <!-- TARGET COMPARISON CARDS (With Red/Green dynamic percentage color and difference below) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     
                     <!-- 1. مقارنة الشهر السابق (MoM) -->
@@ -317,19 +317,19 @@
                                     <span class="text-[9px] text-slate-500 block font-bold">مطلوب/سابق يومي</span>
                                     <span id="prev-daily-rev-lbl" class="font-black text-slate-900 dark:text-white block text-xs">0 ج.م</span>
                                     <span class="text-[9px] text-amber-600 block font-bold" id="mom-rev-actual-lbl">فعلي: 0</span>
-                                    <div class="pt-1 border-t text-[9px]">النسبة: <strong id="mom-rev-pct" class="text-emerald-600">0%</strong></div>
+                                    <div class="pt-1 border-t text-[9px]"><strong id="mom-rev-diff" class="block font-bold">فرق: 0</strong>النسبة: <strong id="mom-rev-pct">0%</strong></div>
                                 </div>
                                 <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
                                     <span class="text-[9px] text-slate-500 block font-bold">مطلوب/سابق عمليات</span>
                                     <span id="prev-daily-ord-lbl" class="font-black text-slate-900 dark:text-white block text-xs">0</span>
                                     <span class="text-[9px] text-amber-600 block font-bold" id="mom-ord-actual-lbl">فعلي: 0</span>
-                                    <div class="pt-1 border-t text-[9px]">النسبة: <strong id="mom-ord-pct" class="text-emerald-600">0%</strong></div>
+                                    <div class="pt-1 border-t text-[9px]"><strong id="mom-ord-diff" class="block font-bold">فرق: 0</strong>النسبة: <strong id="mom-ord-pct">0%</strong></div>
                                 </div>
                                 <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
                                     <span class="text-[9px] text-slate-500 block font-bold">مطلوب/سابق شيك</span>
                                     <span id="prev-avg-check-lbl" class="font-black text-slate-900 dark:text-white block text-xs">0 ج.م</span>
                                     <span class="text-[9px] text-amber-600 block font-bold" id="mom-chk-actual-lbl">فعلي: 0</span>
-                                    <div class="pt-1 border-t text-[9px]">النسبة: <strong id="mom-check-pct" class="text-emerald-600">0%</strong></div>
+                                    <div class="pt-1 border-t text-[9px]"><strong id="mom-chk-diff" class="block font-bold">فرق: 0</strong>النسبة: <strong id="mom-check-pct">0%</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -347,19 +347,19 @@
                                     <span class="text-[9px] text-slate-500 block font-bold">مطلوب يومي (سابق)</span>
                                     <span id="target-ly-rev" class="font-black text-slate-900 dark:text-white block text-xs">0 ج.م</span>
                                     <span class="text-[9px] text-amber-600 block font-bold" id="ly-rev-actual-lbl">فعلي: 0</span>
-                                    <div class="pt-1 border-t text-[9px]">النسبة: <strong id="actual-vs-ly-rev-pct" class="text-emerald-600">0%</strong></div>
+                                    <div class="pt-1 border-t text-[9px]"><strong id="ly-rev-diff" class="block font-bold">فرق: 0</strong>النسبة: <strong id="actual-vs-ly-rev-pct">0%</strong></div>
                                 </div>
                                 <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
                                     <span class="text-[9px] text-slate-500 block font-bold">مطلوب عمليات (سابق)</span>
                                     <span id="target-ly-orders" class="font-black text-slate-900 dark:text-white block text-xs">0</span>
                                     <span class="text-[9px] text-amber-600 block font-bold" id="ly-ord-actual-lbl">فعلي: 0</span>
-                                    <div class="pt-1 border-t text-[9px]">النسبة: <strong id="actual-vs-ly-ord-pct" class="text-emerald-600">0%</strong></div>
+                                    <div class="pt-1 border-t text-[9px]"><strong id="ly-ord-diff" class="block font-bold">فرق: 0</strong>النسبة: <strong id="actual-vs-ly-ord-pct">0%</strong></div>
                                 </div>
                                 <div class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border text-center space-y-1">
                                     <span class="text-[9px] text-slate-500 block font-bold">مطلوب شيك (سابق)</span>
                                     <span id="target-ly-check" class="font-black text-slate-900 dark:text-white block text-xs">0 ج.م</span>
                                     <span class="text-[9px] text-amber-600 block font-bold" id="ly-chk-actual-lbl">فعلي: 0</span>
-                                    <div class="pt-1 border-t text-[9px]">النسبة: <strong id="actual-vs-ly-check-pct" class="text-emerald-600">0%</strong></div>
+                                    <div class="pt-1 border-t text-[9px]"><strong id="ly-chk-diff" class="block font-bold">فرق: 0</strong>النسبة: <strong id="actual-vs-ly-check-pct">0%</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -397,10 +397,10 @@
 
                 </div>
 
-                <!-- NEW: Visual Benchmark Comparison Section with Colored Progress Bars -->
+                <!-- NEW: Visual Benchmark Comparison Section with Current Revenue Line Added -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
                     <h4 class="font-black text-xs flex items-center gap-2 text-slate-900 dark:text-white">
-                        <span class="text-amber-500">📊</span> خط المعايير المقارنة الملونة (أداءك الحالي أين يقع بين الأهداف؟)
+                        <span class="text-amber-500">📊</span> خط المعايير المقارنة الملونة (خطة الشهر، إيراد سابق، سنة سابقة، والإيراد الحالي)
                     </h4>
                     <div class="space-y-3 text-xs font-bold">
                         <div>
@@ -430,9 +430,18 @@
                                 <div id="bench-yoy-bar" class="bg-amber-500 h-full w-0 transition-all duration-500"></div>
                             </div>
                         </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-emerald-600 dark:text-emerald-400">⚡ خط الإيراد الحالي (الفعلي المحقق):</span>
+                                <span id="bench-actual-bar-lbl">0 ج.م</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
+                                <div id="bench-actual-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+                            </div>
+                        </div>
                         <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm">
-                            <span class="text-emerald-600 dark:text-emerald-400 font-black">⚡ موقعك الحالي (الإجمالي المحقق):</span>
-                            <span id="bench-actual-lbl" class="font-black text-slate-900 dark:text-white">0 ج.م</span>
+                            <span class="text-slate-700 dark:text-slate-300 font-bold">موقعك الحالي الإجمالي:</span>
+                            <span id="bench-actual-lbl" class="font-black text-emerald-600">0 ج.م</span>
                         </div>
                     </div>
                 </div>
@@ -860,7 +869,6 @@
             const avgCheck = totalOrders > 0 ? (totalRev / totalOrders) : 0;
             const planRev = appData.baseline.planRev || 0;
             
-            // النسبة العامة المحققة من إجمالي الخطة
             const planTotalRatio = planRev > 0 ? (totalRev / planRev) * 100 : 0;
             const projectedMonthRev = dailyAvgRev * 30;
 
@@ -878,13 +886,17 @@
             document.getElementById('prev-avg-check-lbl').innerText = prevAvgCheck.toFixed(2) + ' ج.م';
             document.getElementById('mom-chk-actual-lbl').innerText = `فعلي: ${avgCheck.toFixed(2)}`;
 
-            const momRevPct = prevDailyRev > 0 ? ((dailyAvgRev - prevDailyRev) / prevDailyRev) * 100 : 0;
-            const momOrdPct = prevDailyOrd > 0 ? ((dailyAvgOrd - prevDailyOrd) / prevDailyOrd) * 100 : 0;
-            const momCheckPct = prevAvgCheck > 0 ? ((avgCheck - prevAvgCheck) / prevAvgCheck) * 100 : 0;
+            const momRevDiff = dailyAvgRev - prevDailyRev;
+            const momRevPct = prevDailyRev > 0 ? (momRevDiff / prevDailyRev) * 100 : 0;
+            const momOrdDiff = dailyAvgOrd - prevDailyOrd;
+            const momOrdPct = prevDailyOrd > 0 ? (momOrdDiff / prevDailyOrd) * 100 : 0;
+            const momChkDiff = avgCheck - prevAvgCheck;
+            const momCheckPct = prevAvgCheck > 0 ? (momChkDiff / prevAvgCheck) * 100 : 0;
 
-            document.getElementById('mom-rev-pct').innerText = (momRevPct >= 0 ? '+' : '') + momRevPct.toFixed(1) + '%';
-            document.getElementById('mom-ord-pct').innerText = (momOrdPct >= 0 ? '+' : '') + momOrdPct.toFixed(1) + '%';
-            document.getElementById('mom-check-pct').innerText = (momCheckPct >= 0 ? '+' : '') + momCheckPct.toFixed(1) + '%';
+            // Update UI with color classes (emerald for positive, red for negative)
+            updateDiffAndPctUI('mom-rev-diff', 'mom-rev-pct', momRevDiff, momRevPct, 'ج.م');
+            updateDiffAndPctUI('mom-ord-diff', 'mom-ord-pct', momOrdDiff, momOrdPct, 'عملية', 0);
+            updateDiffAndPctUI('mom-chk-diff', 'mom-check-pct', momChkDiff, momCheckPct, 'ج.م', 2);
 
             // 2. الهدف الأولي (السنة السابقة YoY)
             let lyTotalRev = appData.baseline.lyTotalRev || 0;
@@ -900,13 +912,16 @@
             document.getElementById('target-ly-check').innerText = targetLyCheck.toFixed(2) + ' ج.م';
             document.getElementById('ly-chk-actual-lbl').innerText = `فعلي: ${avgCheck.toFixed(2)}`;
 
-            const lyRevPct = targetLyDailyRev > 0 ? ((dailyAvgRev - targetLyDailyRev) / targetLyDailyRev) * 100 : 0;
-            const lyOrdPct = targetLyDailyOrders > 0 ? ((dailyAvgOrd - targetLyDailyOrders) / targetLyDailyOrders) * 100 : 0;
-            const lyCheckPct = targetLyCheck > 0 ? ((avgCheck - targetLyCheck) / targetLyCheck) * 100 : 0;
+            const lyRevDiff = dailyAvgRev - targetLyDailyRev;
+            const lyRevPct = targetLyDailyRev > 0 ? (lyRevDiff / targetLyDailyRev) * 100 : 0;
+            const lyOrdDiff = dailyAvgOrd - targetLyDailyOrders;
+            const lyOrdPct = targetLyDailyOrders > 0 ? (lyOrdDiff / targetLyDailyOrders) * 100 : 0;
+            const lyChkDiff = avgCheck - targetLyCheck;
+            const lyCheckPct = targetLyCheck > 0 ? (lyChkDiff / targetLyCheck) * 100 : 0;
 
-            document.getElementById('actual-vs-ly-rev-pct').innerText = (lyRevPct >= 0 ? '+' : '') + lyRevPct.toFixed(1) + '%';
-            document.getElementById('actual-vs-ly-ord-pct').innerText = (lyOrdPct >= 0 ? '+' : '') + lyOrdPct.toFixed(1) + '%';
-            document.getElementById('actual-vs-ly-check-pct').innerText = (lyCheckPct >= 0 ? '+' : '') + lyCheckPct.toFixed(1) + '%';
+            updateDiffAndPctUI('ly-rev-diff', 'actual-vs-ly-rev-pct', lyRevDiff, lyRevPct, 'ج.م');
+            updateDiffAndPctUI('ly-ord-diff', 'actual-vs-ly-ord-pct', lyOrdDiff, lyOrdPct, 'عملية', 0);
+            updateDiffAndPctUI('ly-chk-diff', 'actual-vs-ly-check-pct', lyChkDiff, lyCheckPct, 'ج.م', 2);
 
             // 3. الهدف التشغيلي (خطة الشهر)
             document.getElementById('target-plan-rev').innerText = (planRev > 0 ? (planRev / 30) : 0).toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
@@ -914,16 +929,18 @@
             document.getElementById('actual-total-rev-lbl').innerText = totalRev.toLocaleString() + ' ج.م';
             document.getElementById('actual-vs-plan-pct').innerText = planTotalRatio.toFixed(1) + '%';
 
-            // 4. خط المعايير المقارنة الملونة
+            // 4. خط المعايير المقارنة الملونة (مع إضافة خط الإيراد الحالي الفعلي)
             document.getElementById('bench-plan-lbl').innerText = planRev.toLocaleString() + ' ج.م';
             document.getElementById('bench-mom-lbl').innerText = prevMonthRev.toLocaleString() + ' ج.م';
             document.getElementById('bench-yoy-lbl').innerText = lyTotalRev.toLocaleString() + ' ج.م';
+            document.getElementById('bench-actual-bar-lbl').innerText = totalRev.toLocaleString() + ' ج.م';
             document.getElementById('bench-actual-lbl').innerText = totalRev.toLocaleString() + ' ج.م';
 
             const maxBench = Math.max(planRev, prevMonthRev, lyTotalRev, totalRev, 1);
             document.getElementById('bench-plan-bar').style.width = Math.min(100, (planRev / maxBench) * 100) + '%';
             document.getElementById('bench-mom-bar').style.width = Math.min(100, (prevMonthRev / maxBench) * 100) + '%';
             document.getElementById('bench-yoy-bar').style.width = Math.min(100, (lyTotalRev / maxBench) * 100) + '%';
+            document.getElementById('bench-actual-bar').style.width = Math.min(100, (totalRev / maxBench) * 100) + '%';
 
             document.getElementById('mtd-daily-avg-rev').innerText = dailyAvgRev.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
             document.getElementById('mtd-daily-avg-ord').innerText = Math.round(dailyAvgOrd).toLocaleString() + ' عملية';
@@ -931,6 +948,24 @@
             document.getElementById('mtd-projected-rev').innerText = projectedMonthRev.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
 
             updateChart();
+        }
+
+        // مساعدة لتحديث الألوان والقيم (أحمر للسالب، أخضر للموجب) مع عرض الفرق تحته
+        function updateDiffAndPctUI(diffId, pctId, diffVal, pctVal, unit, decimals = 0) {
+            const diffEl = document.getElementById(diffId);
+            const pctEl = document.getElementById(pctId);
+
+            const sign = diffVal >= 0 ? '+' : '';
+            diffEl.innerText = `فرق: ${sign}${diffVal.toLocaleString(undefined, {maximumFractionDigits: decimals})} ${unit}`;
+            pctEl.innerText = `${sign}${pctVal.toFixed(1)}%`;
+
+            if(diffVal < 0) {
+                diffEl.className = "block font-bold text-red-500";
+                pctEl.className = "font-bold text-red-500";
+            } else {
+                diffEl.className = "block font-bold text-emerald-500";
+                pctEl.className = "font-bold text-emerald-500";
+            }
         }
 
         function renderDayByDayComparison() {
@@ -988,7 +1023,7 @@
                     <td class="p-3 font-black text-amber-600">${curRec.revenue.toLocaleString()} ج.م</td>
                     <td class="p-3 font-bold text-blue-600">${lyDateStr}</td>
                     <td class="p-3 font-bold">${lyRev.toLocaleString(undefined, {maximumFractionDigits:0})} ج.م</td>
-                    <td class="p-3 font-black ${revDiff >= 0 ? 'text-emerald-600' : 'text-amber-600'}">${revDiff >= 0 ? '+' : ''}${revDiff.toLocaleString(undefined, {maximumFractionDigits:0})} (${revDiffPct.toFixed(1)}%)</td>
+                    <td class="p-3 font-black ${revDiff >= 0 ? 'text-emerald-500' : 'text-red-500'}">${revDiff >= 0 ? '+' : ''}${revDiff.toLocaleString(undefined, {maximumFractionDigits:0})} (${revDiffPct.toFixed(1)}%)</td>
                     <td class="p-3 font-bold">${curRec.orders} / ${Math.round(lyOrd)}</td>
                     <td class="p-3 font-bold">${curCheck.toFixed(2)} / ${lyCheck.toFixed(2)} ج.م</td>
                 `;
