@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Premium v7.3</title>
+    <title>Kansas Premium v7.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -33,7 +33,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* ضبط ظهور الكتابة والخانات في الوضع الليلي والنهاري بوضوح تام */
         .dark input, .dark select { background-color: #0b1120 !important; color: #ffffff !important; border-color: #1e293b !important; }
         .dark input::placeholder { color: #94a3b8 !important; }
         .light .bg-kansasLightCard { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
@@ -77,13 +76,13 @@
                     <div class="bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-black p-2 rounded-xl text-xs shadow-md shadow-amber-500/20">K</div>
                     <div>
                         <h1 class="text-xs sm:text-sm font-black flex items-center gap-1.5 flex-wrap">
-                            <span class="gold-text tracking-wide drop-shadow-sm">KANSAS PREMIUM</span> 
-                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v7.3</span>
+                            <span class="gold-text tracking-wide drop-shadow-sm">KANSAS PREMIUM</span>
+                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v7.4</span>
                         </h1>
                         <p class="text-[9px] text-slate-500 dark:text-slate-400 font-bold tracking-tight">Designed & Developed by Tarek Abdallah</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center gap-1.5 no-print">
                     <div id="sync-status" class="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -131,8 +130,7 @@
 
             <!-- ================= REVENUE SECTION ================= -->
             <section id="tab-revenue" class="space-y-6">
-                
-                <!-- Revenue Missing Days Alert Banner -->
+
                 <div id="revenue-missing-alert" class="hidden bg-red-500/15 border-2 border-red-500/50 rounded-2xl p-4 text-xs text-red-900 dark:text-red-300 font-bold flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-2.5">
                         <span class="text-base">⚠️</span>
@@ -143,7 +141,6 @@
                     </div>
                 </div>
 
-                <!-- Revenue Booster AI Tips -->
                 <div class="bg-gradient-to-r from-amber-500/20 via-amber-500/5 to-transparent border border-amber-500/40 rounded-2xl p-5 text-xs flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3.5">
                         <span class="text-2xl animate-bounce">💡</span>
@@ -154,7 +151,6 @@
                     </div>
                 </div>
 
-                <!-- Smart Operational Insights Box -->
                 <div id="smart-insights-box" class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 text-xs flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3.5">
                         <span class="text-2xl">⚡</span>
@@ -165,7 +161,6 @@
                     </div>
                 </div>
 
-                <!-- Revenue Action Bar -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-sm transition-colors">
                     <div class="flex items-center gap-2.5 text-xs text-slate-800 dark:text-slate-300 font-bold">
                         <span class="p-2.5 bg-amber-500/15 text-amber-600 rounded-xl">🗓️</span>
@@ -189,27 +184,27 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">خطة إيراد الشهر الحالي</label>
-                                <input type="number" id="base-plan-rev" onchange="saveBaseline()" class="w-full bg-slate-50 dark:bg-slate-900 border rounded-xl p-2.5 font-bold" placeholder="0.00">
+                                <input type="number" id="base-plan-rev" class="w-full bg-slate-50 dark:bg-slate-900 border rounded-xl p-2.5 font-bold" placeholder="0.00">
                             </div>
                         </div>
 
                         <div class="pt-3 border-t border-slate-300 dark:border-kansasBorder space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl">
-                            <h4 class="font-black text-xs text-purple-600 dark:text-purple-400">📊 بيانات الشهر السابق (لالمقارنة الشهرية Month-over-Month):</h4>
+                            <h4 class="font-black text-xs text-purple-600 dark:text-purple-400">📊 بيانات الشهر السابق (للمقارنة الشهرية Month-over-Month):</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي إيراد الشهر السابق</label>
-                                    <input type="number" id="base-prev-month-rev" onchange="saveBaseline()" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0.00">
+                                    <input type="number" id="base-prev-month-rev" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0.00">
                                 </div>
                                 <div>
                                     <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي عمليات الشهر السابق</label>
-                                    <input type="number" id="base-prev-month-orders" onchange="saveBaseline()" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0">
+                                    <input type="number" id="base-prev-month-orders" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0">
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="pt-3 border-t border-slate-300 dark:border-kansasBorder space-y-3">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                                <span class="font-black text-xs text-slate-900 dark:text-white">📅 طريقة إدخال إيراد السنة السابقة (الشهر المقابل يوم بيوم):</span>
+                                <span class="font-black text-xs text-slate-900 dark:text-white">📅 طريقة إدخال إيراد السنة السابقة (الشهر المقابل):</span>
                                 <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-300 dark:border-kansasBorder">
                                     <button onclick="setLyInputMode('total')" id="btn-ly-total" class="px-3 py-1.5 rounded-lg font-bold text-xs bg-amber-500 text-slate-950 shadow-sm transition">إجمالي الشهر دفعة واحدة</button>
                                     <button onclick="setLyInputMode('daily')" id="btn-ly-daily" class="px-3 py-1.5 rounded-lg font-bold text-xs text-slate-700 dark:text-slate-300 transition">إدخال يدوي يوم بيوم</button>
@@ -220,11 +215,11 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي إيراد الشهر المقابل (السنة السابقة)</label>
-                                        <input type="number" id="base-ly-total-rev" onchange="saveBaseline()" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0.00">
+                                        <input type="number" id="base-ly-total-rev" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">إجمالي عدد عمليات الشهر المقابل (السنة السابقة)</label>
-                                        <input type="number" id="base-ly-total-orders" onchange="saveBaseline()" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0">
+                                        <input type="number" id="base-ly-total-orders" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2.5 font-bold" placeholder="0">
                                     </div>
                                 </div>
                             </div>
@@ -241,7 +236,7 @@
                     </div>
                 </div>
 
-                <!-- Daily Entry (Strict Rule: Both Required + Lock After Save) -->
+                <!-- Daily Entry -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 shadow-sm transition-colors">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
@@ -249,7 +244,7 @@
                         </h3>
                         <div id="day-lock-status-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال والتعديل</div>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
                         <div>
                             <label class="block text-slate-700 dark:text-slate-300 mb-1 font-bold">التاريخ واليوم</label>
@@ -275,7 +270,7 @@
                 <!-- Date Range Filter -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-sm transition-colors no-print">
                     <div class="flex items-center gap-2.5 w-full sm:w-auto flex-wrap font-bold">
-                        <span id="revenue-box-title" class="text-amber-600 dark:text-amber-400 font-black">🔍 نطاق تحليل الإيراد (من - إلى):</span>
+                        <span class="text-amber-600 dark:text-amber-400 font-black">🔍 نطاق تحليل الإيراد (من - إلى):</span>
                         <input type="date" id="rev-date-from" onchange="calculateAnalytics()" class="bg-slate-50 dark:bg-slate-900 border rounded-xl p-2 font-bold">
                         <span class="text-slate-700 dark:text-slate-300">إلى</span>
                         <input type="date" id="rev-date-to" onchange="calculateAnalytics()" class="bg-slate-50 dark:bg-slate-900 border rounded-xl p-2 font-bold">
@@ -305,7 +300,6 @@
 
                 <!-- TARGET COMPARISON CARDS -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <!-- MoM -->
                     <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
                         <div class="space-y-3">
                             <div class="flex justify-between items-center border-b pb-3">
@@ -332,7 +326,6 @@
                         </div>
                     </div>
 
-                    <!-- YoY -->
                     <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
                         <div class="space-y-3">
                             <div class="flex justify-between items-center border-b pb-3">
@@ -359,7 +352,6 @@
                         </div>
                     </div>
 
-                    <!-- Plan -->
                     <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
                         <div class="space-y-3">
                             <div class="flex justify-between items-center border-b pb-3">
@@ -390,7 +382,7 @@
                     </div>
                 </div>
 
-                <!-- Visual Benchmark Comparison Bars -->
+                <!-- Visual Benchmark Bars -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm">
                     <h4 class="font-black text-xs flex items-center gap-2 text-slate-900 dark:text-white">
                         <span class="text-amber-500">📊</span> خط المعايير المقارنة الملونة (خطة الشهر، إيراد سابق، سنة سابقة، والإيراد الحالي)
@@ -435,14 +427,12 @@
                     </div>
                 </div>
 
-                <!-- DUAL-DATE RANGE COMPARISON SHEET (DAY BY DAY) -->
+                <!-- DUAL-DATE RANGE COMPARISON SHEET -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-slate-300 dark:border-kansasBorder pb-4 gap-4">
-                        <div>
-                            <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                                <span class="text-amber-500">📊</span> شيت مقارنة الفترة المحددة (السنة الحالية مقابل السنة السابقة يوم بيوم)
-                            </h3>
-                        </div>
+                        <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
+                            <span class="text-amber-500">📊</span> شيت مقارنة الفترة المحددة (السنة الحالية مقابل السنة السابقة يوم بيوم)
+                        </h3>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-300 dark:border-kansasBorder text-xs font-bold">
@@ -514,7 +504,6 @@
 
             <!-- ================= INVENTORY SECTION ================= -->
             <section id="tab-inventory" class="hidden space-y-6">
-                <!-- Inventory Missing Days Alert -->
                 <div id="inv-missing-alert" class="hidden bg-amber-500/15 border-2 border-amber-500/50 rounded-2xl p-4 text-xs text-amber-900 dark:text-amber-300 font-bold flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-2.5">
                         <span class="text-base">⚠️</span>
@@ -526,17 +515,17 @@
                 </div>
 
                 <!-- Section 1: Opening Balance -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm">
+                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleOpeningAccordion()">
                         <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">1️⃣</span> شريط إعداد الأصناف ورصيد أول المدة
+                            <span class="text-amber-500">📋</span> شريط إعداد الأصناف ورصيد أول المدة
                         </h3>
                         <div class="flex items-center gap-2">
                             <span id="opening-lock-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال</span>
                             <span id="opening-arrow" class="text-slate-500 text-xs transition transform font-bold">▼</span>
                         </div>
                     </div>
-                    <div id="opening-content" class="hidden mt-4 pt-4 border-t border-slate-300 dark:border-kansasBorder space-y-4">
+                    <div id="opening-content" class="hidden pt-4 border-t border-slate-300 dark:border-kansasBorder space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 no-print items-end bg-slate-50 dark:bg-slate-900 p-3 rounded-2xl border border-slate-300 dark:border-kansasBorder">
                             <div>
                                 <label class="block text-[11px] font-bold mb-1">من تاريخ:</label>
@@ -546,10 +535,10 @@
                                 <label class="block text-[11px] font-bold mb-1">إلى تاريخ:</label>
                                 <input type="date" id="inv-open-to" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 text-xs font-bold">
                             </div>
-                            <button onclick="exportOpeningExcelFiltered()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">📊 تحميل شيت أول المدة (بفترة)</button>
+                            <button onclick="exportOpeningExcelFiltered()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">📊 تحميل شيت أول المدة</button>
                         </div>
-                        <div class="flex justify-between items-center no-print pt-2">
-                            <button onclick="addNewProduct()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 py-2.5 px-4 rounded-xl text-xs font-black shadow-sm">+ إضافة صنف جديد</button>
+                        <div class="flex justify-between items-center no-print">
+                            <button onclick="addNewProduct()" class="border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 py-2 px-4 rounded-xl text-xs font-black transition">+ إضافة صنف جديد</button>
                             <button onclick="unlockOpeningData()" id="unlock-opening-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح التعديل للأصناف</button>
                         </div>
                         <div id="opening-container" class="space-y-3"></div>
@@ -560,14 +549,14 @@
                 </div>
 
                 <!-- Section 2: Daily Received -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm">
+                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
                     <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-3 gap-3">
                         <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">2️⃣</span> الوارد اليومي للمخزون
+                            <span class="text-amber-500">📥</span> الوارد اليومي للمخزون
                         </h3>
                         <div id="rec-lock-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال</div>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs font-bold bg-slate-50 dark:bg-slate-900 p-3 rounded-2xl border border-slate-300 dark:border-kansasBorder items-end">
                         <div>
                             <label class="block text-[11px] mb-1">من تاريخ (إكسل):</label>
@@ -592,10 +581,10 @@
                 </div>
 
                 <!-- Section 3: Transfers -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm">
+                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
                     <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-3 gap-3">
                         <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">3️⃣</span> التحويلات (بين الفروع)
+                            <span class="text-amber-500">🔄</span> التحويلات (بين الفروع)
                         </h3>
                         <div id="trans-lock-badge" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold">مفتوح للإدخال</div>
                     </div>
@@ -611,13 +600,13 @@
                         </div>
                         <button onclick="exportTransfersExcelFiltered()" class="no-print bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">📊 إكسل التحويلات (بفترة)</button>
                         <div>
-                            <label class="block text-[11px] text-amber-600 dark:text-amber-400 mb-1">تاريخ التحويل الحلي:</label>
+                            <label class="block text-[11px] text-amber-600 dark:text-amber-400 mb-1">تاريخ التحويل الحالي:</label>
                             <input type="date" id="transfer-unified-date" onchange="renderTransfersList()" class="w-full bg-white dark:bg-slate-800 border rounded-xl p-2 font-bold text-amber-600">
                         </div>
                     </div>
 
                     <div class="flex justify-end">
-                        <button onclick="addTransferRow()" id="add-trans-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-xl text-xs font-black shadow-sm">+ إضافة تحويل جديد</button>
+                        <button onclick="addTransferRow()" id="add-trans-btn" class="border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-xl text-xs font-black transition">+ إضافة تحويل جديد</button>
                     </div>
                     <div id="transfers-container" class="space-y-3"></div>
                     <div class="flex justify-end items-center gap-3 pt-3">
@@ -627,10 +616,10 @@
                 </div>
 
                 <!-- Section 4: Inventory Analysis -->
-                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm">
+                <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors">
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b pb-4 gap-4">
                         <h3 class="font-black text-sm flex items-center gap-2 text-slate-900 dark:text-white">
-                            <span class="text-amber-500">4️⃣</span> تحليل وجرد المخزون النهائي وطباعة التقرير
+                            <span class="text-amber-500">📦</span> تحليل وجرد المخزون النهائي وطباعة التقرير
                         </h3>
                         <div class="flex items-center gap-2 no-print flex-wrap text-xs font-bold">
                             <span>من:</span>
@@ -648,6 +637,7 @@
                                     <th class="p-3">الصنف</th>
                                     <th class="p-3">أول المدة</th>
                                     <th class="p-3">الوارد</th>
+                                    <th class="p-3">التحويلات (صافي)</th>
                                     <th class="p-3">المباع</th>
                                     <th class="p-3">آخر المدة</th>
                                     <th class="p-3">العجز / الزيادة</th>
@@ -674,6 +664,90 @@
         let lyInputModeState = 'total';
         const MASTER_PIN = "k@123456";
 
+        // ===== STORAGE MODEL =====
+        // products: global list shared across all months (kansas_pro_global)
+        // appData: data of ONE month only (kansas_pro_YYYY-MM)
+        let products = [];
+        let currentMonthKey = '';
+        let appData = defaultMonthData();
+
+        function defaultMonthData() {
+            return {
+                baseline: { planRev: 0, prevMonthRev: 0, prevMonthOrders: 0, lyTotalRev: 0, lyTotalOrders: 0, lyMode: 'total' },
+                historicalLyDaily: {},
+                dailyRecords: {},
+                opening: {},
+                dailyReceived: {},
+                transfers: {},
+                closingData: {},
+                lockedDays: {},
+                lockedOpening: false,
+                lockedReceived: {},
+                lockedTransfers: {}
+            };
+        }
+
+        function saveAndSync() {
+            if(!currentMonthKey) return;
+            localStorage.setItem('kansas_pro_' + currentMonthKey, JSON.stringify(appData));
+            localStorage.setItem('kansas_pro_global', JSON.stringify({ products }));
+        }
+
+        function loadGlobal() {
+            const raw = localStorage.getItem('kansas_pro_global');
+            if(raw) {
+                try { products = JSON.parse(raw).products || []; } catch(e) { products = []; }
+            }
+        }
+
+        function loadMonth(monthKey) {
+            currentMonthKey = monthKey;
+            appData = defaultMonthData();
+            const raw = localStorage.getItem('kansas_pro_' + monthKey);
+            if(raw) {
+                try {
+                    const saved = JSON.parse(raw);
+                    // Migration from older versions where products lived inside the month
+                    if(saved.products && !localStorage.getItem('kansas_pro_global')) {
+                        products = saved.products.map(p => ({ id: p.id, name: p.name, unit: p.unit }));
+                        saveAndSync();
+                    }
+                    if(saved.products && !saved.opening) {
+                        saved.opening = {};
+                        saved.products.forEach(p => { saved.opening[p.id] = p.opening || 0; });
+                    }
+                    appData = Object.assign(defaultMonthData(), saved);
+                } catch(e) { console.error('Load error', e); }
+            }
+            if(products.length === 0) {
+                products = [{ id: 'p1', name: 'لحم برجر', unit: 'كرتونة' }];
+                saveAndSync();
+            }
+        }
+
+        function getOpening(pid) { return (appData.opening && appData.opening[pid]) || 0; }
+
+        function getProductStats(p) {
+            const cData = appData.closingData[p.id] || { closing: 0, sold: 0 };
+            let totalRec = 0;
+            Object.values(appData.dailyReceived).forEach(d => totalRec += ((d.data && d.data[p.id]) || 0));
+            let transferNet = 0;
+            Object.values(appData.transfers).forEach(day => {
+                (day.rows || []).forEach(r => {
+                    if(r.productId !== p.id) return;
+                    if(r.type === 'in') transferNet += (r.qty || 0);
+                    else transferNet -= (r.qty || 0);
+                });
+            });
+            const opening = getOpening(p.id);
+            const sold = cData.sold || 0;
+            const closing = cData.closing || 0;
+            const theoretical = opening + totalRec + transferNet - sold;
+            const variance = closing - theoretical;
+            return { opening, totalRec, transferNet, sold, closing, variance };
+        }
+
+        // ===== PIN =====
         function verifyPin() {
             if(document.getElementById('unlock-pin').value === MASTER_PIN) {
                 document.getElementById('pin-lock-modal').classList.add('hidden');
@@ -690,31 +764,18 @@
 
         function lockSystem() { sessionStorage.removeItem('kansas_unlocked'); location.reload(); }
 
-        let appData = {
-            baseline: { planRev: 0, prevMonthRev: 0, prevMonthOrders: 0, lyTotalRev: 0, lyTotalOrders: 0, lyMode: 'total' },
-            historicalLyDaily: {}, 
-            dailyRecords: {},
-            products: [{ id: 'p1', name: 'لحم برجر', unit: 'كرتونة', opening: 100 }],
-            dailyReceived: {},
-            transfers: {},
-            closingData: {},
-            lockedDays: {},
-            lockedOpening: false,
-            lockedReceived: {},
-            lockedTransfers: {}
-        };
-
         function parseUTCExactDate(dateStr) {
             if(!dateStr) return null;
             const [y, m, d] = dateStr.split('-').map(Number);
             return new Date(Date.UTC(y, m - 1, d));
         }
 
+        // ===== INIT =====
         window.onload = function() {
             initTheme();
             const today = new Date();
-            const yearMonth = today.toISOString().slice(0, 7);
-            const todayStr = today.toISOString().split('T')[0];
+            const yearMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
             document.getElementById('global-month-selector').value = yearMonth;
             updateActiveMonthTitle();
@@ -729,7 +790,6 @@
             document.getElementById('inv-rec-to').value = todayStr;
             document.getElementById('inv-trans-from').value = yearMonth + '-01';
             document.getElementById('inv-trans-to').value = todayStr;
-
             document.getElementById('inv-print-from').value = yearMonth + '-01';
             document.getElementById('inv-print-to').value = todayStr;
 
@@ -744,9 +804,17 @@
             document.getElementById('comp-ly-from').value = lyFromStr;
             document.getElementById('comp-ly-to').value = lyToStr;
 
-            updateDayName();
-            loadLocalData();
+            loadGlobal();
+            loadMonth(yearMonth);
             initChart();
+            renderAll();
+        };
+
+        function renderAll() {
+            fillBaselineInputs();
+            setLyModeUI(appData.baseline.lyMode || 'total');
+            updateDayName();
+            loadDayData();
             calculateAnalytics();
             renderOpeningList();
             loadDailyInventory();
@@ -755,7 +823,22 @@
             renderDayByDayComparison();
             checkRevenueMissingDays();
             checkInventoryMissingDays();
-        };
+        }
+
+        function fillBaselineInputs() {
+            const b = appData.baseline;
+            document.getElementById('base-plan-rev').value = b.planRev || '';
+            document.getElementById('base-prev-month-rev').value = b.prevMonthRev || '';
+            document.getElementById('base-prev-month-orders').value = b.prevMonthOrders || '';
+            document.getElementById('base-ly-total-rev').value = b.lyTotalRev || '';
+            document.getElementById('base-ly-total-orders').value = b.lyTotalOrders || '';
+        }
+
+        function setLyModeUI(mode) {
+            document.getElementById('ly-total-mode-box').classList.toggle('hidden', mode === 'daily');
+            document.getElementById('ly-daily-mode-box').classList.toggle('hidden', mode === 'total');
+            if(mode === 'daily') renderHistoricalDaysInputs();
+        }
 
         function showToast(msg, type='success') {
             const c = document.getElementById('toast-container');
@@ -767,7 +850,7 @@
         }
 
         function initTheme() {
-            let savedTheme = localStorage.getItem('kansas_pro_theme') || 'dark';
+            const savedTheme = localStorage.getItem('kansas_pro_theme') || 'dark';
             document.getElementById('html-root').className = savedTheme;
             document.getElementById('theme-icon').innerText = savedTheme === 'dark' ? '🌙' : '☀️';
         }
@@ -781,16 +864,13 @@
         }
 
         function changeActiveMonth() {
+            // save the month we are leaving before switching (prevents data mixing)
+            saveAndSync();
+            const newMonth = document.getElementById('global-month-selector').value;
+            if(!newMonth) return;
+            loadMonth(newMonth);
             updateActiveMonthTitle();
-            loadLocalData();
-            renderOpeningList();
-            loadDailyInventory();
-            renderTransfersList();
-            renderInventoryAnalysis();
-            renderDayByDayComparison();
-            calculateAnalytics();
-            checkRevenueMissingDays();
-            checkInventoryMissingDays();
+            renderAll();
         }
 
         function updateActiveMonthTitle() {
@@ -805,8 +885,10 @@
             currentTab = tab;
             document.getElementById('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
             document.getElementById('tab-inventory').classList.toggle('hidden', tab === 'revenue');
-            document.getElementById('btn-revenue').className = tab === 'revenue' ? 'flex-1 py-3 text-center font-black text-slate-950 bg-gradient-to-r from-amber-500 to-amber-400 rounded-xl text-xs shadow-lg shadow-amber-500/20' : 'flex-1 py-3 text-center font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs transition';
-            document.getElementById('btn-inventory').className = tab === 'inventory' ? 'flex-1 py-3 text-center font-black text-slate-950 bg-gradient-to-r from-amber-500 to-amber-400 rounded-xl text-xs shadow-lg shadow-amber-500/20' : 'flex-1 py-3 text-center font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs transition';
+            const active = 'flex-1 py-3 text-center font-black text-slate-950 bg-gradient-to-r from-amber-500 to-amber-400 rounded-xl text-xs shadow-lg shadow-amber-500/20';
+            const inactive = 'flex-1 py-3 text-center font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs transition';
+            document.getElementById('btn-revenue').className = tab === 'revenue' ? active : inactive;
+            document.getElementById('btn-inventory').className = tab === 'inventory' ? active : inactive;
         }
 
         function toggleBaseline() { document.getElementById('baseline-content').classList.toggle('hidden'); }
@@ -815,9 +897,7 @@
         function setLyInputMode(mode) {
             lyInputModeState = mode;
             appData.baseline.lyMode = mode;
-            document.getElementById('ly-total-mode-box').classList.toggle('hidden', mode === 'daily');
-            document.getElementById('ly-daily-mode-box').classList.toggle('hidden', mode === 'total');
-            if(mode === 'daily') generateHistoricalDays();
+            setLyModeUI(mode);
             saveAndSync();
             calculateAnalytics();
             renderDayByDayComparison();
@@ -828,12 +908,10 @@
             if(!sm) return;
             const [y, m] = sm.split('-').map(Number);
             const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            if(!appData.historicalLyDaily) appData.historicalLyDaily = {};
             for(let d = 1; d <= daysInMonth; d++) {
                 const dayKey = String(d).padStart(2, '0');
                 if(!appData.historicalLyDaily[dayKey]) appData.historicalLyDaily[dayKey] = { rev: 0, orders: 0 };
             }
-            renderHistoricalDaysInputs();
         }
 
         function renderHistoricalDaysInputs() {
@@ -843,7 +921,6 @@
             if(!sm) return;
             const [y, m] = sm.split('-').map(Number);
             const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            if(!appData.historicalLyDaily) appData.historicalLyDaily = {};
             for(let d = 1; d <= daysInMonth; d++) {
                 const dayKey = String(d).padStart(2, '0');
                 if(!appData.historicalLyDaily[dayKey]) appData.historicalLyDaily[dayKey] = { rev: 0, orders: 0 };
@@ -874,13 +951,13 @@
             const dt = parseUTCExactDate(dateVal);
             document.getElementById('day-name-display').innerText = `اليوم: ${days[dt.getUTCDay()]}`;
             document.getElementById('current-day-label').innerText = `تاريخ اليوم: ${dateVal}`;
-            
+
             const isLocked = appData.lockedDays && appData.lockedDays[dateVal];
             document.getElementById('daily-revenue').disabled = isLocked;
             document.getElementById('daily-orders').disabled = isLocked;
             document.getElementById('save-day-btn').classList.toggle('hidden', isLocked);
             document.getElementById('unlock-day-btn').classList.toggle('hidden', !isLocked);
-            
+
             const badge = document.getElementById('day-lock-status-badge');
             if(isLocked) {
                 badge.innerText = "مغلق ومحفوظ";
@@ -895,13 +972,8 @@
             updateDayName();
             const dateVal = document.getElementById('daily-date').value;
             const rec = appData.dailyRecords[dateVal];
-            if(rec) {
-                document.getElementById('daily-revenue').value = rec.revenue;
-                document.getElementById('daily-orders').value = rec.orders;
-            } else {
-                document.getElementById('daily-revenue').value = '';
-                document.getElementById('daily-orders').value = '';
-            }
+            document.getElementById('daily-revenue').value = rec ? rec.revenue : '';
+            document.getElementById('daily-orders').value = rec ? rec.orders : '';
         }
 
         function saveDailyDataStrict() {
@@ -909,21 +981,10 @@
             const revVal = document.getElementById('daily-revenue').value;
             const ordVal = document.getElementById('daily-orders').value;
 
-            if(!dateVal) {
-                showToast('الرجاء اختيار التاريخ', 'error');
-                return;
-            }
-            if(revVal === '' || ordVal === '') {
-                showToast('خطأ: يجب إدخال كل من الإيراد وعمليات اليوم معاً!', 'error');
-                return;
-            }
+            if(!dateVal) { showToast('الرجاء اختيار التاريخ', 'error'); return; }
+            if(revVal === '' || ordVal === '') { showToast('خطأ: يجب إدخال كل من الإيراد وعمليات اليوم معاً!', 'error'); return; }
 
-            appData.dailyRecords[dateVal] = {
-                revenue: parseFloat(revVal) || 0,
-                orders: parseInt(ordVal, 10) || 0
-            };
-            
-            if(!appData.lockedDays) appData.lockedDays = {};
+            appData.dailyRecords[dateVal] = { revenue: parseFloat(revVal) || 0, orders: parseInt(ordVal, 10) || 0 };
             appData.lockedDays[dateVal] = true;
 
             saveAndSync();
@@ -949,9 +1010,10 @@
             const sm = document.getElementById('global-month-selector').value;
             if(!sm) return;
             const [y, m] = sm.split('-').map(Number);
-            const todayStr = new Date().toISOString().split('T')[0];
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
             const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            let missingDays = [];
+            const missingDays = [];
 
             for(let d = 1; d <= daysInMonth; d++) {
                 const dayStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -987,8 +1049,9 @@
 
         function resetRevDateRange() {
             const sm = document.getElementById('global-month-selector').value;
+            const today = new Date();
             document.getElementById('rev-date-from').value = sm + '-01';
-            document.getElementById('rev-date-to').value = new Date().toISOString().split('T')[0];
+            document.getElementById('rev-date-to').value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
             calculateAnalytics();
         }
 
@@ -1037,8 +1100,8 @@
             updateDiffAndPctUI('mom-chk-diff', 'mom-check-pct', momChkDiff, momCheckPct, 'ج.م', 2);
 
             // YoY
-            let lyTotalRev = appData.baseline.lyTotalRev || 0;
-            let lyTotalOrders = appData.baseline.lyTotalOrders || 0;
+            const lyTotalRev = appData.baseline.lyTotalRev || 0;
+            const lyTotalOrders = appData.baseline.lyTotalOrders || 0;
             const targetLyDailyRev = lyTotalRev > 0 ? (lyTotalRev / 30) : 0;
             const targetLyDailyOrders = lyTotalOrders > 0 ? (lyTotalOrders / 30) : 0;
             const targetLyCheck = lyTotalOrders > 0 ? (lyTotalRev / lyTotalOrders) : 0;
@@ -1058,7 +1121,7 @@
             updateDiffAndPctUI('ly-ord-diff', 'actual-vs-ly-ord-pct', lyOrdDiff, lyOrdPct, 'عملية', 0);
             updateDiffAndPctUI('ly-chk-diff', 'actual-vs-ly-check-pct', lyChkDiff, lyCheckPct, 'ج.م', 2);
 
-            // Plan Targets
+            // Plan
             document.getElementById('target-plan-rev').innerText = (planRev > 0 ? (planRev / 30) : 0).toLocaleString(undefined, {maximumFractionDigits:0}) + ' ج.م';
             document.getElementById('target-plan-total').innerText = planRev.toLocaleString() + ' ج.م';
             document.getElementById('actual-total-rev-lbl').innerText = totalRev.toLocaleString() + ' ج.م';
@@ -1111,11 +1174,11 @@
 
             let curDate = parseUTCExactDate(curFromStr);
             const curEndDate = parseUTCExactDate(curToStr);
-            let lyDate = parseUTCExactDate(lyFromStr);
+            const lyDate = parseUTCExactDate(lyFromStr);
             const lyEndDate = parseUTCExactDate(lyToStr);
 
             let curSumRev = 0, lySumRev = 0, curSumOrd = 0, lySumOrd = 0;
-            let currentLyPointer = new Date(lyDate.getTime());
+            const currentLyPointer = new Date(lyDate.getTime());
 
             while(curDate <= curEndDate) {
                 const curDateStr = curDate.toISOString().split('T')[0];
@@ -1171,7 +1234,6 @@
             const sumChkDiffPct = lyAvgChk > 0 ? ((curAvgChk - lyAvgChk) / lyAvgChk) * 100 : 0;
 
             document.getElementById('comp-sum-rev-val').innerText = `${curSumRev.toLocaleString()} ج.م (السابق: ${lySumRev.toLocaleString(undefined, {maximumFractionDigits:0})})`;
-            
             const revPctEl = document.getElementById('comp-sum-rev-pct');
             revPctEl.innerText = `الفرق: ${sumRevDiff >= 0 ? '+' : ''}${sumRevDiff.toLocaleString(undefined, {maximumFractionDigits:0})} (${sumRevDiffPct.toFixed(1)}%)`;
             revPctEl.className = `font-bold block text-[11px] ${sumRevDiff >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
@@ -1187,13 +1249,13 @@
             chkPctEl.className = `font-bold block text-[11px] ${sumChkDiffPct >= 0 ? 'text-emerald-500' : 'text-red-500'}`;
         }
 
-        // --- INVENTORY FUNCTIONS ---
+        // ===== INVENTORY =====
         function checkInventoryMissingDays() {
             const sm = document.getElementById('global-month-selector').value;
             if(!sm) return;
             const [y, m] = sm.split('-').map(Number);
             const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            let missingDays = [];
+            const missingDays = [];
             for(let d = 1; d <= daysInMonth; d++) {
                 const dayStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 if(!appData.dailyReceived[dayStr] || Object.keys(appData.dailyReceived[dayStr].data || {}).length === 0) {
@@ -1215,11 +1277,14 @@
             const name = prompt('اسم الصنف الجديد:');
             if(!name) return;
             const unit = prompt('وحدة القياس (كرتونة، كيلو..):') || '';
-            appData.products.push({ id: 'p_' + Date.now(), name, unit, opening: 0 });
+            const id = 'p_' + Date.now();
+            products.push({ id, name, unit });
+            appData.opening[id] = 0;
+            saveAndSync();
             renderOpeningList();
             loadDailyInventory();
+            renderTransfersList();
             renderInventoryAnalysis();
-            saveAndSync();
             showToast('تمت إضافة الصنف بنجاح', 'success');
         }
 
@@ -1239,13 +1304,13 @@
                 badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold";
             }
 
-            appData.products.forEach((p, idx) => {
+            products.forEach((p, idx) => {
                 const div = document.createElement('div');
                 div.className = "flex gap-2 items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs";
                 div.innerHTML = `
-                    <input type="text" value="${p.name}" ${isLocked ? 'disabled' : ''} onchange="appData.products[${idx}].name=this.value; saveAndSync();" class="border p-2 rounded-xl flex-1 font-bold">
-                    <input type="text" value="${p.unit}" ${isLocked ? 'disabled' : ''} onchange="appData.products[${idx}].unit=this.value; saveAndSync();" class="w-24 border p-2 rounded-xl font-bold">
-                    <input type="number" value="${p.opening}" ${isLocked ? 'disabled' : ''} onchange="appData.products[${idx}].opening=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-24 border p-2 rounded-xl font-black text-center">
+                    <input type="text" value="${p.name}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].name=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl flex-1 font-bold">
+                    <input type="text" value="${p.unit}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].unit=this.value; saveAndSync();" class="w-24 border p-2 rounded-xl font-bold">
+                    <input type="number" value="${getOpening(p.id)}" ${isLocked ? 'disabled' : ''} onchange="appData.opening['${p.id}']=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-24 border p-2 rounded-xl font-black text-center">
                 `;
                 c.appendChild(div);
             });
@@ -1272,8 +1337,7 @@
             const c = document.getElementById('daily-received-container');
             c.innerHTML = '';
             if(!appData.dailyReceived[dateVal]) appData.dailyReceived[dateVal] = { data: {} };
-            
-            if(!appData.lockedReceived) appData.lockedReceived = {};
+
             const isLocked = appData.lockedReceived[dateVal] || false;
 
             document.getElementById('save-rec-btn').classList.toggle('hidden', isLocked);
@@ -1287,7 +1351,7 @@
                 badge.className = "text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 font-bold";
             }
 
-            appData.products.forEach(p => {
+            products.forEach(p => {
                 const val = appData.dailyReceived[dateVal].data[p.id] || 0;
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs";
@@ -1299,14 +1363,14 @@
             });
         }
 
-        function saveDailyReceived() { 
+        function saveDailyReceived() {
             const dateVal = document.getElementById('inv-daily-date').value;
-            if(!appData.lockedReceived) appData.lockedReceived = {};
             appData.lockedReceived[dateVal] = true;
-            saveAndSync(); 
+            saveAndSync();
             checkInventoryMissingDays();
             loadDailyInventory();
-            showToast('تم تأكيد وحفظ وقفل الوارد اليومي بنجاح', 'success'); 
+            renderInventoryAnalysis();
+            showToast('تم تأكيد وحفظ وقفل الوارد اليومي بنجاح', 'success');
         }
 
         function unlockDailyReceived() {
@@ -1322,14 +1386,16 @@
         function addTransferRow() {
             const d = document.getElementById('transfer-unified-date').value;
             if(!d) return;
-            if(appData.lockedTransfers && appData.lockedTransfers[d]) {
+            if(appData.lockedTransfers[d]) {
                 showToast('تحويلات هذا اليوم مغلقة للحماية، يرجى فتح التعديل أولاً', 'error');
                 return;
             }
+            if(products.length === 0) { showToast('أضف صنفاً أولاً', 'error'); return; }
             if(!appData.transfers[d]) appData.transfers[d] = { rows: [] };
-            appData.transfers[d].rows.push({ type: 'in', branch: '', productId: appData.products[0].id, qty: 0 });
-            renderTransfersList();
+            appData.transfers[d].rows.push({ type: 'in', branch: '', productId: products[0].id, qty: 0 });
             saveAndSync();
+            renderTransfersList();
+            renderInventoryAnalysis();
         }
 
         function renderTransfersList() {
@@ -1337,8 +1403,6 @@
             const c = document.getElementById('transfers-container');
             c.innerHTML = '';
             const tData = appData.transfers[d];
-            
-            if(!appData.lockedTransfers) appData.lockedTransfers = {};
             const isLocked = appData.lockedTransfers[d] || false;
 
             document.getElementById('save-trans-btn').classList.toggle('hidden', isLocked);
@@ -1355,26 +1419,29 @@
 
             if(!tData || !tData.rows) return;
             tData.rows.forEach((t, idx) => {
-                const prodOpts = appData.products.map(p => `<option value="${p.id}" ${t.productId===p.id?'selected':''}>${p.name}</option>`).join('');
+                const prodOpts = products.map(p => `<option value="${p.id}" ${t.productId===p.id?'selected':''}>${p.name}</option>`).join('');
                 const div = document.createElement('div');
                 div.className = "grid grid-cols-1 sm:grid-cols-4 gap-2 items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs";
                 div.innerHTML = `
-                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].type=this.value; saveAndSync();" class="border p-2 rounded-xl font-bold"><option value="in" ${t.type==='in'?'selected':''}>تحويل إِلَيْهِ (وارد من فرع)</option><option value="out" ${t.type==='out'?'selected':''}>تحويل مِنْهُ (صادر لفرع)</option></select>
-                    <input type="text" ${isLocked ? 'disabled' : ''} value="${t.branch || ''}" placeholder="اسم الفرع (إليه / منه)" onchange="appData.transfers['${d}'].rows[${idx}].branch=this.value; saveAndSync();" class="border p-2 rounded-xl font-bold">
-                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].productId=this.value; saveAndSync();" class="border p-2 rounded-xl font-bold">${prodOpts}</select>
-                    <input type="number" ${isLocked ? 'disabled' : ''} value="${t.qty || 0}" placeholder="الكمية" onchange="appData.transfers['${d}'].rows[${idx}].qty=parseFloat(this.value)||0; saveAndSync();" class="border p-2 rounded-xl font-black text-center">
+                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].type=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold">
+                        <option value="in" ${t.type==='in'?'selected':''}>وارد من فرع</option>
+                        <option value="out" ${t.type==='out'?'selected':''}>صادر لفرع</option>
+                    </select>
+                    <input type="text" ${isLocked ? 'disabled' : ''} value="${t.branch || ''}" placeholder="اسم الفرع" onchange="appData.transfers['${d}'].rows[${idx}].branch=this.value; saveAndSync();" class="border p-2 rounded-xl font-bold">
+                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].productId=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold">${prodOpts}</select>
+                    <input type="number" ${isLocked ? 'disabled' : ''} value="${t.qty || 0}" placeholder="الكمية" onchange="appData.transfers['${d}'].rows[${idx}].qty=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-black text-center">
                 `;
                 c.appendChild(div);
             });
         }
 
-        function saveTransfersData() { 
+        function saveTransfersData() {
             const d = document.getElementById('transfer-unified-date').value;
-            if(!appData.lockedTransfers) appData.lockedTransfers = {};
             appData.lockedTransfers[d] = true;
-            saveAndSync(); 
+            saveAndSync();
             renderTransfersList();
-            showToast('تم تأكيد وحفظ وقفل التحويلات بنجاح', 'success'); 
+            renderInventoryAnalysis();
+            showToast('تم تأكيد وحفظ وقفل التحويلات بنجاح', 'success');
         }
 
         function unlockTransfersData() {
@@ -1390,32 +1457,29 @@
         function renderInventoryAnalysis() {
             const tbody = document.getElementById('analysis-table-body');
             tbody.innerHTML = '';
-            appData.products.forEach(p => {
+            products.forEach(p => {
                 if(!appData.closingData[p.id]) appData.closingData[p.id] = { closing: 0, sold: 0 };
+                const s = getProductStats(p);
                 const cData = appData.closingData[p.id];
-                let totalRec = 0;
-                Object.values(appData.dailyReceived).forEach(d => totalRec += (d.data[p.id] || 0));
-                const theoretical = (p.opening || 0) + totalRec - (cData.sold || 0);
-                const variance = (cData.closing || 0) - theoretical;
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="p-3 font-bold">${p.name} (${p.unit})</td>
-                    <td class="p-3 font-bold">${p.opening}</td>
-                    <td class="p-3 font-bold">${totalRec}</td>
-                    <td class="p-3"><input type="number" value="${cData.sold}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); showToast('تم تحديث المباع', 'success');" class="w-16 border p-1 rounded font-black text-center"></td>
-                    <td class="p-3"><input type="number" value="${cData.closing}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); showToast('تم تحديث آخر المدة', 'success');" class="w-16 border p-1 rounded font-black text-center"></td>
-                    <td class="p-3 font-bold ${variance >= 0 ? 'text-emerald-500' : 'text-red-500'}">${variance}</td>
+                    <td class="p-3 font-bold">${s.opening}</td>
+                    <td class="p-3 font-bold">${s.totalRec}</td>
+                    <td class="p-3 font-bold ${s.transferNet >= 0 ? 'text-blue-500' : 'text-purple-500'}">${s.transferNet > 0 ? '+' : ''}${s.transferNet}</td>
+                    <td class="p-3"><input type="number" value="${cData.sold || 0}" onchange="appData.closingData['${p.id}'].sold=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); showToast('تم تحديث المباع', 'success');" class="w-16 border p-1 rounded font-black text-center"></td>
+                    <td class="p-3"><input type="number" value="${cData.closing || 0}" onchange="appData.closingData['${p.id}'].closing=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); showToast('تم تحديث آخر المدة', 'success');" class="w-16 border p-1 rounded font-black text-center"></td>
+                    <td class="p-3 font-bold ${s.variance >= 0 ? 'text-emerald-500' : 'text-red-500'}">${s.variance}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // --- EXCEL EXPORT FUNCTIONS WITH DATE RANGES ---
+        // ===== EXCEL EXPORTS =====
         function exportOpeningExcelFiltered() {
-            let data = appData.products.map(p => ({ 'اسم الصنف': p.name, 'الوحدة': p.unit, 'رصيد أول المدة': p.opening }));
-            let ws = XLSX.utils.json_to_sheet(data);
-            let wb = XLSX.utils.book_new();
+            const data = products.map(p => ({ 'اسم الصنف': p.name, 'الوحدة': p.unit, 'رصيد أول المدة': getOpening(p.id) }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Opening_Balance");
             XLSX.writeFile(wb, "Kansas_Opening_Balance.xlsx");
             showToast('تم تصدير شيت أول المدة بنجاح', 'success');
@@ -1424,102 +1488,20 @@
         function exportDailyReceivedExcelFiltered() {
             const f = document.getElementById('inv-rec-from').value;
             const t = document.getElementById('inv-rec-to').value;
-            let data = [];
+            const data = [];
             Object.keys(appData.dailyReceived).forEach(date => {
                 if((!f || date >= f) && (!t || date <= t)) {
-                    let rec = appData.dailyReceived[date].data || {};
-                    appData.products.forEach(p => {
-                        if(rec[p.id]) {
-                            data.push({ 'التاريخ': date, 'اسم الصنف': p.name, 'الوحدة': p.unit, 'الوارد': rec[p.id] });
-                        }
+                    const rec = appData.dailyReceived[date].data || {};
+                    products.forEach(p => {
+                        if(rec[p.id]) data.push({ 'التاريخ': date, 'اسم الصنف': p.name, 'الوحدة': p.unit, 'الوارد': rec[p.id] });
                     });
                 }
             });
-            let ws = XLSX.utils.json_to_sheet(data);
-            let wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Daily_Received");
             XLSX.writeFile(wb, "Kansas_Daily_Received_Filtered.xlsx");
             showToast('تم تصدير شيت الوارد للفترة المحددة بنجاح', 'success');
         }
 
-        function exportTransfersExcelFiltered() {
-            const f = document.getElementById('inv-trans-from').value;
-            const t = document.getElementById('inv-trans-to').value;
-            let data = [];
-            Object.keys(appData.transfers).forEach(date => {
-                if((!f || date >= f) && (!t || date <= t)) {
-                    let rows = appData.transfers[date].rows || [];
-                    rows.forEach(tr => {
-                        let prodObj = appData.products.find(p => p.id === tr.productId);
-                        data.push({ 
-                            'التاريخ': date, 
-                            'نوع التحويل': tr.type === 'in' ? 'تحويل إليه (وارد من فرع)' : 'تحويل منه (صادر لفرع)', 
-                            'اسم الفرع': tr.branch || '-', 
-                            'الصنف': prodObj ? prodObj.name : '-', 
-                            'الكمية': tr.qty 
-                        });
-                    });
-                }
-            });
-            let ws = XLSX.utils.json_to_sheet(data);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Transfers");
-            XLSX.writeFile(wb, "Kansas_Transfers_Filtered.xlsx");
-            showToast('تم تصدير شيت التحويلات للفترة المحددة بنجاح', 'success');
-        }
-
-        function exportInventoryAnalysisExcel() {
-            let data = [];
-            appData.products.forEach(p => {
-                let cData = appData.closingData[p.id] || { closing: 0, sold: 0 };
-                let totalRec = 0;
-                Object.values(appData.dailyReceived).forEach(d => totalRec += (d.data[p.id] || 0));
-                let theoretical = (p.opening || 0) + totalRec - (cData.sold || 0);
-                let variance = (cData.closing || 0) - theoretical;
-                data.push({ 'الصنف': p.name, 'الوحدة': p.unit, 'أول المدة': p.opening, 'الوارد': totalRec, 'المباع': cData.sold, 'آخر المدة': cData.closing, 'العجز/الزيادة': variance });
-            });
-            let ws = XLSX.utils.json_to_sheet(data);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Inventory_Analysis");
-            XLSX.writeFile(wb, "Kansas_Inventory_Analysis.xlsx");
-            showToast('تم تصدير شيت تحليل المخزون بنجاح', 'success');
-        }
-
-        function exportRevenuePageExcel() { XLSX.writeFile(XLSX.utils.book_new(), 'Kansas_Revenue.xlsx'); showToast('تم التصدير بنجاح', 'success'); }
-        function exportRevenuePagePdf() { window.print(); }
-
-        function initChart() {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            revenueChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'الإيراد الفعلي الحالي', data: [], borderColor: '#f59e0b', borderWidth: 3, fill: false }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function updateChart() {
-            if(!revenueChartInstance) return;
-            const dates = Object.keys(appData.dailyRecords).sort();
-            revenueChartInstance.data.labels = dates;
-            revenueChartInstance.data.datasets[0].data = dates.map(d => appData.dailyRecords[d].revenue);
-            revenueChartInstance.update();
-        }
-
-        function saveAndSync() {
-            const activeMonth = document.getElementById('global-month-selector').value;
-            localStorage.setItem('kansas_pro_' + activeMonth, JSON.stringify(appData));
-        }
-
-        function loadLocalData() {
-            const activeMonth = document.getElementById('global-month-selector').value;
-            const saved = localStorage.getItem('kansas_pro_' + activeMonth);
-            if(saved) {
-                try {
-                    appData = JSON.parse(saved);
-                    loadDayData();
-                } catch(e) {}
-            }
-        }
-    </script>
-</body>
-</html>
+        function exportTransfersExcelFiltere
