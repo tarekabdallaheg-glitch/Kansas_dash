@@ -56,9 +56,8 @@
                 <h2 class="text-lg font-black text-slate-900 dark:text-white tracking-wide">KANSAS PREMIUM</h2>
                 <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">الرجاء إدخال رمز الحماية السري</p>
             </div>
-            <div class="relative">
-                <input type="password" id="unlock-pin" autocomplete="off" placeholder="••••••••" class="w-full text-center tracking-widest text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-kansasBorder rounded-2xl p-3.5 pl-12 font-bold text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition shadow-sm" onkeydown="if(event.key === 'Enter') verifyPin()">
-                <button type="button" onclick="togglePinVisibility()" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-slate-500 text-sm" title="إظهار / إخفاء الرمز">👁</button>
+            <div>
+                <input type="text" id="unlock-pin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="الرمز" class="w-full text-center text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-kansasBorder rounded-2xl p-3.5 font-bold text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition shadow-sm" onkeydown="if(event.key === 'Enter') verifyPin()">
             </div>
             <button type="button" onclick="verifyPin()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black py-3 rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition">
                 فتح النظام الآمن
@@ -663,7 +662,7 @@
         let currentTab = 'revenue';
         let revenueChartInstance = null;
         let lyInputModeState = 'total';
-        const MASTER_PIN = "k@123456";
+        const MASTER_PIN = "ks@123456";
 
         // ===== STORAGE MODEL =====
         // products: global list shared across all months (kansas_pro_global)
@@ -751,35 +750,26 @@
         // ===== PIN =====
         function applyLockState() {
             const modal = document.getElementById('pin-lock-modal');
-            if(sessionStorage.getItem('kansas_unlocked') === 'true') {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            } else {
-                modal.classList.remove('hidden');
-                modal.style.display = '';
-            }
+            let unlocked = false;
+            try { unlocked = sessionStorage.getItem('kansas_unlocked') === 'true'; } catch(e) {}
+            modal.style.display = unlocked ? 'none' : 'flex';
         }
 
         function verifyPin() {
             const input = document.getElementById('unlock-pin');
-            const typed = (input.value || '').trim();
+            const typed = (input.value || '').replace(/\s/g, '');
             if(typed === MASTER_PIN) {
-                sessionStorage.setItem('kansas_unlocked', 'true');
+                try { sessionStorage.setItem('kansas_unlocked', 'true'); } catch(e) {}
                 input.value = '';
-                applyLockState();
+                document.getElementById('pin-lock-modal').style.display = 'none';
                 showToast('تم فتح النظام بنجاح', 'success');
             } else {
-                showToast('رمز الحماية غير صحيح', 'error');
+                showToast('رمز الحماية غير صحيح (اكتبه تاني)', 'error');
             }
         }
 
-        function togglePinVisibility() {
-            const input = document.getElementById('unlock-pin');
-            input.type = input.type === 'password' ? 'text' : 'password';
-        }
-
         function lockSystem() {
-            sessionStorage.removeItem('kansas_unlocked');
+            try { sessionStorage.removeItem('kansas_unlocked'); } catch(e) {}
             location.reload();
         }
 
@@ -1509,4 +1499,9 @@
             const f = document.getElementById('inv-rec-from').value;
             const t = document.getElementById('inv-rec-to').value;
             const data = [];
-            Object.keys(appDatl
+            Object.keys(appData.dailyReceived).forEach(date => {
+                if((!f || date >= f) && (!t || date <= t)) {
+                    const rec = appData.dailyReceived[date].data || {};
+                    products.forEach(p => {
+                        if(rec[p.id]) data.push({ 'التاريخ': date, 'اسم الصنف': p.name, 'الوحدة': p.unit, 'الوارد': rec[p.id] });
+       
