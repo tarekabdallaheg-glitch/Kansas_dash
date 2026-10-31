@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Premium v7.4</title>
+    <title>Kansas Premium v7.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -49,17 +49,18 @@
 <body class="min-h-screen pb-16 flex flex-col justify-between bg-kansasLightBg dark:bg-kansasDark text-slate-900 dark:text-slate-100">
 
     <!-- Security PIN Lock Modal -->
-    <div id="pin-lock-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder p-8 rounded-3xl w-88 text-center space-y-5 shadow-2xl">
+    <div id="pin-lock-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder p-8 rounded-3xl w-full max-w-sm text-center space-y-5 shadow-2xl">
             <div class="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">🔒</div>
             <div>
                 <h2 class="text-lg font-black text-slate-900 dark:text-white tracking-wide">KANSAS PREMIUM</h2>
                 <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">الرجاء إدخال رمز الحماية السري</p>
             </div>
-            <div>
-                <input type="password" id="unlock-pin" placeholder="••••••••" class="w-full text-center tracking-widest text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-kansasBorder rounded-2xl p-3.5 font-bold text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition shadow-sm" onkeypress="if(event.key === 'Enter') verifyPin()">
+            <div class="relative">
+                <input type="password" id="unlock-pin" autocomplete="off" placeholder="••••••••" class="w-full text-center tracking-widest text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-kansasBorder rounded-2xl p-3.5 pl-12 font-bold text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 transition shadow-sm" onkeydown="if(event.key === 'Enter') verifyPin()">
+                <button type="button" onclick="togglePinVisibility()" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-slate-500 text-sm" title="إظهار / إخفاء الرمز">👁</button>
             </div>
-            <button onclick="verifyPin()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black py-3 rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition">
+            <button type="button" onclick="verifyPin()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black py-3 rounded-2xl text-xs shadow-lg shadow-amber-500/20 transition">
                 فتح النظام الآمن
             </button>
         </div>
@@ -77,7 +78,7 @@
                     <div>
                         <h1 class="text-xs sm:text-sm font-black flex items-center gap-1.5 flex-wrap">
                             <span class="gold-text tracking-wide drop-shadow-sm">KANSAS PREMIUM</span>
-                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v7.4</span>
+                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v7.5</span>
                         </h1>
                         <p class="text-[9px] text-slate-500 dark:text-slate-400 font-bold tracking-tight">Designed & Developed by Tarek Abdallah</p>
                     </div>
@@ -748,21 +749,39 @@
         }
 
         // ===== PIN =====
+        function applyLockState() {
+            const modal = document.getElementById('pin-lock-modal');
+            if(sessionStorage.getItem('kansas_unlocked') === 'true') {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            } else {
+                modal.classList.remove('hidden');
+                modal.style.display = '';
+            }
+        }
+
         function verifyPin() {
-            if(document.getElementById('unlock-pin').value === MASTER_PIN) {
-                document.getElementById('pin-lock-modal').classList.add('hidden');
+            const input = document.getElementById('unlock-pin');
+            const typed = (input.value || '').trim();
+            if(typed === MASTER_PIN) {
                 sessionStorage.setItem('kansas_unlocked', 'true');
+                input.value = '';
+                applyLockState();
                 showToast('تم فتح النظام بنجاح', 'success');
             } else {
                 showToast('رمز الحماية غير صحيح', 'error');
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if(sessionStorage.getItem('kansas_unlocked') === 'true') document.getElementById('pin-lock-modal').classList.add('hidden');
-        });
+        function togglePinVisibility() {
+            const input = document.getElementById('unlock-pin');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
 
-        function lockSystem() { sessionStorage.removeItem('kansas_unlocked'); location.reload(); }
+        function lockSystem() {
+            sessionStorage.removeItem('kansas_unlocked');
+            location.reload();
+        }
 
         function parseUTCExactDate(dateStr) {
             if(!dateStr) return null;
@@ -772,6 +791,7 @@
 
         // ===== INIT =====
         window.onload = function() {
+            applyLockState();
             initTheme();
             const today = new Date();
             const yearMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
@@ -1489,19 +1509,4 @@
             const f = document.getElementById('inv-rec-from').value;
             const t = document.getElementById('inv-rec-to').value;
             const data = [];
-            Object.keys(appData.dailyReceived).forEach(date => {
-                if((!f || date >= f) && (!t || date <= t)) {
-                    const rec = appData.dailyReceived[date].data || {};
-                    products.forEach(p => {
-                        if(rec[p.id]) data.push({ 'التاريخ': date, 'اسم الصنف': p.name, 'الوحدة': p.unit, 'الوارد': rec[p.id] });
-                    });
-                }
-            });
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Daily_Received");
-            XLSX.writeFile(wb, "Kansas_Daily_Received_Filtered.xlsx");
-            showToast('تم تصدير شيت الوارد للفترة المحددة بنجاح', 'success');
-        }
-
-        function exportTransfersExcelFiltere
+            Object.keys(appDatl
