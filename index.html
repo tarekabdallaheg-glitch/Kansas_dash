@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Premium v5.1</title>
+    <title>Kansas Premium v5.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -33,7 +33,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* تباين ووضوح فائق للنصوص والعناصر في الثيم الصباحي */
         .light .bg-kansasLightCard { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
         .light input, .light select { background-color: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
         .light input::placeholder { color: #64748b !important; }
@@ -77,31 +76,34 @@
     <div id="toast-container" class="fixed bottom-5 left-5 z-50 space-y-2 pointer-events-none"></div>
 
     <div id="printable-area">
-        <!-- Top Bar: بدون اسم، مع ألوان وتناسق احترافي لشعار Kansas Premium -->
-        <header class="bg-white/95 dark:bg-kansasCard/90 backdrop-blur-md border-b border-slate-300 dark:border-kansasBorder sticky top-0 z-40 px-4 sm:px-6 py-3.5 shadow-md transition-colors">
-            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
-                <div class="flex items-center space-x-3 space-x-reverse">
-                    <div class="bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-black p-2.5 rounded-xl text-sm shadow-md shadow-amber-500/20">K</div>
+        <!-- Top Bar (Organized & Clean) -->
+        <header class="bg-white/95 dark:bg-kansasCard/90 backdrop-blur-md border-b border-slate-300 dark:border-kansasBorder sticky top-0 z-40 px-3 sm:px-6 py-2.5 shadow-md transition-colors">
+            <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
+                
+                <!-- الجانب الأيمن: شعار الكنساس واسمك -->
+                <div class="flex items-center space-x-2.5 space-x-reverse">
+                    <div class="bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-black p-2 rounded-xl text-xs shadow-md shadow-amber-500/20">K</div>
                     <div>
-                        <h1 class="text-base sm:text-lg font-black flex items-center gap-2 flex-wrap">
+                        <h1 class="text-xs sm:text-sm font-black flex items-center gap-1.5 flex-wrap">
                             <span class="gold-text tracking-wide drop-shadow-sm">KANSAS PREMIUM</span> 
-                            <span class="text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-black">v5.1</span>
+                            <span class="text-[9px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-black">v5.2</span>
                         </h1>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-wide">Enterprise Operations & Analytics</p>
+                        <p class="text-[9px] text-slate-500 dark:text-slate-400 font-bold tracking-tight">Designed & Developed by Tarek Abdallah</p>
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2.5 no-print">
-                    <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-kansasBorder text-xs font-bold transition flex items-center shadow-sm hover:border-amber-500" title="تغيير الثيم">
+                <!-- الجانب الأيسر: الأدوات (السحابة، الثيم، القفل) -->
+                <div class="flex items-center gap-1.5 no-print">
+                    <div id="sync-status" class="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="sync-text">متصل</span>
+                    </div>
+                    <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-kansasBorder text-xs transition flex items-center shadow-sm hover:border-amber-500" title="تغيير الثيم">
                         <span id="theme-icon">🌙</span>
                     </button>
-                    <button onclick="lockSystem()" class="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30 text-xs font-bold transition flex items-center shadow-sm" title="قفل النظام">
-                        🔒 قفل
+                    <button onclick="lockSystem()" class="px-2.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30 text-[11px] font-bold transition flex items-center shadow-sm" title="قفل النظام">
+                        🔒
                     </button>
-                    <div id="sync-status" class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="sync-text">متصل بالسحابة</span>
-                    </div>
                 </div>
             </div>
         </header>
@@ -443,7 +445,7 @@
                     </div>
                 </div>
 
-                <!-- Custom Period Comparison Matrix -->
+                <!-- Custom Period Comparison Matrix (Fully Repaired & Optimized) -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-300 dark:border-kansasBorder rounded-2xl p-5 shadow-sm transition-colors space-y-4 no-print">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-300 dark:border-kansasBorder pb-3">
                         <h4 class="font-black text-xs text-slate-900 dark:text-white flex items-center gap-2">
@@ -633,7 +635,7 @@
     <footer class="mt-12 py-5 bg-white dark:bg-kansasCard border-t border-slate-300 dark:border-kansasBorder text-center text-xs text-slate-600 dark:text-slate-400 transition-colors no-print font-bold">
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-2">
             <span>© 2026 <strong class="gold-text">KANSAS PREMIUM</strong> - جميع الحقوق محفوظة</span>
-            <span>Enterprise Operations & Analytics</span>
+            <span>Designed & Developed by Tarek Abdallah</span>
         </div>
     </footer>
 
@@ -654,7 +656,7 @@
         try {
             const app = initializeApp(firebaseConfig);
             window.appDB = getFirestore(app);
-            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>متصل بالسحابة</span>';
+            document.getElementById('sync-status').innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>متصل</span>';
         } catch (e) { console.warn(e); }
     </script>
 
@@ -1216,10 +1218,10 @@
             let currentSumRev = 0, currentSumOrd = 0;
             let prevSumRev = 0, prevSumOrd = 0;
 
-            const startD = new Date(dFrom);
-            const endD = new Date(dTo);
-            const lyStartD = new Date(lyFrom);
-            const lyEndD = new Date(lyTo);
+            const startD = new Date(dFrom + 'T00:00:00');
+            const endD = new Date(dTo + 'T00:00:00');
+            const lyStartD = new Date(lyFrom + 'T00:00:00');
+            const lyEndD = new Date(lyTo + 'T00:00:00');
 
             let loopDate = new Date(startD);
             let lyLoopDate = new Date(lyStartD);
@@ -1240,22 +1242,22 @@
                     prevRec = { revenue: (appData.baseline.lyTotalRev || 0) / 30, orders: (appData.baseline.lyTotalOrders || 0) / 30 };
                 }
 
-                currentSumRev += currRec.revenue;
-                currentSumOrd += currRec.orders;
-                prevSumRev += prevRec.revenue;
+                currentSumRev += (currRec.revenue || 0);
+                currentSumOrd += (currRec.orders || 0);
+                prevSumRev += (prevRec.revenue || 0);
                 prevSumOrd += (prevRec.orders || 0);
 
-                const dayRevGrowth = prevRec.revenue > 0 ? (((currRec.revenue - prevRec.revenue) / prevRec.revenue) * 100).toFixed(1) : '0';
+                const dayRevGrowth = (prevRec.revenue && prevRec.revenue > 0) ? (((currRec.revenue - prevRec.revenue) / prevRec.revenue) * 100).toFixed(1) : '0';
                 const dayOrdGrowth = (prevRec.orders && prevRec.orders > 0) ? (((currRec.orders - prevRec.orders) / prevRec.orders) * 100).toFixed(1) : '0';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="p-2.5 font-bold">${currStr}</td>
-                    <td class="p-2.5 text-amber-600 dark:text-amber-400 font-black">${currRec.revenue.toLocaleString()} ج.م</td>
-                    <td class="p-2.5">${currRec.orders}</td>
+                    <td class="p-2.5 text-amber-600 dark:text-amber-400 font-black">${(currRec.revenue || 0).toLocaleString()} ج.م</td>
+                    <td class="p-2.5">${currRec.orders || 0}</td>
                     <td class="p-2.5 text-slate-500">${prevStr}</td>
-                    <td class="p-2.5 text-purple-600 dark:text-purple-400 font-black">${prevRec.revenue.toLocaleString()} ج.م</td>
-                    <td class="p-2.5">${Math.round(prevRec.orders)}</td>
+                    <td class="p-2.5 text-purple-600 dark:text-purple-400 font-black">${(prevRec.revenue || 0).toLocaleString()} ج.م</td>
+                    <td class="p-2.5">${Math.round(prevRec.orders || 0)}</td>
                     <td class="p-2.5"><span class="${parseFloat(dayRevGrowth)>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400'} font-black">${(parseFloat(dayRevGrowth)>=0?'+':'') + dayRevGrowth}%</span></td>
                     <td class="p-2.5"><span class="${parseFloat(dayOrdGrowth)>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400'} font-black">${(parseFloat(dayOrdGrowth)>=0?'+':'') + dayOrdGrowth}%</span></td>
                 `;
