@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kansas Premium v4.6</title>
+    <title>Kansas Premium v4.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -73,17 +73,20 @@
     <div id="toast-container" class="fixed bottom-5 left-5 z-50 space-y-2 pointer-events-none"></div>
 
     <div id="printable-area">
-        <!-- Optimized Sleek Top Bar -->
+        <!-- Optimized Sleek Top Bar with Tarek's Name -->
         <header class="bg-white/90 dark:bg-kansasCard/90 backdrop-blur-md border-b border-slate-200 dark:border-kansasBorder sticky top-0 z-40 px-4 sm:px-6 py-3 shadow-sm transition-colors">
             <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
-                <div class="flex items-center space-x-2.5 space-x-reverse">
+                <div class="flex items-center space-x-3 space-x-reverse">
                     <div class="bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 font-black p-2 rounded-xl text-sm shadow-md shadow-amber-500/20">K</div>
                     <div>
-                        <h1 class="text-sm sm:text-base font-black flex items-center gap-1.5">
+                        <h1 class="text-sm sm:text-base font-black flex items-center gap-1.5 flex-wrap">
                             <span class="gold-text tracking-wide">KANSAS PREMIUM</span> 
-                            <span class="text-[9px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1 py-0.2 rounded font-black">v4.6</span>
+                            <span class="text-[9px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 rounded font-black">v4.9</span>
+                            <span class="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                                👨‍💼 طارق عبد الله
+                            </span>
                         </h1>
-                        <p class="text-[9px] text-slate-400 font-medium hidden sm:block">Operations & Analytics | <span class="text-amber-500 font-bold">Tarek Abdallah</span></p>
+                        <p class="text-[9px] text-slate-400 dark:text-slate-400 font-medium hidden sm:block">Enterprise Operations & Analytics</p>
                     </div>
                 </div>
                 
@@ -322,7 +325,7 @@
                     </div>
                 </div>
 
-                <!-- Comparisons + Intensive Operational Guidance -->
+                <!-- Comparisons + Intensive Operational Guidance (Restored Explicitly) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="bg-white dark:bg-kansasCard border border-slate-200 dark:border-kansasBorder rounded-2xl p-5 space-y-4 shadow-sm transition-colors flex flex-col justify-between">
                         <div class="space-y-3">
@@ -439,7 +442,7 @@
                     </div>
                 </div>
 
-                <!-- Custom Period Comparison Matrix (Auto-Sync with Active Month) -->
+                <!-- Custom Period Comparison Matrix -->
                 <div class="bg-white dark:bg-kansasCard border border-slate-200 dark:border-kansasBorder rounded-2xl p-5 shadow-sm transition-colors space-y-4 no-print">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 dark:border-kansasBorder pb-3">
                         <h4 class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
@@ -450,21 +453,25 @@
 
                     <div id="custom-matrix-container" class="hidden space-y-4 pt-2">
                         <p class="text-[11px] text-slate-500 dark:text-slate-400">حدد نطاق التاريخ الحالي ونطاق الفترة المقابلة في السنة السابقة لتوليد جدول يوم بيوم (إيراد، عمليات، نمو/تراجع):</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                             <div>
                                 <label class="block text-slate-600 dark:text-slate-300 mb-1 font-semibold">من تاريخ (الحالي):</label>
-                                <input type="date" id="matrix-date-from" onchange="syncLyDateRange()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-kansasBorder rounded-xl p-2.5 font-bold">
+                                <input type="date" id="matrix-date-from" onchange="syncLyDateRanges()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-kansasBorder rounded-xl p-2.5 font-bold">
                             </div>
                             <div>
                                 <label class="block text-slate-600 dark:text-slate-300 mb-1 font-semibold">إلى تاريخ (الحالي):</label>
-                                <input type="date" id="matrix-date-to" onchange="syncLyDateRange()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-kansasBorder rounded-xl p-2.5 font-bold">
+                                <input type="date" id="matrix-date-to" onchange="syncLyDateRanges()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-kansasBorder rounded-xl p-2.5 font-bold">
                             </div>
                             <div>
-                                <label class="block text-slate-600 dark:text-slate-300 mb-1 font-semibold">من تاريخ (السنة السابقة - تلقائي):</label>
+                                <label class="block text-slate-600 dark:text-slate-300 mb-1 font-semibold">من تاريخ (السنة السابقة):</label>
                                 <input type="date" id="matrix-ly-from" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-kansasBorder rounded-xl p-2.5 font-bold">
                             </div>
-                            <div class="flex items-end">
-                                <button onclick="generateCustomMatrix()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2.5 rounded-xl transition shadow-sm">توليد جدول المقارنة</button>
+                            <div>
+                                <label class="block text-slate-600 dark:text-slate-300 mb-1 font-semibold">إلى تاريخ (السنة السابقة):</label>
+                                <input type="date" id="matrix-ly-to" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-kansasBorder rounded-xl p-2.5 font-bold">
+                            </div>
+                            <div class="flex items-end sm:col-span-2">
+                                <button onclick="generateCustomMatrix()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 rounded-xl transition shadow-sm text-xs">توليد جدول المقارنة اليومية</button>
                             </div>
                         </div>
 
@@ -731,7 +738,7 @@
 
             document.getElementById('matrix-date-from').value = yearMonth + '-01';
             document.getElementById('matrix-date-to').value = todayStr;
-            syncLyDateRange();
+            syncLyDateRanges();
 
             updateDayName();
             loadLocalData();
@@ -746,13 +753,19 @@
             rotateBoosterTips();
         };
 
-        // Auto sync previous year date range based on current selected date range
-        function syncLyDateRange() {
+        function syncLyDateRanges() {
             const fromVal = document.getElementById('matrix-date-from').value;
-            if(!fromVal) return;
-            const d = new Date(fromVal);
-            d.setFullYear(d.getFullYear() - 1);
-            document.getElementById('matrix-ly-from').value = d.toISOString().split('T')[0];
+            const toVal = document.getElementById('matrix-date-to').value;
+            if(fromVal) {
+                const dFrom = new Date(fromVal);
+                dFrom.setFullYear(dFrom.getFullYear() - 1);
+                document.getElementById('matrix-ly-from').value = dFrom.toISOString().split('T')[0];
+            }
+            if(toVal) {
+                const dTo = new Date(toVal);
+                dTo.setFullYear(dTo.getFullYear() - 1);
+                document.getElementById('matrix-ly-to').value = dTo.toISOString().split('T')[0];
+            }
         }
 
         const boosterTipsList = [
@@ -1189,7 +1202,8 @@
             const dFrom = document.getElementById('matrix-date-from').value;
             const dTo = document.getElementById('matrix-date-to').value;
             const lyFrom = document.getElementById('matrix-ly-from').value;
-            if(!dFrom || !dTo || !lyFrom) return showToast('الرجاء تحديد التواريخ بدقة', 'warn');
+            const lyTo = document.getElementById('matrix-ly-to').value;
+            if(!dFrom || !dTo || !lyFrom || !lyTo) return showToast('الرجاء تحديد نطاق التواريخ بدقة', 'warn');
 
             const tbody = document.getElementById('matrix-table-body');
             tbody.innerHTML = '';
@@ -1200,11 +1214,12 @@
             const startD = new Date(dFrom);
             const endD = new Date(dTo);
             const lyStartD = new Date(lyFrom);
+            const lyEndD = new Date(lyTo);
 
             let loopDate = new Date(startD);
             let lyLoopDate = new Date(lyStartD);
 
-            while(loopDate <= endD) {
+            while(loopDate <= endD && lyLoopDate <= lyEndD) {
                 const currStr = loopDate.toISOString().split('T')[0];
                 const prevStr = lyLoopDate.toISOString().split('T')[0];
 
