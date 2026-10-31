@@ -541,7 +541,8 @@
                             <button onclick="addNewProduct()" class="border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 py-2 px-4 rounded-xl text-xs font-black transition">+ إضافة صنف جديد</button>
                             <button onclick="unlockOpeningData()" id="unlock-opening-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح التعديل للأصناف</button>
                         </div>
-                        <div id="opening-container" class="space-y-3"></div>
+                        <!-- تم إصلاح تخطيط حاوية الأصناف هنا لتجنب الخروج عن القالب -->
+                        <div id="opening-container" class="space-y-3 w-full overflow-hidden"></div>
                         <div class="flex justify-end pt-2">
                             <button onclick="saveOpeningData()" id="save-opening-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition">💾 تأكيد وحفظ الأصناف ورصيد أول المدة</button>
                         </div>
@@ -573,7 +574,7 @@
                         </div>
                     </div>
 
-                    <div id="daily-received-container" class="space-y-2.5"></div>
+                    <div id="daily-received-container" class="space-y-2.5 w-full overflow-hidden"></div>
                     <div class="flex justify-end items-center gap-3 pt-3">
                         <button onclick="unlockDailyReceived()" id="unlock-rec-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح تعديل الوارد</button>
                         <button onclick="saveDailyReceived()" id="save-rec-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition">💾 تأكيد وحفظ وقفل الوارد اليومي</button>
@@ -608,7 +609,7 @@
                     <div class="flex justify-end">
                         <button onclick="addTransferRow()" id="add-trans-btn" class="border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-xl text-xs font-black transition">+ إضافة تحويل جديد</button>
                     </div>
-                    <div id="transfers-container" class="space-y-3"></div>
+                    <div id="transfers-container" class="space-y-3 w-full overflow-hidden"></div>
                     <div class="flex justify-end items-center gap-3 pt-3">
                         <button onclick="unlockTransfersData()" id="unlock-trans-btn" class="hidden bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">🔓 فتح تعديل التحويلات</button>
                         <button onclick="saveTransfersData()" id="save-trans-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition">💾 تأكيد وحفظ وقفل التحويلات</button>
@@ -1294,11 +1295,11 @@
 
             products.forEach((p, idx) => {
                 const div = document.createElement('div');
-                div.className = "flex gap-2 items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs";
+                div.className = "flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs w-full";
                 div.innerHTML = `
-                    <input type="text" value="${p.name}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].name=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl flex-1 font-bold">
-                    <input type="text" value="${p.unit}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].unit=this.value; saveAndSync();" class="w-24 border p-2 rounded-xl font-bold">
-                    <input type="number" value="${getOpening(p.id)}" ${isLocked ? 'disabled' : ''} onchange="appData.opening['${p.id}']=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-24 border p-2 rounded-xl font-black text-center">
+                    <input type="text" value="${p.name}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].name=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl flex-1 font-bold w-full">
+                    <input type="text" value="${p.unit}" ${isLocked ? 'disabled' : ''} onchange="products[${idx}].unit=this.value; saveAndSync();" class="w-full sm:w-24 border p-2 rounded-xl font-bold">
+                    <input type="number" value="${getOpening(p.id)}" ${isLocked ? 'disabled' : ''} onchange="appData.opening['${p.id}']=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="w-full sm:w-24 border p-2 rounded-xl font-black text-center">
                 `;
                 c.appendChild(div);
             });
@@ -1342,7 +1343,7 @@
             products.forEach(p => {
                 const val = appData.dailyReceived[dateVal].data[p.id] || 0;
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs";
+                div.className = "flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs w-full";
                 div.innerHTML = `
                     <span class="font-bold">${p.name} (${p.unit})</span>
                     <input type="number" value="${val}" ${isLocked ? 'disabled' : ''} onchange="appData.dailyReceived['${dateVal}'].data['${p.id}']=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis(); checkInventoryMissingDays();" class="w-28 border p-2 rounded-xl font-black text-center">
@@ -1409,15 +1410,15 @@
             tData.rows.forEach((t, idx) => {
                 const prodOpts = products.map(p => `<option value="${p.id}" ${t.productId===p.id?'selected':''}>${p.name}</option>`).join('');
                 const div = document.createElement('div');
-                div.className = "grid grid-cols-1 sm:grid-cols-4 gap-2 items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs";
+                div.className = "grid grid-cols-1 sm:grid-cols-4 gap-2 items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border text-xs w-full";
                 div.innerHTML = `
-                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].type=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold">
+                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].type=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold w-full">
                         <option value="in" ${t.type==='in'?'selected':''}>وارد من فرع</option>
                         <option value="out" ${t.type==='out'?'selected':''}>صادر لفرع</option>
                     </select>
-                    <input type="text" ${isLocked ? 'disabled' : ''} value="${t.branch || ''}" placeholder="اسم الفرع" onchange="appData.transfers['${d}'].rows[${idx}].branch=this.value; saveAndSync();" class="border p-2 rounded-xl font-bold">
-                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].productId=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold">${prodOpts}</select>
-                    <input type="number" ${isLocked ? 'disabled' : ''} value="${t.qty || 0}" placeholder="الكمية" onchange="appData.transfers['${d}'].rows[${idx}].qty=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-black text-center">
+                    <input type="text" ${isLocked ? 'disabled' : ''} value="${t.branch || ''}" placeholder="اسم الفرع" onchange="appData.transfers['${d}'].rows[${idx}].branch=this.value; saveAndSync();" class="border p-2 rounded-xl font-bold w-full">
+                    <select ${isLocked ? 'disabled' : ''} onchange="appData.transfers['${d}'].rows[${idx}].productId=this.value; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-bold w-full">${prodOpts}</select>
+                    <input type="number" ${isLocked ? 'disabled' : ''} value="${t.qty || 0}" placeholder="الكمية" onchange="appData.transfers['${d}'].rows[${idx}].qty=parseFloat(this.value)||0; saveAndSync(); renderInventoryAnalysis();" class="border p-2 rounded-xl font-black text-center w-full">
                 `;
                 c.appendChild(div);
             });
