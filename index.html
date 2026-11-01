@@ -23,7 +23,7 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,-apple-system,sans-serif;background:var(--bg);background-image:radial-gradient(1200px 500px at 90% -10%,rgba(214,158,46,.07),transparent 60%),radial-gradient(900px 400px at -10% 0%,rgba(30,58,95,.08),transparent 60%);color:var(--text);font-size:14px;line-height:1.6;padding-bottom:48px;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1240px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:16px}
+.wrap{max-width:100%;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);min-width:0}
 .card.flat{box-shadow:none;background:transparent;border-color:transparent;padding:0 2px}
 .muted{color:var(--muted);font-size:12.5px;font-weight:600}
@@ -92,7 +92,7 @@ tr:last-child td{border-bottom:none}
 .hero h2{margin:6px 0 4px;font-size:24px;font-weight:800;letter-spacing:.2px}
 .status{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13px;padding:7px 15px;border-radius:99px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08)}
 .status i{width:9px;height:9px;border-radius:50%;display:inline-block}
-.hero-sum{margin:14px 0 0;font-size:15px;line-height:1.85;max-width:860px;color:#e3ebf7}
+.hero-sum{margin:14px 0 0;font-size:15px;line-height:1.85;max-width:100%;color:#e3ebf7}
 
 /* Trend */
 .trend{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -134,14 +134,14 @@ details.sub summary::-webkit-details-marker{display:none}
 details.sub summary::before{content:"▸ ";color:var(--gold)}
 details.sub[open] summary::before{content:"▾ "}
 
-/* Tabs: ثابتة مش بتتحرك مع السكرول */
+/* Tabs */
 .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:5px;box-shadow:var(--shadow)}
 .tabs .btn{flex:1;border:none;background:transparent;padding:11px 8px;font-size:14px;color:var(--muted)}
 .tabs .btn:hover{color:var(--text);border:none}
 .tabs .on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(30,58,95,.25)}
 .dark .tabs .on{background:var(--gold2);color:#111827;box-shadow:none}
 
-/* Entry card: أول حاجة في تقرير الإيرادات */
+/* Entry card */
 .entry{border-color:var(--gold2)}
 .entry .h{margin-bottom:14px}
 
@@ -188,7 +188,7 @@ details.sub[open] summary::before{content:"▾ "}
 .missing-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:9px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
 
-/* شاشة الدخول */
+/* Lock Screen */
 .lock{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 .lock .card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;text-align:center;padding:30px}
 .lock .logo{margin:0 auto;width:56px;height:56px;font-size:24px;border-radius:17px}
@@ -197,7 +197,7 @@ details.sub[open] summary::before{content:"▾ "}
 .toasts{position:fixed;bottom:16px;left:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:99;pointer-events:none;align-items:flex-start}
 .toast{padding:12px 17px;border-radius:12px;color:#fff;font-weight:700;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:460px}
 
-/* موبايل */
+/* Mobile */
 @media (max-width:640px){
     .wrap{padding:10px;gap:14px}
     .card,.icard{padding:15px;border-radius:16px}
@@ -219,13 +219,15 @@ details.sub[open] summary::before{content:"▾ "}
     .pgrid{grid-template-columns:1fr 1fr}
     .tico{width:48px;height:48px}
 }
-/* كمبيوتر */
+
+/* Desktop FULL WIDTH (V10.6) */
 @media (min-width:1000px){
     html{font-size:16px}
-    body{font-size:15px}
-    .wrap{max-width:1360px;padding:26px 36px;gap:20px}
-    .card,.icard{padding:26px}
-    .card{border-radius:20px}
+    body{font-size:15px; width:100%; min-width:0; overflow-x:hidden;}
+    #app{display:block; width:100%!important; max-width:none!important; min-width:0; margin:0; padding:0;}
+    #app > .wrap, .wrap{width:100%!important; max-width:none!important; padding:22px clamp(18px,2vw,40px); gap:20px}
+    #tab-revenue.wrap, #tab-salesforecast.wrap, #tab-inventory.wrap{width:100%!important; max-width:none!important;}
+    .card,.icard{padding:26px; border-radius:20px; min-width:0;}
     .h{font-size:17px;margin-bottom:14px}
     .eyebrow{font-size:12px}
     .inp{font-size:15px;padding:12px 14px}
@@ -233,8 +235,9 @@ details.sub[open] summary::before{content:"▾ "}
     .inp.xs{width:170px}
     .btn{font-size:14px;padding:11px 20px}
     .btn-sm{font-size:13px;padding:9px 15px}
+    .tabs{width:100%; max-width:none;}
     .tabs .btn{font-size:15px;padding:13px 10px}
-    .tiles{grid-template-columns:repeat(4,1fr);gap:20px}
+    .tiles{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px; width:100%; max-width:none;}
     .tile{padding:32px 18px;border-radius:22px}
     .tico{width:66px;height:66px;border-radius:20px}
     .tico .ico{width:30px;height:30px}
@@ -243,9 +246,9 @@ details.sub[open] summary::before{content:"▾ "}
     .hero{padding:34px 38px}
     .hero h2{font-size:30px}
     .hero-sum{font-size:17px}
-    .tb{padding:24px}
+    .tb{padding:24px; min-width:0;}
     .tb .big{font-size:34px}
-    .quick{padding:22px}
+    .quick{padding:22px; min-width:0;}
     .quick .lbl{font-size:13.5px}
     .quick .val{font-size:32px}
     .quick .sub{font-size:13px}
@@ -253,9 +256,10 @@ details.sub[open] summary::before{content:"▾ "}
     .ilines{font-size:14px}
     .ilbl{font-size:13.5px}
     .tip{font-size:14.5px;padding:12px 15px}
-    table{font-size:14.5px}
+    table{font-size:14.5px; width:100%!important;}
     th,td{padding:12px 11px}
     th{font-size:13px}
+    .grid, .trend, .g2, .g3, .g4, .cmp-head, .pgrid{width:100%!important; max-width:none!important; min-width:0;}
     .g4{grid-template-columns:repeat(4,1fr)}
     .pgrid{grid-template-columns:1fr 1fr;gap:16px 20px}
     .fld{font-size:13.5px}
@@ -265,7 +269,7 @@ details.sub[open] summary::before{content:"▾ "}
     .brand-name{font-size:18px}
 }
 
-/* طباعة: صفحة A4 واحدة للتقرير */
+/* Print Settings */
 @page{size:A4;margin:9mm}
 @media print{
     .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,details,.entry{display:none!important}
@@ -287,11 +291,61 @@ details.sub[open] summary::before{content:"▾ "}
     .g2,.g4,.g3{gap:6px}
     .icard{break-inside:avoid}
 }
+
+@page{size:A4 landscape;margin:10mm}
+@media print{
+  body.print-orders *, body.print-salesforecast *{visibility:hidden!important}
+  body.print-orders #tab-inventory, body.print-orders #tab-inventory *, body.print-orders #inv-panel, body.print-orders #pn-orders, body.print-orders #pn-orders *,
+  body.print-salesforecast #sales-forecast, body.print-salesforecast #sales-forecast *{visibility:visible!important}
+  body.print-orders #pn-orders, body.print-salesforecast #sales-forecast{display:block!important;position:absolute!important;top:0!important;right:0!important;left:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important;border:0!important;box-shadow:none!important}
+  body.print-orders #pn-orders .no-print, body.print-salesforecast #sales-forecast .no-print,
+  body.print-orders #pn-orders button, body.print-salesforecast #sales-forecast button,
+  body.print-orders #pn-orders details, body.print-salesforecast #sales-forecast details{display:none!important}
+  body.print-orders #pn-orders .card, body.print-salesforecast #sales-forecast .card{background:#fff!important;color:#000!important;border:0!important;box-shadow:none!important}
+  body.print-orders #pn-orders table, body.print-salesforecast #sales-forecast table{width:100%!important;border-collapse:collapse!important;font-size:12px!important;font-weight:800!important}
+  body.print-orders #pn-orders th, body.print-orders #pn-orders td,
+  body.print-salesforecast #sales-forecast th, body.print-salesforecast #sales-forecast td{color:#000!important;border:1px solid #777!important;padding:7px 6px!important;white-space:normal!important}
+  body.print-orders #pn-orders .muted, body.print-salesforecast #sales-forecast .muted{color:#222!important;font-weight:800!important}
+  body.print-orders #pn-orders *, body.print-salesforecast #sales-forecast *{font-weight:800!important}
+  body.print-orders #pn-orders, body.print-salesforecast #sales-forecast{font-size:12px!important}
+}
+
+/* Light Theme Overrides */
+html:not(.dark){
+  --bg:#f7f9fc;--bg2:#edf2f8;--card:#ffffff;--card2:#f5f8fc;--text:#172033;--muted:#46546b;--border:#d5deea;--inp:#ffffff;--gold:#94600b;--gold2:#e3ad32;--accent:#244d78;--ok:#087a52;--bad:#c52e36;
+  --shadow:0 1px 3px rgba(22,34,52,.07),0 5px 16px rgba(22,34,52,.07);
+  --shadow-lg:0 2px 5px rgba(22,34,52,.08),0 14px 32px rgba(22,34,52,.11);
+}
+html:not(.dark) body{background-color:var(--bg);background-image:linear-gradient(180deg,#f9fbfe 0%,#f1f5fa 100%);color:var(--text);}
+html:not(.dark) .card,html:not(.dark) .tb,html:not(.dark) .quick,html:not(.dark) .icard,html:not(.dark) .tile,html:not(.dark) .tabs{background:#fff;border-color:#d5deea;color:#172033;box-shadow:0 3px 12px rgba(25,42,66,.07);}
+html:not(.dark) .pcard,html:not(.dark) .cmp-box,html:not(.dark) .chip2,html:not(.dark) .tip{background:#f5f8fc;border-color:#d5deea;color:#172033;}
+html:not(.dark) .muted,html:not(.dark) .brand-sub,html:not(.dark) .fld,html:not(.dark) .ilbl,html:not(.dark) .quick .lbl,html:not(.dark) .quick .sub,html:not(.dark) .tstat,html:not(.dark) th{color:#46546b;}
+html:not(.dark) td,html:not(.dark) .fld b,html:not(.dark) .ilines,html:not(.dark) .tname,html:not(.dark) .ptitle{color:#172033;}
+html:not(.dark) th{background:#edf2f8;font-weight:900;}
+html:not(.dark) tr:nth-child(even) td{background:#fafcff}
+html:not(.dark) .inp{background:#fff;color:#172033;border-color:#cbd6e4;}
+html:not(.dark) .inp::placeholder{color:#78869a;opacity:1}
+html:not(.dark) .btn:not(.btn-gold):not(.btn-green):not(.btn-red):not(.btn-slate){background:#f2f6fb;color:#24364d;border-color:#cbd6e4;}
+html:not(.dark) .tabs .btn.on{background:#244d78;color:#fff}
+html:not(.dark) .tico{background:linear-gradient(145deg,#eaf1f9,#f8fbff);color:#244d78;border-color:#d3deeb;}
+html:not(.dark) .hero{background:linear-gradient(135deg,#e8f0fa 0%,#dce9f7 60%,#d2e2f3 100%);color:#172b43;border:1px solid #c8d8ea;}
+html:not(.dark) .hero .eyebrow{color:#87570b}
+html:not(.dark) .hero .muted{color:#405873}
+html:not(.dark) .hero-sum{color:#263d57}
+html:not(.dark) .status{color:#203b59;background:rgba(255,255,255,.7);border-color:#b8cce2;}
+html:not(.dark) .note{color:#67470c;background:#fff8e8;border-color:#ead39c;}
+html:not(.dark) .alert{color:#a5222b;background:#fff0f0;border-color:#efc2c5;}
+html:not(.dark) .badge.open{color:#087a52;background:#eaf8f1;border-color:#a9dfc7}
+html:not(.dark) .badge.closed{color:#80540b;background:#fff7e5;border-color:#ead39c}
+html:not(.dark) .chip.up{color:#087a52}
+html:not(.dark) .chip.down{color:#b4232b}
+html:not(.dark) details.sub summary{color:#244d78}
+html:not(.dark) .prow{border-color:#dce4ee}
 </style>
 </head>
 <body>
 
-<!-- ===== شاشة الدخول: سكربت مستقل عشان تشتغل حتى لو البرنامج فيه خطأ ===== -->
+<!-- ===== شاشة الدخول ===== -->
 <div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
@@ -306,23 +360,20 @@ details.sub[open] summary::before{content:"▾ "}
 </div>
 <script>
 (function () {
-    var PIN = '1234';                 // رمز الحماية (غيّره لو عايز)
+    var PIN = '1234';
     var errBox = document.getElementById('lock-err');
     var input = document.getElementById('unlock-pin');
     var btn = document.getElementById('unlock-btn');
-    var appReady = false;
 
     function show(msg, ok) {
         errBox.textContent = msg;
         errBox.className = ok ? 'ok' : '';
     }
 
-    // أي خطأ في البرنامج بيظهر على شاشة الدخول بدل ما يفضل صامت
     window.addEventListener('error', function (e) {
         show('حصل خطأ في البرنامج: ' + e.message + (e.lineno ? ' (سطر ' + e.lineno + ')' : ''));
     });
 
-    // الأرقام العربية (١٢٣٤) تتحول لإنجليزية، والمسافات تتشال
     function normDigits(s) {
         return String(s || '')
             .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
@@ -332,7 +383,6 @@ details.sub[open] summary::before{content:"▾ "}
 
     function openApp(attempt) {
         attempt = attempt || 0;
-        // انتظر تسجيل دالة تشغيل البرنامج لو المتصفح اتأخر في تحميل السكربت الرئيسي.
         if (typeof window.kansasStart !== 'function') {
             if (attempt < 40) {
                 setTimeout(function () { openApp(attempt + 1); }, 100);
@@ -344,7 +394,6 @@ details.sub[open] summary::before{content:"▾ "}
         }
         try {
             window.kansasStart();
-            appReady = true;
             try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
             document.getElementById('lock').classList.add('hidden');
         } catch (err) {
@@ -371,11 +420,10 @@ details.sub[open] summary::before{content:"▾ "}
         if (unlocked) openApp();
         else input.focus();
     });
-    window.kansasLockedReady = true;
 })();
 </script>
 
-<!-- ===== التطبيق ===== -->
+<!-- ===== التطبيق الرئيسي ===== -->
 <div id="app" class="hidden">
 <div class="wrap">
 
@@ -407,13 +455,13 @@ details.sub[open] summary::before{content:"▾ "}
 
     <nav class="tabs no-print">
         <button class="btn on" id="tab-btn-revenue" onclick="switchTab('revenue')">تقرير الإيرادات</button>
+        <button class="btn" id="tab-btn-salesforecast" onclick="switchTab('salesforecast')">Sales Forecasting</button>
         <button class="btn" id="tab-btn-inventory" onclick="switchTab('inventory')">المخزون</button>
     </nav>
 
     <!-- ================= الإيرادات ================= -->
     <section id="tab-revenue" class="wrap" style="padding:0">
 
-        <!-- تسجيل اليوم: أول حاجة، لأن كل النتايج مبنية عليه -->
         <div class="card entry no-print" data-scope>
             <div class="row between">
                 <div class="h" style="margin:0">تسجيل إيراد وعمليات يوم</div>
@@ -446,7 +494,6 @@ details.sub[open] summary::before{content:"▾ "}
 
         <div class="trend" id="trend"></div>
 
-        <!-- إضافة جديدة: مساعد تحليل الإيرادات المحلي، دون أي اتصال خارجي -->
         <div class="card no-print" id="revenue-assistant" style="border:1px solid var(--gold, #d6a500)">
             <div class="row between" style="align-items:center;gap:10px">
                 <div>
@@ -468,7 +515,7 @@ details.sub[open] summary::before{content:"▾ "}
                 <button class="btn btn-ghost btn-sm" onclick="askRevenuePreset('حلل عدد العمليات')">عدد العمليات</button>
                 <button class="btn btn-ghost btn-sm" onclick="askRevenuePreset('قارن بالسنة الماضية')">مقارنة السنة الماضية</button>
             </div>
-            <div id="revenue-assistant-answer" class="note" aria-live="polite" style="margin-top:10px">اختار سؤالًا أو اكتب سؤالك عن الإيرادات.</div>
+            <div id="revenue-assistant-answer" class="note" aria-live="polite" style="margin-top:10px">اختار سؤالاً أو اكتب سؤالك عن الإيرادات.</div>
         </div>
 
         <div class="grid g4" id="quick"></div>
@@ -481,7 +528,6 @@ details.sub[open] summary::before{content:"▾ "}
         <div class="h" style="margin:4px 2px 0">التفاصيل</div>
         <div class="grid g2" id="items"></div>
 
-        <!-- مقارنة فترتين: مقفولة لحد ما تفتحها -->
         <details class="card no-print" id="cmp-card">
             <summary>مقارنة فترتين</summary>
             <div class="grid g2" style="margin-bottom:16px">
@@ -505,7 +551,6 @@ details.sub[open] summary::before{content:"▾ "}
             </details>
         </details>
 
-        <!-- تصدير وطباعة -->
         <div class="card no-print">
             <div class="h">تصدير وطباعة</div>
             <div class="exp">
@@ -542,6 +587,48 @@ details.sub[open] summary::before{content:"▾ "}
         </details>
     </section>
 
+    <!-- ================= Sales Forecasting ================= -->
+    <section id="tab-salesforecast" class="wrap hidden" style="padding:0">
+        <div class="card" id="sales-forecast" style="border:1px solid var(--gold, #d6a500);margin-top:14px">
+            <div class="row between" style="align-items:center;gap:10px">
+                <div>
+                    <div class="eyebrow">التخطيط للمبيعات</div>
+                    <div class="h" style="margin:3px 0">Sales Forecasting - توقع المبيعات</div>
+                    <div class="muted">يتعلم تلقائيًا من المبيعات التي تسجلها، ولا يشترط وجود 4 أسابيع سابقة</div>
+                </div>
+                <span class="badge open">توقع 7 أيام</span>
+            </div>
+            <div id="forecast-summary" class="note" style="margin-top:12px">ابدأ بتسجيل المبيعات أو استيراد بيانات سابقة لبناء التوقع.</div>
+            <div class="tbl-wrap" style="margin-top:12px"><table>
+                <thead><tr><th>اليوم والتاريخ</th><th>التوقع المرجح</th><th>المناسبة / التأثير</th><th>مستوى الثقة</th></tr></thead>
+                <tbody id="forecast-rows"></tbody>
+                <tfoot><tr><th>إجمالي الأسبوع</th><th id="forecast-total">—</th><th colspan="2" id="forecast-confidence">—</th></tr></tfoot>
+            </table></div>
+            <details style="margin-top:14px" open>
+                <summary>تغذية النظام ببيانات الأسابيع السابقة</summary>
+                <div class="muted" style="margin:8px 0">الصق البيانات في صورة: التاريخ، الإيراد فقط. كل يوم في سطر. مثال: 2026-10-01,42000. يقبل CSV أو نسخ صفوف من Excel.</div>
+                <textarea id="forecast-history-input" class="inp" rows="5" placeholder="2026-10-01,42000&#10;2026-10-02,45000&#10;2026-10-03,39000" style="width:100%;resize:vertical"></textarea>
+                <div class="row" style="margin-top:8px;align-items:center">
+                    <button class="btn btn-gold" onclick="importForecastHistory()">إضافة البيانات للتعلم</button>
+                    <span class="muted" id="forecast-history-count"></span>
+                </div>
+            </details>
+            <details style="margin-top:12px">
+                <summary>الإجازات والمناسبات والعروض</summary>
+                <div class="muted" style="margin:8px 0">الإجازات الرسمية الثابتة في مصر تظهر تلقائيًا. أضف الأعياد المتغيرة هجريًا أو عروض الفرع يدويًا، وحدد التأثير المتوقع إن كان معروفًا.</div>
+                <div class="grid g3" style="margin-top:10px">
+                    <div><label class="muted">التاريخ</label><input type="date" id="forecast-event-date" class="inp"></div>
+                    <div><label class="muted">اسم المناسبة</label><input type="text" id="forecast-event-name" class="inp" placeholder="مثال: عيد الفطر / عرض خاص"></div>
+                    <div><label class="muted">التأثير المتوقع % (اختياري)</label><input type="number" id="forecast-event-impact" class="inp" placeholder="مثال: 20 أو -10" step="1"></div>
+                </div>
+                <div class="row" style="margin-top:8px"><button class="btn btn-gold" onclick="saveForecastEvent()">حفظ المناسبة</button></div>
+                <div id="forecast-events-list" style="margin-top:10px"></div>
+            </details>
+            <div class="row no-print" style="margin-top:14px;justify-content:flex-end"><button class="btn btn-green" onclick="printSalesForecast()">طباعة / حفظ PDF</button></div>
+            <div class="muted" style="margin-top:12px">ملاحظة: التوقع تقديري وليس ضمانًا للمبيعات. دقته تتحسن كلما زادت البيانات. تواريخ الأعياد الدينية تتغير سنويًا؛ راجع التاريخ وأضفه عند إعلان الإجازة رسميًا.</div>
+        </div>
+    </section>
+
     <!-- ================= المخزون ================= -->
     <section id="tab-inventory" class="wrap hidden" style="padding:0">
 
@@ -568,9 +655,13 @@ details.sub[open] summary::before{content:"▾ "}
                 <span class="tname">تحليل المخزون</span>
                 <span class="tstat" id="ts-analysis"></span>
             </button>
+            <button class="tile" onclick="openInv('orders')">
+                <span class="tico"><svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/></svg></span>
+                <span class="tname">الطلبيات المتوقعة</span>
+                <span class="tstat">Per 1000 · 7 أيام</span>
+            </button>
         </div>
 
-        <!-- تصدير شيت الفترة -->
         <div class="card" id="inv-export">
             <div class="h">تحميل شيت الوارد والتحويلات والإيراد</div>
             <div class="exp">
@@ -693,6 +784,54 @@ details.sub[open] summary::before{content:"▾ "}
                     <div id="saved-list" style="margin-top:12px"></div>
                 </details>
             </div>
+
+            <!-- الطلبيات المتوقعة -->
+            <div id="pn-orders" class="hidden">
+              <div class="hero">
+                <div class="eyebrow">KANSAS · ORDER FORECAST</div>
+                <h2>الطلبيات المتوقعة للأسبوع</h2>
+                <div class="hero-sum">اختار الأصناف وحدد معدل كل صنف لكل 1000 جنيه مبيعات مرة واحدة. النظام يحسب احتياج كل يوم تلقائيًا من توقع الإيراد.</div>
+              </div>
+              <div class="card no-print">
+                <div class="h">إعداد أصناف الـ Per 1000</div>
+                <div class="muted" style="margin-bottom:12px">فعّل الأصناف التي تريد حسابها، واكتب معدل الاستهلاك لكل 1000 جنيه. أسماء الأصناف ووحداتها مأخوذة من قائمة أصناف المخزون.</div>
+                <div id="per1000-products"></div>
+                <div class="note" style="margin-top:12px">مثال: معدل الدجاج 1 لكل 1000 جنيه، وتوقع الإيراد 40,000 جنيه = احتياج 40 دجاجة.</div>
+              </div>
+              <div class="card" id="orders-print-area">
+                <div class="row between no-print" style="margin-bottom:12px">
+                  <div>
+                    <div class="h" style="margin:0">جدول الأسبوع القادم</div>
+                    <div class="muted">يمكنك تغيير تاريخ بداية الجدول، وسيتم تحديث الأيام السبعة.</div>
+                  </div>
+                  <div class="row">
+                    <label class="muted" for="orders-start-date">بداية الجدول</label>
+                    <input type="date" id="orders-start-date" class="inp sm" onchange="renderOrderForecast()">
+                  </div>
+                </div>
+                <div id="orders-print-heading" style="text-align:center;margin:0 0 12px">
+                  <div style="font-size:20px;font-weight:900">KANSAS CHICKEN</div>
+                  <div style="font-size:17px;font-weight:800">جدول توقع الإيرادات والطلبيات</div>
+                  <div id="orders-print-period" class="muted"></div>
+                </div>
+                <div class="tbl-wrap"><table id="orders-table">
+                  <thead id="orders-head"><tr><th>اليوم والتاريخ</th><th>الإيراد المتوقع</th></tr></thead>
+                  <tbody id="orders-rows"></tbody>
+                  <tfoot id="orders-foot"></tfoot>
+                </table></div>
+                <div id="orders-note" class="muted" style="margin-top:10px"></div>
+                <div class="row no-print" style="margin-top:16px;justify-content:flex-end">
+                  <button class="btn btn-gold" onclick="saveOrderSnapshot()">اعتماد وحفظ نسخة الأسبوع</button>
+                  <button class="btn btn-green" onclick="printOrdersPdf()">طباعة جدول الأسبوع PDF</button>
+                </div>
+                <div id="orders-snapshot-status" class="muted no-print" style="margin-top:8px"></div>
+              </div>
+              <div class="card no-print" id="orders-actual-card">
+                <div class="h">مقارنة المتوقع بالفعلي</div>
+                <div class="muted" style="margin-bottom:10px">بعد اعتماد نسخة الأسبوع، أدخل الكمية الفعلية المصروفة أو المطلوبة لكل صنف، وسيظهر الفرق عن التوقع.</div>
+                <div id="orders-actual-review" class="muted">اعتمد نسخة الأسبوع أولًا لتفعيل المقارنة.</div>
+              </div>
+            </div>
         </div>
     </section>
 
@@ -705,11 +844,10 @@ details.sub[open] summary::before{content:"▾ "}
 
 <script>
 /* ============================================================
-   الإعدادات
+   الإعدادات والوظائف الأساسية
    ============================================================ */
-const STORE_KEY = 'kansas_v8';      // نفس المفتاح عشان البيانات القديمة تفضل
+const STORE_KEY = 'kansas_v8';
 
-/* ---------- أدوات مساعدة ---------- */
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
@@ -732,7 +870,6 @@ const addDays = (day, n) => { const [y, m, d] = day.split('-').map(Number); retu
 const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
 const weekdayOf = day => { const [y, m, d] = day.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); };
 const lyDay = day => (Number(day.slice(0, 4)) - 1) + day.slice(4);
-const curOf = lyD => (Number(lyD.slice(0, 4)) + 1) + lyD.slice(4);
 const inRange = (d, from, to) => (!from || d >= from) && (!to || d <= to);
 function eachDay(from, to, fn) {
     if (!from || !to) return;
@@ -741,7 +878,6 @@ function eachDay(from, to, fn) {
 }
 function shiftMonth(key, delta) { const [y, m] = key.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + delta, 1)); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}`; }
 
-/* ---------- أيقونات خطية موحدة ---------- */
 const ICON_PATHS = {
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
     moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
@@ -759,9 +895,6 @@ function toast(msg, type = 'success') {
     setTimeout(() => t.remove(), 3500);
 }
 
-/* ============================================================
-   تأكيد داخل البرنامج
-   ============================================================ */
 function askConfirm(msg, okText = 'تأكيد') {
     return new Promise(resolve => {
         const ov = document.createElement('div');
@@ -793,11 +926,8 @@ function askConfirm(msg, okText = 'تأكيد') {
     });
 }
 
-/* ============================================================
-   التخزين والترحيل
-   ============================================================ */
 const emptyDB = () => ({
-    v: 9,
+    v: 10,
     products: [],
     openings: {},
     openLocked: {},
@@ -808,12 +938,12 @@ const emptyDB = () => ({
     transferLocked: {},
     transferNone: {},
     analyses: [],
-    sales: {}, monthly: {}, lyDaily: {},
+    sales: {}, monthly: {}, lyDaily: {}, forecastEvents: {},
+    per1000: {}, orderSnapshots: {},
     locks: { sales: {} },
     lastBackup: null
 });
 
-// يرحّل بيانات v8 (stock) و v9 للشكل الجديد من غير ما يفقد حاجة
 function migrate(d) {
     d.receipts = d.receipts || {};
     d.openings = d.openings || {};
@@ -822,6 +952,9 @@ function migrate(d) {
     d.receiptNone = d.receiptNone || {};
     d.transferLocked = d.transferLocked || {};
     d.transferNone = d.transferNone || {};
+    d.forecastEvents = d.forecastEvents || {};
+    d.per1000 = d.per1000 || {};
+    d.orderSnapshots = d.orderSnapshots || {};
     if (d.stock) {
         const days = Object.keys(d.stock).sort();
         days.forEach(day => {
@@ -847,6 +980,8 @@ function normalize(d) {
     const out = Object.assign(emptyDB(), d);
     out.locks = { sales: (d.locks && d.locks.sales) || {} };
     out.products = (out.products || []).map(p => ({ id: p.id, name: p.name || '', unit: p.unit || '' }));
+    out.per1000 = out.per1000 || {};
+    out.orderSnapshots = out.orderSnapshots || {};
     out.transfers = (out.transfers || []).map(t => ({ ...t, product_id: t.product_id || t.productId }));
     return out;
 }
@@ -884,8 +1019,6 @@ async function confirmFuture(day) {
     return day <= todayStr() || await askConfirm('التاريخ ده في المستقبل. متأكد إنه صح؟');
 }
 
-/* ---------- الدخول والخروج (الشاشة نفسها في السكربت اللي فوق) ---------- */
-// الدالة دي بيناديها سكربت الدخول بعد ما الرمز يتقبل
 window.kansasStart = function () {
     S = loadDB();
     saveDB();
@@ -937,9 +1070,12 @@ function resetRevRange() {
 function switchTab(tab) {
     activeTab = tab;
     $('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
+    $('tab-salesforecast').classList.toggle('hidden', tab !== 'salesforecast');
     $('tab-inventory').classList.toggle('hidden', tab !== 'inventory');
     $('tab-btn-revenue').classList.toggle('on', tab === 'revenue');
+    $('tab-btn-salesforecast').classList.toggle('on', tab === 'salesforecast');
     $('tab-btn-inventory').classList.toggle('on', tab === 'inventory');
+    if (tab === 'salesforecast') renderForecast();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -952,7 +1088,6 @@ function applyTheme(t) {
     try { localStorage.setItem('kansas_theme', t); } catch (e) {}
 }
 
-/* ---------- النسخ الاحتياطي ---------- */
 function exportBackup() {
     const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -1002,9 +1137,6 @@ function renderBackupAlert() {
     }
 }
 
-/* ============================================================
-   ✏️ الكيبورد: Enter والأسهم بتنقل بين الخانات، والأسهم مش بتغيّر الرقم
-   ============================================================ */
 function isVisible(el) { return !!el && el.offsetParent !== null; }
 
 function rowCells(scope, ri) {
@@ -1065,7 +1197,7 @@ document.addEventListener('wheel', () => {
 }, { passive: true });
 
 /* ============================================================
-   محرك الإيرادات: الاتجاه والأرقام والمقترحات
+   محرك الإيرادات
    ============================================================ */
 function salesIn(from, to) {
     let rev = 0, ord = 0, days = 0;
@@ -1186,7 +1318,6 @@ function statusOf(a) {
 
 const tipHtml = t => `<div class="tip ${t.type}"><span class="dot"></span><span>${t.text}</span></div>`;
 
-/* ---------- المقترحات: 5 بنود ---------- */
 function buildBlocks(a) {
     const B = [];
     const pa = v => (Math.abs(v) * 100).toFixed(1) + '%';
@@ -1253,7 +1384,6 @@ function buildBlocks(a) {
     return B;
 }
 
-/* ---------- عرض التقرير ---------- */
 function renderHero(a, from, to) {
     const st = statusOf(a);
     $('hero-title').textContent = `${MONTHS_AR[Number(activeMonth.slice(5)) - 1]} ${activeMonth.slice(0, 4)}`;
@@ -1328,7 +1458,6 @@ function renderItems(blocks) {
     </div>`).join('');
 }
 
-/* ---------- مقارنة فترتين ---------- */
 function periodStats(from, to) {
     if (from > to) [from, to] = [to, from];
     let rev = 0, ord = 0, days = 0;
@@ -1472,6 +1601,136 @@ function askRevenuePreset(question) {
     askRevenueAssistant();
 }
 
+/* ============================================================
+   توقع المبيعات (Sales Forecasting)
+   ============================================================ */
+const FIXED_EGYPT_HOLIDAYS = {
+    '01-07': 'عيد الميلاد المجيد', '01-25': 'عيد الشرطة وثورة يناير',
+    '04-25': 'عيد تحرير سيناء', '05-01': 'عيد العمال',
+    '06-30': 'ذكرى ثورة 30 يونيو', '07-23': 'ذكرى ثورة 23 يوليو',
+    '10-06': 'عيد القوات المسلحة'
+};
+function forecastEventFor(day) {
+    const custom = S.forecastEvents && S.forecastEvents[day];
+    if (custom) return { name: custom.name || 'مناسبة خاصة', impact: custom.impact === null || custom.impact === undefined || custom.impact === '' ? null : (Number.isFinite(Number(custom.impact)) ? Number(custom.impact) : null), custom: true };
+    const fixed = FIXED_EGYPT_HOLIDAYS[day.slice(5)];
+    return fixed ? { name: fixed, impact: null, custom: false } : null;
+}
+function forecastHistory() {
+    return Object.keys(S.sales || {}).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && Number(S.sales[d]?.revenue) > 0)
+        .sort().map(d => ({ date:d, revenue:Number(S.sales[d].revenue), orders:Number(S.sales[d].orders || 0), weekday:weekdayOf(d) }));
+}
+function mean(values) { return values.length ? values.reduce((a,b)=>a+b,0)/values.length : 0; }
+function forecastTrend(history) {
+    if (!history.length) return { factor:1, label:'لا توجد بيانات كافية لقياس الاتجاه' };
+    const end = todayStr(), startRecent = addDays(end,-13), startPrior = addDays(end,-27);
+    const recent = history.filter(x=>x.date>=startRecent && x.date<=end).map(x=>x.revenue);
+    const prior = history.filter(x=>x.date>=startPrior && x.date<startRecent).map(x=>x.revenue);
+    if (recent.length < 3 || prior.length < 3 || mean(prior) <= 0) return { factor:1, label:'الاتجاه غير محسوب لعدم كفاية بيانات آخر 4 أسابيع' };
+    const raw = mean(recent)/mean(prior);
+    const factor = Math.max(0.85, Math.min(1.15, raw));
+    return { factor, label: factor>1.015 ? 'اتجاه صاعد' : factor<0.985 ? 'اتجاه هابط' : 'اتجاه مستقر' };
+}
+function forecastOne(day, history, trend) {
+    const wd = weekdayOf(day);
+    const same = history.filter(x=>x.weekday===wd).slice(-8);
+    const all = history.slice(-28);
+    let base = 0, confidence = 'ضعيفة', basis = '';
+    if (same.length) {
+        const weights = same.map((_,i)=>i+1);
+ base = same.reduce((sum,x,i)=>sum+x.revenue*weights[i],0)/weights.reduce((a,b)=>a+b,0);
+        confidence = same.length>=8 ? 'مرتفعة' : same.length>=4 ? 'متوسطة' : 'مبدئية';
+        basis = `${same.length} تسجيل لنفس اليوم`;
+    } else if (all.length) {
+        base = mean(all.map(x=>x.revenue));
+        confidence = 'ضعيفة'; basis = 'متوسط الأيام المسجلة لعدم وجود نفس اليوم';
+    }
+    const event = forecastEventFor(day);
+    let impact = event && event.impact !== null ? event.impact : 0;
+    let learned = false;
+    if (event && event.impact === null) {
+        const priorEvents = history.filter(h => h.date < day && (() => {
+            const oldEvent = forecastEventFor(h.date);
+            return oldEvent && oldEvent.name === event.name;
+        })());
+        const ratios = priorEvents.map(h => {
+            const normalDays = history.filter(x => x.weekday === h.weekday && x.date < h.date && !forecastEventFor(x.date)).slice(-8).map(x => x.revenue);
+            const normal = mean(normalDays);
+            return normal > 0 ? h.revenue / normal : null;
+        }).filter(x => x !== null && Number.isFinite(x));
+        if (ratios.length) {
+            const learnedFactor = Math.max(0.5, Math.min(2.5, mean(ratios)));
+            impact = (learnedFactor - 1) * 100;
+            learned = true;
+            if (ratios.length >= 2) confidence = confidence === 'مرتفعة' ? 'مرتفعة' : 'متوسطة';
+        }
+    }
+    const predicted = Math.max(0, base * trend.factor * (1 + impact/100));
+    return { day, base, predicted, event, impact, learned, confidence, basis };
+}
+function renderForecast() {
+    const body = $('forecast-rows'); if (!body) return;
+    const history = forecastHistory();
+    const trend = forecastTrend(history);
+    const days = Array.from({length:7},(_,i)=>addDays(todayStr(),i+1));
+    const rows = days.map(d=>forecastOne(d,history,trend));
+    const total = rows.reduce((a,x)=>a+x.predicted,0);
+    body.innerHTML = rows.map(x=>`<tr><td>${DAYS_AR[weekdayOf(x.day)]}<br><span class="muted">${x.day}</span></td><td><b>${x.base ? fmt(x.predicted)+' ج.م' : 'بانتظار البيانات'}</b></td><td>${x.event ? esc(x.event.name)+((x.event.impact!==null || x.learned) ? `<br><span class="muted">${x.learned?'تأثير متعلم ':'تأثير محدد '}${x.impact>0?'+':''}${x.impact.toFixed(0)}%</span>` : '<br><span class="muted">التأثير غير محدد؛ لم يُفترض رقم</span>') : 'يوم عادي'}</td><td>${x.confidence}<br><span class="muted">${esc(x.basis)}</span></td></tr>`).join('');
+    $('forecast-total').textContent = history.length ? fmt(total)+' ج.م' : 'بانتظار البيانات';
+    $('forecast-confidence').textContent = history.length ? `${history.length} يوم مسجل · ${trend.label}` : 'أدخل بيانات سابقة أو ابدأ التسجيل اليومي';
+    $('forecast-summary').textContent = history.length
+        ? `النظام يستخدم ${history.length} يومًا مسجلًا، ويقارن كل يوم بالأيام السابقة من نفس يوم الأسبوع. ${trend.label}. التوقع الحالي مبدئي ويتحسن مع كل تسجيل جديد.`
+        : 'لا توجد مبيعات مسجلة بعد. أدخل بيانات سابقة من المربع أدناه أو سجل المبيعات اليومية المعتادة ليبدأ النظام التعلم.';
+    $('forecast-history-count').textContent = `الموجود حاليًا: ${history.length} يوم`;
+    renderForecastEvents();
+}
+function parseForecastDate(v) {
+    v=String(v||'').trim();
+    let m=v.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+    if(m) return `${m[1]}-${pad(Number(m[2]))}-${pad(Number(m[3]))}`;
+    m=v.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+    if(m) return `${m[3]}-${pad(Number(m[2]))}-${pad(Number(m[1]))}`;
+    return '';
+}
+function importForecastHistory() {
+    const raw=$('forecast-history-input').value.trim();
+    if(!raw) return toast('الصق بيانات المبيعات أولًا','error');
+    const lines=raw.split(/\r?\n/).filter(Boolean); let added=0, skipped=0, overwritten=0;
+    lines.forEach(line=>{
+        const cols=line.split(/[\t,;]+/).map(x=>x.trim());
+        if(cols.length<2) { skipped++; return; }
+        const date=parseForecastDate(cols[0]);
+        const revenue=Number(cols[1].replace(/[^0-9.\-]/g,''));
+        if(!date || !Number.isFinite(revenue) || revenue<0) { skipped++; return; }
+        if(S.sales[date]) overwritten++;
+        S.sales[date]={ ...(S.sales[date]||{}), revenue };
+        added++;
+    });
+    if(!added) return toast('لم أتعرف على أي صف. استخدم التاريخ,الإيراد فقط','error');
+    saveDB(); renderAll();
+    $('forecast-history-input').value='';
+    toast(`تم إدخال ${added} يوم${overwritten ? ` (تحديث ${overwritten} يوم)` : ''}${skipped ? `، وتجاهل ${skipped} صف` : ''}`);
+}
+
+function saveForecastEvent() {
+    const date=$('forecast-event-date').value, name=$('forecast-event-name').value.trim(), raw=$('forecast-event-impact').value.trim();
+    if(!date || !name) return toast('أدخل تاريخ المناسبة واسمها','error');
+    const impact=raw==='' ? null : Number(raw);
+    if(impact!==null && (!Number.isFinite(impact) || impact < -90 || impact > 300)) return toast('التأثير لازم يكون بين -90% و300%','error');
+    S.forecastEvents[date]={name,impact}; saveDB();
+    $('forecast-event-name').value=''; $('forecast-event-impact').value='';
+    renderForecast(); toast('تم حفظ المناسبة');
+}
+function deleteForecastEvent(date) {
+    if(!S.forecastEvents[date]) return;
+    delete S.forecastEvents[date]; saveDB(); renderForecast();
+}
+function renderForecastEvents() {
+    const el=$('forecast-events-list'); if(!el) return;
+    const entries=Object.entries(S.forecastEvents||{}).sort((a,b)=>a[0].localeCompare(b[0]));
+    el.innerHTML=entries.length ? `<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>المناسبة</th><th>التأثير</th><th></th></tr></thead><tbody>${entries.map(([d,e])=>`<tr><td>${d}</td><td>${esc(e.name)}</td><td>${e.impact===null||e.impact===undefined?'غير محدد':(e.impact>0?'+':'')+e.impact+'%'}</td><td><button class="btn btn-red btn-sm" onclick="deleteForecastEvent('${d}')">حذف</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="muted">لا توجد مناسبات مضافة يدويًا. الإجازات الثابتة تظهر تلقائيًا في التوقع.</div>';
+}
+
 function renderRevenue() {
     const from = $('rev-from').value, to = $('rev-to').value;
     const a = analyzeRevenue(from, to);
@@ -1479,6 +1738,7 @@ function renderRevenue() {
     renderHero(a, from, to);
     renderTrend(a);
     renderRevenueAssistant(a);
+    renderForecast();
     renderQuick(a);
     renderPriorities(blocks);
     renderItems(blocks);
@@ -1584,7 +1844,7 @@ function saveLyDays() {
 }
 
 /* ============================================================
-   المخزون
+   المخزون والتحليلات والطلبيات المتوقعة
    ============================================================ */
 const openingFor = (pid, m) => ((S.openings[m] || {})[pid]) ?? 0;
 const hasOpening = (pid, m) => !!S.openings[m] && S.openings[m][pid] !== undefined;
@@ -1649,13 +1909,15 @@ const INV_TITLES = {
     opening: 'الأصناف ورصيد أول الشهر',
     receipts: 'الوارد اليومي',
     transfers: 'التحويلات بين الفروع',
-    analysis: 'تحليل المخزون'
+    analysis: 'تحليل المخزون',
+    orders: 'الطلبيات المتوقعة - Per 1000'
 };
 const INV_ICONS = {
     opening: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
     receipts: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
     transfers: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>',
-    analysis: '<path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/>'
+    analysis: '<path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/>',
+    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"'
 };
 
 function openInv(v) {
@@ -1684,7 +1946,6 @@ function renderTiles() {
     $('ts-analysis').textContent = $('an-to').value ? 'لحد ' + $('an-to').value : 'اختار تاريخ';
 }
 
-/* ---------- 1) الأصناف ورصيد أول الشهر ---------- */
 function renderOpening() {
     const m = activeMonth;
     const locked = !!S.openLocked[m];
@@ -1801,7 +2062,6 @@ document.addEventListener('change', (e) => {
     renderAll();
 });
 
-/* ---------- 2) الوارد اليومي ---------- */
 function rcValue(d, p) {
     return Object.prototype.hasOwnProperty.call(rcDraft, p.id) ? rcDraft[p.id] : (rcpt(d, p.id) || '');
 }
@@ -1920,7 +2180,6 @@ async function unlockReceipts() {
     renderAll();
 }
 
-/* ---------- 3) التحويلات ---------- */
 function fillTransProducts() {
     const q = ($('trans-search').value || '').trim().toLowerCase();
     const list = S.products.filter(p => !q || searchKey(p).includes(q));
@@ -2041,7 +2300,6 @@ async function unlockTransfers() {
     renderAll();
 }
 
-/* ---------- 4) التحليل: دايماً من أول الشهر لحد تاريخ ---------- */
 function anRange() {
     const from = monthStart(activeMonth);
     const to = $('an-to').value;
@@ -2209,7 +2467,7 @@ async function deleteAnalysis(id) {
 }
 
 /* ============================================================
-   التصدير
+   التصدير الشامل (XLSX)
    ============================================================ */
 function setExportMonth() {
     if (!$('ex-from')) return;
@@ -2324,7 +2582,6 @@ function exportRevenueXlsx() {
     XLSX.writeFile(wb, 'Kansas_Revenue.xlsx');
 }
 
-/* ---------- عرض المخزون ---------- */
 function renderInventory() {
     const m = activeMonth;
     const al = $('inv-alert');
@@ -2338,12 +2595,13 @@ function renderInventory() {
     renderReceipts();
     renderTransfers();
     renderAnalysis();
+    renderOrderForecast();
 
     const showPanel = !!invView;
     $('inv-tiles').classList.toggle('hidden', showPanel);
     $('inv-export').classList.toggle('hidden', showPanel);
     $('inv-panel').classList.toggle('hidden', !showPanel);
-    ['opening', 'receipts', 'transfers', 'analysis'].forEach(k => {
+    ['opening', 'receipts', 'transfers', 'analysis', 'orders'].forEach(k => {
         $('pn-' + k).classList.toggle('hidden', k !== invView);
     });
     if (showPanel) {
@@ -2351,13 +2609,103 @@ function renderInventory() {
     }
 }
 
-/* ---------- الرسم العام ---------- */
+/* ============================================================
+   الطلبيات المتوقعة (Per 1000)
+   ============================================================ */
+function renderPer1000Products() {
+  const host = $('per1000-products'); if (!host) return;
+  if (!S.products.length) { host.innerHTML = '<div class="alert">أضف الأصناف أولًا من صفحة المخزون، ثم ارجع لاختيارها هنا.</div>'; return; }
+  host.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>اختيار</th><th>الصنف</th><th>الوحدة</th><th>معدل الكمية لكل 1000 جنيه</th></tr></thead><tbody>${S.products.map(p=>{
+    const cfg=S.per1000[p.id] || {}; const enabled=cfg.enabled===true;
+    return `<tr><td><input type="checkbox" ${enabled?'checked':''} aria-label="تفعيل ${esc(p.name)}" onchange="setPer1000Enabled('${esc(p.id)}',this.checked)"></td><td><b>${esc(p.name)}</b></td><td>${esc(p.unit||'—')}</td><td><input class="inp xs" type="number" min="0" step="0.01" value="${cfg.rate===undefined?'':esc(String(cfg.rate))}" placeholder="مثال: 1" onchange="setPer1000Rate('${esc(p.id)}',this.value)" ${enabled?'':'disabled'}></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+function setPer1000Enabled(id, enabled) {
+  S.per1000[id]=S.per1000[id]||{rate:0}; S.per1000[id].enabled=!!enabled; saveDB(); renderOrderForecast(); renderPer1000Products();
+}
+function setPer1000Rate(id, value) {
+  const rate=value===''?0:Number(value);
+  if(!Number.isFinite(rate)||rate<0) return toast('أدخل معدلًا صحيحًا','error');
+  S.per1000[id]=S.per1000[id]||{enabled:true}; S.per1000[id].rate=rate; if(S.per1000[id].enabled===undefined) S.per1000[id].enabled=true;
+  saveDB(); renderOrderForecast();
+}
+function orderStartDate() {
+  const el=$('orders-start-date');
+  if(el && el.value) return el.value;
+  const d=addDays(todayStr(),1); if(el) el.value=d; return d;
+}
+function renderOrderForecast() {
+  if(!$('orders-rows')) return;
+  renderPer1000Products();
+  const start=orderStartDate();
+  const history=forecastHistory(), trend=forecastTrend(history);
+  const days=Array.from({length:7},(_,i)=>addDays(start,i));
+  const forecasts=days.map(day=>forecastOne(day,history,trend));
+  const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
+  const quantities=forecasts.map(f=>products.map(p=>({id:p.id,qty:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100})));
+  $('orders-head').innerHTML=`<tr><th>اليوم والتاريخ</th><th>الإيراد المتوقع</th>${products.map(p=>`<th>${esc(p.name)}<br><span class="muted">${esc(p.unit||'')}</span></th>`).join('')}</tr>`;
+  $('orders-rows').innerHTML=forecasts.map((f,i)=>`<tr><td><b>${DAYS_AR[weekdayOf(f.day)]}</b><br><span class="muted">${f.day}</span></td><td><b>${f.base?fmt(f.predicted)+' ج.م':'لا توجد بيانات'}</b></td>${products.map(p=>{const q=quantities[i].find(x=>x.id===p.id)?.qty||0;return `<td><b>${f.base?fmt(q,2):'—'}</b></td>`}).join('')}</tr>`).join('');
+  const totalRev=forecasts.reduce((a,f)=>a+f.predicted,0);
+  const totals=products.map(p=>quantities.reduce((a,row)=>a+(row.find(x=>x.id===p.id)?.qty||0),0));
+  $('orders-foot').innerHTML=`<tr><th>إجمالي الأسبوع</th><th>${fmt(totalRev)} ج.م</th>${totals.map(q=>`<th>${fmt(q,2)}</th>`).join('')}</tr>`;
+  $('orders-print-period').textContent=`من ${days[0]} إلى ${days[6]}`;
+  $('orders-note').textContent=products.length?`تم حساب ${products.length} صنفًا من توقع الإيراد. المعدل = كمية الصنف لكل 1000 جنيه مبيعات. الكميات معروضة حتى منزلتين عشريتين.`:'اختار صنفًا واحدًا على الأقل وأدخل معدل Per 1000 أكبر من صفر لعرض الطلبيات.';
+  const saved=S.orderSnapshots[start];
+  $('orders-snapshot-status').textContent=saved?`يوجد اعتماد محفوظ لهذا الأسبوع بتاريخ ${saved.savedAt||''}. حفظ اعتماد جديد سيحدّث النسخة.`:'';
+  renderOrderActualReview(start);
+}
+function renderOrderActualReview(start) {
+  const host=$('orders-actual-review'); if(!host) return;
+  const snap=S.orderSnapshots[start];
+  if(!snap || !snap.rows || !snap.rows.length) { host.textContent='اعتمد نسخة الأسبوع أولًا لتفعيل المقارنة.'; return; }
+  const rows=[];
+  snap.rows.forEach((day,di)=>(day.items||[]).forEach(item=>{
+    const actual=item.actual===undefined||item.actual===null?'':item.actual;
+    const diff=actual===''?null:Number(actual)-Number(item.quantity||0);
+    rows.push(`<tr><td>${day.weekday}<br><span class="muted">${day.date}</span></td><td><b>${esc(item.name)}</b> <span class="muted">${esc(item.unit||'')}</span></td><td>${fmt(Number(item.quantity||0),2)}</td><td><input class="inp xs" type="number" min="0" step="0.01" value="${actual}" placeholder="الفعلي" onchange="saveOrderActual('${start}',${di},'${esc(item.productId)}',this.value)"></td><td id="order-diff-${di}-${esc(item.productId)}">${diff===null?'—':`${diff>0?'+':''}${fmt(diff,2)}`}</td></tr>`);
+  }));
+  host.innerHTML=rows.length?`<div class="tbl-wrap"><table><thead><tr><th>اليوم والتاريخ</th><th>الصنف</th><th>المتوقع</th><th>الفعلي</th><th>الفرق (فعلي - متوقع)</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`:'لا توجد أصناف محفوظة في نسخة الأسبوع.';
+}
+function saveOrderActual(start, dayIndex, productId, value) {
+  const snap=S.orderSnapshots[start]; if(!snap || !snap.rows[dayIndex]) return;
+  const actual=value===''?null:Number(value);
+  if(actual!==null && (!Number.isFinite(actual)||actual<0)) return toast('أدخل كمية فعلية صحيحة','error');
+  const item=(snap.rows[dayIndex].items||[]).find(x=>x.productId===productId); if(!item) return;
+  item.actual=actual; saveDB();
+  const diffEl=$(`order-diff-${dayIndex}-${productId}`);
+  if(diffEl) diffEl.textContent=actual===null?'—':`${actual-Number(item.quantity||0)>0?'+':''}${fmt(actual-Number(item.quantity||0),2)}`;
+}
+
+function saveOrderSnapshot() {
+  const start=orderStartDate();
+  const history=forecastHistory(), trend=forecastTrend(history);
+  const days=Array.from({length:7},(_,i)=>addDays(start,i));
+  const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
+  if(!products.length) return toast('اختار الأصناف وأدخل معدلات Per 1000 أولًا','error');
+  const rows=days.map(day=>{const f=forecastOne(day,history,trend);return {date:day,weekday:DAYS_AR[weekdayOf(day)],revenue:f.predicted,items:products.map(p=>({productId:p.id,name:p.name,unit:p.unit,rate:Number(S.per1000[p.id].rate),quantity:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100}))}});
+  S.orderSnapshots[start]={start,end:days[6],savedAt:new Date().toLocaleString('ar-EG'),rows}; saveDB(); renderOrderForecast(); toast('تم حفظ نسخة الطلبية المتوقعة للأسبوع');
+}
+function printOrdersPdf() {
+  document.body.classList.add('print-orders');
+  const clean=()=>document.body.classList.remove('print-orders');
+  window.addEventListener('afterprint',clean,{once:true});
+  setTimeout(()=>window.print(),80);
+}
+function printSalesForecast() {
+  document.body.classList.add('print-salesforecast');
+  const clean=()=>document.body.classList.remove('print-salesforecast');
+  window.addEventListener('afterprint',clean,{once:true});
+  setTimeout(()=>window.print(),80);
+}
+
 function renderAll() {
     renderSettings();
     renderLyGrid();
     renderSalesForm();
     renderRevenue();
+    renderForecast();
     renderInventory();
+    renderOrderForecast();
     renderBackupAlert();
 }
 </script>
