@@ -330,17 +330,26 @@ details.sub[open] summary::before{content:"▾ "}
             .replace(/\s/g, '');
     }
 
-    function openApp() {
+    function openApp(attempt) {
+        attempt = attempt || 0;
+        // انتظر تسجيل دالة تشغيل البرنامج لو المتصفح اتأخر في تحميل السكربت الرئيسي.
         if (typeof window.kansasStart !== 'function') {
-            show('البرنامج ما اتحمّلش. جرّب تحدّث الصفحة، ولو فضل كده ابعتلي الرسالة دي.');
+            if (attempt < 40) {
+                setTimeout(function () { openApp(attempt + 1); }, 100);
+                return;
+            }
+            show('البرنامج ما اتحمّلش بالكامل. حدّث الصفحة وجرب مرة تانية.');
+            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
             return;
         }
         try {
             window.kansasStart();
             appReady = true;
+            try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
             document.getElementById('lock').classList.add('hidden');
         } catch (err) {
-            show('حصلت مشكلة وأنا بفتح البيانات: ' + (err && err.message ? err.message : err));
+            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
+            show('حصلت مشكلة أثناء فتح البرنامج: ' + (err && err.message ? err.message : err));
         }
     }
 
@@ -349,7 +358,6 @@ details.sub[open] summary::before{content:"▾ "}
         var v = normDigits(input.value);
         if (!v) { show('اكتب الرمز الأول'); return; }
         if (v !== PIN) { show('رمز الحماية غير صحيح'); input.select(); return; }
-        try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
         input.value = '';
         openApp();
     }
@@ -437,6 +445,31 @@ details.sub[open] summary::before{content:"▾ "}
         <div id="rev-alert" class="alert hidden no-print"></div>
 
         <div class="trend" id="trend"></div>
+
+        <!-- إضافة جديدة: مساعد تحليل الإيرادات المحلي، دون أي اتصال خارجي -->
+        <div class="card no-print" id="revenue-assistant" style="border:1px solid var(--gold, #d6a500)">
+            <div class="row between" style="align-items:center;gap:10px">
+                <div>
+                    <div class="eyebrow">مساعد الفرع</div>
+                    <div class="h" style="margin:3px 0">المحلل الذكي للإيرادات</div>
+                    <div class="muted">تحليل محلي من أرقام الإيرادات المسجلة فقط</div>
+                </div>
+                <span class="badge open">يعمل بدون إنترنت</span>
+            </div>
+            <div id="revenue-assistant-summary" class="note" style="margin-top:12px"></div>
+            <div class="h" style="margin-top:14px">اسأل عن إيرادات الفرع</div>
+            <div class="row" style="gap:8px;align-items:stretch">
+                <input id="revenue-assistant-question" class="inp" type="text" placeholder="مثال: هل هحقق خطة الشهر؟" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter') askRevenueAssistant()">
+                <button class="btn btn-gold" onclick="askRevenueAssistant()">اسأل</button>
+            </div>
+            <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:9px">
+                <button class="btn btn-ghost btn-sm" onclick="askRevenuePreset('هل هحقق خطة الشهر؟')">تحقيق الخطة</button>
+                <button class="btn btn-ghost btn-sm" onclick="askRevenuePreset('حلل متوسط الشيك')">متوسط الشيك</button>
+                <button class="btn btn-ghost btn-sm" onclick="askRevenuePreset('حلل عدد العمليات')">عدد العمليات</button>
+                <button class="btn btn-ghost btn-sm" onclick="askRevenuePreset('قارن بالسنة الماضية')">مقارنة السنة الماضية</button>
+            </div>
+            <div id="revenue-assistant-answer" class="note" aria-live="polite" style="margin-top:10px">اختار سؤالًا أو اكتب سؤالك عن الإيرادات.</div>
+        </div>
 
         <div class="grid g4" id="quick"></div>
 
@@ -668,7 +701,7 @@ details.sub[open] summary::before{content:"▾ "}
 
 <div class="toasts" id="toasts"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
 /* ============================================================
@@ -1372,12 +1405,80 @@ function renderCompare() {
     $('cmp-body').innerHTML = rows.join('');
 }
 
+function revenueAssistantAnswer(question, a) {
+    const q = String(question || '').toLowerCase();
+    const money = v => `${fmt(v, 2)} ج.م`;
+    if (!a.t.days) return 'مفيش بيانات إيرادات كفاية في الفترة المحددة. سجّل الإيراد وعدد العمليات للأيام، وبعدها أقدر أحلل الأداء.';
+    if (q.includes('خطة') || q.includes('هدف') || q.includes('هحقق') || q.includes('تحقيق')) {
+        if (!a.c.plan_rev) return 'لسه مفيش خطة شهرية مسجلة. افتح إعدادات الشهر وسجّل المستهدف، وبعدها هحسب نسبة التحقيق والمتوسط اليومي المطلوب.';
+        let msg = `المحقق حتى الآن ${money(a.m.rev)} من خطة ${money(a.c.plan_rev)}، بنسبة ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
+        if (a.required !== null) msg += `محتاج تحقق ${money(a.required)} يوميًا خلال ${a.remDays} يوم متبقي.`;
+        if (a.projPlan !== null) msg += ` وبالمعدل الحالي، المتوقع إغلاق الشهر على ${money(a.projected)}، أي ${(100 * a.projPlan).toFixed(1)}% من الخطة.`;
+        return msg;
+    }
+    if (q.includes('شيك') || q.includes('متوسط')) {
+        let msg = `متوسط الشيك الحالي ${money(a.avgChk)}، بإجمالي ${fmt(a.t.ord)} عملية وإيراد ${money(a.t.rev)}.`;
+        if (a.chkGrowth !== null) msg += ` مقارنة بالسنة الماضية، متوسط الشيك ${a.chkGrowth >= 0 ? 'زاد' : 'انخفض'} بنسبة ${Math.abs(a.chkGrowth * 100).toFixed(1)}%.`;
+        else msg += ' لا توجد بيانات كافية لمقارنته بالسنة الماضية.';
+        return msg;
+    }
+    if (q.includes('عملية') || q.includes('عمليات') || q.includes('اوردر') || q.includes('طلبات')) {
+        let msg = `تم تسجيل ${fmt(a.t.ord)} عملية خلال ${a.t.days} يوم، بمتوسط ${fmt(a.avgOrd, 1)} عملية يوميًا.`;
+        if (a.ordGrowth !== null) msg += ` مقارنة بالسنة الماضية، عدد العمليات ${a.ordGrowth >= 0 ? 'زاد' : 'انخفض'} بنسبة ${Math.abs(a.ordGrowth * 100).toFixed(1)}%.`;
+        else msg += ' لا توجد بيانات مقارنة كافية للسنة الماضية.';
+        return msg;
+    }
+    if (q.includes('سنة') || q.includes('ماضي') || q.includes('مقارن')) {
+        if (a.growthLy === null) return 'بيانات المقارنة مع السنة الماضية غير كافية. أدخل بيانات السنة الماضية من قسم إعدادات الإيرادات.';
+        return `إيراد الفترة ${money(a.t.rev)} مقابل ${money(a.lyRev)} لنفس الأيام السنة الماضية؛ ${a.growthLy >= 0 ? 'نمو' : 'انخفاض'} بنسبة ${Math.abs(a.growthLy * 100).toFixed(1)}%.`;
+    }
+    if (q.includes('أضعف') || q.includes('اضعف') || q.includes('أفضل') || q.includes('اقوى') || q.includes('أقوى')) {
+        if (!a.best) return 'محتاج بيانات أيام أكثر عشان أحدد أقوى وأضعف يوم في الأسبوع.';
+        return `أقوى يوم حسب البيانات المسجلة هو ${DAYS_AR[a.best.i]} بمتوسط ${money(a.best.v)}.` + (a.worst ? ` وأضعف يوم هو ${DAYS_AR[a.worst.i]} بمتوسط ${money(a.worst.v)}.` : ' ولسه محتاجين بيانات أكثر لتحديد الأضعف.');
+    }
+    if (q.includes('ليه') || q.includes('سبب') || q.includes('انخفاض') || q.includes('نازل') || q.includes('نزول')) {
+        const clues = [];
+        if (a.ordGrowth !== null && a.ordGrowth < 0) clues.push(`عدد العمليات أقل من السنة الماضية بنسبة ${Math.abs(a.ordGrowth * 100).toFixed(1)}%`);
+        if (a.chkGrowth !== null && a.chkGrowth < 0) clues.push(`متوسط الشيك أقل بنسبة ${Math.abs(a.chkGrowth * 100).toFixed(1)}%`);
+        if (a.pace !== null && a.pace < 1) clues.push(`الإيراد متأخر عن وتيرة الخطة بنسبة ${Math.abs((1 - a.pace) * 100).toFixed(1)}%`);
+        return clues.length ? `الأرقام بتوضح المؤشرات دي: ${clues.join('، ')}. دي مؤشرات تساعد في التحقيق، لكنها مش دليل لوحدها على السبب الفعلي. راجع العروض، ساعات الذروة، وقنوات البيع.` : 'الأرقام الحالية لا تثبت وجود انخفاض واضح. قارن عدد العمليات ومتوسط الشيك وساعات البيع قبل تحديد السبب.';
+    }
+    return `ملخص الفترة: الإيراد ${money(a.t.rev)} من ${a.t.days} يوم مسجل، بمتوسط يومي ${money(a.avgRev)}، وعدد ${fmt(a.t.ord)} عملية، ومتوسط شيك ${money(a.avgChk)}. ${a.missing.length ? `فيه ${a.missing.length} يوم سابق ناقص التسجيل.` : 'لا توجد أيام سابقة ناقصة حسب البيانات الحالية.'} اسألني عن الخطة أو الشيك أو العمليات أو المقارنة بالسنة الماضية.`;
+}
+
+function renderRevenueAssistant(a) {
+    const summary = $('revenue-assistant-summary');
+    if (!summary) return;
+    if (!a.t.days) { summary.textContent = 'سجّل بيانات الإيرادات أولًا، وسيظهر هنا ملخص الأداء والتنبيهات.'; return; }
+    const alerts = [];
+    if (a.pace !== null && a.pace < 0.85) alerts.push('الإيراد متأخر بوضوح عن وتيرة الخطة');
+    if (a.chkGrowth !== null && a.chkGrowth < -0.05) alerts.push('متوسط الشيك أقل من السنة الماضية');
+    if (a.ordGrowth !== null && a.ordGrowth < -0.05) alerts.push('عدد العمليات أقل من السنة الماضية');
+    if (a.missing.length) alerts.push(`يوجد ${a.missing.length} يوم سابق غير مسجل`);
+    const headline = alerts.length ? `محتاج متابعة: ${alerts.join('؛ ')}.` : 'لا توجد إشارة خطر واضحة من المؤشرات المتاحة حاليًا.';
+    summary.textContent = `ملخص ذكي: ${headline} إجمالي الفترة ${fmt(a.t.rev)} ج.م، ومتوسط الشيك ${fmt(a.avgChk, 2)} ج.م.`;
+}
+
+function askRevenueAssistant() {
+    const input = $('revenue-assistant-question');
+    const answer = $('revenue-assistant-answer');
+    if (!input || !answer) return;
+    const a = analyzeRevenue($('rev-from').value, $('rev-to').value);
+    answer.textContent = revenueAssistantAnswer(input.value, a);
+}
+
+function askRevenuePreset(question) {
+    $('revenue-assistant-question').value = question;
+    askRevenueAssistant();
+}
+
 function renderRevenue() {
     const from = $('rev-from').value, to = $('rev-to').value;
     const a = analyzeRevenue(from, to);
     const blocks = buildBlocks(a);
     renderHero(a, from, to);
     renderTrend(a);
+    renderRevenueAssistant(a);
     renderQuick(a);
     renderPriorities(blocks);
     renderItems(blocks);
@@ -2082,4 +2183,183 @@ function renderSavedAnalyses() {
             <b>من ${esc(a.from)} لحد ${esc(a.to)}</b>
             <div class="muted">محفوظ ${esc(a.saved)} · ${Object.keys(a.rows || {}).length} صنف</div>
         </div>
-        <di
+        <div class="row">
+            <button class="btn btn-sm" onclick="loadAnalysis('${esc(a.id)}')">عرض</button>
+            <button class="btn btn-red btn-sm" onclick="deleteAnalysis('${esc(a.id)}')">حذف</button>
+        </div>
+    </div>`).join('') || '<div class="muted">مفيش تحليلات محفوظة بعد.</div>';
+}
+
+function loadAnalysis(id) {
+    const a = S.analyses.find(x => x.id === id);
+    if (!a) return;
+    if (monthOf(a.to) !== activeMonth) { activeMonth = monthOf(a.to); setMonthDefaults(); $('month-input').value = activeMonth; }
+    $('an-to').value = a.to;
+    anLoadRows = a.rows;
+    renderAnalysis();
+    toast('تم عرض التحليل المحفوظ');
+}
+
+async function deleteAnalysis(id) {
+    if (!await askConfirm('حذف هذا التحليل المحفوظ؟', 'حذف')) return;
+    S.analyses = S.analyses.filter(x => x.id !== id);
+    saveDB();
+    toast('تم الحذف');
+    renderAll();
+}
+
+/* ============================================================
+   التصدير
+   ============================================================ */
+function setExportMonth() {
+    if (!$('ex-from')) return;
+    $('ex-from').value = monthStart(activeMonth);
+    $('ex-to').value = clampToday(activeMonth);
+}
+
+function exportRange() {
+    let from = $('ex-from').value || monthStart(activeMonth);
+    let to = $('ex-to').value || clampToday(activeMonth);
+    if (from > to) [from, to] = [to, from];
+    if (monthOf(from) !== activeMonth) from = monthStart(activeMonth);
+    if (monthOf(to) !== activeMonth) to = monthEnd(activeMonth);
+    return { from, to };
+}
+
+function exportPeriodXlsx() {
+    const { from, to } = exportRange();
+    const wb = XLSX.utils.book_new();
+    let sheets = 0;
+
+    if (S.products.length) {
+        const rows = [];
+        eachDay(from, to, d => {
+            const row = { 'التاريخ': d, 'اليوم': DAYS_AR[weekdayOf(d)] };
+            let total = 0;
+            S.products.forEach(p => {
+                const v = rcpt(d, p.id);
+                row[`${p.name} (${p.unit})`] = v || '';
+                total += v;
+            });
+            row['إجمالي الوارد (عدد)'] = total || '';
+            row['الحالة'] = S.receiptNone[d] ? 'بدون توريد' : (total ? 'تم' : 'ناقص');
+            rows.push(row);
+        });
+        if (rows.length) {
+            const totalRow = { 'التاريخ': 'الإجمالي', 'اليوم': '' };
+            S.products.forEach(p => {
+                totalRow[`${p.name} (${p.unit})`] = rows.reduce((a, r) => a + (Number(r[`${p.name} (${p.unit})`]) || 0), 0);
+            });
+            totalRow['إجمالي الوارد (عدد)'] = rows.reduce((a, r) => a + (Number(r['إجمالي الوارد (عدد)']) || 0), 0);
+            totalRow['الحالة'] = '';
+            rows.push(totalRow);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'الوارد');
+            sheets++;
+        }
+    }
+
+    const tr = S.transfers
+        .filter(t => inRange(t.day, from, to))
+        .sort((a, b) => (a.day < b.day ? -1 : 1))
+        .map(t => ({
+            'التاريخ': t.day,
+            'النوع': t.type === 'in' ? 'وارد من فرع' : 'صادر لفرع',
+            'الفرع': safeCell(t.branch || ''),
+            'الصنف': safeCell((productById(t.product_id) || {}).name || ''),
+            'الوحدة': safeCell((productById(t.product_id) || {}).unit || ''),
+            'الكمية': t.qty
+        }));
+    if (tr.length) {
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tr), 'التحويلات');
+        sheets++;
+    }
+
+    const rv = Object.keys(S.sales).sort().filter(d => inRange(d, from, to)).map(d => {
+        const r = S.sales[d];
+        return { 'التاريخ': d, 'اليوم': DAYS_AR[weekdayOf(d)], 'الإيراد': r.revenue, 'العمليات': r.orders,
+            'متوسط الشيك': r.orders ? Number((r.revenue / r.orders).toFixed(2)) : 0 };
+    });
+    if (rv.length) {
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rv), 'الإيراد');
+        sheets++;
+    }
+
+    if (!sheets) return toast('مفيش بيانات في الفترة دي', 'error');
+    XLSX.writeFile(wb, `Kansas_${from}_${to}.xlsx`);
+    toast('تم تحميل الشيت');
+}
+
+function exportAnalysisXlsx() {
+    const r = anRange();
+    if (!r || !r.to) return toast('اختر تاريخ النهاية', 'error');
+    const res = readAnalysisRows();
+    if (res.error) return toast(res.error, 'error');
+    const rows = S.products.map(p => {
+        const x = res.rows[p.id];
+        const c = calcRow(p.id, r, x.opening, x.sold, x.closing === null ? '' : x.closing);
+        return {
+            'الصنف': safeCell(p.name), 'الوحدة': safeCell(p.unit),
+            'أول الشهر': x.opening, 'الوارد': c.rec, 'التحويلات (صافي)': c.net,
+            'المباع': x.sold, 'النظري': c.theo,
+            'الجرد الفعلي': x.closing ?? '', 'العجز / الزيادة': c.variance ?? ''
+        };
+    });
+    if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+    XLSX.writeFile(wb, `Kansas_Inventory_${r.from}_${r.to}.xlsx`);
+}
+
+function exportRevenueXlsx() {
+    const from = $('rev-from').value, to = $('rev-to').value;
+    const rows = Object.keys(S.sales).sort().filter(d => inRange(d, from, to)).map(d => {
+        const r = S.sales[d];
+        return { 'التاريخ': d, 'الإيراد': r.revenue, 'العمليات': r.orders, 'متوسط الشيك': r.orders ? Number((r.revenue / r.orders).toFixed(2)) : 0 };
+    });
+    if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Revenue');
+    XLSX.writeFile(wb, 'Kansas_Revenue.xlsx');
+}
+
+/* ---------- عرض المخزون ---------- */
+function renderInventory() {
+    const m = activeMonth;
+    const al = $('inv-alert');
+    if (!S.openLocked[m]) {
+        al.classList.remove('hidden');
+        al.textContent = 'رصيد أول الشهر ده لسه مش محفوظ. افتح "الأصناف ورصيد أول الشهر" واحفظه.';
+    } else al.classList.add('hidden');
+
+    renderTiles();
+    renderOpening();
+    renderReceipts();
+    renderTransfers();
+    renderAnalysis();
+
+    const showPanel = !!invView;
+    $('inv-tiles').classList.toggle('hidden', showPanel);
+    $('inv-export').classList.toggle('hidden', showPanel);
+    $('inv-panel').classList.toggle('hidden', !showPanel);
+    ['opening', 'receipts', 'transfers', 'analysis'].forEach(k => {
+        $('pn-' + k).classList.toggle('hidden', k !== invView);
+    });
+    if (showPanel) {
+        $('panel-title').innerHTML = `<span class="tico"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${INV_ICONS[invView]}</svg></span>${INV_TITLES[invView]}`;
+    }
+}
+
+/* ---------- الرسم العام ---------- */
+function renderAll() {
+    renderSettings();
+    renderLyGrid();
+    renderSalesForm();
+    renderRevenue();
+    renderInventory();
+    renderBackupAlert();
+}
+</script>
+</body>
+</html>
