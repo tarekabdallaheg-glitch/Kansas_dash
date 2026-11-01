@@ -79,7 +79,7 @@ tr:last-child td{border-bottom:none}
 .brand-sub{font-size:11.5px;color:var(--muted);font-weight:600}
 .actions .btn{padding:9px 12px}
 
-/* Modal (تأكيد داخل البرنامج) */
+/* Modal */
 .modal{position:fixed;inset:0;background:rgba(5,10,20,.55);display:grid;place-items:center;z-index:120;padding:16px}
 .mbox{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:440px;width:100%;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:20px}
 .mbox p{margin:0;font-weight:700;font-size:15px;line-height:1.75}
@@ -128,6 +128,11 @@ details.card summary{cursor:pointer;font-weight:800;font-size:14px;list-style:no
 details.card summary::-webkit-details-marker{display:none}
 details.card summary::after{content:"";margin-inline-start:auto;width:8px;height:8px;border-left:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
 details.card[open] summary::after{transform:rotate(135deg)}
+details.card[open] summary{margin-bottom:14px}
+details.sub summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--accent);list-style:none;padding:6px 0}
+details.sub summary::-webkit-details-marker{display:none}
+details.sub summary::before{content:"▸ ";color:var(--gold)}
+details.sub[open] summary::before{content:"▾ "}
 
 /* Tabs: ثابتة مش بتتحرك مع السكرول */
 .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:5px;box-shadow:var(--shadow)}
@@ -135,6 +140,10 @@ details.card[open] summary::after{transform:rotate(135deg)}
 .tabs .btn:hover{color:var(--text);border:none}
 .tabs .on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(30,58,95,.25)}
 .dark .tabs .on{background:var(--gold2);color:#111827;box-shadow:none}
+
+/* Entry card: أول حاجة في تقرير الإيرادات */
+.entry{border-color:var(--gold2)}
+.entry .h{margin-bottom:14px}
 
 /* Inventory tiles */
 .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
@@ -179,10 +188,12 @@ details.card[open] summary::after{transform:rotate(135deg)}
 .missing-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:9px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
 
+/* شاشة الدخول */
 .lock{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 .lock .card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;text-align:center;padding:30px}
 .lock .logo{margin:0 auto;width:56px;height:56px;font-size:24px;border-radius:17px}
-.lock-err{color:var(--bad);font-weight:700;font-size:13px;min-height:18px;margin:0}
+#lock-err{font-weight:700;font-size:13px;min-height:20px;margin:0;color:var(--bad);white-space:pre-wrap;word-break:break-word;text-align:right}
+#lock-err.ok{color:var(--ok)}
 .toasts{position:fixed;bottom:16px;left:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:99;pointer-events:none;align-items:flex-start}
 .toast{padding:12px 17px;border-radius:12px;color:#fff;font-weight:700;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:460px}
 
@@ -257,7 +268,7 @@ details.card[open] summary::after{transform:rotate(135deg)}
 /* طباعة: صفحة A4 واحدة للتقرير */
 @page{size:A4;margin:9mm}
 @media print{
-    .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,details{display:none!important}
+    .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,details,.entry{display:none!important}
     body{background:#fff;color:#000;font-size:10.5px;padding:0}
     .wrap{padding:0;gap:6px;max-width:none}
     .card,.icard,.quick,.tb{box-shadow:none;border:1px solid #bbb;padding:6px;border-radius:8px;break-inside:avoid}
@@ -280,7 +291,7 @@ details.card[open] summary::after{transform:rotate(135deg)}
 </head>
 <body>
 
-<!-- ===== شاشة الحماية ===== -->
+<!-- ===== شاشة الدخول: سكربت مستقل عشان تشتغل حتى لو البرنامج فيه خطأ ===== -->
 <div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
@@ -288,11 +299,73 @@ details.card[open] summary::after{transform:rotate(135deg)}
             <div class="brand-name">KANSAS PREMIUM</div>
             <div class="muted">رجاء إدخال رمز الحماية</div>
         </div>
-        <input id="unlock-pin" class="inp" type="password" inputmode="numeric" autocomplete="off" placeholder="الرمز" onkeydown="if(event.key==='Enter')verifyPin()">
-        <p id="lock-err" class="lock-err"></p>
-        <button class="btn btn-gold" onclick="verifyPin()">فتح النظام</button>
+        <input id="unlock-pin" class="inp" type="password" inputmode="numeric" autocomplete="off" placeholder="الرمز">
+        <p id="lock-err"></p>
+        <button class="btn btn-gold" id="unlock-btn" type="button">فتح النظام</button>
     </div>
 </div>
+<script>
+(function () {
+    var PIN = '1234';                 // رمز الحماية (غيّره لو عايز)
+    var errBox = document.getElementById('lock-err');
+    var input = document.getElementById('unlock-pin');
+    var btn = document.getElementById('unlock-btn');
+    var appReady = false;
+
+    function show(msg, ok) {
+        errBox.textContent = msg;
+        errBox.className = ok ? 'ok' : '';
+    }
+
+    // أي خطأ في البرنامج بيظهر على شاشة الدخول بدل ما يفضل صامت
+    window.addEventListener('error', function (e) {
+        show('حصل خطأ في البرنامج: ' + e.message + (e.lineno ? ' (سطر ' + e.lineno + ')' : ''));
+    });
+
+    // الأرقام العربية (١٢٣٤) تتحول لإنجليزية، والمسافات تتشال
+    function normDigits(s) {
+        return String(s || '')
+            .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
+            .replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
+            .replace(/\s/g, '');
+    }
+
+    function openApp() {
+        if (typeof window.kansasStart !== 'function') {
+            show('البرنامج ما اتحمّلش. جرّب تحدّث الصفحة، ولو فضل كده ابعتلي الرسالة دي.');
+            return;
+        }
+        try {
+            window.kansasStart();
+            appReady = true;
+            document.getElementById('lock').classList.add('hidden');
+        } catch (err) {
+            show('حصلت مشكلة وأنا بفتح البيانات: ' + (err && err.message ? err.message : err));
+        }
+    }
+
+    function tryUnlock() {
+        show('');
+        var v = normDigits(input.value);
+        if (!v) { show('اكتب الرمز الأول'); return; }
+        if (v !== PIN) { show('رمز الحماية غير صحيح'); input.select(); return; }
+        try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
+        input.value = '';
+        openApp();
+    }
+
+    btn.addEventListener('click', tryUnlock);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
+
+    window.addEventListener('load', function () {
+        var unlocked = false;
+        try { unlocked = sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) {}
+        if (unlocked) openApp();
+        else input.focus();
+    });
+    window.kansasLockedReady = true;
+})();
+</script>
 
 <!-- ===== التطبيق ===== -->
 <div id="app" class="hidden">
@@ -332,6 +405,23 @@ details.card[open] summary::after{transform:rotate(135deg)}
     <!-- ================= الإيرادات ================= -->
     <section id="tab-revenue" class="wrap" style="padding:0">
 
+        <!-- تسجيل اليوم: أول حاجة، لأن كل النتايج مبنية عليه -->
+        <div class="card entry no-print" data-scope>
+            <div class="row between">
+                <div class="h" style="margin:0">تسجيل إيراد وعمليات يوم</div>
+                <span id="sales-badge" class="badge open">مفتوح</span>
+            </div>
+            <div class="grid g3">
+                <div><div class="muted" style="margin-bottom:6px">التاريخ</div><input type="date" id="sales-day" class="inp" onchange="loadSalesDay()"></div>
+                <div><div class="muted" style="margin-bottom:6px">الإيراد (ج.م)</div><input type="number" min="0" step="0.01" id="sales-rev" class="inp" data-nav="srev" data-ri="0"></div>
+                <div><div class="muted" style="margin-bottom:6px">عدد العمليات</div><input type="number" min="0" step="1" id="sales-ord" class="inp" data-nav="sord" data-ri="0"></div>
+            </div>
+            <div class="row" style="margin-top:14px">
+                <button class="btn btn-gold" id="sales-save" data-save onclick="saveSalesDay()">حفظ وقفل اليوم</button>
+                <button class="btn" id="sales-unlock" onclick="unlockSales()">فتح التعديل</button>
+            </div>
+        </div>
+
         <div class="hero">
             <div class="row between" style="align-items:flex-start">
                 <div>
@@ -358,9 +448,9 @@ details.card[open] summary::after{transform:rotate(135deg)}
         <div class="h" style="margin:4px 2px 0">التفاصيل</div>
         <div class="grid g2" id="items"></div>
 
-        <!-- مقارنة فترتين -->
-        <div class="card no-print" data-scope>
-            <div class="h">مقارنة فترتين</div>
+        <!-- مقارنة فترتين: مقفولة لحد ما تفتحها -->
+        <details class="card no-print" id="cmp-card">
+            <summary>مقارنة فترتين</summary>
             <div class="grid g2" style="margin-bottom:16px">
                 <div class="cmp-box">
                     <div class="lbl">الفترة الأولى</div>
@@ -373,31 +463,14 @@ details.card[open] summary::after{transform:rotate(135deg)}
             </div>
             <div id="cmp-head"></div>
             <div class="tbl-wrap" style="margin-top:14px"><table id="cmp-summary"></table></div>
-            <details style="margin-top:14px">
+            <details class="sub" style="margin-top:12px">
                 <summary>الجدول يوماً بيوم</summary>
-                <div class="tbl-wrap" style="margin-top:12px"><table>
+                <div class="tbl-wrap" style="margin-top:10px"><table>
                     <thead><tr><th>يوم الفترة الأولى</th><th>إيراد</th><th>يوم الفترة الثانية</th><th>إيراد</th><th>الفرق</th><th>النسبة</th></tr></thead>
                     <tbody id="cmp-body"></tbody>
                 </table></div>
             </details>
-        </div>
-
-        <!-- تسجيل اليوم -->
-        <div class="card no-print" data-scope>
-            <div class="row between" style="margin-bottom:14px">
-                <div class="h" style="margin:0">تسجيل إيراد وعمليات يوم</div>
-                <span id="sales-badge" class="badge open">مفتوح</span>
-            </div>
-            <div class="grid g3">
-                <div><div class="muted" style="margin-bottom:6px">التاريخ</div><input type="date" id="sales-day" class="inp" onchange="loadSalesDay()"></div>
-                <div><div class="muted" style="margin-bottom:6px">الإيراد (ج.م)</div><input type="number" min="0" step="0.01" id="sales-rev" class="inp" data-nav="srev" data-ri="0"></div>
-                <div><div class="muted" style="margin-bottom:6px">عدد العمليات</div><input type="number" min="0" step="1" id="sales-ord" class="inp" data-nav="sord" data-ri="0"></div>
-            </div>
-            <div class="row" style="margin-top:14px">
-                <button class="btn btn-gold" id="sales-save" data-save onclick="saveSalesDay()">حفظ وقفل اليوم</button>
-                <button class="btn" id="sales-unlock" onclick="unlockSales()">فتح التعديل</button>
-            </div>
-        </div>
+        </details>
 
         <!-- تصدير وطباعة -->
         <div class="card no-print">
@@ -601,7 +674,6 @@ details.card[open] summary::after{transform:rotate(135deg)}
 /* ============================================================
    الإعدادات
    ============================================================ */
-const PIN = '1234';                 // رمز الحماية (غيّره لو عايز)
 const STORE_KEY = 'kansas_v8';      // نفس المفتاح عشان البيانات القديمة تفضل
 
 /* ---------- أدوات مساعدة ---------- */
@@ -638,7 +710,6 @@ function shiftMonth(key, delta) { const [y, m] = key.split('-').map(Number); con
 
 /* ---------- أيقونات خطية موحدة ---------- */
 const ICON_PATHS = {
-    back: '<path d="M19 12H5M12 19l-7-7 7-7"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
     moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
 };
@@ -656,7 +727,7 @@ function toast(msg, type = 'success') {
 }
 
 /* ============================================================
-   تأكيد داخل البرنامج (بديل نافذة المتصفح اللي ممكن تتقفل)
+   تأكيد داخل البرنامج
    ============================================================ */
 function askConfirm(msg, okText = 'تأكيد') {
     return new Promise(resolve => {
@@ -780,48 +851,12 @@ async function confirmFuture(day) {
     return day <= todayStr() || await askConfirm('التاريخ ده في المستقبل. متأكد إنه صح؟');
 }
 
-/* ---------- القفل والدخول ---------- */
-function isUnlocked() {
-    try { return sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) { return false; }
-}
-
-// تحويل الأرقام العربية (١٢٣٤ و۱۲۳۴) لأرقام إنجليزية، وإزالة المسافات
-function normDigits(s) {
-    return String(s || '')
-        .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
-        .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0))
-        .replace(/\s/g, '');
-}
-
-function verifyPin() {
-    const v = normDigits($('unlock-pin').value);
-    if (v === PIN) {
-        try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
-        $('lock-err').textContent = '';
-        $('unlock-pin').value = '';
-        try {
-            showApp();
-        } catch (err) {
-            $('lock-err').textContent = 'حصلت مشكلة وأنا بفتح البيانات: ' + (err && err.message ? err.message : err);
-            $('lock').classList.remove('hidden');
-            $('app').classList.add('hidden');
-        }
-    } else {
-        $('lock-err').textContent = 'رمز الحماية غير صحيح';
-        toast('رمز الحماية غير صحيح', 'error');
-    }
-}
-
-function lockSystem() {
-    try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
-    location.reload();
-}
-
-function showApp() {
-    $('lock').classList.add('hidden');
-    $('app').classList.remove('hidden');
+/* ---------- الدخول والخروج (الشاشة نفسها في السكربت اللي فوق) ---------- */
+// الدالة دي بيناديها سكربت الدخول بعد ما الرمز يتقبل
+window.kansasStart = function () {
     S = loadDB();
     saveDB();
+    $('app').classList.remove('hidden');
     $('month-input').value = activeMonth;
     $('sales-day').value = todayStr();
     $('rc-day').value = todayStr();
@@ -829,6 +864,12 @@ function showApp() {
     setMonthDefaults();
     loadSalesDay();
     renderAll();
+    applyTheme(localStorage.getItem('kansas_theme') || 'dark');
+};
+
+function lockSystem() {
+    try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
+    location.reload();
 }
 
 function setMonthDefaults() {
@@ -1272,7 +1313,6 @@ function periodStats(from, to) {
     };
 }
 
-// فرق بالقيمة والنسبة، مع نمو أو نزول
 function diffHtml(a, b, dec = 0) {
     const d = a - b;
     const p = b ? d / b : null;
@@ -2042,53 +2082,4 @@ function renderSavedAnalyses() {
             <b>من ${esc(a.from)} لحد ${esc(a.to)}</b>
             <div class="muted">محفوظ ${esc(a.saved)} · ${Object.keys(a.rows || {}).length} صنف</div>
         </div>
-        <div class="row">
-            <button class="btn btn-sm" onclick="loadAnalysis('${esc(a.id)}')">عرض</button>
-            <button class="btn btn-red btn-sm" onclick="deleteAnalysis('${esc(a.id)}')">حذف</button>
-        </div>
-    </div>`).join('') || '<div class="muted">مفيش تحليلات محفوظة بعد.</div>';
-}
-
-function loadAnalysis(id) {
-    const a = S.analyses.find(x => x.id === id);
-    if (!a) return;
-    if (monthOf(a.to) !== activeMonth) { activeMonth = monthOf(a.to); setMonthDefaults(); $('month-input').value = activeMonth; }
-    $('an-to').value = a.to;
-    anLoadRows = a.rows;
-    renderAnalysis();
-    toast('تم عرض التحليل المحفوظ');
-}
-
-async function deleteAnalysis(id) {
-    if (!await askConfirm('حذف هذا التحليل المحفوظ؟', 'حذف')) return;
-    S.analyses = S.analyses.filter(x => x.id !== id);
-    saveDB();
-    toast('تم الحذف');
-    renderAll();
-}
-
-/* ============================================================
-   التصدير
-   ============================================================ */
-function setExportMonth() {
-    if (!$('ex-from')) return;
-    $('ex-from').value = monthStart(activeMonth);
-    $('ex-to').value = clampToday(activeMonth);
-}
-
-function exportRange() {
-    let from = $('ex-from').value || monthStart(activeMonth);
-    let to = $('ex-to').value || clampToday(activeMonth);
-    if (from > to) [from, to] = [to, from];
-    if (monthOf(from) !== activeMonth) from = monthStart(activeMonth);
-    if (monthOf(to) !== activeMonth) to = monthEnd(activeMonth);
-    return { from, to };
-}
-
-function exportPeriodXlsx() {
-    const { from, to } = exportRange();
-    const wb = XLSX.utils.book_new();
-    let sheets = 0;
-
-    if (S.products.length) {
-   ح
+        <di
