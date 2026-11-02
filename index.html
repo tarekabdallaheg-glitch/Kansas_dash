@@ -345,13 +345,13 @@ html:not(.dark) .prow{border-color:#dce4ee}
 </head>
 <body>
 
-<!-- ===== شاشة الدخول ===== -->
+<!-- ===== شاشة الدخول برمز بسيط فقط (بدون إيميل) ===== -->
 <div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
         <div>
             <div class="brand-name">KANSAS PREMIUM</div>
-            <div class="muted">رجاء إدخال رمز الحماية</div>
+            <div class="muted">أدخل رمز الحماية (1234)</div>
         </div>
         <input id="unlock-pin" class="inp" type="password" inputmode="numeric" autocomplete="off" placeholder="الرمز">
         <p id="lock-err"></p>
@@ -370,10 +370,6 @@ html:not(.dark) .prow{border-color:#dce4ee}
         errBox.className = ok ? 'ok' : '';
     }
 
-    window.addEventListener('error', function (e) {
-        show('حصل خطأ في البرنامج: ' + e.message + (e.lineno ? ' (سطر ' + e.lineno + ')' : ''));
-    });
-
     function normDigits(s) {
         return String(s || '')
             .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
@@ -388,7 +384,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 setTimeout(function () { openApp(attempt + 1); }, 100);
                 return;
             }
-            show('البرنامج ما اتحمّلش بالكامل. حدّث الصفحة وجرب مرة تانية.');
+            show('البرنامج ما اتحمّلش بالكامل. حدّث الصفحة.');
             try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
             return;
         }
@@ -1022,7 +1018,7 @@ async function confirmFuture(day) {
 window.kansasStart = function () {
     S = loadDB();
     saveDB();
-    checkDailyAutoBackup(); // فحص وتشغيل النسخ الاحتياطي التلقائي اليومي
+    checkDailyAutoBackup();
     $('app').classList.remove('hidden');
     $('month-input').value = activeMonth;
     $('sales-day').value = todayStr();
@@ -1034,7 +1030,6 @@ window.kansasStart = function () {
     applyTheme(localStorage.getItem('kansas_theme') || 'dark');
 };
 
-// وظيفة النسخ الاحتياطي التلقائي اليومي
 function checkDailyAutoBackup() {
     const today = todayStr();
     if (S.lastBackup !== today) {
@@ -1049,7 +1044,6 @@ function checkDailyAutoBackup() {
             setTimeout(() => URL.revokeObjectURL(a.href), 1000);
             S.lastBackup = today;
             saveDB();
-            toast('تم إجراء النسخ الاحتياطي التلقائي لليوم بنجاح');
         } catch (e) {
             console.log('فشل النسخ التلقائي:', e);
         }
@@ -1161,11 +1155,7 @@ function renderBackupAlert() {
 }
 
 function isVisible(el) { return !!el && el.offsetParent !== null; }
-
-function rowCells(scope, ri) {
-    return [...scope.querySelectorAll(`[data-nav][data-ri="${ri}"]`)].filter(isVisible);
-}
-
+function rowCells(scope, ri) { return [...scope.querySelectorAll(`[data-nav][data-ri="${ri}"]`)].filter(isVisible); }
 function nextRowCells(scope, ri, dir) {
     for (let r = ri + dir, guard = 0; guard < 3000; r += dir, guard++) {
         const cells = rowCells(scope, r);
@@ -1213,11 +1203,6 @@ document.addEventListener('keydown', (e) => {
 
     if (target) { target.focus(); if (typeof target.select === 'function') target.select(); }
 });
-
-document.addEventListener('wheel', () => {
-    const a = document.activeElement;
-    if (a && a.type === 'number') a.blur();
-}, { passive: true });
 
 /* ============================================================
    محرك الإيرادات
@@ -1661,7 +1646,7 @@ function forecastOne(day, history, trend) {
     let base = 0, confidence = 'ضعيفة', basis = '';
     if (same.length) {
         const weights = same.map((_,i)=>i+1);
- base = same.reduce((sum,x,i)=>sum+x.revenue*weights[i],0)/weights.reduce((a,b)=>a+b,0);
+        base = same.reduce((sum,x,i)=>sum+x.revenue*weights[i],0)/weights.reduce((a,b)=>a+b,0);
         confidence = same.length>=8 ? 'مرتفعة' : same.length>=4 ? 'متوسطة' : 'مبدئية';
         basis = `${same.length} تسجيل لنفس اليوم`;
     } else if (all.length) {
