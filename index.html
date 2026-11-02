@@ -626,7 +626,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             <div class="tbl-wrap" style="margin-top:12px"><table>
                 <thead><tr><th>اليوم</th><th>متوسط الإيراد</th><th>نسبة النمو %</th><th>المتوقع</th><th>الفعلي</th><th>الفرق (الفعلي − المتوقع)</th><th>نسبة الفرق</th><th>نمو عن اليوم السابق</th></tr></thead>
                 <tbody id="forecast-rows"></tbody>
-                <tfoot><tr><th>الإجمالي (أيام لها فعلي)</th><th></th><th></th><th id="var-tot-exp">—</th><th id="var-tot-act">—</th><th id="var-tot-diff">—</th><th id="var-tot-pct">—</th><th></th></tr></tfoot>
+                <tfoot><tr><th>إجمالي الفترة</th><th id="var-tot-avg">—</th><th></th><th id="var-tot-exp">—</th><th id="var-tot-act">—</th><th id="var-tot-diff">—</th><th id="var-tot-pct">—</th><th></th></tr></tfoot>
             </table></div>
             <details style="margin-top:14px" open>
                 <summary>إدارة وتغذية النظام ببيانات الأسابيع السابقة</summary>
@@ -2054,7 +2054,7 @@ function renderForecast() {
     const range = fcRange();
     const days = [];
     eachDay(range.from, range.to, d => days.push(d));
-    let prev = null, tE = 0, tA = 0;
+    let prev = null, tE = 0, tA = 0, tEall = 0, tAvg = 0;
     body.innerHTML = days.map(d => {
         const before = hist.filter(x => x.date < d);
         const f = before.length ? forecastOne(d, before, forecastTrend(before), rowGrowth(d)) : null;
@@ -2068,6 +2068,8 @@ function renderForecast() {
         const dp = both && exp > 0 ? diff / exp : null;
         const grow = act !== null && prev !== null && prev > 0 ? (act - prev) / prev : null;
         if (act !== null) prev = act;
+        if (avg !== null) tAvg += avg;
+        if (exp !== null) tEall += exp;
         if (both) { tE += exp; tA += act; }
         const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
         return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
@@ -2080,12 +2082,14 @@ function renderForecast() {
             <td>${arrowChip(grow)}</td></tr>`;
     }).join('');
     const tDiff = tA - tE;
-    $('var-tot-exp').textContent = fmt(tE);
+    const achieved = tEall > 0 && tA > 0 ? tA / tEall : null;
+    $('var-tot-avg').textContent = tAvg > 0 ? fmt(tAvg) : '—';
+    $('var-tot-exp').textContent = tEall > 0 ? fmt(tEall) : '—';
     $('var-tot-act').textContent = fmt(tA);
     $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
     $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
     $('forecast-summary').textContent = hist.length
-        ? `الفترة من ${range.from} إلى ${range.to}. المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع × اتجاه الفترة × تأثير المناسبات × نسبة النمو. الفرق = الفعلي − المتوقع.`
+        ? `الفترة من ${range.from} إلى ${range.to}. المتوقع للفترة: ${fmt(tEall)} ج.م، والمحقق فعلاً: ${fmt(tA)} ج.م${achieved !== null ? ` (${(achieved * 100).toFixed(1)}% من المتوقع)` : ''}. المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع × اتجاه الفترة × تأثير المناسبات × نسبة النمو. الفرق = الفعلي − المتوقع.`
         : 'لا توجد مبيعات مسجلة بعد. سجّل الإيراد اليومي أو أدخل بيانات سابقة ليبدأ التوقع.';
     $('forecast-history-count').textContent = `الموجود حاليًا: ${hist.length} يوم`;
 }
