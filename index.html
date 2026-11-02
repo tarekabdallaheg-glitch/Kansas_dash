@@ -345,7 +345,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
 </head>
 <body>
 
-<!-- ===== شاشة تسجيل الدخول (Firebase Auth) ===== -->
+<!-- ===== شاشة تسجيل الدخول ===== -->
 <div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
@@ -814,7 +814,7 @@ let currentUser = null;
 let unsubscribeSync = null;
 let isSyncingFromCloud = false;
 
-// دالة تسجيل الدخول
+// دالة تسجيل الدخول المحسنة لمنع التعليق
 async function handleLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value.trim();
@@ -826,11 +826,18 @@ async function handleLogin() {
   }
   
   errBox.textContent = 'جاري تسجيل الدخول...';
+  
   try {
     await signInWithEmailAndPassword(auth, email, password);
     errBox.textContent = '';
   } catch (error) {
-    errBox.textContent = 'خطأ في بيانات الدخول، تحقق من الإيميل والباسورد.';
+    console.error("Login Error:", error);
+    errBox.textContent = 'خطأ في الدخول: ' + error.message;
+    alert("تنبيه الاتصال بالسحابة: " + error.message + "\nسيتم فتح البرنامج محلياً الآن.");
+    document.getElementById('lock').classList.add('hidden');
+    if (typeof window.kansasStart === 'function') {
+      window.kansasStart();
+    }
   }
 }
 
@@ -841,28 +848,32 @@ document.getElementById('login-password').addEventListener('keydown', (e) => {
 
 // ترحيل البيانات القديمة من localStorage إلى السحابة
 async function migrateLocalDataToCloud(userId) {
-  const userDocRef = doc(db, "app_data", userId);
-  const docSnap = await getDoc(userDocRef);
+  try {
+    const userDocRef = doc(db, "app_data", userId);
+    const docSnap = await getDoc(userDocRef);
 
-  if (!docSnap.exists()) {
-    const localData = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith('kansas')) {
-        try {
-          localData[key] = JSON.parse(localStorage.getItem(key));
-        } catch (e) {
-          localData[key] = localStorage.getItem(key);
+    if (!docSnap.exists()) {
+      const localData = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('kansas')) {
+          try {
+            localData[key] = JSON.parse(localStorage.getItem(key));
+          } catch (e) {
+            localData[key] = localStorage.getItem(key);
+          }
         }
       }
-    }
 
-    if (Object.keys(localData).length > 0) {
-      await setDoc(userDocRef, {
-        payload: localData,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      if (Object.keys(localData).length > 0) {
+        await setDoc(userDocRef, {
+          payload: localData,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      }
     }
+  } catch (err) {
+    console.log("Migration background notice:", err);
   }
 }
 
@@ -872,28 +883,31 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     document.getElementById('lock').classList.add('hidden');
     
-    await migrateLocalDataToCloud(user.uid);
+    migrateLocalDataToCloud(user.uid);
 
-    // الاستماع الفوري للتحديثات (Real-time Sync)
-    const userDocRef = doc(db, "app_data", user.uid);
-    unsubscribeSync = onSnapshot(userDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const cloudData = docSnap.data().payload || {};
-        isSyncingFromCloud = true;
-        
-        Object.keys(cloudData).forEach(key => {
-          const val = typeof cloudData[key] === 'object' ? JSON.stringify(cloudData[key]) : cloudData[key];
-          localStorage.setItem(key, val);
-        });
+    try {
+      const userDocRef = doc(db, "app_data", user.uid);
+      unsubscribeSync = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const cloudData = docSnap.data().payload || {};
+          isSyncingFromCloud = true;
+          
+          Object.keys(cloudData).forEach(key => {
+            const val = typeof cloudData[key] === 'object' ? JSON.stringify(cloudData[key]) : cloudData[key];
+            localStorage.setItem(key, val);
+          });
 
-        if (typeof window.kansasStart === 'function' && document.getElementById('app').classList.contains('hidden')) {
-          window.kansasStart();
-        } else if (typeof window.renderAll === 'function') {
-          window.renderAll();
+          if (typeof window.kansasStart === 'function' && document.getElementById('app').classList.contains('hidden')) {
+            window.kansasStart();
+          } else if (typeof window.renderAll === 'function') {
+            window.renderAll();
+          }
+          isSyncingFromCloud = false;
         }
-        isSyncingFromCloud = false;
-      }
-    });
+      });
+    } catch (e) {
+      console.log("Sync error background:", e);
+    }
 
     if (typeof window.kansasStart === 'function') {
       window.kansasStart();
@@ -906,7 +920,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// دالة الحفظ المعدلة لتحديث Firebase تلقائياً عند أي تعديل
+// دالة الحفظ المحدثة لتحديث Firebase تلقائياً عند أي تعديل
 window.saveDBSyncToCloud = async function() {
   if (!currentUser || isSyncingFromCloud) return;
   try {
@@ -933,6 +947,8 @@ window.saveDBSyncToCloud = async function() {
 
 window.lockSystem = function() {
   signOut(auth).then(() => {
+    location.reload();
+  }).catch(() => {
     location.reload();
   });
 };
