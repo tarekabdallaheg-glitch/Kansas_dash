@@ -36,7 +36,6 @@ body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,-apple-system,sans-serif;b
 .inp.xs{width:140px;max-width:100%;text-align:center}
 .inp:disabled{opacity:.55}
 
-/* إخفاء أسهم زيادة ونقصان الرقم في حقول الـ number */
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
@@ -103,19 +102,16 @@ html:not(.dark) header.sticky-header {
     background: rgba(7, 12, 22, 0.92);
 }
 
-/* Header */
 .brand{display:flex;align-items:center;gap:12px}
 .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#1e3a5f,#0f1f36);color:#f2c96b;font-weight:800;font-size:18px;letter-spacing:.5px;box-shadow:inset 0 0 0 1px rgba(242,201,107,.35),0 6px 16px rgba(15,31,54,.35)}
 .brand-name{font-weight:800;font-size:16px;letter-spacing:.6px}
 .brand-sub{font-size:11.5px;color:var(--muted);font-weight:600}
 .actions .btn{padding:9px 12px}
 
-/* Modal */
 .modal{position:fixed;inset:0;background:rgba(5,10,20,.55);display:grid;place-items:center;z-index:120;padding:16px}
 .mbox{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:440px;width:100%;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:20px}
 .mbox p{margin:0;font-weight:700;font-size:15px;line-height:1.75}
 
-/* Hero */
 .hero{position:relative;overflow:hidden;border-radius:22px;padding:24px;color:#f5f8ff;background:linear-gradient(135deg,#0f1f36 0%,#1e3a5f 60%,#2b4f7e 100%);box-shadow:var(--shadow-lg)}
 .hero::after{content:"";position:absolute;inset:auto -80px -120px auto;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(242,201,107,.28),transparent 70%);pointer-events:none}
 .hero .eyebrow{color:#f2c96b}
@@ -125,20 +121,17 @@ html:not(.dark) header.sticky-header {
 .status i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .hero-sum{margin:14px 0 0;font-size:15px;line-height:1.85;max-width:100%;color:#e3ebf7}
 
-/* Trend */
 .trend{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .tb{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-width:0}
 .tb .big{font-size:26px;font-weight:800;line-height:1.2}
 .tb .big.up{color:var(--ok)}
 .tb .big.down{color:var(--bad)}
 
-/* Quick numbers */
 .quick{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-width:0}
 .quick .lbl{font-size:12.5px;font-weight:700;color:var(--muted)}
 .quick .val{font-size:22px;font-weight:800;line-height:1.2;letter-spacing:.2px}
 .quick .sub{font-size:12px;color:var(--muted);font-weight:600;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 
-/* Tips */
 .ins-list{display:flex;flex-direction:column;gap:9px}
 .tip{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border-radius:12px;background:var(--card2);border:1px solid var(--border);font-size:13.5px;line-height:1.7}
 .tip .dot{width:8px;height:8px;border-radius:50%;margin-top:9px;flex:none;background:var(--gold2)}
@@ -147,7 +140,6 @@ html:not(.dark) header.sticky-header {
 .tip.good{border-color:rgba(15,157,107,.25)}
 .tip.warn{border-color:rgba(214,69,69,.25)}
 
-/* Item cards */
 .icard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:11px;min-width:0}
 .ilbl{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.2px}
 .ibig{font-size:24px;font-weight:800;letter-spacing:.2px}
@@ -165,18 +157,15 @@ details.sub summary::-webkit-details-marker{display:none}
 details.sub summary::before{content:"▸ ";color:var(--gold)}
 details.sub[open] summary::before{content:"▾ "}
 
-/* Tabs */
 .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:5px;box-shadow:var(--shadow)}
 .tabs .btn{flex:1;border:none;background:transparent;padding:11px 8px;font-size:14px;color:var(--muted)}
 .tabs .btn:hover{color:var(--text);border:none}
 .tabs .on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(30,58,95,.25)}
 .dark .tabs .on{background:var(--gold2);color:#111827;box-shadow:none}
 
-/* Entry card */
 .entry{border-color:var(--gold2)}
 .entry .h{margin-bottom:14px}
 
-/* Inventory tiles */
 .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .tile{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;font-family:inherit;color:var(--text);text-align:center;transition:transform .12s,box-shadow .15s,border-color .15s}
 .tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--gold2)}
@@ -190,16 +179,13 @@ details.sub[open] summary::before{content:"▾ "}
 .pnl-title{font-weight:800;font-size:17px;display:flex;align-items:center;gap:10px}
 .pnl-title .tico{width:38px;height:38px;border-radius:12px}
 
-/* Export card */
 .exp{display:flex;flex-direction:column;gap:12px}
 .exp-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
-/* Comparison */
 .cmp-head{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .cmp-box{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .cmp-box .lbl{font-size:12.5px;font-weight:800;color:var(--muted)}
 
-/* Inventory rows */
 .prow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .prow:last-child{border-bottom:none}
 .pfields{display:flex;gap:8px;flex:1;min-width:0;flex-wrap:wrap}
@@ -219,7 +205,6 @@ details.sub[open] summary::before{content:"▾ "}
 .missing-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:9px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
 
-/* Lock Screen */
 .lock{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 .lock .card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;text-align:center;padding:30px}
 .lock .logo{margin:0 auto;width:56px;height:56px;font-size:24px;border-radius:17px}
@@ -228,7 +213,6 @@ details.sub[open] summary::before{content:"▾ "}
 .toasts{position:fixed;bottom:16px;left:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:99;pointer-events:none;align-items:flex-start}
 .toast{padding:12px 17px;border-radius:12px;color:#fff;font-weight:700;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:460px}
 
-/* Mobile */
 @media (max-width:640px){
     .wrap{padding:10px;gap:14px}
     .card,.icard{padding:15px;border-radius:16px}
@@ -251,7 +235,6 @@ details.sub[open] summary::before{content:"▾ "}
     .tico{width:48px;height:48px}
 }
 
-/* Desktop FULL WIDTH (V10.6) */
 @media (min-width:1000px){
     html{font-size:16px}
     body{font-size:15px; width:100%; min-width:0; overflow-x:hidden;}
@@ -300,7 +283,6 @@ details.sub[open] summary::before{content:"▾ "}
     .brand-name{font-size:18px}
 }
 
-/* Print Settings */
 @page{size:A4;margin:9mm}
 @media print{
     .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,details,.entry{display:none!important}
@@ -341,7 +323,6 @@ details.sub[open] summary::before{content:"▾ "}
   body.print-orders #pn-orders, body.print-salesforecast #sales-forecast{font-size:12px!important}
 }
 
-/* Light Theme Overrides */
 html:not(.dark){
   --bg:#f7f9fc;--bg2:#edf2f8;--card:#ffffff;--card2:#f5f8fc;--text:#172033;--muted:#46546b;--border:#d5deea;--inp:#ffffff;--gold:#94600b;--gold2:#e3ad32;--accent:#244d78;--ok:#087a52;--bad:#c52e36;
   --shadow:0 1px 3px rgba(22,34,52,.07),0 5px 16px rgba(22,34,52,.07);
@@ -376,7 +357,6 @@ html:not(.dark) .prow{border-color:#dce4ee}
 </head>
 <body>
 
-<!-- ===== شاشة الدخول بررمز بسيط فقط (بدون إيميل) ===== -->
 <div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
@@ -450,7 +430,6 @@ html:not(.dark) .prow{border-color:#dce4ee}
 })();
 </script>
 
-<!-- ===== التطبيق الرئيسي ===== -->
 <div id="app" class="hidden">
 <div class="wrap">
 
@@ -870,9 +849,6 @@ html:not(.dark) .prow{border-color:#dce4ee}
 <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
-/* ============================================================
-   الإعدادات والوظائف الأساسية
-   ============================================================ */
 const STORE_KEY = 'kansas_v8';
 
 const $ = id => document.getElementById(id);
@@ -1239,6 +1215,16 @@ document.addEventListener('keydown', (e) => {
 /* ============================================================
    محرك الإيرادات
    ============================================================ */
+function getDayRecord(d) {
+    if (S.sales[d]) {
+        return { rev: Number(S.sales[d].revenue || 0), ord: Number(S.sales[d].orders || 0), exists: true };
+    }
+    if (S.lyDaily[d]) {
+        return { rev: Number(S.lyDaily[d].rev || 0), ord: Number(S.lyDaily[d].orders || 0), exists: true };
+    }
+    return { rev: 0, ord: 0, exists: false };
+}
+
 function salesIn(from, to) {
     let rev = 0, ord = 0, days = 0;
     Object.keys(S.sales).forEach(d => {
@@ -1510,8 +1496,12 @@ function periodStats(from, to) {
     const dates = getPeriodDates(from, to);
     let rev = 0, ord = 0, days = 0;
     dates.forEach(d => {
-        const r = S.sales[d];
-        if (r && (r.revenue > 0 || r.orders > 0)) { rev += r.revenue; ord += r.orders; days++; }
+        const rec = getDayRecord(d);
+        if (rec.exists) {
+            rev += rec.rev;
+            ord += rec.ord;
+            days++;
+        }
     });
     return {
         from, to, dates, rev, ord, days,
@@ -1566,8 +1556,10 @@ function renderCompare() {
     for (let i = 0; i < n; i++) {
         const ad = datesA[i] || '';
         const bd = datesB[i] || '';
-        const ar = (ad && S.sales[ad]) ? S.sales[ad].revenue : null;
-        const br = (bd && S.sales[bd]) ? S.sales[bd].revenue : null;
+        const aRec = ad ? getDayRecord(ad) : null;
+        const bRec = bd ? getDayRecord(bd) : null;
+        const ar = aRec && aRec.exists ? aRec.rev : null;
+        const br = bRec && bRec.exists ? bRec.rev : null;
         const diff = (ar ?? 0) - (br ?? 0);
         const dp = br !== null && br > 0 ? diff / br : null;
         const cls = diff > 0 ? 'up' : (diff < 0 ? 'down' : '');
@@ -2515,9 +2507,6 @@ async function deleteAnalysis(id) {
     renderAll();
 }
 
-/* ============================================================
-   التصدير الشامل (XLSX)
-   ============================================================ */
 function setExportMonth() {
     if (!$('ex-from')) return;
     $('ex-from').value = monthStart(activeMonth);
@@ -2658,9 +2647,6 @@ function renderInventory() {
     }
 }
 
-/* ============================================================
-   الطلبيات المتوقعة (Per 1000)
-   ============================================================ */
 function renderPer1000Products() {
   const host = $('per1000-products'); if (!host) return;
   if (!S.products.length) { host.innerHTML = '<div class="alert">أضف الأصناف أولًا من صفحة المخزون، ثم ارجع لاختيارها هنا.</div>'; return; }
