@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://*.firebaseio.com https://*.googleapis.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com; img-src 'self' data: https://*.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>Kansas Premium</title>
 <style>
 :root{
@@ -188,9 +188,9 @@ details.sub[open] summary::before{content:"▾ "}
 .missing-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:9px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
 
-/* Lock Screen / Login Overlay */
+/* Lock Screen */
 .lock{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
-.lock .card{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px;text-align:center;padding:30px}
+.lock .card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;text-align:center;padding:30px}
 .lock .logo{margin:0 auto;width:56px;height:56px;font-size:24px;border-radius:17px}
 #lock-err{font-weight:700;font-size:13px;min-height:20px;margin:0;color:var(--bad);white-space:pre-wrap;word-break:break-word;text-align:right}
 #lock-err.ok{color:var(--ok)}
@@ -345,21 +345,83 @@ html:not(.dark) .prow{border-color:#dce4ee}
 </head>
 <body>
 
-<!-- ===== شاشة تسجيل الدخول ===== -->
+<!-- ===== شاشة الدخول ===== -->
 <div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
         <div>
             <div class="brand-name">KANSAS PREMIUM</div>
-            <div class="muted">تسجيل الدخول للسحابة</div>
+            <div class="muted">رجاء إدخال رمز الحماية</div>
         </div>
-        <input id="login-email" class="inp" type="email" autocomplete="email" placeholder="البريد الإلكتروني">
-        <input id="login-password" class="inp" type="password" autocomplete="current-password" placeholder="كلمة المرور">
+        <input id="unlock-pin" class="inp" type="password" inputmode="numeric" autocomplete="off" placeholder="الرمز">
         <p id="lock-err"></p>
-        <button class="btn btn-gold" id="unlock-btn" type="button">تسجيل الدخول</button>
-        <button class="btn" id="force-open-btn" type="button" style="background:transparent;border:1px dashed var(--gold);color:var(--gold);font-size:12px;margin-top:2px;">دخول مباشر محلياً (تخطي السحابة مؤقتاً)</button>
+        <button class="btn btn-gold" id="unlock-btn" type="button">فتح النظام</button>
     </div>
 </div>
+<script>
+(function () {
+    var PIN = '1234';
+    var errBox = document.getElementById('lock-err');
+    var input = document.getElementById('unlock-pin');
+    var btn = document.getElementById('unlock-btn');
+
+    function show(msg, ok) {
+        errBox.textContent = msg;
+        errBox.className = ok ? 'ok' : '';
+    }
+
+    window.addEventListener('error', function (e) {
+        show('حصل خطأ في البرنامج: ' + e.message + (e.lineno ? ' (سطر ' + e.lineno + ')' : ''));
+    });
+
+    function normDigits(s) {
+        return String(s || '')
+            .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
+            .replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
+            .replace(/\s/g, '');
+    }
+
+    function openApp(attempt) {
+        attempt = attempt || 0;
+        if (typeof window.kansasStart !== 'function') {
+            if (attempt < 40) {
+                setTimeout(function () { openApp(attempt + 1); }, 100);
+                return;
+            }
+            show('البرنامج ما اتحمّلش بالكامل. حدّث الصفحة وجرب مرة تانية.');
+            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
+            return;
+        }
+        try {
+            window.kansasStart();
+            try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
+            document.getElementById('lock').classList.add('hidden');
+        } catch (err) {
+            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
+            show('حصلت مشكلة أثناء فتح البرنامج: ' + (err && err.message ? err.message : err));
+        }
+    }
+
+    function tryUnlock() {
+        show('');
+        var v = normDigits(input.value);
+        if (!v) { show('اكتب الرمز الأول'); return; }
+        if (v !== PIN) { show('رمز الحماية غير صحيح'); input.select(); return; }
+        input.value = '';
+        openApp();
+    }
+
+    btn.addEventListener('click', tryUnlock);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
+
+    window.addEventListener('load', function () {
+        var unlocked = false;
+        try { unlocked = sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) {}
+        if (unlocked) openApp();
+        else input.focus();
+    });
+})();
+</script>
 
 <!-- ===== التطبيق الرئيسي ===== -->
 <div id="app" class="hidden">
@@ -377,7 +439,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
             <button class="btn" onclick="toggleTheme()" id="theme-btn"></button>
             <button class="btn btn-slate" onclick="exportBackup()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>نسخة</button>
             <label class="btn" style="cursor:pointer"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M4 19h16"/></svg>استيراد<input type="file" accept="application/json" class="hidden" onchange="importBackup(this)"></label>
-            <button class="btn btn-red" onclick="lockSystem()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>خروج</button>
+            <button class="btn btn-red" onclick="lockSystem()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>قفل</button>
         </div>
     </header>
 
@@ -778,190 +840,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
 
 <div class="toasts" id="toasts"></div>
 
-<!-- ملفات مكتبات SheetJS و Firebase SDKs -->
 <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  onSnapshot 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCKIlUDTqllI9iaiwyF01JKStovqXqpcdE",
-  authDomain: "kansas-dash.firebaseapp.com",
-  databaseURL: "https://kansas-dash-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "kansas-dash",
-  storageBucket: "kansas-dash.firebasestorage.app",
-  messagingSenderId: "450873671289",
-  appId: "1:450873671289:web:2f2398aa996c6ee354dea8",
-  measurementId: "G-YET3KNSC5M"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUser = null;
-let unsubscribeSync = null;
-let isSyncingFromCloud = false;
-
-// دالة تسجيل الدخول مع مانع التعليق
-async function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value.trim();
-  const errBox = document.getElementById('lock-err');
-  
-  if (!email || !password) {
-    errBox.textContent = 'أدخل البريد الإلكتروني وكلمة المرور';
-    return;
-  }
-  
-  errBox.textContent = 'جاري تسجيل الدخول...';
-  
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    errBox.textContent = '';
-  } catch (error) {
-    console.error("Login Error:", error);
-    errBox.textContent = 'خطأ في الدخول: ' + error.message;
-    alert("تنبيه الاتصال بالسحابة: " + error.message + "\nسيتم فتح البرنامج محلياً الآن.");
-    document.getElementById('lock').classList.add('hidden');
-    if (typeof window.kansasStart === 'function') {
-      window.kansasStart();
-    }
-  }
-}
-
-document.getElementById('unlock-btn').addEventListener('click', handleLogin);
-document.getElementById('login-password').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') handleLogin();
-});
-
-// زر الدخول المباشر للتخطي المؤقت
-document.getElementById('force-open-btn').addEventListener('click', () => {
-  document.getElementById('lock').classList.add('hidden');
-  if (typeof window.kansasStart === 'function') {
-    window.kansasStart();
-  }
-});
-
-// ترحيل البيانات القديمة من localStorage إلى السحابة
-async function migrateLocalDataToCloud(userId) {
-  try {
-    const userDocRef = doc(db, "app_data", userId);
-    const docSnap = await getDoc(userDocRef);
-
-    if (!docSnap.exists()) {
-      const localData = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('kansas')) {
-          try {
-            localData[key] = JSON.parse(localStorage.getItem(key));
-          } catch (e) {
-            localData[key] = localStorage.getItem(key);
-          }
-        }
-      }
-
-      if (Object.keys(localData).length > 0) {
-        await setDoc(userDocRef, {
-          payload: localData,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-      }
-    }
-  } catch (err) {
-    console.log("Migration background notice:", err);
-  }
-}
-
-// مراقبة حالة تسجيل الدخول والمزامنة الحية
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    document.getElementById('lock').classList.add('hidden');
-    
-    migrateLocalDataToCloud(user.uid);
-
-    try {
-      const userDocRef = doc(db, "app_data", user.uid);
-      unsubscribeSync = onSnapshot(userDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const cloudData = docSnap.data().payload || {};
-          isSyncingFromCloud = true;
-          
-          Object.keys(cloudData).forEach(key => {
-            const val = typeof cloudData[key] === 'object' ? JSON.stringify(cloudData[key]) : cloudData[key];
-            localStorage.setItem(key, val);
-          });
-
-          if (typeof window.kansasStart === 'function' && document.getElementById('app').classList.contains('hidden')) {
-            window.kansasStart();
-          } else if (typeof window.renderAll === 'function') {
-            window.renderAll();
-          }
-          isSyncingFromCloud = false;
-        }
-      });
-    } catch (e) {
-      console.log("Sync error background:", e);
-    }
-
-    if (typeof window.kansasStart === 'function') {
-      window.kansasStart();
-    }
-  } else {
-    currentUser = null;
-    if (unsubscribeSync) unsubscribeSync();
-    document.getElementById('lock').classList.remove('hidden');
-    document.getElementById('app').classList.add('hidden');
-  }
-});
-
-// دالة الحفظ المحدثة لتحديث Firebase تلقائياً عند أي تعديل
-window.saveDBSyncToCloud = async function() {
-  if (!currentUser || isSyncingFromCloud) return;
-  try {
-    const localData = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith('kansas')) {
-        try {
-          localData[key] = JSON.parse(localStorage.getItem(key));
-        } catch (e) {
-          localData[key] = localStorage.getItem(key);
-        }
-      }
-    }
-    const userDocRef = doc(db, "app_data", currentUser.uid);
-    await setDoc(userDocRef, {
-      payload: localData,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-  } catch (err) {
-    console.error("Cloud sync error:", err);
-  }
-};
-
-window.lockSystem = function() {
-  signOut(auth).then(() => {
-    location.reload();
-  }).catch(() => {
-    location.reload();
-  });
-};
-</script>
 
 <script>
 /* ============================================================
@@ -1127,12 +1006,7 @@ function loadDB() {
 }
 
 function saveDB() {
-    try { 
-        localStorage.setItem(STORE_KEY, JSON.stringify(S)); 
-        if (typeof window.saveDBSyncToCloud === 'function') {
-            window.saveDBSyncToCloud();
-        }
-    }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
     catch (e) { toast('تعذر الحفظ (مساحة المتصفح ممتلئة؟)', 'error'); }
 }
 
@@ -1148,6 +1022,7 @@ async function confirmFuture(day) {
 window.kansasStart = function () {
     S = loadDB();
     saveDB();
+    checkDailyAutoBackup(); // فحص وتشغيل النسخ الاحتياطي التلقائي اليومي
     $('app').classList.remove('hidden');
     $('month-input').value = activeMonth;
     $('sales-day').value = todayStr();
@@ -1158,6 +1033,33 @@ window.kansasStart = function () {
     renderAll();
     applyTheme(localStorage.getItem('kansas_theme') || 'dark');
 };
+
+// وظيفة النسخ الاحتياطي التلقائي اليومي
+function checkDailyAutoBackup() {
+    const today = todayStr();
+    if (S.lastBackup !== today) {
+        try {
+            const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'kansas-auto-backup-' + today + '.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            S.lastBackup = today;
+            saveDB();
+            toast('تم إجراء النسخ الاحتياطي التلقائي لليوم بنجاح');
+        } catch (e) {
+            console.log('فشل النسخ التلقائي:', e);
+        }
+    }
+}
+
+function lockSystem() {
+    try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
+    location.reload();
+}
 
 function setMonthDefaults() {
     $('active-month-title').textContent = `${MONTHS_AR[Number(activeMonth.slice(5)) - 1]} ${activeMonth.slice(0, 4)}`;
@@ -1759,7 +1661,7 @@ function forecastOne(day, history, trend) {
     let base = 0, confidence = 'ضعيفة', basis = '';
     if (same.length) {
         const weights = same.map((_,i)=>i+1);
-        base = same.reduce((sum,x,i)=>sum+x.revenue*weights[i],0)/weights.reduce((a,b)=>a+b,0);
+ base = same.reduce((sum,x,i)=>sum+x.revenue*weights[i],0)/weights.reduce((a,b)=>a+b,0);
         confidence = same.length>=8 ? 'مرتفعة' : same.length>=4 ? 'متوسطة' : 'مبدئية';
         basis = `${same.length} تسجيل لنفس اليوم`;
     } else if (all.length) {
