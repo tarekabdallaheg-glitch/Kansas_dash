@@ -203,7 +203,7 @@ details.sub[open] summary::before{content:"▾ "}
 .search{display:flex;gap:8px;align-items:center;margin-bottom:12px;position:relative}
 .search .inp{padding-right:14px}
 .missing-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-.mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:9px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
+.mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
 
 .lock{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 .lock .card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;text-align:center;padding:30px}
@@ -1298,12 +1298,22 @@ function analyzeRevenue(from, to) {
     const m = salesIn(monthStart(activeMonth), monthEnd(activeMonth));
     const c = cfg(activeMonth);
     const planDaily = c.plan_rev > 0 ? c.plan_rev / dim : 0;
-    const planPct = c.plan_rev > 0 ? m.rev / c.plan_rev : null;
-    const expected = planDaily * elapsed;
-    const pace = expected > 0 ? m.rev / expected : null;
-    const required = (c.plan_rev > 0 && remDays > 0) ? Math.max(0, c.plan_rev - m.rev) / remDays : null;
+    
+    // ==========================================
+    // تصحيح معادلة تحقيق الخطة حتى تاريخه ومتوقع غلق الشهر
+    // ==========================================
+    // تحقيق الخطة حتى تاريخه = الإيراد المسجل حتى الآن ÷ مستهدف الأيام المسجلة (الخطة اليومية × عدد الأيام المسجلة)
+    const expectedToDate = planDaily * (m.days > 0 ? m.days : elapsed);
+    const planPctToDate = (expectedToDate > 0 && m.rev > 0) ? m.rev / expectedToDate : null;
+
+    // المتوقع لغلق الشهر بناءً على المتوسط اليومي في إجمالي أيام الشهر
     const projected = m.days > 0 ? (m.rev / m.days) * dim : 0;
+    
+    // نسبة المتوقع لغلق الشهر مقارنة بالخطة الكلية
     const projPlan = c.plan_rev > 0 ? projected / c.plan_rev : null;
+
+    const pace = expectedToDate > 0 ? m.rev / expectedToDate : null;
+    const required = (c.plan_rev > 0 && remDays > 0) ? Math.max(0, c.plan_rev - m.rev) / remDays : null;
     const lyM = lyMonthTotal(activeMonth);
 
     const wdAvg = weekday.map(w => w.n ? w.sum / w.n : null);
@@ -1315,7 +1325,8 @@ function analyzeRevenue(from, to) {
     const last3Vs = (last3Avg !== null && avgRev > 0) ? (last3Avg - avgRev) / avgRev : null;
 
     return { t, avgRev, avgOrd, avgChk, lyRev, lyOrd, lyDays, lyAvgRev, lyAvgChk,
-        growthLy, avgGrowthLy, ordGrowth, chkGrowth, dim, elapsed, remDays, m, c, planDaily, planPct, expected, pace,
+        growthLy, avgGrowthLy, ordGrowth, chkGrowth, dim, elapsed, remDays, m, c, planDaily, 
+        planPct: planPctToDate, expected: expectedToDate, pace,
         required, projected, projPlan, lyM,
         wdAvg, best, worst, last3Avg, last3Vs, missing: missingRevenueDays() };
 }
@@ -1378,11 +1389,11 @@ function buildBlocks(a) {
     {
         const tips = [];
         if (a.c.plan_rev > 0) {
-            if (a.planPct !== null && a.planPct >= 1) tips.push(T(3, 'good', 'الخطة اتحققت. أي إيراد بعد كده زيادة صافية.'));
+            if (a.planPct !== null && a.planPct >= 1) tips.push(T(3, 'good', 'أداء الإيراد أعلى من وتيرة الخطة المحددة.'));
             else if (a.required !== null) {
                 tips.push(T(a.pace !== null && a.pace < 0.85 ? 1 : 2, a.pace !== null && a.pace < 0.85 ? 'warn' : 'tip',
                     `مقترح: المطلوب <b>${fmt(a.required)} ج.م</b> يومياً لباقي ${a.remDays} يوم، والمتوسط الحالي ${fmt(a.avgRev)} ج.م.`));
-            } else if (a.elapsed > 0) tips.push(T(1, 'warn', `الشهر انتهى بـ ${(a.planPct * 100).toFixed(0)}% من الخطة. راجع الأسباب قبل خطة الشهر الجاي.`));
+            } else if (a.elapsed > 0) tips.push(T(1, 'warn', `الشهر انتهى بـ ${(a.projPlan * 100).toFixed(0)}% من الخطة.`));
         } else tips.push(T(3, 'tip', 'مقترح: حدد خطة الشهر من الإعدادات.'));
         if (a.projPlan !== null && a.projPlan < 1) tips.push(T(1, 'warn', `المتوقع يقفل على ${(a.projPlan * 100).toFixed(0)}% من الخطة.`));
         B.push({ title: 'الخطة والمتوقع', big: a.c.plan_rev > 0 ? `${((a.planPct || 0) * 100).toFixed(1)}%` : '—',
@@ -1455,7 +1466,7 @@ function renderQuick(a) {
     $('quick').innerHTML = [
         q('إيراد الفترة', `${fmt(a.t.rev)} ج.م`, arrowChip(a.growthLy, 'vs السنة اللي فاتت')),
         q('المتوسط اليومي', `${fmt(a.avgRev)} ج.م`, arrowChip(a.avgGrowthLy, 'vs السنة اللي فاتت')),
-        q('تحقيق الخطة', a.planPct === null ? '—' : `${(a.planPct * 100).toFixed(1)}%`,
+        q('تحقيق الخطة حتى تاريخه', a.planPct === null ? '—' : `${(a.planPct * 100).toFixed(1)}%`,
             a.required !== null ? `<span class="muted">محتاج ${fmt(a.required)} ج.م يومياً</span>` : (a.c.plan_rev > 0 ? '<span class="muted">الشهر انتهى</span>' : '<span class="muted">حدد الخطة</span>')),
         q('متوقع غلق الشهر', `${fmt(a.projected)} ج.م`,
             a.projPlan === null ? '<span class="muted">حدد الخطة</span>' : `<span class="chip ${a.projPlan >= 1 ? 'up' : 'down'}">${(a.projPlan * 100).toFixed(0)}% من الخطة</span>`)
@@ -1534,7 +1545,6 @@ function renderCompare() {
     const revTrend = trendWord(revGrowth);
     const ordTrend = trendWord(ordGrowth);
     
-    // تم ضبط الملخص العلوي ليعرض إجمالي الإيراد وإجمالي العمليات مقارنة الفترتين بالكامل
     $('cmp-head').innerHTML = `
         <div class="cmp-box">
             <div class="lbl">مقارنة إجمالي الإيراد للفترتين</div>
@@ -1581,7 +1591,6 @@ function renderCompare() {
         const ordDp = bo !== null && bo > 0 ? ordDiff / bo : null;
         const ordCls = ordDiff > 0 ? 'up' : (ordDiff < 0 ? 'down' : '');
         
-        // تم إضافة نسب وفرق العمليات بجانب الإيراد في الجدول يوم بيوم
         rows.push(`<tr>
             <td>${ad ? esc(ad) : '-'}</td>
             <td>${ar === null ? '<span class="muted">—</span>' : fmt(ar)}</td>
@@ -1604,9 +1613,9 @@ function revenueAssistantAnswer(question, a) {
     if (!a.t.days) return 'مفيش بيانات إيرادات كفاية في الفترة المحددة. سجّل الإيراد وعدد العمليات للأيام، وبعدها أقدر أحلل الأداء.';
     if (q.includes('خطة') || q.includes('هدف') || q.includes('هحقق') || q.includes('تحقيق')) {
         if (!a.c.plan_rev) return 'لسه مفيش خطة شهرية مسجلة. افتح إعدادات الشهر وسجّل المستهدف، وبعدها هحسب نسبة التحقيق والمتوسط اليومي المطلوب.';
-        let msg = `المحقق حتى الآن ${money(a.m.rev)} من خطة ${money(a.c.plan_rev)}، بنسبة ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
+        let msg = `المحقق حتى الآن ${money(a.m.rev)} من خطة ${money(a.c.plan_rev)}، وتيرة تحقيق الخطة للأيام المسجلة هي ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
         if (a.required !== null) msg += `محتاج تحقق ${money(a.required)} يوميًا خلال ${a.remDays} يوم متبقي.`;
-        if (a.projPlan !== null) msg += ` وبالمعدل الحالي، المتوقع إغلاق الشهر على ${money(a.projected)}، أي ${(100 * a.projPlan).toFixed(1)}% من الخطة.`;
+        if (a.projPlan !== null) msg += ` وبالمعدل الحالي، المتوقع إغلاق الشهر على ${money(a.projected)}، أي ${(100 * a.projPlan).toFixed(1)}% من الخطة الكلية.`;
         return msg;
     }
     if (q.includes('شيك') || q.includes('متوسط')) {
