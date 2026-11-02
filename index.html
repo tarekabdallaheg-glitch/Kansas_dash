@@ -82,6 +82,7 @@ th,td{padding:10px 9px;border-bottom:1px solid var(--border);text-align:right;wh
 th{font-weight:700;color:var(--muted);font-size:12px}
 tr:last-child td{border-bottom:none}
 
+/* Sticky Header */
 header.sticky-header {
     position: sticky;
     top: 0;
@@ -234,6 +235,54 @@ details.sub[open] summary::before{content:"▾ "}
     .tico{width:48px;height:48px}
 }
 
+@media (min-width:1000px){
+    html{font-size:16px}
+    body{font-size:15px; width:100%; min-width:0; overflow-x:hidden;}
+    #app{display:block; width:100%!important; max-width:none!important; min-width:0; margin:0; padding:0;}
+    #app > .wrap, .wrap{width:100%!important; max-width:none!important; padding:22px clamp(18px,2vw,40px); gap:20px}
+    #tab-revenue.wrap, #tab-salesforecast.wrap, #tab-inventory.wrap{width:100%!important; max-width:none!important;}
+    .card,.icard{padding:26px; border-radius:20px; min-width:0;}
+    .h{font-size:17px;margin-bottom:14px}
+    .eyebrow{font-size:12px}
+    .inp{font-size:15px;padding:12px 14px}
+    .inp.sm{width:200px}
+    .inp.xs{width:170px}
+    .btn{font-size:14px;padding:11px 20px}
+    .btn-sm{font-size:13px;padding:9px 15px}
+    .tabs{width:100%; max-width:none;}
+    .tabs .btn{font-size:15px;padding:13px 10px}
+    .tiles{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px; width:100%; max-width:none;}
+    .tile{padding:32px 18px;border-radius:22px}
+    .tico{width:66px;height:66px;border-radius:20px}
+    .tico .ico{width:30px;height:30px}
+    .tname{font-size:16px}
+    .tstat{font-size:13px}
+    .hero{padding:34px 38px}
+    .hero h2{font-size:30px}
+    .hero-sum{font-size:17px}
+    .tb{padding:24px; min-width:0;}
+    .tb .big{font-size:34px}
+    .quick{padding:22px; min-width:0;}
+    .quick .lbl{font-size:13.5px}
+    .quick .val{font-size:32px}
+    .quick .sub{font-size:13px}
+    .ibig{font-size:30px}
+    .ilines{font-size:14px}
+    .ilbl{font-size:13.5px}
+    .tip{font-size:14.5px;padding:12px 15px}
+    table{font-size:14.5px; width:100%!important;}
+    th,td{padding:12px 11px}
+    th{font-size:13px}
+    .grid, .trend, .g2, .g3, .g4, .cmp-head, .pgrid{width:100%!important; max-width:none!important; min-width:0;}
+    .g4{grid-template-columns:repeat(4,1fr)}
+    .pgrid{grid-template-columns:1fr 1fr;gap:16px 20px}
+    .fld{font-size:13.5px}
+    .fld b{font-size:17px}
+    .ptitle{font-size:16px}
+    .logo{width:48px;height:48px;font-size:20px}
+    .brand-name{font-size:18px}
+}
+
 @page{size:A4;margin:9mm}
 @media print{
     .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,details,.entry{display:none!important}
@@ -254,6 +303,24 @@ details.sub[open] summary::before{content:"▾ "}
     .trend{gap:6px}
     .g2,.g4,.g3{gap:6px}
     .icard{break-inside:avoid}
+}
+
+@page{size:A4 landscape;margin:10mm}
+@media print{
+  body.print-orders *, body.print-salesforecast *{visibility:hidden!important}
+  body.print-orders #tab-inventory, body.print-orders #tab-inventory *, body.print-orders #inv-panel, body.print-orders #pn-orders, body.print-orders #pn-orders *,
+  body.print-salesforecast #sales-forecast, body.print-salesforecast #sales-forecast *{visibility:visible!important}
+  body.print-orders #pn-orders, body.print-salesforecast #sales-forecast{display:block!important;position:absolute!important;top:0!important;right:0!important;left:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important;border:0!important;box-shadow:none!important}
+  body.print-orders #pn-orders .no-print, body.print-salesforecast #sales-forecast .no-print,
+  body.print-orders #pn-orders button, body.print-salesforecast #sales-forecast button,
+  body.print-orders #pn-orders details, body.print-salesforecast #sales-forecast details{display:none!important}
+  body.print-orders #pn-orders .card, body.print-salesforecast #sales-forecast .card{background:#fff!important;color:#000!important;border:0!important;box-shadow:none!important}
+  body.print-orders #pn-orders table, body.print-salesforecast #sales-forecast table{width:100%!important;border-collapse:collapse!important;font-size:12px!important;font-weight:800!important}
+  body.print-orders #pn-orders th, body.print-orders #pn-orders td,
+  body.print-salesforecast #sales-forecast th, body.print-salesforecast #sales-forecast td{color:#000!important;border:1px solid #777!important;padding:7px 6px!important;white-space:normal!important}
+  body.print-orders #pn-orders .muted, body.print-salesforecast #sales-forecast .muted{color:#222!important;font-weight:800!important}
+  body.print-orders #pn-orders *, body.print-salesforecast #sales-forecast *{font-weight:800!important}
+  body.print-orders #pn-orders, body.print-salesforecast #sales-forecast{font-size:12px!important}
 }
 
 html:not(.dark){
@@ -532,52 +599,17 @@ html:not(.dark) .prow{border-color:#dce4ee}
             <div class="row between" style="align-items:center;gap:10px">
                 <div>
                     <div class="eyebrow">التخطيط للمبيعات</div>
-                    <div class="h" style="margin:3px 0">Sales Forecasting - توقع المبيعات والمقارنة الفعلية</div>
-                    <div class="muted">يتعلم تلقائيًا من المبيعات التي تسجلها، مع إمكانية تحديد تاريخ بداية الجدول ونسبة النمو المستهدفة</div>
+                    <div class="h" style="margin:3px 0">Sales Forecasting - توقع المبيعات</div>
+                    <div class="muted">يتعلم تلقائيًا من المبيعات التي تسجلها، مع إمكانية تعديل أو مسح البيانات المضافة في أي وقت</div>
                 </div>
                 <span class="badge open">توقع 7 أيام</span>
             </div>
-
-            <!-- لوحة التحكم في التاريخ ونسبة النمو -->
-            <div class="grid g3" style="margin-top:14px;background:var(--card2);padding:12px;border-radius:14px;border:1px solid var(--border)">
-                <div>
-                    <label class="muted" for="forecast-start-date">تاريخ بداية التوقع</label>
-                    <input type="date" id="forecast-start-date" class="inp" onchange="renderForecast()">
-                </div>
-                <div>
-                    <label class="muted" for="forecast-growth-rate">نسبة نمو مستهدفة إضافية % (اختياري)</label>
-                    <input type="number" id="forecast-growth-rate" class="inp" placeholder="مثال: 5 أو -5" step="0.5" oninput="renderForecast()">
-                </div>
-                <div style="display:flex;align-items:flex-end">
-                    <button class="btn btn-ghost btn-sm" onclick="resetForecastDate()">إرجاع لبداية غداً</button>
-                </div>
-            </div>
-
             <div id="forecast-summary" class="note" style="margin-top:12px">ابدأ بتسجيل المبيعات أو استيراد بيانات سابقة لبناء التوقع.</div>
-            
             <div class="tbl-wrap" style="margin-top:12px"><table>
-                <thead>
-                    <tr>
-                        <th>اليوم والتاريخ</th>
-                        <th>التوقع المرجح</th>
-                        <th>الإيراد الفعلي (المحقق)</th>
-                        <th>الفرق (الفعلي - المتوقع)</th>
-                        <th>المناسبة / التأثير</th>
-                        <th>مستوى الثقة</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>اليوم والتاريخ</th><th>التوقع المرجح</th><th>المناسبة / التأثير</th><th>مستوى الثقة</th></tr></thead>
                 <tbody id="forecast-rows"></tbody>
-                <tfoot>
-                    <tr>
-                        <th>إجمالي الأسبوع</th>
-                        <th id="forecast-total">—</th>
-                        <th id="forecast-actual-total">—</th>
-                        <th id="forecast-diff-total">—</th>
-                        <th colspan="2" id="forecast-confidence">—</th>
-                    </tr>
-                </tfoot>
+                <tfoot><tr><th>إجمالي الأسبوع</th><th id="forecast-total">—</th><th colspan="2" id="forecast-confidence">—</th></tr></tfoot>
             </table></div>
-
             <details style="margin-top:14px" open>
                 <summary>إدارة وتغذية النظام ببيانات الأسابيع السابقة</summary>
                 <div class="muted" style="margin:8px 0">الصق البيانات في صورة: التاريخ، الإيراد فقط. كل يوم في سطر. مثال: 2026-10-01,42000. يمكنك الإضافة أو تعديل البيانات الحالية ومسحها بالكامل لو أردت البدء من جديد.</div>
@@ -634,11 +666,6 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 <span class="tico"><svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/></svg></span>
                 <span class="tname">الطلبيات المتوقعة</span>
                 <span class="tstat">Per 1000 · 7 أيام</span>
-            </button>
-            <button class="tile" onclick="openInv('expiry')">
-                <span class="tico"><svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
-                <span class="tname">صلاحيات المنتجات</span>
-                <span class="tstat" id="ts-expiry">متابعة FEFO</span>
             </button>
         </div>
 
@@ -773,6 +800,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 <div class="hero-sum">اختر القالب المطلوب للتنقل بين إعداد الأصناف، جدول الأسبوع، ومقارنة الفعلي بالمتوقع.</div>
               </div>
 
+              <!-- أيقونات التبديل بين القوالب الثلاثة -->
               <div class="tiles no-print" style="margin-bottom:16px;grid-template-columns:repeat(3,1fr)">
                 <button class="tile" id="order-tile-config" onclick="switchOrderSubTab('config')">
                     <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
@@ -844,72 +872,6 @@ html:not(.dark) .prow{border-color:#dce4ee}
               </div>
 
             </div>
-
-            <!-- صلاحيات المنتجات (FEFO) مع القوالب الثلاثة والملخص السفلي -->
-            <div id="pn-expiry" class="hidden">
-              <div class="hero" style="margin-bottom:14px">
-                <div class="eyebrow">KANSAS · EXPIRY &amp; FEFO TRACKING</div>
-                <h2>متابعة صلاحيات وتواريخ المنتجات</h2>
-                <div class="hero-sum">تتبع تواريخ الإنتاج والانتهاء تلقائياً لتطبيق نظام (الأول ينتهي يُصرف أولاً).</div>
-              </div>
-
-              <!-- 1. القالب الأول: إعداد الصنف وفترة الصلاحية -->
-              <div class="card" style="margin-bottom:16px">
-                <div class="row between" style="margin-bottom:10px">
-                  <div class="h" style="margin:0">1. إعداد فترات الصلاحية الثابتة للأصناف</div>
-                  <span class="badge open">قالب مستقل</span>
-                </div>
-                <div class="muted" style="margin-bottom:10px">حدد فترة الصلاحية لكل صنف (سواء بالأيام، أو الشهور، أو السنين، والنظام يحولها لأيام).</div>
-                <div id="expiry-config-rows"></div>
-                <div class="row" style="margin-top:14px;justify-content:flex-end">
-                  <button class="btn btn-gold" onclick="saveExpiryConfig()">حفظ وغلق قالب الإعدادات</button>
-                </div>
-              </div>
-
-              <!-- 2. القالب الثاني: إدخال تاريخ الإنتاج وحساب الانتهاء تلقائياً -->
-              <div class="card" style="margin-bottom:16px">
-                <div class="row between" style="margin-bottom:10px">
-                  <div class="h" style="margin:0">2. تسجيل تاريخ الإنتاج اليومي أو الأسبوعي</div>
-                  <span class="badge open">قالب مستقل</span>
-                </div>
-                <div class="muted" style="margin-bottom:10px">أدخل تاريخ إنتاج كل صنف وقت ما تحب، والنظام سيحسب تاريخ الانتهاء تلقائياً بناءً على فترة الصلاحية المسجلة.</div>
-                <div id="expiry-production-rows"></div>
-                <div class="row" style="margin-top:14px;justify-content:flex-end">
-                  <button class="btn btn-gold" onclick="saveExpiryProduction()">حفظ وغلق قالب الإنتاج</button>
-                </div>
-              </div>
-
-              <!-- 3. القالب الثالث: جدول المتابعة والترتيب التصاعدي (FEFO) -->
-              <div class="card" style="margin-bottom:16px">
-                <div class="row between" style="margin-bottom:10px">
-                  <div class="h" style="margin:0">3. جدول المتابعة (مرتب تصاعدياً للأقرب انتهاءً)</div>
-                  <span class="badge open">قالب مستقل</span>
-                </div>
-                <div class="muted" style="margin-bottom:10px">يعرض الأصناف مرتبة تلقائياً من الأقرب انتهاءً للأبعد لتطبيق قاعدة الفيفو.</div>
-                <div class="tbl-wrap"><table>
-                  <thead>
-                    <tr>
-                      <th>الصنف (الوحدة)</th>
-                      <th>تاريخ الإنتاج</th>
-                      <th>فترة الصلاحية</th>
-                      <th>تاريخ الانتهاء المحسوب</th>
-                      <th>الأيام المتبقية</th>
-                      <th>الحالة</th>
-                    </tr>
-                  </thead>
-                  <tbody id="expiry-table-rows"></tbody>
-                </table></div>
-              </div>
-
-              <!-- 4. الملخص والتحذيرات (تحت القوالب الأساسية) -->
-              <div class="card" style="background:var(--card2);border:1px solid var(--border)">
-                <div class="h" style="margin-bottom:8px">⚠️ ملخص التحذيرات الفورية للمخزون</div>
-                <div id="expiry-summary-box" class="muted">
-                  جاري فحص حالة المنتجات...
-                </div>
-              </div>
-            </div>
-
         </div>
     </section>
 
@@ -945,33 +907,13 @@ const addDays = (day, n) => { const [y, m, d] = day.split('-').map(Number); retu
 const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
 const weekdayOf = day => { const [y, m, d] = day.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); };
 const lyDay = day => (Number(day.slice(0, 4)) - 1) + day.slice(4);
-
-// الدالة المفقودة التي كانت تسبب خطأ التشغيل
+const inRange = (d, from, to) => (!from || d >= from) && (!to || d <= to);
 function eachDay(from, to, fn) {
-    if (!from || !to || from > to) return;
-    let curr = from;
-    while (curr <= to) {
-        fn(curr);
-        curr = addDays(curr, 1);
-    }
+    if (!from || !to) return;
+    let i = 0;
+    for (let d = from; d <= to && i < 4000; d = addDays(d, 1), i++) fn(d);
 }
-
-function shiftMonth(key, delta) {
-    let [y, m] = key.split('-').map(Number);
-    m += delta;
-    while (m > 12) { m -= 12; y++; }
-    while (m < 1) { m += 12; y--; }
-    return `${y}-${pad(m)}`;
-}
-
-function inRange(d, from, to) {
-    return (!from || d >= from) && (!to || d <= to);
-}
-
-function mean(arr) {
-    if (!arr.length) return 0;
-    return arr.reduce((a, b) => a + b, 0) / arr.length;
-}
+function shiftMonth(key, delta) { const [y, m] = key.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + delta, 1)); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}`; }
 
 const ICON_PATHS = {
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -1022,7 +964,7 @@ function askConfirm(msg, okText = 'تأكيد') {
 }
 
 const emptyDB = () => ({
-    v: 12,
+    v: 10,
     products: [],
     openings: {},
     openLocked: {},
@@ -1035,7 +977,6 @@ const emptyDB = () => ({
     analyses: [],
     sales: {}, monthly: {}, lyDaily: {}, forecastEvents: {},
     per1000: {}, orderSnapshots: {},
-    expiryConfig: {}, expiryProduction: {},
     locks: { sales: {} },
     lastBackup: null
 });
@@ -1051,8 +992,23 @@ function migrate(d) {
     d.forecastEvents = d.forecastEvents || {};
     d.per1000 = d.per1000 || {};
     d.orderSnapshots = d.orderSnapshots || {};
-    d.expiryConfig = d.expiryConfig || {};
-    d.expiryProduction = d.expiryProduction || {};
+    if (d.stock) {
+        const days = Object.keys(d.stock).sort();
+        days.forEach(day => {
+            Object.entries(d.stock[day]).forEach(([pid, r]) => {
+                if ((r.received || 0) > 0) (d.receipts[day] = d.receipts[day] || {})[pid] = r.received;
+            });
+        });
+        const fm = days.length ? monthOf(days[0]) : monthOf(todayStr());
+        d.openings[fm] = d.openings[fm] || {};
+        (d.products || []).forEach(p => { if (p.initial_opening !== undefined) d.openings[fm][p.id] = num(p.initial_opening); });
+        if (d.locks && d.locks.opening) d.openLocked[fm] = true;
+        if (d.locks && d.locks.stock) Object.assign(d.receiptLocked, d.locks.stock);
+        delete d.stock;
+    }
+    if (d.locks && d.locks.day) Object.assign(d.receiptLocked, d.locks.day);
+    if (d.locks && d.locks.open) Object.assign(d.openLocked, d.locks.open);
+    if (d.locks && d.locks.transfers) Object.assign(d.transferLocked, d.locks.transfers);
     return d;
 }
 
@@ -1252,6 +1208,7 @@ function nextRowCells(scope, ri, dir) {
     return null;
 }
 
+// منع زيادة/نقص الأرقام عند لف عجلة الماوس فوق خانات الأرقام
 document.addEventListener('wheel', function(e) {
     if (document.activeElement && document.activeElement.type === 'number') {
         document.activeElement.blur();
@@ -1696,13 +1653,13 @@ function revenueAssistantAnswer(question, a) {
     if (!a.t.days) return 'مفيش بيانات إيرادات كفاية في الفترة المحددة. سجّل الإيراد وعدد العمليات للأيام، وبعدها أقدر أحلل الأداء.';
     if (q.includes('خطة') || q.includes('هدف') || q.includes('هحقق') || q.includes('تحقيق')) {
         if (!a.c.plan_rev) return 'لسه مفيش خطة شهرية مسجلة. افتح إعدادات الشهر وسجّل المستهدف، وبعدها هحسب نسبة التحقيق والمتوسط اليومي المطلوب.';
-        let msg = `المحقق حتى الآن ${money(a.m.rev)} من إجمالي خطة الشهر ${money(a.c.plan_rev)}, بنسبة تحقيق ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
+        let msg = `المحقق حتى الآن ${money(a.m.rev)} من إجمالي خطة الشهر ${money(a.c.plan_rev)}، بنسبة تحقيق ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
         if (a.required !== null) msg += `محتاج تحقق ${money(a.required)} يوميًا خلال ${a.remDays} يوم متبقي.`;
-        if (a.projPlan !== null) msg += ` وبالمعدل الحالي، المتوقع إغلاق الشهر على ${money(a.projected)}, أي ${(100 * a.projPlan).toFixed(1)}% من الخطة الكلية.`;
+        if (a.projPlan !== null) msg += ` وبالمعدل الحالي، المتوقع إغلاق الشهر على ${money(a.projected)}، أي ${(100 * a.projPlan).toFixed(1)}% من الخطة الكلية.`;
         return msg;
     }
     if (q.includes('شيك') || q.includes('متوسط')) {
-        let msg = `متوسط الشيك الحالي ${money(a.avgChk)}, بإجمالي ${fmt(a.t.ord)} عملية وإيراد ${money(a.t.rev)}.`;
+        let msg = `متوسط الشيك الحالي ${money(a.avgChk)}، بإجمالي ${fmt(a.t.ord)} عملية وإيراد ${money(a.t.rev)}.`;
         if (a.chkGrowth !== null) msg += ` مقارنة بالسنة الماضية، متوسط الشيك ${a.chkGrowth >= 0 ? 'زاد' : 'انخفض'} بنسبة ${Math.abs(a.chkGrowth * 100).toFixed(1)}%.`;
         else msg += ' لا توجد بيانات كافية لمقارنته بالسنة الماضية.';
         return msg;
@@ -1726,7 +1683,7 @@ function revenueAssistantAnswer(question, a) {
         if (a.ordGrowth !== null && a.ordGrowth < 0) clues.push(`عدد العمليات أقل من السنة الماضية بنسبة ${Math.abs(a.ordGrowth * 100).toFixed(1)}%`);
         if (a.chkGrowth !== null && a.chkGrowth < 0) clues.push(`متوسط الشيك أقل بنسبة ${Math.abs(a.chkGrowth * 100).toFixed(1)}%`);
         if (a.pace !== null && a.pace < 1) clues.push(`الإيراد متأخر عن وتيرة الخطة بنسبة ${Math.abs((1 - a.pace) * 100).toFixed(1)}%`);
-        return clues.length ? `الأرقام بتوضح المؤشرات دي: ${clues.join('، ')}. دي تساعد في التحقيق، لكنها مش دليل لوحدها على السبب الفعلي. راجع العروض، ساعات الذروة، وقنوات البيع.` : 'الأرقام الحالية لا تثبت وجود انخفاض واضح. قارن عدد العمليات ومتوسط الشيك وساعات البيع قبل تحديد السبب.';
+        return clues.length ? `الأرقام بتوضح المؤشرات دي: ${clues.join('، ')}. دي مؤشرات تساعد في التحقيق، لكنها مش دليل لوحدها على السبب الفعلي. راجع العروض، ساعات الذروة، وقنوات البيع.` : 'الأرقام الحالية لا تثبت وجود انخفاض واضح. قارن عدد العمليات ومتوسط الشيك وساعات البيع قبل تحديد السبب.';
     }
     return `ملخص الفترة: الإيراد ${money(a.t.rev)} من ${a.t.days} يوم مسجل، بمتوسط يومي ${money(a.avgRev)}, وعدد ${fmt(a.t.ord)} عملية، ومتوسط شيك ${money(a.avgChk)}. ${a.missing.length ? `فيه ${a.missing.length} يوم سابق ناقص التسجيل.` : 'لا توجد أيام سابقة ناقصة حسب البيانات الحالية.'} اسألني عن الخطة أو الشيك أو العمليات أو المقارنة بالسنة الماضية.`;
 }
@@ -1758,7 +1715,7 @@ function askRevenuePreset(question) {
 }
 
 /* ============================================================
-   توقع المبيعات (Sales Forecasting) مع الإيراد الفعلي والفرق
+   توقع المبيعات (Sales Forecasting)
    ============================================================ */
 const FIXED_EGYPT_HOLIDAYS = {
     '01-07': 'عيد الميلاد المجيد', '01-25': 'عيد الشرطة وثورة يناير',
@@ -1776,6 +1733,7 @@ function forecastHistory() {
     return Object.keys(S.sales || {}).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && Number(S.sales[d]?.revenue) > 0)
         .sort().map(d => ({ date:d, revenue:Number(S.sales[d].revenue), orders:Number(S.sales[d].orders || 0), weekday:weekdayOf(d) }));
 }
+function mean(values) { return values.length ? values.reduce((a,b)=>a+b,0)/values.length : 0; }
 function forecastTrend(history) {
     if (!history.length) return { factor:1, label:'لا توجد بيانات كافية لقياس الاتجاه' };
     const end = todayStr(), startRecent = addDays(end,-13), startPrior = addDays(end,-27);
@@ -1786,20 +1744,7 @@ function forecastTrend(history) {
     const factor = Math.max(0.85, Math.min(1.15, raw));
     return { factor, label: factor>1.015 ? 'اتجاه صاعد' : factor<0.985 ? 'اتجاه هابط' : 'اتجاه مستقر' };
 }
-function forecastStartDate() {
-    const el = $('forecast-start-date');
-    if (el && el.value) return el.value;
-    const d = addDays(todayStr(), 1); 
-    if (el) el.value = d; 
-    return d;
-}
-function resetForecastDate() {
-    const d = addDays(todayStr(), 1);
-    const el = $('forecast-start-date');
-    if (el) el.value = d;
-    renderForecast();
-}
-function forecastOne(day, history, trend, extraGrowth) {
+function forecastOne(day, history, trend) {
     const wd = weekdayOf(day);
     const same = history.filter(x=>x.weekday===wd).slice(-8);
     const all = history.slice(-28);
@@ -1833,58 +1778,22 @@ function forecastOne(day, history, trend, extraGrowth) {
             if (ratios.length >= 2) confidence = confidence === 'مرتفعة' ? 'مرتفعة' : 'متوسطة';
         }
     }
-    const predicted = Math.max(0, base * trend.factor * (1 + impact/100) * (1 + extraGrowth/100));
-    const actualRec = S.sales[day];
-    const actual = (actualRec && actualRec.revenue !== undefined) ? Number(actualRec.revenue) : null;
-    return { day, base, predicted, actual, event, impact, learned, confidence, basis };
+    const predicted = Math.max(0, base * trend.factor * (1 + impact/100));
+    return { day, base, predicted, event, impact, learned, confidence, basis };
 }
 function renderForecast() {
     const body = $('forecast-rows'); if (!body) return;
-    const start = forecastStartDate();
-    const growthInput = $('forecast-growth-rate');
-    const extraGrowth = growthInput && growthInput.value !== '' ? Number(growthInput.value) : 0;
-
     const history = forecastHistory();
     const trend = forecastTrend(history);
-    const days = Array.from({length:7},(_,i)=>addDays(start,i));
-    const rows = days.map(d=>forecastOne(d, history, trend, extraGrowth));
-    
-    const totalPred = rows.reduce((a,x)=>a+x.predicted,0);
-    const recordedActuals = rows.filter(x => x.actual !== null);
-    const totalActual = recordedActuals.length ? recordedActuals.reduce((a,x)=>a+x.actual,0) : null;
-    const totalDiff = totalActual !== null ? totalActual - totalPred : null;
-
-    body.innerHTML = rows.map(x=>{
-        const diff = x.actual !== null ? x.actual - x.predicted : null;
-        const diffCls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
-        const diffText = diff === null ? '—' : `${diff > 0 ? '+' : ''}${fmt(diff, 2)} ج.م (${pct(x.predicted ? diff/x.predicted : 0)})`;
-
-        return `<tr>
-            <td><b>${DAYS_AR[weekdayOf(x.day)]}</b><br><span class="muted">${x.day}</span></td>
-            <td><b>${x.base ? fmt(x.predicted)+' ج.م' : 'بانتظار البيانات'}</b></td>
-            <td>${x.actual !== null ? `<span style="font-weight:800;color:var(--accent)">${fmt(x.actual)} ج.م</span>` : '<span class="muted">لم يُسجل بعد</span>'}</td>
-            <td class="${diffCls}"><b>${diffText}</b></td>
-            <td>${x.event ? esc(x.event.name)+((x.event.impact!==null || x.learned) ? `<br><span class="muted">${x.learned?'تأثير متعلم ':'تأثير محدد '}${x.impact>0?'+':''}${x.impact.toFixed(0)}%</span>` : '<br><span class="muted">التأثير غير محدد</span>') : 'يوم عادي'}</td>
-            <td>${x.confidence}<br><span class="muted">${esc(x.basis)}</span></td>
-        </tr>`;
-    }).join('');
-
-    $('forecast-total').textContent = history.length ? fmt(totalPred)+' ج.م' : 'بانتظار البيانات';
-    $('forecast-actual-total').textContent = totalActual !== null ? fmt(totalActual) + ' ج.م' : '—';
-    
-    const diffTotEl = $('forecast-diff-total');
-    if (totalDiff !== null) {
-        diffTotEl.textContent = `${totalDiff > 0 ? '+' : ''}${fmt(totalDiff, 2)} ج.م`;
-        diffTotEl.className = totalDiff >= 0 ? 'up' : 'down';
-    } else {
-        diffTotEl.textContent = '—';
-        diffTotEl.className = '';
-    }
-
+    const days = Array.from({length:7},(_,i)=>addDays(todayStr(),i+1));
+    const rows = days.map(d=>forecastOne(d,history,trend));
+    const total = rows.reduce((a,x)=>a+x.predicted,0);
+    body.innerHTML = rows.map(x=>`<tr><td>${DAYS_AR[weekdayOf(x.day)]}<br><span class="muted">${x.day}</span></td><td><b>${x.base ? fmt(x.predicted)+' ج.م' : 'بانتظار البيانات'}</b></td><td>${x.event ? esc(x.event.name)+((x.event.impact!==null || x.learned) ? `<br><span class="muted">${x.learned?'تأثير متعلم ':'تأثير محدد '}${x.impact>0?'+':''}${x.impact.toFixed(0)}%</span>` : '<br><span class="muted">التأثير غير محدد؛ لم يُفترض رقم</span>') : 'يوم عادي'}</td><td>${x.confidence}<br><span class="muted">${esc(x.basis)}</span></td></tr>`).join('');
+    $('forecast-total').textContent = history.length ? fmt(total)+' ج.م' : 'بانتظار البيانات';
     $('forecast-confidence').textContent = history.length ? `${history.length} يوم مسجل · ${trend.label}` : 'أدخل بيانات سابقة أو ابدأ التسجيل اليومي';
     $('forecast-summary').textContent = history.length
-        ? `النظام يستخدم ${history.length} يومًا مسجلًا للفترة من ${days[0]} إلى ${days[6]}. ${trend.label}. المقارنة تظهر فورًا بمجرد تسجيل الإيراد اليومي.`
-        : 'لا توجد مبيعات مسجلة بعد. أدخل بيانات سابقة أو سجل الإيراد اليومي ليبدأ التعلم.';
+        ? `النظام يستخدم ${history.length} يومًا مسجلًا، ويقارن كل يوم بالأيام السابقة من نفس يوم الأسبوع. ${trend.label}. التوقع الحالي مبدئي ويتحسن مع كل تسجيل جديد.`
+        : 'لا توجد مبيعات مسجلة بعد. أدخل بيانات سابقة من المربع أدناه أو سجل المبيعات اليومية المعتادة ليبدأ النظام التعلم.';
     $('forecast-history-count').textContent = `الموجود حاليًا: ${history.length} يوم`;
     renderForecastEvents();
 }
@@ -2055,6 +1964,9 @@ function saveLyDays() {
     renderAll();
 }
 
+/* ============================================================
+   المخزون والتحليلات والطلبيات المتوقعة
+   ============================================================ */
 const openingFor = (pid, m) => ((S.openings[m] || {})[pid]) ?? 0;
 const hasOpening = (pid, m) => !!S.openings[m] && S.openings[m][pid] !== undefined;
 const rcpt = (day, pid) => ((S.receipts[day] || {})[pid]) || 0;
@@ -2083,21 +1995,50 @@ function productUsed(pid) {
         || S.analyses.some(a => a.rows && a.rows[pid] !== undefined);
 }
 
+function transfersNet(pid, from, to) {
+    let net = 0;
+    S.transfers.forEach(t => {
+        if (t.product_id === pid && inRange(t.day, from, to)) net += t.type === 'in' ? t.qty : -t.qty;
+    });
+    return net;
+}
+
+function applySearch(containerId, inputId, msgId) {
+    const q = ($(inputId).value || '').trim().toLowerCase();
+    const items = $(containerId).querySelectorAll('[data-search]');
+    let shown = 0;
+    items.forEach(el => {
+        const ok = !q || el.dataset.search.includes(q);
+        el.classList.toggle('hidden', !ok);
+        if (ok) shown++;
+    });
+    const msg = $(msgId);
+    if (msg) msg.classList.toggle('hidden', !(q && items.length && shown === 0));
+}
+
+function lastClosingIn(pid, month) {
+    let best = null, val = null;
+    S.analyses.forEach(a => {
+        if (monthOf(a.to) !== month) return;
+        const r = a.rows && a.rows[pid];
+        if (r && r.closing !== null && r.closing !== undefined && (best === null || a.to > best)) { best = a.to; val = r.closing; }
+    });
+    return val;
+}
+
 const INV_TITLES = {
     opening: 'الأصناف ورصيد أول الشهر',
     receipts: 'الوارد اليومي',
     transfers: 'التحويلات بين الفروع',
     analysis: 'تحليل المخزون',
-    orders: 'الطلبيات المتوقعة - Per 1000',
-    expiry: 'صلاحيات المنتجات (FEFO)'
+    orders: 'الطلبيات المتوقعة - Per 1000'
 };
 const INV_ICONS = {
     opening: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
     receipts: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
     transfers: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>',
     analysis: '<path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/>',
-    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/>',
-    expiry: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/>'
 };
 
 function openInv(v) {
@@ -2124,20 +2065,6 @@ function renderTiles() {
     $('ts-transfers').textContent = mt ? `${mt} يوم ناقص` : 'كل الأيام مغطاة';
 
     $('ts-analysis').textContent = $('an-to').value ? 'لحد ' + $('an-to').value : 'اختار تاريخ';
-    
-    let expiredCount = 0, warningCount = 0;
-    const today = todayStr();
-    S.products.forEach(p => {
-        const cfg = S.expiryConfig[p.id] || {};
-        const prod = S.expiryProduction[p.id] || {};
-        if (cfg.shelfLife && prod.productionDate) {
-            const expDate = addDays(prod.productionDate, Number(cfg.shelfLife));
-            const diff = daysBetween(today, expDate);
-            if (diff < 0) expiredCount++;
-            else if (diff <= 3) warningCount++;
-        }
-    });
-    $('ts-expiry').textContent = expiredCount > 0 ? `${expiredCount} منتهي!` : (warningCount > 0 ? `${warningCount} قريب الانتهاء` : 'المخزون سليم');
 }
 
 function renderOpening() {
@@ -2192,7 +2119,7 @@ function addProduct() {
 }
 
 async function deleteProduct(id) {
-    if (productUsed(id)) return toast('الصنف ده عليه حطات، مينفعش يتحذف', 'error');
+    if (productUsed(id)) return toast('الصنف ده عليه حركات، مينفعش يتحذف', 'error');
     const p = productById(id);
     if (!p) return;
     if (!await askConfirm(`حذف الصنف "${p.name}"؟`, 'حذف')) return;
@@ -2234,7 +2161,7 @@ function suggestOpening() {
     let n = 0;
     S.products.forEach(p => {
         const el = $('op-' + p.id);
-        if (!el || !el.disabled) return;
+        if (!el || el.disabled) return;
         const v = lastClosingIn(p.id, prev);
         const val = v !== null ? v : (hasOpening(p.id, prev) ? openingFor(p.id, prev) : null);
         if (val !== null) { el.value = val; n++; }
@@ -2261,19 +2188,6 @@ function rcValue(d, p) {
 }
 
 function rcSet(pid, v) { rcDraft[pid] = v; }
-
-function applySearch(containerId, inputId, nomatchId) {
-    const q = ($(inputId).value || '').trim().toLowerCase();
-    const rows = $(containerId).querySelectorAll('[data-search]');
-    let count = 0;
-    rows.forEach(r => {
-        const match = !q || r.getAttribute('data-search').includes(q);
-        r.classList.toggle('hidden', !match);
-        if (match) count++;
-    });
-    const nomatch = $(nomatchId);
-    if (nomatch) nomatch.classList.toggle('hidden', !(q && count === 0));
-}
 
 function renderReceipts() {
     const d = $('rc-day').value;
@@ -2528,24 +2442,6 @@ function calcRow(pid, r, opening, sold, closingStr) {
     const theo = opening + rec + net - sold;
     const variance = (closingStr === '' || closingStr === null || closingStr === undefined) ? null : num(closingStr) - theo;
     return { rec, net, theo, variance };
-}
-
-function transfersNet(pid, from, to) {
-    let net = 0;
-    S.transfers.forEach(t => {
-        if (t.product_id === pid && inRange(t.day, from, to)) net += t.type === 'in' ? t.qty : -t.qty;
-    });
-    return net;
-}
-
-function lastClosingIn(pid, month) {
-    let best = null, val = null;
-    S.analyses.forEach(a => {
-        if (monthOf(a.to) !== month) return;
-        const r = a.rows && a.rows[pid];
-        if (r && r.closing !== null && r.closing !== undefined && (best === null || a.to > best)) { best = a.to; val = r.closing; }
-    });
-    return val;
 }
 
 function renderAnalysis() {
@@ -2829,129 +2725,17 @@ function renderInventory() {
     renderTransfers();
     renderAnalysis();
     renderOrderForecast();
-    renderExpiryModule();
 
     const showPanel = !!invView;
     $('inv-tiles').classList.toggle('hidden', showPanel);
     $('inv-export').classList.toggle('hidden', showPanel);
     $('inv-panel').classList.toggle('hidden', !showPanel);
-    ['opening', 'receipts', 'transfers', 'analysis', 'orders', 'expiry'].forEach(k => {
+    ['opening', 'receipts', 'transfers', 'analysis', 'orders'].forEach(k => {
         $('pn-' + k).classList.toggle('hidden', k !== invView);
     });
     if (showPanel) {
         $('panel-title').innerHTML = `<span class="tico"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${INV_ICONS[invView]}</svg></span>${INV_TITLES[invView]}`;
     }
-}
-
-function renderExpiryModule() {
-    const configHost = $('expiry-config-rows');
-    if (configHost) {
-        configHost.innerHTML = S.products.length ? `<div class="tbl-wrap"><table><thead><tr><th>الصنف</th><th>الوحدة</th><th>فترة الصلاحية الثابتة</th></tr></thead><tbody>${S.products.map(p=>{
-            const cfg = S.expiryConfig[p.id] || {};
-            return `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.unit||'—')}</td><td><input class="inp sm" type="number" min="1" step="1" id="exp-cfg-${esc(p.id)}" value="${cfg.shelfLife !== undefined ? esc(String(cfg.shelfLife)) : ''}" placeholder="عدد الأيام"></td></tr>`;
-        }).join('')}</tbody></table></div>` : '<div class="muted">أضف أصنافاً للمخزون أولاً.</div>';
-    }
-
-    const prodHost = $('expiry-production-rows');
-    if (prodHost) {
-        prodHost.innerHTML = S.products.length ? `<div class="tbl-wrap"><table><thead><tr><th>الصنف</th><th>الوحدة</th><th>تاريخ الإنتاج</th></tr></thead><tbody>${S.products.map(p=>{
-            const prod = S.expiryProduction[p.id] || {};
-            return `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.unit||'—')}</td><td><input class="inp sm" type="date" id="exp-prod-${esc(p.id)}" value="${esc(prod.productionDate || '')}"></td></tr>`;
-        }).join('')}</tbody></table></div>` : '<div class="muted">أضف أصنافاً للمخزون أولاً.</div>';
-    }
-
-    const tableHost = $('expiry-table-rows');
-    const summaryBox = $('expiry-summary-box');
-    if (tableHost && summaryBox) {
-        const today = todayStr();
-        const computedItems = S.products.map(p => {
-            const cfg = S.expiryConfig[p.id] || {};
-            const prod = S.expiryProduction[p.id] || {};
-            const shelfLife = Number(cfg.shelfLife || 0);
-            const prodDate = prod.productionDate || '';
-            let expDate = '';
-            let diff = null;
-
-            if (prodDate && shelfLife > 0) {
-                expDate = addDays(prodDate, shelfLife);
-                diff = daysBetween(today, expDate);
-            }
-            return { p, shelfLife, prodDate, expDate, diff };
-        }).sort((a, b) => {
-            if (!a.expDate) return 1;
-            if (!b.expDate) return -1;
-            return a.expDate.localeCompare(b.expDate);
-        });
-
-        tableHost.innerHTML = computedItems.length ? computedItems.map(x => {
-            const p = x.p;
-            let statusHtml = '<span class="muted">أدخل تاريخ الإنتاج والصلاحية</span>';
-            if (x.diff !== null) {
-                if (x.diff < 0) statusHtml = `<span class="down" style="font-weight:800">منتهي الصلاحية (${Math.abs(x.diff)} يوم فائض)</span>`;
-                else if (x.diff === 0) statusHtml = `<span class="down" style="font-weight:800">ينتهي اليوم!</span>`;
-                else if (x.diff <= 3) statusHtml = `<span class="down" style="font-weight:800">حرج · متبقي ${x.diff} أيام</span>`;
-                else statusHtml = `<span class="up">سليم · متبقي ${x.diff} يوم</span>`;
-            }
-
-            return `<tr>
-                <td><b>${esc(p.name)}</b> <span class="muted">${esc(p.unit||'')}</span></td>
-                <td>${esc(x.prodDate || '—')}</td>
-                <td>${x.shelfLife ? x.shelfLife + ' يوم' : '—'}</td>
-                <td><b>${esc(x.expDate || '—')}</b></td>
-                <td><b>${x.diff !== null ? x.diff : '—'}</b></td>
-                <td>${statusHtml}</td>
-            </tr>`;
-        }).join('') : '<tr><td colspan="6" class="muted">لا توجد أصناف للمتابعة.</td></tr>';
-
-        let expired = 0, warning = 0, totalTracked = 0;
-        computedItems.forEach(x => {
-            if (x.diff !== null) {
-                totalTracked++;
-                if (x.diff < 0) expired++;
-                else if (x.diff <= 3) warning++;
-            }
-        });
-
-        if (expired === 0 && warning === 0) {
-            summaryBox.className = 'note';
-            summaryBox.textContent = `حالة المخزون سليمة: جميع الأصناف الـ (${totalTracked}) المرتبة بطريقة FEFO صالحة ولا توجد تحذيرات قريبة.`;
-        } else {
-            summaryBox.className = 'alert';
-            summaryBox.innerHTML = `⚠️ تنبيه هام: ${expired > 0 ? `<b style="color:var(--bad)">${expired} صنف منتهي الصلاحية!</b> ` : ''}${warning > 0 ? `<b style="color:var(--gold)">${warning} صنف يقترب من الانتهاء خلال 3 أيام!</b>` : ''} يُرجى فحص جدول FEFO أعلاه للأولويات.`;
-        }
-    }
-}
-
-function saveExpiryConfig() {
-    let count = 0;
-    S.products.forEach(p => {
-        const el = $('exp-cfg-' + p.id);
-        if (el && el.value !== '') {
-            const val = int(el.value);
-            if (val > 0) {
-                S.expiryConfig[p.id] = { shelfLife: val };
-                count++;
-            }
-        }
-    });
-    saveDB();
-    renderExpiryModule();
-    toast(`تم حفظ فترات الصلاحية الثابتة لـ ${count} صنف`);
-}
-
-function saveExpiryProduction() {
-    let count = 0;
-    S.products.forEach(p => {
-        const el = $('exp-prod-' + p.id);
-        if (el) {
-            const dt = el.value;
-            S.expiryProduction[p.id] = { productionDate: dt || '' };
-            if (dt) count++;
-        }
-    });
-    saveDB();
-    renderExpiryModule();
-    toast(`تم حفظ تواريخ الإنتاج لـ ${count} صنف وحساب تواريخ الانتهاء وترتيب الجدول بنجاح`);
 }
 
 function switchOrderSubTab(tab) {
@@ -2998,7 +2782,7 @@ function renderOrderForecast() {
   const start=orderStartDate();
   const history=forecastHistory(), trend=forecastTrend(history);
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
-  const forecasts=days.map(day=>forecastOne(day,history,trend,0));
+  const forecasts=days.map(day=>forecastOne(day,history,trend));
   const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
   const quantities=forecasts.map(f=>products.map(p=>({id:p.id,qty:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100})));
   $('orders-head').innerHTML=`<tr><th>اليوم والتاريخ</th><th>الإيراد المتوقع</th>${products.map(p=>`<th>${esc(p.name)}<br><span class="muted">${esc(p.unit||'')}</span></th>`).join('')}</tr>`;
@@ -3040,7 +2824,7 @@ function saveOrderSnapshot() {
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
   const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
   if(!products.length) return toast('اختار الأصناف وأدخل معدلات Per 1000 أولًا','error');
-  const rows=days.map(day=>{const f=forecastOne(day,history,trend,0);return {date:day,weekday:DAYS_AR[weekdayOf(day)],revenue:f.predicted,items:products.map(p=>({productId:p.id,name:p.name,unit:p.unit,rate:Number(S.per1000[p.id].rate),quantity:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100}))}});
+  const rows=days.map(day=>{const f=forecastOne(day,history,trend);return {date:day,weekday:DAYS_AR[weekdayOf(day)],revenue:f.predicted,items:products.map(p=>({productId:p.id,name:p.name,unit:p.unit,rate:Number(S.per1000[p.id].rate),quantity:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100}))}});
   S.orderSnapshots[start]={start,end:days[6],savedAt:new Date().toLocaleString('ar-EG'),rows}; saveDB(); renderOrderForecast(); toast('تم نسخة الطلبية المتوقعة للأسبوع');
 }
 function printOrdersPdf() {
@@ -3064,7 +2848,6 @@ function renderAll() {
     renderForecast();
     renderInventory();
     renderOrderForecast();
-    renderExpiryModule();
     renderBackupAlert();
 }
 </script>
