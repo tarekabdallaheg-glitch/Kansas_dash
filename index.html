@@ -67,8 +67,8 @@ input[type=number] {
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .between{justify-content:space-between}
 .hidden{display:none!important}
-.up{color:var(--ok);font-weight:700}
-.down{color:var(--bad);font-weight:700}
+.up{color:var(--ok)!important;font-weight:700}
+.down{color:var(--bad)!important;font-weight:700}
 .chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--card2);border:1px solid var(--border);color:var(--muted)}
 .chip.up{background:rgba(15,157,107,.10);border-color:rgba(15,157,107,.30);color:var(--ok)}
 .chip.down{background:rgba(214,69,69,.10);border-color:rgba(214,69,69,.30);color:var(--bad)}
@@ -794,18 +794,48 @@ html:not(.dark) .prow{border-color:#dce4ee}
 
             <!-- الطلبيات المتوقعة -->
             <div id="pn-orders" class="hidden">
-              <div class="hero">
+              <div class="hero" style="margin-bottom:14px">
                 <div class="eyebrow">KANSAS · ORDER FORECAST</div>
                 <h2>الطلبيات المتوقعة للأسبوع</h2>
-                <div class="hero-sum">اختار الأصناف وحدد معدل كل صنف لكل 1000 جنيه مبيعات مرة واحدة. النظام يحسب احتياج كل يوم تلقائيًا من توقع الإيراد.</div>
+                <div class="hero-sum">اختر القالب المطلوب للتنقل بين إعداد الأصناف، جدول الأسبوع، ومقارنة الفعلي بالمتوقع.</div>
               </div>
-              <div class="card no-print">
-                <div class="h">إعداد أصناف الـ Per 1000</div>
-                <div class="muted" style="margin-bottom:12px">فعّل الأصناف التي تريد حسابها، واكتب معدل الاستهلاك لكل 1000 جنيه. أسماء الأصناف ووحداتها مأخوذة من قائمة أصناف المخزون.</div>
+
+              <!-- أيقونات التبديل بين القوالب الثلاثة -->
+              <div class="tiles no-print" style="margin-bottom:16px;grid-template-columns:repeat(3,1fr)">
+                <button class="tile" id="order-tile-config" onclick="switchOrderSubTab('config')">
+                    <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                    <span class="tname">إعداد أصناف الـ Per 1000</span>
+                    <span class="tstat">تحدي المبيعات والمعدل</span>
+                </button>
+                <button class="tile" id="order-tile-table" onclick="switchOrderSubTab('table')">
+                    <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg></span>
+                    <span class="tname">جدول الأسبوع القادم</span>
+                    <span class="tstat">توقع 7 أيام والطباعة</span>
+                </button>
+                <button class="tile" id="order-tile-actual" onclick="switchOrderSubTab('actual')">
+                    <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
+                    <span class="tname">مقارنة المتوقع بالفعلي</span>
+                    <span class="tstat">مراجعة المنصرف والتفاوت</span>
+                </button>
+              </div>
+
+              <!-- القالب الأول: إعداد أصناف Per 1000 -->
+              <div class="card no-print" id="orders-sub-config">
+                <div class="row between" style="margin-bottom:12px">
+                  <div>
+                    <div class="h" style="margin:0">إعداد أصناف الـ Per 1000</div>
+                    <div class="muted">فعّل الأصناف التي تريد حسابها، واكتب معدل الاستهلاك لكل 1000 جنيه. أسماء الأصناف ووحداتها مأخوذة من قائمة أصناف المخزون.</div>
+                  </div>
+                </div>
                 <div id="per1000-products"></div>
                 <div class="note" style="margin-top:12px">مثال: معدل الدجاج 1 لكل 1000 جنيه، وتوقع الإيراد 40,000 جنيه = احتياج 40 دجاجة.</div>
+                <div class="row" style="margin-top:16px;justify-content:flex-end">
+                  <button class="btn btn-gold" onclick="switchOrderSubTab('table')">حفظ وتوجه لجدول الأسبوع ←</button>
+                </div>
               </div>
-              <div class="card" id="orders-print-area">
+
+              <!-- القالب الثاني: جدول الأسبوع القادم -->
+              <div class="card" id="orders-sub-table">
                 <div class="row between no-print" style="margin-bottom:12px">
                   <div>
                     <div class="h" style="margin:0">جدول الأسبوع القادم</div>
@@ -833,11 +863,14 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 </div>
                 <div id="orders-snapshot-status" class="muted no-print" style="margin-top:8px"></div>
               </div>
-              <div class="card no-print" id="orders-actual-card">
+
+              <!-- القالب الثالث: مقارنة المتوقع بالفعلي -->
+              <div class="card no-print" id="orders-sub-actual">
                 <div class="h">مقارنة المتوقع بالفعلي</div>
                 <div class="muted" style="margin-bottom:10px">بعد اعتماد نسخة الأسبوع، أدخل الكمية الفعلية المصروفة أو المطلوبة لكل صنف، وسيظهر الفرق عن التوقع.</div>
                 <div id="orders-actual-review" class="muted">اعتمد نسخة الأسبوع أولًا لتفعيل المقارنة.</div>
               </div>
+
             </div>
         </div>
     </section>
@@ -853,7 +886,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
 const STORE_KEY = 'kansas_v8';
 
 const $ = id => document.getElementById(id);
-const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;min'}[c] || c));
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
 const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
 const int = v => { const n = parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : 0; };
 const fmt = (n, d = 0) => (Number.isFinite(n) ? n : 0).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -994,6 +1027,7 @@ let S = emptyDB();
 let activeMonth = monthOf(todayStr());
 let activeTab = 'revenue';
 let invView = null;
+let orderSubTab = 'table';
 let rcDraft = {};
 let rcDraftDay = null;
 let anKey = '';
@@ -1174,6 +1208,13 @@ function nextRowCells(scope, ri, dir) {
     return null;
 }
 
+// منع زيادة/نقص الأرقام عند لف عجلة الماوس فوق خانات الأرقام
+document.addEventListener('wheel', function(e) {
+    if (document.activeElement && document.activeElement.type === 'number') {
+        document.activeElement.blur();
+    }
+}, { passive: false });
+
 document.addEventListener('keydown', (e) => {
     const el = e.target;
     if (!el || !el.dataset || !el.dataset.nav) return;
@@ -1182,6 +1223,12 @@ document.addEventListener('keydown', (e) => {
     const cells = rowCells(scope, ri);
     const idx = cells.indexOf(el);
     let target = null;
+
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        if (el.type === 'number') {
+            e.preventDefault();
+        }
+    }
 
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -1299,16 +1346,13 @@ function analyzeRevenue(from, to) {
     const c = cfg(activeMonth);
     const planDaily = c.plan_rev > 0 ? c.plan_rev / dim : 0;
     
-    // ==========================================
-    // تعديل: حساب تحقيق الخطة حتى تاريخه (Pro-Rata / Run-Rate Target)
-    // ==========================================
-    const targetToDate = planDaily * elapsed;
-    const planPctToDate = (targetToDate > 0 && m.rev > 0) ? m.rev / targetToDate : null;
+    const planPctToDate = (c.plan_rev > 0 && m.rev > 0) ? m.rev / c.plan_rev : null;
+    const expectedToDate = planDaily * elapsed;
 
     const projected = m.days > 0 ? (m.rev / m.days) * dim : 0;
     const projPlan = c.plan_rev > 0 ? projected / c.plan_rev : null;
 
-    const pace = targetToDate > 0 ? m.rev / targetToDate : null;
+    const pace = expectedToDate > 0 ? m.rev / expectedToDate : null;
     const required = (c.plan_rev > 0 && remDays > 0) ? Math.max(0, c.plan_rev - m.rev) / remDays : null;
     const lyM = lyMonthTotal(activeMonth);
 
@@ -1322,7 +1366,7 @@ function analyzeRevenue(from, to) {
 
     return { t, avgRev, avgOrd, avgChk, lyRev, lyOrd, lyDays, lyAvgRev, lyAvgChk,
         growthLy, avgGrowthLy, ordGrowth, chkGrowth, dim, elapsed, remDays, m, c, planDaily, 
-        planPct: planPctToDate, expected: targetToDate, pace,
+        planPct: planPctToDate, expected: expectedToDate, pace,
         required, projected, projPlan, lyM,
         wdAvg, best, worst, last3Avg, last3Vs, missing: missingRevenueDays() };
 }
@@ -1385,7 +1429,7 @@ function buildBlocks(a) {
     {
         const tips = [];
         if (a.c.plan_rev > 0) {
-            if (a.planPct !== null && a.planPct >= 1) tips.push(T(3, 'good', 'أداء الإيراد أعلى من وتيرة الخطة المحددة حتى تاريخه.'));
+            if (a.planPct !== null && a.planPct >= 1) tips.push(T(3, 'good', 'مبروك! تم تحقيق هدف الخطة الشهرية بالكامل.'));
             else if (a.required !== null) {
                 tips.push(T(a.pace !== null && a.pace < 0.85 ? 1 : 2, a.pace !== null && a.pace < 0.85 ? 'warn' : 'tip',
                     `مقترح: المطلوب <b>${fmt(a.required)} ج.م</b> يومياً لباقي ${a.remDays} يوم، والمتوسط الحالي ${fmt(a.avgRev)} ج.م.`));
@@ -1394,7 +1438,7 @@ function buildBlocks(a) {
         if (a.projPlan !== null && a.projPlan < 1) tips.push(T(1, 'warn', `المتوقع يقفل على ${(a.projPlan * 100).toFixed(0)}% من الخطة.`));
         B.push({ title: 'الخطة والمتوقع', big: a.c.plan_rev > 0 ? `${((a.planPct || 0) * 100).toFixed(1)}%` : '—',
             lines: [`الخطة: <b>${fmt(a.c.plan_rev)} ج.م</b> · المحقق: <b>${fmt(a.m.rev)} ج.م</b>`,
-                    `المتهدف حتى تاريخه: <b>${fmt(a.expected)} ج.م</b>`,
+                    `المستهدف كاملاً: <b>${fmt(a.c.plan_rev)} ج.م</b>`,
                     `المتوقع لغلق الشهر: <b>${fmt(a.projected)} ج.م</b>`], tips });
     }
 
@@ -1609,7 +1653,7 @@ function revenueAssistantAnswer(question, a) {
     if (!a.t.days) return 'مفيش بيانات إيرادات كفاية في الفترة المحددة. سجّل الإيراد وعدد العمليات للأيام، وبعدها أقدر أحلل الأداء.';
     if (q.includes('خطة') || q.includes('هدف') || q.includes('هحقق') || q.includes('تحقيق')) {
         if (!a.c.plan_rev) return 'لسه مفيش خطة شهرية مسجلة. افتح إعدادات الشهر وسجّل المستهدف، وبعدها هحسب نسبة التحقيق والمتوسط اليومي المطلوب.';
-        let msg = `المحقق حتى الآن ${money(a.m.rev)} مقابل المستهدف حتى تاريخه ${money(a.expected)} من خطة ${money(a.c.plan_rev)}، وتيرة تحقيق الخطة هي ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
+        let msg = `المحقق حتى الآن ${money(a.m.rev)} من إجمالي خطة الشهر ${money(a.c.plan_rev)}، بنسبة تحقيق ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
         if (a.required !== null) msg += `محتاج تحقق ${money(a.required)} يوميًا خلال ${a.remDays} يوم متبقي.`;
         if (a.projPlan !== null) msg += ` وبالمعدل الحالي، المتوقع إغلاق الشهر على ${money(a.projected)}، أي ${(100 * a.projPlan).toFixed(1)}% من الخطة الكلية.`;
         return msg;
@@ -1994,7 +2038,7 @@ const INV_ICONS = {
     receipts: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
     transfers: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>',
     analysis: '<path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/>',
-    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"'
+    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/>'
 };
 
 function openInv(v) {
@@ -2475,19 +2519,16 @@ function liveAn() {
         th.className = res.theo < 0 ? 'down' : '';
         const av = $('av-' + p.id);
         
-        // ==========================================
-        // تعديل: تلوين العجز (سالب) بالأحمر والزيادة (موجب) بالأخضر
-        // ==========================================
         if (res.variance === null) { 
             av.textContent = '-'; 
             av.className = ''; 
         } else {
             if (res.variance < 0) {
                 av.textContent = res.variance.toFixed(2);
-                av.className = 'down'; // لون أحمر بالسالب
+                av.className = 'down';
             } else if (res.variance > 0) {
                 av.textContent = '+' + res.variance.toFixed(2);
-                av.className = 'up'; // لون أخضر بالموجب
+                av.className = 'up';
             } else {
                 av.textContent = '0.00';
                 av.className = '';
@@ -2697,6 +2738,21 @@ function renderInventory() {
     }
 }
 
+function switchOrderSubTab(tab) {
+    orderSubTab = tab;
+    $('orders-sub-config').classList.toggle('hidden', tab !== 'config');
+    $('orders-sub-table').classList.toggle('hidden', tab !== 'table');
+    $('orders-sub-actual').classList.toggle('hidden', tab !== 'actual');
+    
+    ['config', 'table', 'actual'].forEach(k => {
+        const btn = $('order-tile-' + k);
+        if (btn) {
+            btn.style.borderColor = (k === tab) ? 'var(--gold2)' : 'var(--border)';
+            btn.style.boxShadow = (k === tab) ? 'var(--shadow-lg)' : 'var(--shadow)';
+        }
+    });
+}
+
 function renderPer1000Products() {
   const host = $('per1000-products'); if (!host) return;
   if (!S.products.length) { host.innerHTML = '<div class="alert">أضف الأصناف أولًا من صفحة المخزون، ثم ارجع لاختيارها هنا.</div>'; return; }
@@ -2722,6 +2778,7 @@ function orderStartDate() {
 function renderOrderForecast() {
   if(!$('orders-rows')) return;
   renderPer1000Products();
+  switchOrderSubTab(orderSubTab);
   const start=orderStartDate();
   const history=forecastHistory(), trend=forecastTrend(history);
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
