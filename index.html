@@ -36,10 +36,10 @@ body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,-apple-system,sans-serif;b
 .inp.xs{width:140px;max-width:100%;text-align:center}
 .inp:disabled{opacity:.55}
 
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
 }
 input[type=number] {
   -moz-appearance: textfield;
@@ -251,7 +251,7 @@ details.sub[open] summary::before{content:"▾ "}
     .btn-sm{font-size:13px;padding:9px 15px}
     .tabs{width:100%; max-width:none;}
     .tabs .btn{font-size:15px;padding:13px 10px}
-    .tiles{grid-template-columns:repeat(6,minmax(0,1fr));gap:16px; width:100%; max-width:none;}
+    .tiles{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px; width:100%; max-width:none;}
     .tile{padding:32px 18px;border-radius:22px}
     .tico{width:66px;height:66px;border-radius:20px}
     .tico .ico{width:30px;height:30px}
@@ -353,17 +353,6 @@ html:not(.dark) .chip.up{color:#087a52}
 html:not(.dark) .chip.down{color:#b4232b}
 html:not(.dark) details.sub summary{color:#244d78}
 html:not(.dark) .prow{border-color:#dce4ee}
-
-/* ===== إضافات صلاحية المنتجات والمتوقع مقابل الفعلي ===== */
-#print-exp-tmp{display:none}
-tr.rowred td{background:rgba(214,69,69,.12)}
-tr.rowyel td{background:rgba(183,121,31,.14)}
-@media print{
-  body.print-exp-mode > *:not(#print-exp-tmp){display:none!important}
-  #print-exp-tmp{display:block!important;background:#fff;color:#000;padding:8px}
-  #print-exp-tmp table{width:100%;border-collapse:collapse;font-size:12px}
-  #print-exp-tmp th,#print-exp-tmp td{border:1px solid #777;padding:6px;color:#000;text-align:right}
-}
 </style>
 </head>
 <body>
@@ -615,17 +604,11 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <span class="badge open">توقع 7 أيام</span>
             </div>
-            <div class="row" style="margin-top:12px;gap:10px">
-                
-                <input type="date" id="fc-start" class="inp sm hidden" onchange="renderForecast()">
-                <span class="muted">نسبة النمو % (من 5 لـ 10)</span>
-                <input type="number" id="fc-growth" class="inp xs" min="5" max="10" step="0.5" value="5" onchange="renderForecast();renderVariance()">
-            </div>
             <div id="forecast-summary" class="note" style="margin-top:12px">ابدأ بتسجيل المبيعات أو استيراد بيانات سابقة لبناء التوقع.</div>
             <div class="tbl-wrap" style="margin-top:12px"><table>
-                <thead><tr><th>اليوم</th><th>متوسط الإيراد</th><th>نسبة النمو %</th><th>المتوقع</th><th>الفعلي</th><th>الفرق (الفعلي − المتوقع)</th><th>نسبة الفرق</th><th>نمو عن اليوم السابق</th></tr></thead>
+                <thead><tr><th>اليوم والتاريخ</th><th>التوقع المرجح</th><th>المناسبة / التأثير</th><th>مستوى الثقة</th></tr></thead>
                 <tbody id="forecast-rows"></tbody>
-                <tfoot><tr><th>الإجمالي (أيام لها فعلي)</th><th></th><th></th><th id="var-tot-exp">—</th><th id="var-tot-act">—</th><th id="var-tot-diff">—</th><th id="var-tot-pct">—</th><th></th></tr></tfoot>
+                <tfoot><tr><th>إجمالي الأسبوع</th><th id="forecast-total">—</th><th colspan="2" id="forecast-confidence">—</th></tr></tfoot>
             </table></div>
             <details style="margin-top:14px" open>
                 <summary>إدارة وتغذية النظام ببيانات الأسابيع السابقة</summary>
@@ -648,24 +631,6 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="row" style="margin-top:8px"><button class="btn btn-gold" onclick="saveForecastEvent()">حفظ المناسبة</button></div>
                 <div id="forecast-events-list" style="margin-top:10px"></div>
             </details>
-
-            <div class="card" style="margin-top:14px">
-                <span id="var-month" class="hidden"></span>
-                <div class="muted" style="margin-bottom:10px">متوسط الإيراد والمتوقع بيتحسبوا تلقائياً، والفعلي بيتسحب من إدخال الإيراد اليومي.</div>
-                <div class="tbl-wrap"><table>
-                    
-                    
-                    
-                </table></div>
-                <div class="h" style="margin-top:16px">حاسبة نسبة النمو</div>
-                <div class="row">
-                    <input id="gr-old" class="inp sm" type="number" placeholder="القيمة القديمة">
-                    <input id="gr-new" class="inp sm" type="number" placeholder="القيمة الجديدة">
-                    <button class="btn btn-gold" onclick="calcGrowth()">احسب</button>
-                    <span id="gr-result" class="chip2"></span>
-                </div>
-            </div>
-
             <div class="row no-print" style="margin-top:14px;justify-content:flex-end"><button class="btn btn-green" onclick="printSalesForecast()">طباعة / حفظ PDF</button></div>
             <div class="muted" style="margin-top:12px">ملاحظة: التوقع تقديري وليس ضمانًا للمبيعات. دقته تتحسن كلما زادت البيانات. تواريخ الأعياد الدينية تتغير سنويًا؛ راجع التاريخ وأضفه عند إعلان الإجازة رسميًا.</div>
         </div>
@@ -701,11 +666,6 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <span class="tico"><svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/></svg></span>
                 <span class="tname">الطلبيات المتوقعة</span>
                 <span class="tstat">Per 1000 · 7 أيام</span>
-            </button>
-            <button class="tile" onclick="openInv('expiry')">
-                <span class="tico"><svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
-                <span class="tname">صلاحية المنتجات</span>
-                <span class="tstat" id="ts-expiry"></span>
             </button>
         </div>
 
@@ -912,55 +872,6 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
               </div>
 
             </div>
-
-            <!-- ===== صلاحية المنتجات ===== -->
-            <div id="pn-expiry" class="hidden">
-              <div class="tiles no-print" style="margin-bottom:16px;grid-template-columns:repeat(3,1fr)">
-                <button class="tile" id="exp-tile-define" onclick="switchExpSub('define')">
-                  <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-                  <span class="tname">تعريف صلاحية الأصناف</span>
-                  <span class="tstat">كام يوم أو شهر أو سنة</span>
-                </button>
-                <button class="tile" id="exp-tile-daily" onclick="switchExpSub('daily')">
-                  <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg></span>
-                  <span class="tname">إدخال الإنتاج اليومي</span>
-                  <span class="tstat">كميات الإنتاج لكل يوم</span>
-                </button>
-                <button class="tile" id="exp-tile-report" onclick="switchExpSub('report')">
-                  <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/></svg></span>
-                  <span class="tname">الترتيب والتقرير</span>
-                  <span class="tstat">الأقرب للانتهاء أولاً</span>
-                </button>
-              </div>
-
-              <div id="exp-warn" class="note" style="margin-bottom:14px"></div>
-
-              <div class="card hidden" id="exp-sub-define">
-                <div class="h">تعريف مدة صلاحية كل صنف</div>
-                <div class="muted" style="margin-bottom:10px">اختار المدة والوحدة (يوم، شهر، سنة).</div>
-                <div id="exp-define-list"></div>
-                <div class="row" style="margin-top:16px"><button class="btn btn-gold" onclick="saveShelfDefs()">حفظ وإغلاق</button></div>
-              </div>
-
-              <div class="card hidden" id="exp-sub-daily">
-                <div class="row" style="margin-bottom:12px">
-                  <span class="muted">تاريخ الإنتاج</span>
-                  <input type="date" id="exp-day" class="inp sm" onchange="renderExpDaily()">
-                </div>
-                <div id="exp-daily-list"></div>
-                <div class="row" style="margin-top:16px"><button class="btn btn-gold" onclick="saveExpDaily()">حفظ وإغلاق</button></div>
-              </div>
-
-              <div class="card hidden" id="exp-sub-report">
-                <div class="h">جدول الصلاحية (الأقرب للانتهاء أولاً)</div>
-                <div id="exp-report-body"></div>
-                <div class="row no-print" style="margin-top:16px">
-                  <button class="btn btn-green" onclick="exportExpiryXlsx()">تحميل Excel</button>
-                  <button class="btn btn-green" onclick="printExpiry()">تحميل PDF</button>
-                  <button class="btn btn-gold" onclick="closeInv()">حفظ وإغلاق</button>
-                </div>
-              </div>
-            </div>
         </div>
     </section>
 
@@ -1066,7 +977,6 @@ const emptyDB = () => ({
     analyses: [],
     sales: {}, monthly: {}, lyDaily: {}, forecastEvents: {},
     per1000: {}, orderSnapshots: {},
-    expected: {}, shelf: {}, batches: [],
     locks: { sales: {} },
     lastBackup: null
 });
@@ -1082,9 +992,6 @@ function migrate(d) {
     d.forecastEvents = d.forecastEvents || {};
     d.per1000 = d.per1000 || {};
     d.orderSnapshots = d.orderSnapshots || {};
-    d.expected = d.expected || {};
-    d.shelf = d.shelf || {};
-    d.batches = d.batches || [];
     if (d.stock) {
         const days = Object.keys(d.stock).sort();
         days.forEach(day => {
@@ -1113,9 +1020,6 @@ function normalize(d) {
     out.per1000 = out.per1000 || {};
     out.orderSnapshots = out.orderSnapshots || {};
     out.transfers = (out.transfers || []).map(t => ({ ...t, product_id: t.product_id || t.productId }));
-    out.expected = out.expected || {};
-    out.shelf = out.shelf || {};
-    out.batches = out.batches || [];
     return out;
 }
 
@@ -1128,7 +1032,6 @@ let rcDraft = {};
 let rcDraftDay = null;
 let anKey = '';
 let anLoadRows = null;
-let expSub = 'report';
 
 function loadDB() {
     try {
@@ -1232,7 +1135,7 @@ function switchTab(tab) {
     $('tab-btn-revenue').classList.toggle('on', tab === 'revenue');
     $('tab-btn-salesforecast').classList.toggle('on', tab === 'salesforecast');
     $('tab-btn-inventory').classList.toggle('on', tab === 'inventory');
-    if (tab === 'salesforecast') { renderForecast(); renderVariance(); }
+    if (tab === 'salesforecast') renderForecast();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1442,7 +1345,7 @@ function analyzeRevenue(from, to) {
     const m = salesIn(monthStart(activeMonth), monthEnd(activeMonth));
     const c = cfg(activeMonth);
     const planDaily = c.plan_rev > 0 ? c.plan_rev / dim : 0;
-
+    
     const planPctToDate = (c.plan_rev > 0 && m.rev > 0) ? m.rev / c.plan_rev : null;
     const expectedToDate = planDaily * elapsed;
 
@@ -1462,7 +1365,7 @@ function analyzeRevenue(from, to) {
     const last3Vs = (last3Avg !== null && avgRev > 0) ? (last3Avg - avgRev) / avgRev : null;
 
     return { t, avgRev, avgOrd, avgChk, lyRev, lyOrd, lyDays, lyAvgRev, lyAvgChk,
-        growthLy, avgGrowthLy, ordGrowth, chkGrowth, dim, elapsed, remDays, m, c, planDaily,
+        growthLy, avgGrowthLy, ordGrowth, chkGrowth, dim, elapsed, remDays, m, c, planDaily, 
         planPct: planPctToDate, expected: expectedToDate, pace,
         required, projected, projPlan, lyM,
         wdAvg, best, worst, last3Avg, last3Vs, missing: missingRevenueDays() };
@@ -1681,7 +1584,7 @@ function renderCompare() {
     const ordGrowth = B.ord ? (A.ord - B.ord) / B.ord : null;
     const revTrend = trendWord(revGrowth);
     const ordTrend = trendWord(ordGrowth);
-
+    
     $('cmp-head').innerHTML = `
         <div class="cmp-box">
             <div class="lbl">مقارنة إجمالي الإيراد للفترتين</div>
@@ -1719,7 +1622,7 @@ function renderCompare() {
         const ao = aRec && aRec.exists ? aRec.ord : null;
         const br = bRec && bRec.exists ? bRec.rev : null;
         const bo = bRec && bRec.exists ? bRec.ord : null;
-
+        
         const revDiff = (ar ?? 0) - (br ?? 0);
         const revDp = br !== null && br > 0 ? revDiff / br : null;
         const revCls = revDiff > 0 ? 'up' : (revDiff < 0 ? 'down' : '');
@@ -1727,7 +1630,7 @@ function renderCompare() {
         const ordDiff = (ao ?? 0) - (bo ?? 0);
         const ordDp = bo !== null && bo > 0 ? ordDiff / bo : null;
         const ordCls = ordDiff > 0 ? 'up' : (ordDiff < 0 ? 'down' : '');
-
+        
         rows.push(`<tr>
             <td>${ad ? esc(ad) : '-'}</td>
             <td>${ar === null ? '<span class="muted">—</span>' : fmt(ar)}</td>
@@ -1775,4 +1678,1178 @@ function revenueAssistantAnswer(question, a) {
         if (!a.best) return 'محتاج بيانات أيام أكثر عشان أحدد أقوى وأضعف يوم في الأسبوع.';
         return `أقوى يوم حسب البيانات المسجلة هو ${DAYS_AR[a.best.i]} بمتوسط ${money(a.best.v)}.` + (a.worst ? ` وأضعف يوم هو ${DAYS_AR[a.worst.i]} بمتوسط ${money(a.worst.v)}.` : ' ولسه محتاجين بيانات أكثر لتحديد الأضعف.');
     }
-    if (q
+    if (q.includes('ليه') || q.includes('سبب') || q.includes('انخفاض') || q.includes('نازل') || q.includes('نزول')) {
+        const clues = [];
+        if (a.ordGrowth !== null && a.ordGrowth < 0) clues.push(`عدد العمليات أقل من السنة الماضية بنسبة ${Math.abs(a.ordGrowth * 100).toFixed(1)}%`);
+        if (a.chkGrowth !== null && a.chkGrowth < 0) clues.push(`متوسط الشيك أقل بنسبة ${Math.abs(a.chkGrowth * 100).toFixed(1)}%`);
+        if (a.pace !== null && a.pace < 1) clues.push(`الإيراد متأخر عن وتيرة الخطة بنسبة ${Math.abs((1 - a.pace) * 100).toFixed(1)}%`);
+        return clues.length ? `الأرقام بتوضح المؤشرات دي: ${clues.join('، ')}. دي مؤشرات تساعد في التحقيق، لكنها مش دليل لوحدها على السبب الفعلي. راجع العروض، ساعات الذروة، وقنوات البيع.` : 'الأرقام الحالية لا تثبت وجود انخفاض واضح. قارن عدد العمليات ومتوسط الشيك وساعات البيع قبل تحديد السبب.';
+    }
+    return `ملخص الفترة: الإيراد ${money(a.t.rev)} من ${a.t.days} يوم مسجل، بمتوسط يومي ${money(a.avgRev)}, وعدد ${fmt(a.t.ord)} عملية، ومتوسط شيك ${money(a.avgChk)}. ${a.missing.length ? `فيه ${a.missing.length} يوم سابق ناقص التسجيل.` : 'لا توجد أيام سابقة ناقصة حسب البيانات الحالية.'} اسألني عن الخطة أو الشيك أو العمليات أو المقارنة بالسنة الماضية.`;
+}
+
+function renderRevenueAssistant(a) {
+    const summary = $('revenue-assistant-summary');
+    if (!summary) return;
+    if (!a.t.days) { summary.textContent = 'سجّل بيانات الإيرادات أولًا، وسيظهر هنا ملخص الأداء والتنبيهات.'; return; }
+    const alerts = [];
+    if (a.pace !== null && a.pace < 0.85) alerts.push('الإيراد متأخر بوضوح عن وتيرة الخطة');
+    if (a.chkGrowth !== null && a.chkGrowth < -0.05) alerts.push('متوسط الشيك أقل من السنة الماضية');
+    if (a.ordGrowth !== null && a.ordGrowth < -0.05) alerts.push('عدد العمليات أقل من السنة الماضية');
+    if (a.missing.length) alerts.push(`يوجد ${a.missing.length} يوم سابق غير مسجل`);
+    const headline = alerts.length ? `محتاج متابعة: ${alerts.join('؛ ')}.` : 'لا توجد إشارة خطر واضحة من المؤشرات المتاحة حاليًا.';
+    summary.textContent = `ملخص ذكي: ${headline} إجمالي الفترة ${fmt(a.t.rev)} ج.م، ومتوسط الشيك ${fmt(a.avgChk, 2)} ج.م.`;
+}
+
+function askRevenueAssistant() {
+    const input = $('revenue-assistant-question');
+    const answer = $('revenue-assistant-answer');
+    if (!input || !answer) return;
+    const a = analyzeRevenue($('rev-from').value, $('rev-to').value);
+    answer.textContent = revenueAssistantAnswer(input.value, a);
+}
+
+function askRevenuePreset(question) {
+    $('revenue-assistant-question').value = question;
+    askRevenueAssistant();
+}
+
+/* ============================================================
+   توقع المبيعات (Sales Forecasting)
+   ============================================================ */
+const FIXED_EGYPT_HOLIDAYS = {
+    '01-07': 'عيد الميلاد المجيد', '01-25': 'عيد الشرطة وثورة يناير',
+    '04-25': 'عيد تحرير سيناء', '05-01': 'عيد العمال',
+    '06-30': 'ذكرى ثورة 30 يونيو', '07-23': 'ذكرى ثورة 23 يوليو',
+    '10-06': 'عيد القوات المسلحة'
+};
+function forecastEventFor(day) {
+    const custom = S.forecastEvents && S.forecastEvents[day];
+    if (custom) return { name: custom.name || 'مناسبة خاصة', impact: custom.impact === null || custom.impact === undefined || custom.impact === '' ? null : (Number.isFinite(Number(custom.impact)) ? Number(custom.impact) : null), custom: true };
+    const fixed = FIXED_EGYPT_HOLIDAYS[day.slice(5)];
+    return fixed ? { name: fixed, impact: null, custom: false } : null;
+}
+function forecastHistory() {
+    return Object.keys(S.sales || {}).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && Number(S.sales[d]?.revenue) > 0)
+        .sort().map(d => ({ date:d, revenue:Number(S.sales[d].revenue), orders:Number(S.sales[d].orders || 0), weekday:weekdayOf(d) }));
+}
+function mean(values) { return values.length ? values.reduce((a,b)=>a+b,0)/values.length : 0; }
+function forecastTrend(history) {
+    if (!history.length) return { factor:1, label:'لا توجد بيانات كافية لقياس الاتجاه' };
+    const end = todayStr(), startRecent = addDays(end,-13), startPrior = addDays(end,-27);
+    const recent = history.filter(x=>x.date>=startRecent && x.date<=end).map(x=>x.revenue);
+    const prior = history.filter(x=>x.date>=startPrior && x.date<startRecent).map(x=>x.revenue);
+    if (recent.length < 3 || prior.length < 3 || mean(prior) <= 0) return { factor:1, label:'الاتجاه غير محسوب لعدم كفاية بيانات آخر 4 أسابيع' };
+    const raw = mean(recent)/mean(prior);
+    const factor = Math.max(0.85, Math.min(1.15, raw));
+    return { factor, label: factor>1.015 ? 'اتجاه صاعد' : factor<0.985 ? 'اتجاه هابط' : 'اتجاه مستقر' };
+}
+function forecastOne(day, history, trend) {
+    const wd = weekdayOf(day);
+    const same = history.filter(x=>x.weekday===wd).slice(-8);
+    const all = history.slice(-28);
+    let base = 0, confidence = 'ضعيفة', basis = '';
+    if (same.length) {
+        const weights = same.map((_,i)=>i+1);
+        base = same.reduce((sum,x,i)=>sum+x.revenue*weights[i],0)/weights.reduce((a,b)=>a+b,0);
+        confidence = same.length>=8 ? 'مرتفعة' : same.length>=4 ? 'متوسطة' : 'مبدئية';
+        basis = `${same.length} تسجيل لنفس اليوم`;
+    } else if (all.length) {
+        base = mean(all.map(x=>x.revenue));
+        confidence = 'ضعيفة'; basis = 'متوسط الأيام المسجلة لعدم وجود نفس اليوم';
+    }
+    const event = forecastEventFor(day);
+    let impact = event && event.impact !== null ? event.impact : 0;
+    let learned = false;
+    if (event && event.impact === null) {
+        const priorEvents = history.filter(h => h.date < day && (() => {
+            const oldEvent = forecastEventFor(h.date);
+            return oldEvent && oldEvent.name === event.name;
+        })());
+        const ratios = priorEvents.map(h => {
+            const normalDays = history.filter(x => x.weekday === h.weekday && x.date < h.date && !forecastEventFor(x.date)).slice(-8).map(x => x.revenue);
+            const normal = mean(normalDays);
+            return normal > 0 ? h.revenue / normal : null;
+        }).filter(x => x !== null && Number.isFinite(x));
+        if (ratios.length) {
+            const learnedFactor = Math.max(0.5, Math.min(2.5, mean(ratios)));
+            impact = (learnedFactor - 1) * 100;
+            learned = true;
+            if (ratios.length >= 2) confidence = confidence === 'مرتفعة' ? 'مرتفعة' : 'متوسطة';
+        }
+    }
+    const predicted = Math.max(0, base * trend.factor * (1 + impact/100));
+    return { day, base, predicted, event, impact, learned, confidence, basis };
+}
+function renderForecast() {
+    const body = $('forecast-rows'); if (!body) return;
+    const history = forecastHistory();
+    const trend = forecastTrend(history);
+    const days = Array.from({length:7},(_,i)=>addDays(todayStr(),i+1));
+    const rows = days.map(d=>forecastOne(d,history,trend));
+    const total = rows.reduce((a,x)=>a+x.predicted,0);
+    body.innerHTML = rows.map(x=>`<tr><td>${DAYS_AR[weekdayOf(x.day)]}<br><span class="muted">${x.day}</span></td><td><b>${x.base ? fmt(x.predicted)+' ج.م' : 'بانتظار البيانات'}</b></td><td>${x.event ? esc(x.event.name)+((x.event.impact!==null || x.learned) ? `<br><span class="muted">${x.learned?'تأثير متعلم ':'تأثير محدد '}${x.impact>0?'+':''}${x.impact.toFixed(0)}%</span>` : '<br><span class="muted">التأثير غير محدد؛ لم يُفترض رقم</span>') : 'يوم عادي'}</td><td>${x.confidence}<br><span class="muted">${esc(x.basis)}</span></td></tr>`).join('');
+    $('forecast-total').textContent = history.length ? fmt(total)+' ج.م' : 'بانتظار البيانات';
+    $('forecast-confidence').textContent = history.length ? `${history.length} يوم مسجل · ${trend.label}` : 'أدخل بيانات سابقة أو ابدأ التسجيل اليومي';
+    $('forecast-summary').textContent = history.length
+        ? `النظام يستخدم ${history.length} يومًا مسجلًا، ويقارن كل يوم بالأيام السابقة من نفس يوم الأسبوع. ${trend.label}. التوقع الحالي مبدئي ويتحسن مع كل تسجيل جديد.`
+        : 'لا توجد مبيعات مسجلة بعد. أدخل بيانات سابقة من المربع أدناه أو سجل المبيعات اليومية المعتادة ليبدأ النظام التعلم.';
+    $('forecast-history-count').textContent = `الموجود حاليًا: ${history.length} يوم`;
+    renderForecastEvents();
+}
+function parseForecastDate(v) {
+    v=String(v||'').trim();
+    let m=v.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+    if(m) return `${m[1]}-${pad(Number(m[2]))}-${pad(Number(m[3]))}`;
+    m=v.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+    if(m) return `${m[3]}-${pad(Number(m[2]))}-${pad(Number(m[1]))}`;
+    return '';
+}
+function importForecastHistory() {
+    const raw=$('forecast-history-input').value.trim();
+    if(!raw) return toast('الصق بيانات المبيعات أولًا','error');
+    const lines=raw.split(/\r?\n/).filter(Boolean); let added=0, skipped=0, overwritten=0;
+    lines.forEach(line=>{
+        const cols=line.split(/[\t,;]+/).map(x=>x.trim());
+        if(cols.length<2) { skipped++; return; }
+        const date=parseForecastDate(cols[0]);
+        const revenue=Number(cols[1].replace(/[^0-9.\-]/g,''));
+        if(!date || !Number.isFinite(revenue) || revenue<0) { skipped++; return; }
+        if(S.sales[date]) overwritten++;
+        S.sales[date]={ ...(S.sales[date]||{}), revenue };
+        added++;
+    });
+    if(!added) return toast('لم أتعرف على أي صف. استخدم التاريخ,الإيراد فقط','error');
+    saveDB(); renderAll();
+    $('forecast-history-input').value='';
+    toast(`تم إدخال ${added} يوم${overwritten ? ` (تحديث ${overwritten} يوم)` : ''}${skipped ? `، وتجاهل ${skipped} صف` : ''}`);
+}
+
+async function clearForecastHistory() {
+    if(!await askConfirm('هل أنت متأكد من مسح جميع بيانات مبيعات التعلم وسجل الإيرادات لبدء إدخال بيانات جديدة بالكامل؟', 'مسح الكل')) return;
+    S.sales = {};
+    saveDB();
+    renderAll();
+    toast('تم مسح جميع بيانات مبيعات التعلم بنجاح');
+}
+
+function saveForecastEvent() {
+    const date=$('forecast-event-date').value, name=$('forecast-event-name').value.trim(), raw=$('forecast-event-impact').value.trim();
+    if(!date || !name) return toast('أدخل تاريخ المناسبة واسمها','error');
+    const impact=raw==='' ? null : Number(raw);
+    if(impact!==null && (!Number.isFinite(impact) || impact < -90 || impact > 300)) return toast('التأثير لازم يكون بين -90% و300%','error');
+    S.forecastEvents[date]={name,impact}; saveDB();
+    $('forecast-event-name').value=''; $('forecast-event-impact').value='';
+    renderForecast(); toast('تم حفظ المناسبة');
+}
+function deleteForecastEvent(date) {
+    if(!S.forecastEvents[date]) return;
+    delete S.forecastEvents[date]; saveDB(); renderForecast();
+}
+function renderForecastEvents() {
+    const el=$('forecast-events-list'); if(!el) return;
+    const entries=Object.entries(S.forecastEvents||{}).sort((a,b)=>a[0].localeCompare(b[0]));
+    el.innerHTML=entries.length ? `<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>المناسبة</th><th>التأثير</th><th></th></tr></thead><tbody>${entries.map(([d,e])=>`<tr><td>${d}</td><td>${esc(e.name)}</td><td>${e.impact===null||e.impact===undefined?'غير محدد':(e.impact>0?'+':'')+e.impact+'%'}</td><td><button class="btn btn-red btn-sm" onclick="deleteForecastEvent('${d}')">حذف</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="muted">لا توجد مناسبات مضافة يدويًا. الإجازات الثابتة تظهر تلقائيًا في التوقع.</div>';
+}
+
+function renderRevenue() {
+    const from = $('rev-from').value, to = $('rev-to').value;
+    const a = analyzeRevenue(from, to);
+    const blocks = buildBlocks(a);
+    renderHero(a, from, to);
+    renderTrend(a);
+    renderRevenueAssistant(a);
+    renderForecast();
+    renderQuick(a);
+    renderPriorities(blocks);
+    renderItems(blocks);
+    renderCompare();
+    const al = $('rev-alert');
+    if (a.missing.length) { al.classList.remove('hidden'); al.textContent = 'أيام سابقة بدون إيراد مسجلْ: ' + a.missing.join(', '); }
+    else al.classList.add('hidden');
+}
+
+function renderLyGrid() {
+    const rows = [];
+    let i = 0;
+    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => {
+        const ly = lyDay(d);
+        const v = S.lyDaily[ly];
+        rows.push(`<tr>
+            <td>${Number(d.slice(8))}</td>
+            <td>${esc(ly)}</td>
+            <td><input type="number" min="0" step="any" class="inp xs" data-nav="lyr" data-ri="${i}" data-ly-rev="${esc(d)}" value="${v ? v.rev : ''}"></td>
+            <td><input type="number" min="0" step="1" class="inp xs" data-nav="lyo" data-ri="${i}" data-ly-ord="${esc(d)}" value="${v ? v.orders : ''}"></td>
+        </tr>`);
+        i++;
+    });
+    $('ly-grid').innerHTML = rows.join('');
+}
+
+function renderSettings() {
+    const c = cfg(activeMonth);
+    $('s-plan').value = c.plan_rev || '';
+    $('s-ly-rev').value = c.ly_rev || '';
+    $('s-ly-ord').value = c.ly_orders || '';
+}
+
+function renderSalesForm() {
+    const d = $('sales-day').value;
+    const locked = !!S.locks.sales[d];
+    $('sales-rev').disabled = locked;
+    $('sales-ord').disabled = locked;
+    $('sales-save').classList.toggle('hidden', locked);
+    $('sales-unlock').classList.toggle('hidden', !locked);
+    $('sales-badge').textContent = locked ? 'مغلق ومحفوظ' : 'مفتوح';
+    $('sales-badge').className = 'badge ' + (locked ? 'closed' : 'open');
+}
+
+function loadSalesDay() {
+    const r = S.sales[$('sales-day').value];
+    $('sales-rev').value = r ? r.revenue : '';
+    $('sales-ord').value = r ? r.orders : '';
+    renderSalesForm();
+}
+
+async function saveSalesDay() {
+    const d = $('sales-day').value;
+    if (!d) return toast('اختر التاريخ', 'error');
+    if (S.locks.sales[d]) return toast('اليوم ده مقفول. افتح التعديل الأول', 'error');
+    const rv = $('sales-rev').value, ov = $('sales-ord').value;
+    if (rv === '' || ov === '') return toast('أدخل الإيراد وعدد العمليات', 'error');
+    const revenue = num(rv), orders = int(ov);
+    if (revenue < 0) return toast('الإيراد لا يكون بالسالب', 'error');
+    if (!await confirmFuture(d)) return;
+    if (revenue > 0 && orders === 0 && !await askConfirm('عدد العمليات صفر والإيراد أكبر من صفر. متأكد؟')) return;
+    if (revenue === 0 && orders > 0 && !await askConfirm('الإيراد صفر وفيه عمليات. متأكد؟')) return;
+    S.sales[d] = { revenue, orders };
+    S.locks.sales[d] = true;
+    saveDB();
+    toast('تم حفظ وقفل إيراد اليوم');
+    renderAll();
+}
+
+async function unlockSales() {
+    const d = $('sales-day').value;
+    if (!await askConfirm('فتح تعديل إيراد هذا اليوم؟ بعد التعديل لازم تحفظه تاني.', 'فتح التعديل')) return;
+    delete S.locks.sales[d];
+    saveDB();
+    toast('تم فتح اليوم للتعديل');
+    renderAll();
+}
+
+function saveSettings() {
+    const prev = S.monthly[activeMonth] || {};
+    S.monthly[activeMonth] = {
+        ...prev,
+        plan_rev: num($('s-plan').value),
+        ly_rev: num($('s-ly-rev').value),
+        ly_orders: int($('s-ly-ord').value)
+    };
+    saveDB();
+    toast('تم حفظ الإعدادات');
+    renderAll();
+}
+
+function saveLyDays() {
+    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => {
+        const rv = document.querySelector(`[data-ly-rev="${d}"]`).value;
+        const ov = document.querySelector(`[data-ly-ord="${d}"]`).value;
+        const ly = lyDay(d);
+        if (rv === '' && ov === '') { delete S.lyDaily[ly]; return; }
+        S.lyDaily[ly] = { rev: num(rv), orders: int(ov) };
+    });
+    saveDB();
+    toast('تم حفظ بيانات السنة اللي فاتت');
+    renderAll();
+}
+
+/* ============================================================
+   المخزون والتحليلات والطلبيات المتوقعة
+   ============================================================ */
+const openingFor = (pid, m) => ((S.openings[m] || {})[pid]) ?? 0;
+const hasOpening = (pid, m) => !!S.openings[m] && S.openings[m][pid] !== undefined;
+const rcpt = (day, pid) => ((S.receipts[day] || {})[pid]) || 0;
+const productById = pid => S.products.find(p => p.id === pid);
+const productLabel = pid => { const p = productById(pid); return p ? `${p.name} (${p.unit})` : ''; };
+const searchKey = p => `${p.name} ${p.unit}`.toLowerCase();
+
+const coveredReceipt = d => !!S.receiptNone[d] || Object.values(S.receipts[d] || {}).some(v => v > 0);
+const coveredTransfer = d => !!S.transferNone[d] || S.transfers.some(t => t.day === d);
+
+function missingDays(covered) {
+    const end = addDays(todayStr(), -1);
+    const last = monthEnd(activeMonth) < end ? monthEnd(activeMonth) : end;
+    const out = [];
+    if (last < monthStart(activeMonth)) return out;
+    eachDay(monthStart(activeMonth), last, d => { if (!covered(d)) out.push(d); });
+    return out;
+}
+
+const dayNums = list => list.map(d => Number(d.slice(8)));
+
+function productUsed(pid) {
+    return S.transfers.some(t => t.product_id === pid)
+        || Object.values(S.receipts).some(d => d[pid] !== undefined)
+        || Object.values(S.openings).some(m => m[pid] !== undefined)
+        || S.analyses.some(a => a.rows && a.rows[pid] !== undefined);
+}
+
+function transfersNet(pid, from, to) {
+    let net = 0;
+    S.transfers.forEach(t => {
+        if (t.product_id === pid && inRange(t.day, from, to)) net += t.type === 'in' ? t.qty : -t.qty;
+    });
+    return net;
+}
+
+function applySearch(containerId, inputId, msgId) {
+    const q = ($(inputId).value || '').trim().toLowerCase();
+    const items = $(containerId).querySelectorAll('[data-search]');
+    let shown = 0;
+    items.forEach(el => {
+        const ok = !q || el.dataset.search.includes(q);
+        el.classList.toggle('hidden', !ok);
+        if (ok) shown++;
+    });
+    const msg = $(msgId);
+    if (msg) msg.classList.toggle('hidden', !(q && items.length && shown === 0));
+}
+
+function lastClosingIn(pid, month) {
+    let best = null, val = null;
+    S.analyses.forEach(a => {
+        if (monthOf(a.to) !== month) return;
+        const r = a.rows && a.rows[pid];
+        if (r && r.closing !== null && r.closing !== undefined && (best === null || a.to > best)) { best = a.to; val = r.closing; }
+    });
+    return val;
+}
+
+const INV_TITLES = {
+    opening: 'الأصناف ورصيد أول الشهر',
+    receipts: 'الوارد اليومي',
+    transfers: 'التحويلات بين الفروع',
+    analysis: 'تحليل المخزون',
+    orders: 'الطلبيات المتوقعة - Per 1000'
+};
+const INV_ICONS = {
+    opening: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+    receipts: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
+    transfers: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>',
+    analysis: '<path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/>',
+    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/>'
+};
+
+function openInv(v) {
+    invView = v;
+    renderInventory();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeInv() {
+    invView = null;
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderTiles() {
+    const m = activeMonth;
+    const allOpen = S.products.length > 0 && S.products.every(p => hasOpening(p.id, m));
+    $('ts-opening').textContent = S.openLocked[m] && allOpen ? 'محفوظ لشهر ' + MONTHS_AR[Number(m.slice(5)) - 1] : 'يحتاج إدخال';
+
+    const mr = missingDays(coveredReceipt).length;
+    $('ts-receipts').textContent = mr ? `${mr} يوم ناقص` : 'كل الأيام مغطاة';
+
+    const mt = missingDays(coveredTransfer).length;
+    $('ts-transfers').textContent = mt ? `${mt} يوم ناقص` : 'كل الأيام مغطاة';
+
+    $('ts-analysis').textContent = $('an-to').value ? 'لحد ' + $('an-to').value : 'اختار تاريخ';
+}
+
+function renderOpening() {
+    const m = activeMonth;
+    const locked = !!S.openLocked[m];
+    const monthName = `${MONTHS_AR[Number(m.slice(5)) - 1]} ${m.slice(0, 4)}`;
+    const missing = S.products.filter(p => !hasOpening(p.id, m));
+
+    $('open-summary').textContent = `الأصناف ورصيد أول ${monthName}`;
+    $('open-badge').textContent = locked && !missing.length ? 'محفوظ' : 'يحتاج إدخال';
+    $('open-badge').className = 'badge ' + (locked && !missing.length ? 'closed' : 'open');
+
+    $('open-list').innerHTML = S.products.map((p, i) => {
+        const has = hasOpening(p.id, m);
+        const dis = locked && has ? 'disabled' : '';
+        return `<div class="prow">
+            <div class="pfields">
+                <input class="inp" data-pid="${esc(p.id)}" data-f="name" value="${esc(p.name)}" aria-label="اسم الصنف">
+                <input class="inp" data-pid="${esc(p.id)}" data-f="unit" value="${esc(p.unit)}" placeholder="الوحدة" aria-label="الوحدة">
+            </div>
+            <div class="pfields2">
+                <input class="inp xs" type="number" step="any" id="op-${esc(p.id)}" data-nav="open" data-ri="${i}"
+                    value="${has ? openingFor(p.id, m) : ''}" placeholder="رصيد أول الشهر" ${dis}>
+                ${productUsed(p.id) ? '' : `<button class="btn btn-red btn-sm" onclick="deleteProduct('${esc(p.id)}')">حذف</button>`}
+            </div>
+        </div>`;
+    }).join('') || '<div class="muted">لسه ماضفتش أصناف. أضف أول صنف من تحت.</div>';
+
+    const allDone = S.products.length > 0 && missing.length === 0;
+    $('open-note').textContent = !S.products.length
+        ? 'ابدأ بإضافة الأصناف.'
+        : locked
+            ? (missing.length ? `فيه ${missing.length} صنف لسه ما اتدخلش له رصيد الشهر. دخله واحفظ.` : 'الرصيد محفوظ ومقفول. لو محتاج تغيّره افتح التعديل.')
+            : 'ادخل رصيد أول الشهر لكل صنف (Enter أو ↓ للصنف اللي بعده) واضغط حفظ وإغلاق.';
+
+    $('open-save').classList.toggle('hidden', locked && allDone);
+    $('open-suggest').classList.toggle('hidden', locked);
+    $('open-unlock').classList.toggle('hidden', !locked);
+}
+
+function addProduct() {
+    const name = $('new-prod-name').value.trim();
+    const unit = $('new-prod-unit').value.trim();
+    if (!name) return toast('اكتب اسم الصنف', 'error');
+    if (name.length > 120 || unit.length > 40) return toast('الاسم أو الوحدة طويل جداً', 'error');
+    if (S.products.some(p => p.name === name && p.unit === unit)) return toast('الصنف ده موجود قبل كده', 'error');
+    S.products.push({ id: uid(), name, unit });
+    saveDB();
+    $('new-prod-name').value = ''; $('new-prod-unit').value = '';
+    toast('تمت إضافة الصنف. ادخل رصيد أول الشهر له');
+    renderAll();
+}
+
+async function deleteProduct(id) {
+    if (productUsed(id)) return toast('الصنف ده عليه حركات، مينفعش يتحذف', 'error');
+    const p = productById(id);
+    if (!p) return;
+    if (!await askConfirm(`حذف الصنف "${p.name}"؟`, 'حذف')) return;
+    S.products = S.products.filter(x => x.id !== id);
+    saveDB();
+    toast('تم حذف الصنف');
+    renderAll();
+}
+
+function saveOpening() {
+    const m = activeMonth;
+    if (!S.products.length) return toast('أضف أصنافاً الأول', 'error');
+    const vals = {};
+    for (const p of S.products) {
+        const el = $('op-' + p.id);
+        if (!el || el.disabled) continue;
+        if (el.value === '') return toast(`ادخل رصيد أول الشهر للصنف: ${p.name}`, 'error');
+        const n = num(el.value);
+        if (n < 0) return toast('الرصيد لا يكون بالسالب', 'error');
+        vals[p.id] = n;
+    }
+    S.openings[m] = Object.assign(S.openings[m] || {}, vals);
+    S.openLocked[m] = true;
+    saveDB();
+    toast('تم حفظ وقفل رصيد أول الشهر');
+    closeInv();
+}
+
+async function unlockOpening() {
+    if (!await askConfirm('فتح رصيد أول الشهر للتعديل؟ تغييره هيأثر على كل حسابات الشهر ده.', 'فتح التعديل')) return;
+    delete S.openLocked[activeMonth];
+    saveDB();
+    toast('تم فتح الرصيد للتعديل');
+    renderAll();
+}
+
+function suggestOpening() {
+    const prev = shiftMonth(activeMonth, -1);
+    let n = 0;
+    S.products.forEach(p => {
+        const el = $('op-' + p.id);
+        if (!el || el.disabled) return;
+        const v = lastClosingIn(p.id, prev);
+        const val = v !== null ? v : (hasOpening(p.id, prev) ? openingFor(p.id, prev) : null);
+        if (val !== null) { el.value = val; n++; }
+    });
+    toast(n ? `تم ملء ${n} صنف. راجع الأرقام واضغط حفظ` : 'مفيش جرد محفوظ للشهر اللي فات', n ? 'success' : 'error');
+}
+
+document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (!t.dataset || !t.dataset.pid || !t.dataset.f) return;
+    const p = productById(t.dataset.pid);
+    if (!p) return;
+    const value = t.value.trim();
+    if (t.dataset.f === 'name' && (!value || value.length > 120)) { toast('اسم الصنف غير صالح', 'error'); return renderAll(); }
+    if (t.dataset.f === 'unit' && value.length > 40) { toast('الوحدة طويلة جداً', 'error'); return renderAll(); }
+    p[t.dataset.f] = value;
+    saveDB();
+    toast('تم التحديث');
+    renderAll();
+});
+
+function rcValue(d, p) {
+    return Object.prototype.hasOwnProperty.call(rcDraft, p.id) ? rcDraft[p.id] : (rcpt(d, p.id) || '');
+}
+
+function rcSet(pid, v) { rcDraft[pid] = v; }
+
+function renderReceipts() {
+    const d = $('rc-day').value;
+    const locked = !!S.receiptLocked[d];
+    const none = !!S.receiptNone[d];
+
+    if (rcDraftDay !== d) { rcDraft = {}; rcDraftDay = d; }
+
+    const miss = missingDays(coveredReceipt);
+    const al = $('rc-alert');
+    if (miss.length) {
+        al.classList.remove('hidden');
+        al.innerHTML = `<div>فيه ${miss.length} يوم من أول الشهر بدون وارد مسجل ولا تأكيد:</div>
+            <div class="missing-chips">${dayNums(miss).map(n => `<span class="mchip">${n}</span>`).join('')}</div>
+            <button class="btn btn-sm" onclick="bulkReceiptNone()">تأكيد كل الأيام دي كـ "بدون توريد"</button>`;
+    } else {
+        al.classList.add('hidden');
+        al.innerHTML = '';
+    }
+
+    const badge = $('rc-badge');
+    badge.textContent = locked ? (none ? 'مقفول · بدون توريد' : 'مقفول') : 'مفتوح';
+    badge.className = 'badge ' + (locked ? 'closed' : 'open');
+    $('rc-search-wrap').classList.toggle('hidden', locked || !S.products.length);
+
+    if (!d) { $('rc-body').innerHTML = ''; return; }
+
+    if (!S.products.length) {
+        $('rc-body').innerHTML = '<div class="muted">أضف أصنافك من الأصناف ورصيد أول الشهر الأول.</div>';
+        $('rc-save').classList.add('hidden'); $('rc-edit').classList.add('hidden'); $('rc-none').classList.add('hidden');
+        $('rc-nomatch').classList.add('hidden');
+        return;
+    }
+
+    if (locked) {
+        const items = S.products.filter(p => rcpt(d, p.id) > 0);
+        $('rc-body').innerHTML = items.length
+            ? `<div class="chips">${items.map(p => `<span class="chip2"><b>${esc(p.name)}</b> ${fmt(rcpt(d, p.id), 2)} <span class="muted">${esc(p.unit)}</span></span>`).join('')}</div>`
+            : `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون توريد.' : 'مفيش وارد مسجل لليوم ده.'}</div>`;
+        $('rc-save').classList.add('hidden');
+        $('rc-none').classList.add('hidden');
+        $('rc-edit').classList.remove('hidden');
+        $('rc-nomatch').classList.add('hidden');
+        return;
+    }
+
+    const hasAny = coveredReceipt(d) && !none;
+    $('rc-save').classList.remove('hidden');
+    $('rc-none').classList.toggle('hidden', hasAny);
+    $('rc-edit').classList.add('hidden');
+    $('rc-body').innerHTML = S.products.map((p, i) => `<div class="prow" data-search="${esc(searchKey(p))}">
+        <div><b>${esc(p.name)}</b> <span class="muted">${esc(p.unit)}</span></div>
+        <input class="inp xs" type="number" min="0" step="any" data-nav="rec" data-ri="${i}" value="${esc(rcValue(d, p))}" placeholder="0"
+            oninput="rcSet('${esc(p.id)}', this.value)">
+    </div>`).join('');
+    applySearch('rc-body', 'rc-search', 'rc-nomatch');
+}
+
+async function saveReceipts() {
+    const d = $('rc-day').value;
+    if (!d) return toast('اختر التاريخ', 'error');
+    if (S.receiptLocked[d]) return toast('اليوم ده مقفول', 'error');
+    if (!await confirmFuture(d)) return;
+    const rec = {};
+    for (const p of S.products) {
+        const v = rcValue(d, p);
+        if (v === '' || v === null) continue;
+        const n = num(v);
+        if (n < 0) return toast('الوارد لا يكون بالسالب', 'error');
+        if (n > 0) rec[p.id] = n;
+    }
+    if (!Object.keys(rec).length && !await askConfirm('مفيش وارد مدخل. تعتبر اليوم ده بدون توريد؟', 'بدون توريد')) return;
+    if (Object.keys(rec).length) S.receipts[d] = rec; else { delete S.receipts[d]; S.receiptNone[d] = true; }
+    S.receiptLocked[d] = true;
+    rcDraft = {};
+    saveDB();
+    toast('تم حفظ وقفل وارد اليوم');
+    closeInv();
+}
+
+async function markReceiptNone() {
+    const d = $('rc-day').value;
+    if (!d) return;
+    if (!await askConfirm('تأكيد إن مفيش توريدات في اليوم ده؟')) return;
+    S.receiptNone[d] = true;
+    S.receiptLocked[d] = true;
+    rcDraft = {};
+    saveDB();
+    toast('تم تأكيد اليوم بدون توريد');
+    closeInv();
+}
+
+async function bulkReceiptNone() {
+    const miss = missingDays(coveredReceipt);
+    if (!miss.length) return;
+    if (!await askConfirm(`تأكيد ${miss.length} يوم كـ "بدون توريد"؟`)) return;
+    miss.forEach(d => { S.receiptNone[d] = true; S.receiptLocked[d] = true; });
+    saveDB();
+    toast(`تم تأكيد ${miss.length} يوم`);
+    renderAll();
+}
+
+async function unlockReceipts() {
+    const d = $('rc-day').value;
+    if (!await askConfirm('فتح وارد هذا اليوم للتعديل؟ بعد التعديل لازم تحفظه تاني.', 'فتح التعديل')) return;
+    delete S.receiptLocked[d];
+    delete S.receiptNone[d];
+    rcDraft = {};
+    saveDB();
+    toast('تم فتح اليوم للتعديل');
+    renderAll();
+}
+
+function fillTransProducts() {
+    const q = ($('trans-search').value || '').trim().toLowerCase();
+    const list = S.products.filter(p => !q || searchKey(p).includes(q));
+    const cur = $('trans-prod').value;
+    $('trans-prod').innerHTML = list.map(p => `<option value="${esc(p.id)}">${esc(p.name)} (${esc(p.unit)})</option>`).join('');
+    if (list.some(p => p.id === cur)) $('trans-prod').value = cur;
+    $('trans-nomatch').classList.toggle('hidden', !(q && list.length === 0));
+}
+
+function renderTransfers() {
+    const d = $('tr-day').value;
+    const locked = !!S.transferLocked[d];
+    const none = !!S.transferNone[d];
+    const list = S.transfers.filter(t => t.day === d);
+
+    const miss = missingDays(coveredTransfer);
+    const al = $('tr-alert');
+    if (miss.length) {
+        al.classList.remove('hidden');
+        al.innerHTML = `<div>فيه ${miss.length} يوم من أول الشهر بدون تحويلات مسجلة ولا تأكيد:</div>
+            <div class="missing-chips">${dayNums(miss).map(n => `<span class="mchip">${n}</span>`).join('')}</div>
+            <button class="btn btn-sm" onclick="bulkTransfersNone()">تأكيد كل الأيام دي كـ "بدون تحويلات"</button>`;
+    } else {
+        al.classList.add('hidden');
+        al.innerHTML = '';
+    }
+
+    $('trans-badge').textContent = locked ? (none ? 'مقفول · بدون تحويلات' : 'مقفول') : 'مفتوح';
+    $('trans-badge').className = 'badge ' + (locked ? 'closed' : 'open');
+    $('trans-form').classList.toggle('hidden', locked);
+    $('trans-lock').classList.toggle('hidden', locked);
+    $('trans-none').classList.toggle('hidden', locked || list.length > 0);
+    $('trans-unlock').classList.toggle('hidden', !locked);
+
+    $('tr-list').innerHTML = list.map(t => `<div class="prow">
+        <div>
+            <b>${t.type === 'in' ? 'وارد من فرع' : 'صادر لفرع'}</b> · ${esc(t.branch || '—')}
+            <div class="muted">${esc(productLabel(t.product_id) || 'صنف محذوف')} — ${fmt(t.qty, 2)}</div>
+        </div>
+        ${locked ? '' : `<button class="btn btn-red btn-sm" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
+    </div>`).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
+    fillTransProducts();
+}
+
+async function addTransfer() {
+    const d = $('tr-day').value;
+    if (!d) return toast('اختر التاريخ', 'error');
+    if (S.transferLocked[d]) return toast('تحويلات اليوم مقفولة. افتح التعديل الأول', 'error');
+    const type = $('trans-type').value;
+    const branch = $('trans-branch').value.trim();
+    const pid = $('trans-prod').value;
+    const qty = num($('trans-qty').value);
+    if (!pid) return toast('اختر صنفاً الأول', 'error');
+    if (qty <= 0) return toast('الكمية لازم تكون أكبر من صفر', 'error');
+    if (branch.length > 120) return toast('اسم الفرع طويل جداً', 'error');
+    if (!await confirmFuture(d)) return;
+    S.transfers.push({ id: uid(), day: d, type, branch, product_id: pid, qty });
+    delete S.transferNone[d];
+    saveDB();
+    $('trans-branch').value = ''; $('trans-qty').value = '';
+    $('trans-qty').focus();
+    toast('تمت إضافة التحويل');
+    renderAll();
+}
+
+async function deleteTransfer(id) {
+    const t = S.transfers.find(x => x.id === id);
+    if (!t) return;
+    if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'error');
+    if (!await askConfirm('حذف هذا التحويل؟', 'حذف')) return;
+    S.transfers = S.transfers.filter(x => x.id !== id);
+    saveDB();
+    toast('تم الحذف');
+    renderAll();
+}
+
+async function lockTransfers() {
+    const d = $('tr-day').value;
+    if (!d) return;
+    if (!S.transfers.some(t => t.day === d)) {
+        if (!await askConfirm('مفيش تحويلات في اليوم ده. تعتبره بدون تحويلات؟', 'بدون تحويلات')) return;
+        S.transferNone[d] = true;
+    }
+    S.transferLocked[d] = true;
+    saveDB();
+    toast('تم حفظ وقفل تحويلات اليوم');
+    closeInv();
+}
+
+async function markTransfersNone() {
+    const d = $('tr-day').value;
+    if (!d) return;
+    if (!await askConfirm('تأكيد إن مفيش تحويلات في اليوم ده؟')) return;
+    S.transferNone[d] = true;
+    S.transferLocked[d] = true;
+    saveDB();
+    toast('تم تأكيد اليوم بدون تحويلات');
+    closeInv();
+}
+
+async function bulkTransfersNone() {
+    const miss = missingDays(coveredTransfer);
+    if (!miss.length) return;
+    if (!await askConfirm(`تأكيد ${miss.length} يوم كـ "بدون تحويلات"؟`)) return;
+    miss.forEach(d => { S.transferNone[d] = true; S.transferLocked[d] = true; });
+    saveDB();
+    toast(`تم تأكيد ${miss.length} يوم`);
+    renderAll();
+}
+
+async function unlockTransfers() {
+    const d = $('tr-day').value;
+    if (!await askConfirm('فتح تحويلات هذا اليوم للتعديل؟', 'فتح التعديل')) return;
+    delete S.transferLocked[d];
+    delete S.transferNone[d];
+    saveDB();
+    toast('تم فتح التحويلات للتعديل');
+    renderAll();
+}
+
+function anRange() {
+    const from = monthStart(activeMonth);
+    const to = $('an-to').value;
+    if (!to) return null;
+    if (monthOf(to) !== activeMonth) return { from, to: null, note: 'اختار تاريخ داخل الشهر النشط.' };
+    return { from, to, note: '' };
+}
+
+function quickAn(kind) {
+    if (kind === 'day') $('an-to').value = $('rc-day').value || todayStr();
+    if (kind === 'month') $('an-to').value = clampToday(activeMonth);
+    renderAnalysis();
+}
+
+function calcRow(pid, r, opening, sold, closingStr) {
+    let rec = 0;
+    eachDay(r.from, r.to, d => { rec += rcpt(d, pid); });
+    const net = transfersNet(pid, r.from, r.to);
+    const theo = opening + rec + net - sold;
+    const variance = (closingStr === '' || closingStr === null || closingStr === undefined) ? null : num(closingStr) - theo;
+    return { rec, net, theo, variance };
+}
+
+function renderAnalysis() {
+    const r = anRange();
+    const cards = $('an-cards');
+    const note = $('an-note');
+    if (!r || !r.to) {
+        cards.innerHTML = '';
+        note.textContent = r ? r.note : 'اختار تاريخ النهاية';
+        note.classList.remove('hidden');
+        return;
+    }
+    note.classList.toggle('hidden', !r.note);
+    note.textContent = r.note;
+
+    const key = r.to;
+    const keep = {};
+    if (key === anKey && !anLoadRows) {
+        S.products.forEach(p => {
+            const s = $('as-' + p.id), c = $('ac-' + p.id);
+            if (s) keep[p.id] = { s: s.value, c: c.value };
+        });
+    }
+    const loaded = anLoadRows;
+    anLoadRows = null;
+    anKey = key;
+
+    if (!S.products.length) { cards.innerHTML = '<div class="muted">أضف أصنافك من الأصناف ورصيد أول الشهر الأول.</div>'; return; }
+
+    const m = activeMonth;
+    cards.innerHTML = S.products.map((p, i) => {
+        let s = '', c = '';
+        if (loaded && loaded[p.id]) {
+            s = loaded[p.id].sold;
+            c = loaded[p.id].closing === null ? '' : loaded[p.id].closing;
+        } else if (keep[p.id]) {
+            s = keep[p.id].s; c = keep[p.id].c;
+        }
+        const has = hasOpening(p.id, m);
+        return `<div class="pcard" data-search="${esc(searchKey(p))}">
+            <div class="ptitle">${esc(p.name)} <span class="muted">${esc(p.unit)}</span></div>
+            <div class="pgrid">
+                <div class="fld"><span>أول الشهر (ثابت)</span><b>${has ? fmt(openingFor(p.id, m), 2) : '<span class="muted">لم يُدخل</span>'}</b></div>
+                <div class="fld"><span>الوارد (من أول الشهر)</span><b id="ar-${esc(p.id)}">-</b></div>
+                <label class="fld"><span>المباع (من أول الشهر)</span>
+                    <input class="inp" type="number" min="0" step="any" id="as-${esc(p.id)}" data-nav="sold" data-ri="${i}" value="${esc(s)}" placeholder="0" oninput="liveAn()"></label>
+                <div class="fld"><span>التحويلات (صافي)</span><b id="at-${esc(p.id)}">-</b></div>
+                <label class="fld"><span>الجرد الفعلي (في تاريخ النهاية)</span>
+                    <input class="inp" type="number" min="0" step="any" id="ac-${esc(p.id)}" data-nav="close" data-ri="${i}" value="${esc(c)}" placeholder="بعد العد" oninput="liveAn()"></label>
+                <div class="fld"><span>النظري</span><b id="ath-${esc(p.id)}">-</b></div>
+                <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة</span><b id="av-${esc(p.id)}">-</b></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    liveAn();
+    applySearch('an-cards', 'an-search', 'an-nomatch');
+    renderSavedAnalyses();
+}
+
+function liveAn() {
+    const r = anRange();
+    if (!r || !r.to) return;
+    S.products.forEach(p => {
+        const as = $('as-' + p.id);
+        if (!as) return;
+        const opening = openingFor(p.id, activeMonth);
+        const res = calcRow(p.id, r, opening, num(as.value), $('ac-' + p.id).value);
+        $('ar-' + p.id).textContent = fmt(res.rec, 2);
+        const at = $('at-' + p.id);
+        at.textContent = (res.net > 0 ? '+' : '') + fmt(res.net, 2);
+        at.className = res.net >= 0 ? 'up' : 'down';
+        const th = $('ath-' + p.id);
+        th.textContent = fmt(res.theo, 2);
+        th.className = res.theo < 0 ? 'down' : '';
+        const av = $('av-' + p.id);
+        
+        if (res.variance === null) { 
+            av.textContent = '-'; 
+            av.className = ''; 
+        } else {
+            if (res.variance < 0) {
+                av.textContent = res.variance.toFixed(2);
+                av.className = 'down';
+            } else if (res.variance > 0) {
+                av.textContent = '+' + res.variance.toFixed(2);
+                av.className = 'up';
+            } else {
+                av.textContent = '0.00';
+                av.className = '';
+            }
+        }
+    });
+}
+
+function readAnalysisRows() {
+    const rows = {};
+    for (const p of S.products) {
+        if (!hasOpening(p.id, activeMonth)) return { error: `ادخل رصيد أول الشهر للصنف "${p.name}" الأول` };
+        const s = $('as-' + p.id), c = $('ac-' + p.id);
+        const cv = c ? c.value : '';
+        rows[p.id] = {
+            opening: openingFor(p.id, activeMonth),
+            sold: s ? num(s.value) : 0,
+            closing: cv === '' ? null : num(cv)
+        };
+    }
+    return { rows };
+}
+
+async function saveAnalysis() {
+    const r = anRange();
+    if (!r || !r.to) return toast('اختر تاريخ النهاية', 'error');
+    const res = readAnalysisRows();
+    if (res.error) return toast(res.error, 'error');
+    const anyClosing = Object.values(res.rows).some(x => x.closing !== null);
+    if (!anyClosing && !await askConfirm('مفيش جرد فعلي مدخل. تحفظ التحليل على كده؟', 'حفظ')) return;
+    S.analyses = S.analyses.filter(a => a.to !== r.to);
+    S.analyses.push({ id: uid(), from: r.from, to: r.to, saved: todayStr(), rows: res.rows });
+    saveDB();
+    toast('تم حفظ التحليل');
+    closeInv();
+}
+
+function renderSavedAnalyses() {
+    const list = [...S.analyses].sort((a, b) => (a.to < b.to ? 1 : -1));
+    $('saved-list').innerHTML = list.map(a => `<div class="prow">
+        <div>
+            <b>من ${esc(a.from)} لحد ${esc(a.to)}</b>
+            <div class="muted">محفوظ ${esc(a.saved)} · ${Object.keys(a.rows || {}).length} صنف</div>
+        </div>
+        <div class="row">
+            <button class="btn btn-sm" onclick="loadAnalysis('${esc(a.id)}')">عرض</button>
+            <button class="btn btn-red btn-sm" onclick="deleteAnalysis('${esc(a.id)}')">حذف</button>
+        </div>
+    </div>`).join('') || '<div class="muted">مفيش تحليلات محفوظة بعد.</div>';
+}
+
+function loadAnalysis(id) {
+    const a = S.analyses.find(x => x.id === id);
+    if (!a) return;
+    if (monthOf(a.to) !== activeMonth) { activeMonth = monthOf(a.to); setMonthDefaults(); $('month-input').value = activeMonth; }
+    $('an-to').value = a.to;
+    anLoadRows = a.rows;
+    renderAnalysis();
+    toast('تم عرض التحليل المحفوظ');
+}
+
+async function deleteAnalysis(id) {
+    if (!await askConfirm('حذف هذا التحليل المحفوظ؟', 'حذف')) return;
+    S.analyses = S.analyses.filter(x => x.id !== id);
+    saveDB();
+    toast('تم الحذف');
+    renderAll();
+}
+
+function setExportMonth() {
+    if (!$('ex-from')) return;
+    $('ex-from').value = monthStart(activeMonth);
+    $('ex-to').value = clampToday(activeMonth);
+}
+
+function exportRange() {
+    let from = $('ex-from').value || monthStart(activeMonth);
+    let to = $('ex-to').value || clampToday(activeMonth);
+    if (from > to) [from, to] = [to, from];
+    if (monthOf(from) !== activeMonth) from = monthStart(activeMonth);
+    if (monthOf(to) !== activeMonth) to = monthEnd(activeMonth);
+    return { from, to };
+}
+
+function exportPeriodXlsx() {
+    const { from, to } = exportRange();
+    const wb = XLSX.utils.book_new();
+    let sheets = 0;
+
+    if (S.products.length) {
+        const rows = [];
+        eachDay(from, to, d => {
+            const row = { 'التاريخ': d, 'اليوم': DAYS_AR[weekdayOf(d)] };
+            let total = 0;
+            S.products.forEach(p => {
+                const v = rcpt(d, p.id);
+                row[`${p.name} (${p.unit})`] = v || '';
+                total += v;
+            });
+            row['إجمالي الوارد (عدد)'] = total || '';
+            row['الحالة'] = S.receiptNone[d] ? 'بدون توريد' : (total ? 'تم' : 'ناقص');
+            rows.push(row);
+        });
+        if (rows.length) {
+            const totalRow = { 'التاريخ': 'الإجمالي', 'اليوم': '' };
+            S.products.forEach(p => {
+                totalRow[`${p.name} (${p.unit})`] = rows.reduce((a, r) => a + (Number(r[`${p.name} (${p.unit})`]) || 0), 0);
+            });
+            totalRow['إجمالي الوارد (عدد)'] = rows.reduce((a, r) => a + (Number(r['إجمالي الوارد (عدد)']) || 0), 0);
+            totalRow['الحالة'] = '';
+            rows.push(totalRow);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'الوارد');
+            sheets++;
+        }
+    }
+
+    const tr = S.transfers
+        .filter(t => inRange(t.day, from, to))
+        .sort((a, b) => (a.day < b.day ? -1 : 1))
+        .map(t => ({
+            'التاريخ': t.day,
+            'النوع': t.type === 'in' ? 'وارد من فرع' : 'صادر لفرع',
+            'الفرع': safeCell(t.branch || ''),
+            'الصنف': safeCell((productById(t.product_id) || {}).name || ''),
+            'الوحدة': safeCell((productById(t.product_id) || {}).unit || ''),
+            'الكمية': t.qty
+        }));
+    if (tr.length) {
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tr), 'التحويلات');
+        sheets++;
+    }
+
+    const rv = Object.keys(S.sales).sort().filter(d => inRange(d, from, to)).map(d => {
+        const r = S.sales[d];
+        return { 'التاريخ': d, 'اليوم': DAYS_AR[weekdayOf(d)], 'الإيراد': r.revenue, 'العمليات': r.orders,
+            'متوسط الشيك': r.orders ? Number((r.revenue / r.orders).toFixed(2)) : 0 };
+    });
+    if (rv.length) {
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rv), 'الإيراد');
+        sheets++;
+    }
+
+    if (!sheets) return toast('مفيش بيانات في الفترة دي', 'error');
+    XLSX.writeFile(wb, `Kansas_${from}_${to}.xlsx`);
+    toast('تم تحميل الشيت');
+}
+
+function exportAnalysisXlsx() {
+    const r = anRange();
+    if (!r || !r.to) return toast('اختر تاريخ النهاية', 'error');
+    const res = readAnalysisRows();
+    if (res.error) return toast(res.error, 'error');
+    const rows = S.products.map(p => {
+        const x = res.rows[p.id];
+        const c = calcRow(p.id, r, x.opening, x.sold, x.closing === null ? '' : x.closing);
+        return {
+            'الصنف': safeCell(p.name), 'الوحدة': safeCell(p.unit),
+            'أول الشهر': x.opening, 'الوارد': c.rec, 'التحويلات (صافي)': c.net,
+            'المباع': x.sold, 'النظري': c.theo,
+            'الجرد الفعلي': x.closing ?? '', 'العجز / الزيادة': c.variance ?? ''
+        };
+    });
+    if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+    XLSX.writeFile(wb, `Kansas_Inventory_${r.from}_${r.to}.xlsx`);
+}
+
+function exportRevenueXlsx() {
+    const from = $('rev-from').value, to = $('rev-to').value;
+    const rows = Object.keys(S.sales).sort().filter(d => inRange(d, from, to)).map(d => {
+        const r = S.sales[d];
+        return { 'التاريخ': d, 'الإيراد': r.revenue, 'العمليات': r.orders, 'متوسط الشيك': r.orders ? Number((r.revenue / r.orders).toFixed(2)) : 0 };
+    });
+    if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Revenue');
+    XLSX.writeFile(wb, 'Kansas_Revenue.xlsx');
+}
+
+function renderInventory() {
+    const m = activeMonth;
+    const al = $('inv-alert');
+    if (!S.openLocked[m]) {
+        al.classList.remove('hidden');
+        al.textContent = 'رصيد أول الشهر ده لسه مش محفوظ. افتح "الأصناف ورصيد أول الشهر" واحفظه.';
+    } else al.classList.add('hidden');
+
+    renderTiles();
+    renderOpening();
+    renderReceipts();
+    renderTransfers();
+    renderAnalysis();
+    renderOrderForecast();
+
+    const showPanel = !!invView;
+    $('inv-tiles').classList.toggle('hidden', showPanel);
+    $('inv-export').classList.toggle('hidden', showPanel);
+    $('inv-panel').classList.toggle('hidden', !showPanel);
+    ['opening', 'receipts', 'transfers', 'analysis', 'orders'].forEach(k => {
+        $('pn-' + k).classList.toggle('hidden', k !== invView);
+    });
+    if (showPanel) {
+        $('panel-title').innerHTML = `<span class="tico"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${INV_ICONS[invView]}</svg></span>${INV_TITLES[invView]}`;
+    }
+}
+
+function switchOrderSubTab(tab) {
+    orderSubTab = tab;
+    $('orders-sub-config').classList.toggle('hidden', tab !== 'config');
+    $('orders-sub-table').classList.toggle('hidden', tab !== 'table');
+    $('orders-sub-actual').classList.toggle('hidden', tab !== 'actual');
+    
+    ['config', 'table', 'actual'].forEach(k => {
+        const btn = $('order-tile-' + k);
+        if (btn) {
+            btn.style.borderColor = (k === tab) ? 'var(--gold2)' : 'var(--border)';
+            btn.style.boxShadow = (k === tab) ? 'var(--shadow-lg)' : 'var(--shadow)';
+        }
+    });
+}
+
+function renderPer1000Products() {
+  const host = $('per1000-products'); if (!host) return;
+  if (!S.products.length) { host.innerHTML = '<div class="alert">أضف الأصناف أولًا من صفحة المخزون، ثم ارجع لاختيارها هنا.</div>'; return; }
+  host.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>اختيار</th><th>الصنف</th><th>الوحدة</th><th>معدل الكمية لكل 1000 جنيه</th></tr></thead><tbody>${S.products.map(p=>{
+    const cfg=S.per1000[p.id] || {}; const enabled=cfg.enabled===true;
+    return `<tr><td><input type="checkbox" ${enabled?'checked':''} aria-label="تفعيل ${esc(p.name)}" onchange="setPer1000Enabled('${esc(p.id)}',this.checked)"></td><td><b>${esc(p.name)}</b></td><td>${esc(p.unit||'—')}</td><td><input class="inp xs" type="number" min="0" step="0.01" value="${cfg.rate===undefined?'':esc(String(cfg.rate))}" placeholder="مثال: 1" onchange="setPer1000Rate('${esc(p.id)}',this.value)" ${enabled?'':'disabled'}></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+function setPer1000Enabled(id, enabled) {
+  S.per1000[id]=S.per1000[id]||{rate:0}; S.per1000[id].enabled=!!enabled; saveDB(); renderOrderForecast(); renderPer1000Products();
+}
+function setPer1000Rate(id, value) {
+  const rate=value===''?0:Number(value);
+  if(!Number.isFinite(rate)||rate<0) return toast('أدخل معدلًا صحيحًا','error');
+  S.per1000[id]=S.per1000[id]||{enabled:true}; S.per1000[id].rate=rate; if(S.per1000[id].enabled===undefined) S.per1000[id].enabled=true;
+  saveDB(); renderOrderForecast();
+}
+function orderStartDate() {
+  const el=$('orders-start-date');
+  if(el && el.value) return el.value;
+  const d=addDays(todayStr(),1); if(el) el.value=d; return d;
+}
+function renderOrderForecast() {
+  if(!$('orders-rows')) return;
+  renderPer1000Products();
+  switchOrderSubTab(orderSubTab);
+  const start=orderStartDate();
+  const history=forecastHistory(), trend=forecastTrend(history);
+  const days=Array.from({length:7},(_,i)=>addDays(start,i));
+  const forecasts=days.map(day=>forecastOne(day,history,trend));
+  const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
+  const quantities=forecasts.map(f=>products.map(p=>({id:p.id,qty:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100})));
+  $('orders-head').innerHTML=`<tr><th>اليوم والتاريخ</th><th>الإيراد المتوقع</th>${products.map(p=>`<th>${esc(p.name)}<br><span class="muted">${esc(p.unit||'')}</span></th>`).join('')}</tr>`;
+  $('orders-rows').innerHTML=forecasts.map((f,i)=>`<tr><td><b>${DAYS_AR[weekdayOf(f.day)]}</b><br><span class="muted">${f.day}</span></td><td><b>${f.base?fmt(f.predicted)+' ج.م':'لا توجد بيانات'}</b></td>${products.map(p=>{const q=quantities[i].find(x=>x.id===p.id)?.qty||0;return `<td><b>${f.base?fmt(q,2):'—'}</b></td>`}).join('')}</tr>`).join('');
+  const totalRev=forecasts.reduce((a,f)=>a+f.predicted,0);
+  const totals=products.map(p=>quantities.reduce((a,row)=>a+(row.find(x=>x.id===p.id)?.qty||0),0));
+  $('orders-foot').innerHTML=`<tr><th>إجمالي الأسبوع</th><th>${fmt(totalRev)} ج.م</th>${totals.map(q=>`<th>${fmt(q,2)}</th>`).join('')}</tr>`;
+  $('orders-print-period').textContent=`من ${days[0]} إلى ${days[6]}`;
+  $('orders-note').textContent=products.length?`تم حساب ${products.length} صنفًا من توقع الإيراد. المعدل = كمية الصنف لكل 1000 جنيه مبيعات. الكميات معروضة حتى منزلتين عشريتين.`:'اختار صنفًا واحدًا على الأقل وأدخل معدل Per 1000 أكبر من صفر لعرض الطلبيات.';
+  const saved=S.orderSnapshots[start];
+  $('orders-snapshot-status').textContent=saved?`يوجد اعتماد محفوظ لهذا الأسبوع بتاريخ ${saved.savedAt||''}. حفظ اعتماد جديد سيحدّث النسخة.`:'';
+  renderOrderActualReview(start);
+}
+function renderOrderActualReview(start) {
+  const host=$('orders-actual-review'); if(!host) return;
+  const snap=S.orderSnapshots[start];
+  if(!snap || !snap.rows || !snap.rows.length) { host.textContent='اعتمد نسخة الأسبوع أولًا لتفعيل المقارنة.'; return; }
+  const rows=[];
+  snap.rows.forEach((day,di)=>(day.items||[]).forEach(item=>{
+    const actual=item.actual===undefined||item.actual===null?'':item.actual;
+    const diff=actual===''?null:Number(actual)-Number(item.quantity||0);
+    rows.push(`<tr><td>${day.weekday}<br><span class="muted">${day.date}</span></td><td><b>${esc(item.name)}</b> <span class="muted">${esc(item.unit||'')}</span></td><td>${fmt(Number(item.quantity||0),2)}</td><td><input class="inp xs" type="number" min="0" step="0.01" value="${actual}" placeholder="الفعلي" onchange="saveOrderActual('${start}',${di},'${esc(item.productId)}',this.value)"></td><td id="order-diff-${di}-${esc(item.productId)}">${diff===null?'—':`${diff>0?'+':''}${fmt(diff,2)}`}</td></tr>`);
+  }));
+  host.innerHTML=rows.length?`<div class="tbl-wrap"><table><thead><tr><th>اليوم والتاريخ</th><th>الصنف</th><th>المتوقع</th><th>الفعلي</th><th>الفرق (فعلي - متوقع)</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`:'لا توجد أصناف محفوظة في نسخة الأسبوع.';
+}
+function saveOrderActual(start, dayIndex, productId, value) {
+  const snap=S.orderSnapshots[start]; if(!snap || !snap.rows[dayIndex]) return;
+  const actual=value===''?null:Number(value);
+  if(actual!==null && (!Number.isFinite(actual)||actual<0)) return toast('أدخل كمية فعلية صحيحة','error');
+  const item=(snap.rows[dayIndex].items||[]).find(x=>x.productId===productId); if(!item) return;
+  item.actual=actual; saveDB();
+  const diffEl=$(`order-diff-${dayIndex}-${productId}`);
+  if(diffEl) diffEl.textContent=actual===null?'—':`${actual-Number(item.quantity||0)>0?'+':''}${fmt(actual-Number(item.quantity||0),2)}`;
+}
+
+function saveOrderSnapshot() {
+  const start=orderStartDate();
+  const history=forecastHistory(), trend=forecastTrend(history);
+  const days=Array.from({length:7},(_,i)=>addDays(start,i));
+  const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
+  if(!products.length) return toast('اختار الأصناف وأدخل معدلات Per 1000 أولًا','error');
+  const rows=days.map(day=>{const f=forecastOne(day,history,trend);return {date:day,weekday:DAYS_AR[weekdayOf(day)],revenue:f.predicted,items:products.map(p=>({productId:p.id,name:p.name,unit:p.unit,rate:Number(S.per1000[p.id].rate),quantity:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100}))}});
+  S.orderSnapshots[start]={start,end:days[6],savedAt:new Date().toLocaleString('ar-EG'),rows}; saveDB(); renderOrderForecast(); toast('تم نسخة الطلبية المتوقعة للأسبوع');
+}
+function printOrdersPdf() {
+  document.body.classList.add('print-orders');
+  const clean=()=>document.body.classList.remove('print-orders');
+  window.addEventListener('afterprint',clean,{once:true});
+  setTimeout(()=>window.print(),80);
+}
+function printSalesForecast() {
+  document.body.classList.add('print-salesforecast');
+  const clean=()=>document.body.classList.remove('print-salesforecast');
+  window.addEventListener('afterprint',clean,{once:true});
+  setTimeout(()=>window.print(),80);
+}
+
+function renderAll() {
+    renderSettings();
+    renderLyGrid();
+    renderSalesForm();
+    renderRevenue();
+    renderForecast();
+    renderInventory();
+    renderOrderForecast();
+    renderBackupAlert();
+}
+</script>
+</body>
+</html>
