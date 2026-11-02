@@ -3293,6 +3293,12 @@ function setPer1000Rate(id, value) {
   S.per1000[id]=S.per1000[id]||{enabled:true}; S.per1000[id].rate=rate; if(S.per1000[id].enabled===undefined) S.per1000[id].enabled=true;
   saveDB(); renderOrderForecast();
 }
+function planForecast(d) {
+  // نفس الأرقام اللي في جدول التخطيط للمبيعات (متوسط × اتجاه × مناسبات × نسبة النمو لكل يوم)
+  const before = forecastHistory().filter(x => x.date < d);
+  if (!before.length) return { day: d, base: 0, predicted: 0 };
+  return forecastOne(d, before, forecastTrend(before), rowGrowth(d));
+}
 function orderStartDate() {
   const el=$('orders-start-date');
   if(el && el.value) return el.value;
@@ -3305,7 +3311,7 @@ function renderOrderForecast() {
   const start=orderStartDate();
   const history=forecastHistory(), trend=forecastTrend(history);
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
-  const forecasts=days.map(day=>forecastOne(day,history,trend));
+  const forecasts=days.map(day=>planForecast(day));
   const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
   const quantities=forecasts.map(f=>products.map(p=>({id:p.id,qty:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100})));
   $('orders-head').innerHTML=`<tr><th>اليوم والتاريخ</th><th>الإيراد المتوقع</th>${products.map(p=>`<th>${esc(p.name)}<br><span class="muted">${esc(p.unit||'')}</span></th>`).join('')}</tr>`;
@@ -3347,7 +3353,7 @@ function saveOrderSnapshot() {
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
   const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
   if(!products.length) return toast('اختار الأصناف وأدخل معدلات Per 1000 أولًا','error');
-  const rows=days.map(day=>{const f=forecastOne(day,history,trend);return {date:day,weekday:DAYS_AR[weekdayOf(day)],revenue:f.predicted,items:products.map(p=>({productId:p.id,name:p.name,unit:p.unit,rate:Number(S.per1000[p.id].rate),quantity:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100}))}});
+  const rows=days.map(day=>{const f=planForecast(day);return {date:day,weekday:DAYS_AR[weekdayOf(day)],revenue:f.predicted,items:products.map(p=>({productId:p.id,name:p.name,unit:p.unit,rate:Number(S.per1000[p.id].rate),quantity:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100}))}});
   S.orderSnapshots[start]={start,end:days[6],savedAt:new Date().toLocaleString('ar-EG'),rows}; saveDB(); renderOrderForecast(); toast('تم نسخة الطلبية المتوقعة للأسبوع');
 }
 function printOrdersPdf() {
