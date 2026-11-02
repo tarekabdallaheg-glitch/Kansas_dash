@@ -866,13 +866,13 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 </div>
               </div>
 
-              <!-- 2. القالب الثاني: إدخال تاريخ الإنتاج -->
+              <!-- 2. القالب الثاني: إدخال تاريخ الإنتاج وحساب الانتهاء تلقائياً -->
               <div class="card" style="margin-bottom:16px">
                 <div class="row between" style="margin-bottom:10px">
                   <div class="h" style="margin:0">2. تسجيل تاريخ الإنتاج اليومي أو الأسبوعي</div>
                   <span class="badge open">قالب مستقل</span>
                 </div>
-                <div class="muted" style="margin-bottom:10px">أدخل تاريخ إنتاج كل صنف، والنظام سيحسب تاريخ الانتهاء تلقائياً بناءً على فترة الصلاحية المسجلة.</div>
+                <div class="muted" style="margin-bottom:10px">أدخل تاريخ إنتاج كل صنف وقت ما تحب، والنظام سيحسب تاريخ الانتهاء تلقائياً بناءً على فترة الصلاحية المسجلة.</div>
                 <div id="expiry-production-rows"></div>
                 <div class="row" style="margin-top:14px;justify-content:flex-end">
                   <button class="btn btn-gold" onclick="saveExpiryProduction()">حفظ وغلق قالب الإنتاج</button>
@@ -945,6 +945,33 @@ const addDays = (day, n) => { const [y, m, d] = day.split('-').map(Number); retu
 const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
 const weekdayOf = day => { const [y, m, d] = day.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); };
 const lyDay = day => (Number(day.slice(0, 4)) - 1) + day.slice(4);
+
+// الدالة المفقودة التي كانت تسبب خطأ التشغيل
+function eachDay(from, to, fn) {
+    if (!from || !to || from > to) return;
+    let curr = from;
+    while (curr <= to) {
+        fn(curr);
+        curr = addDays(curr, 1);
+    }
+}
+
+function shiftMonth(key, delta) {
+    let [y, m] = key.split('-').map(Number);
+    m += delta;
+    while (m > 12) { m -= 12; y++; }
+    while (m < 1) { m += 12; y--; }
+    return `${y}-${pad(m)}`;
+}
+
+function inRange(d, from, to) {
+    return (!from || d >= from) && (!to || d <= to);
+}
+
+function mean(arr) {
+    if (!arr.length) return 0;
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
 
 const ICON_PATHS = {
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -2098,7 +2125,6 @@ function renderTiles() {
 
     $('ts-analysis').textContent = $('an-to').value ? 'لحد ' + $('an-to').value : 'اختار تاريخ';
     
-    // حالة الصلاحيات للملخص في البطاقة الرئيسية
     let expiredCount = 0, warningCount = 0;
     const today = todayStr();
     S.products.forEach(p => {
@@ -2166,7 +2192,7 @@ function addProduct() {
 }
 
 async function deleteProduct(id) {
-    if (productUsed(id)) return toast('الصنف ده عليه حركات، مينفعش يتحذف', 'error');
+    if (productUsed(id)) return toast('الصنف ده عليه حطات، مينفعش يتحذف', 'error');
     const p = productById(id);
     if (!p) return;
     if (!await askConfirm(`حذف الصنف "${p.name}"؟`, 'حذف')) return;
@@ -2235,6 +2261,19 @@ function rcValue(d, p) {
 }
 
 function rcSet(pid, v) { rcDraft[pid] = v; }
+
+function applySearch(containerId, inputId, nomatchId) {
+    const q = ($(inputId).value || '').trim().toLowerCase();
+    const rows = $(containerId).querySelectorAll('[data-search]');
+    let count = 0;
+    rows.forEach(r => {
+        const match = !q || r.getAttribute('data-search').includes(q);
+        r.classList.toggle('hidden', !match);
+        if (match) count++;
+    });
+    const nomatch = $(nomatchId);
+    if (nomatch) nomatch.classList.toggle('hidden', !(q && count === 0));
+}
 
 function renderReceipts() {
     const d = $('rc-day').value;
@@ -2805,7 +2844,6 @@ function renderInventory() {
 }
 
 function renderExpiryModule() {
-    // 1. القالب الأول: إعداد فترات الصلاحية
     const configHost = $('expiry-config-rows');
     if (configHost) {
         configHost.innerHTML = S.products.length ? `<div class="tbl-wrap"><table><thead><tr><th>الصنف</th><th>الوحدة</th><th>فترة الصلاحية الثابتة</th></tr></thead><tbody>${S.products.map(p=>{
@@ -2814,7 +2852,6 @@ function renderExpiryModule() {
         }).join('')}</tbody></table></div>` : '<div class="muted">أضف أصنافاً للمخزون أولاً.</div>';
     }
 
-    // 2. القالب الثاني: تسجيل تاريخ الإنتاج
     const prodHost = $('expiry-production-rows');
     if (prodHost) {
         prodHost.innerHTML = S.products.length ? `<div class="tbl-wrap"><table><thead><tr><th>الصنف</th><th>الوحدة</th><th>تاريخ الإنتاج</th></tr></thead><tbody>${S.products.map(p=>{
@@ -2823,7 +2860,6 @@ function renderExpiryModule() {
         }).join('')}</tbody></table></div>` : '<div class="muted">أضف أصنافاً للمخزون أولاً.</div>';
     }
 
-    // 3. القالب الثالث: جدول المتابعة والترتيب التصاعدي (FEFO) + 4. الملخص والتحذيرات تحته
     const tableHost = $('expiry-table-rows');
     const summaryBox = $('expiry-summary-box');
     if (tableHost && summaryBox) {
@@ -2867,7 +2903,6 @@ function renderExpiryModule() {
             </tr>`;
         }).join('') : '<tr><td colspan="6" class="muted">لا توجد أصناف للمتابعة.</td></tr>';
 
-        // حساب الملخص تحت القوالب
         let expired = 0, warning = 0, totalTracked = 0;
         computedItems.forEach(x => {
             if (x.diff !== null) {
