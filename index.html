@@ -551,7 +551,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
             <details class="sub" style="margin-top:12px">
                 <summary>الجدول يوماً بيوم</summary>
                 <div class="tbl-wrap" style="margin-top:10px"><table>
-                    <thead><tr><th>يوم الفترة الأولى</th><th>إيراد</th><th>عمليات</th><th>يوم الفترة الثانية</th><th>إيراد</th><th>عمليات</th><th>الفرق (إيراد)</th><th>النسبة</th></tr></thead>
+                    <thead><tr><th>يوم الفترة الأولى</th><th>إيراد</th><th>عمليات</th><th>يوم الفترة الثانية</th><th>إيراد</th><th>عمليات</th><th>الفرق (إيراد)</th><th>النسبة (إيراد)</th><th>الفرق (عمليات)</th><th>النسبة (عمليات)</th></tr></thead>
                     <tbody id="cmp-body"></tbody>
                 </table></div>
             </details>
@@ -600,7 +600,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 <div>
                     <div class="eyebrow">التخطيط للمبيعات</div>
                     <div class="h" style="margin:3px 0">Sales Forecasting - توقع المبيعات</div>
-                    <div class="muted">يتعلم تلقائيًا من المبيعات التي تسجلها، ولا يشترط وجود 4 أسابيع سابقة</div>
+                    <div class="muted">يتعلم تلقائيًا من المبيعات التي تسجلها، مع إمكانية تعديل أو مسح البيانات المضافة في أي وقت</div>
                 </div>
                 <span class="badge open">توقع 7 أيام</span>
             </div>
@@ -611,11 +611,12 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 <tfoot><tr><th>إجمالي الأسبوع</th><th id="forecast-total">—</th><th colspan="2" id="forecast-confidence">—</th></tr></tfoot>
             </table></div>
             <details style="margin-top:14px" open>
-                <summary>تغذية النظام ببيانات الأسابيع السابقة</summary>
-                <div class="muted" style="margin:8px 0">الصق البيانات في صورة: التاريخ، الإيراد فقط. كل يوم في سطر. مثال: 2026-10-01,42000. يقبل CSV أو نسخ صفوف من Excel.</div>
+                <summary>إدارة وتغذية النظام ببيانات الأسابيع السابقة</summary>
+                <div class="muted" style="margin:8px 0">الصق البيانات في صورة: التاريخ، الإيراد فقط. كل يوم في سطر. مثال: 2026-10-01,42000. يمكنك الإضافة أو تعديل البيانات الحالية ومسحها بالكامل لو أردت البدء من جديد.</div>
                 <textarea id="forecast-history-input" class="inp" rows="5" placeholder="2026-10-01,42000&#10;2026-10-02,45000&#10;2026-10-03,39000" style="width:100%;resize:vertical"></textarea>
-                <div class="row" style="margin-top:8px;align-items:center">
-                    <button class="btn btn-gold" onclick="importForecastHistory()">إضافة البيانات للتعلم</button>
+                <div class="row" style="margin-top:8px;align-items:center;gap:8px">
+                    <button class="btn btn-gold" onclick="importForecastHistory()">إضافة أو تحديث البيانات للتعلم</button>
+                    <button class="btn btn-red" onclick="clearForecastHistory()">مسح بيانات التعلم وإعادة التعيين</button>
                     <span class="muted" id="forecast-history-count"></span>
                 </div>
             </details>
@@ -852,7 +853,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
 const STORE_KEY = 'kansas_v8';
 
 const $ = id => document.getElementById(id);
-const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;min'}[c] || c));
 const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
 const int = v => { const n = parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : 0; };
 const fmt = (n, d = 0) => (Number.isFinite(n) ? n : 0).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -1301,8 +1302,6 @@ function analyzeRevenue(from, to) {
     const expected = planDaily * elapsed;
     const pace = expected > 0 ? m.rev / expected : null;
     const required = (c.plan_rev > 0 && remDays > 0) ? Math.max(0, c.plan_rev - m.rev) / remDays : null;
-    
-    // تم تصحيح حساب المتوقع ليكون دقيقاً بناءً على الإيراد المحقق الفعلي والأيام المسجلة (أو المتوقع بناءً على الأداء الفعلي الفعلي)
     const projected = m.days > 0 ? (m.rev / m.days) * dim : 0;
     const projPlan = c.plan_rev > 0 ? projected / c.plan_rev : null;
     const lyM = lyMonthTotal(activeMonth);
@@ -1530,14 +1529,23 @@ function renderCompare() {
     const A = periodStats(pa1, pa2);
     const B = periodStats(pb1, pb2);
 
-    const g = B.avgRev ? (A.avgRev - B.avgRev) / B.avgRev : null;
-    const w = trendWord(g);
+    const revGrowth = B.rev ? (A.rev - B.rev) / B.rev : null;
+    const ordGrowth = B.ord ? (A.ord - B.ord) / B.ord : null;
+    const revTrend = trendWord(revGrowth);
+    const ordTrend = trendWord(ordGrowth);
     
-    $('cmp-head').innerHTML = `<div class="tb">
-        <div class="muted">متوسط اليوم في الفترة الأولى مقارنة بالثانية</div>
-        <div class="big ${w.cls}">${w.arrow} ${w.word}${g !== null && g !== 0 ? ' ' + (Math.abs(g) * 100).toFixed(1) + '%' : ''}</div>
-        <div class="muted">${fmt(A.avgRev)} ج.م في اليوم (الأولى) مقابل ${fmt(B.avgRev)} ج.م في اليوم (الثانية)</div>
-    </div>`;
+    // تم ضبط الملخص العلوي ليعرض إجمالي الإيراد وإجمالي العمليات مقارنة الفترتين بالكامل
+    $('cmp-head').innerHTML = `
+        <div class="cmp-box">
+            <div class="lbl">مقارنة إجمالي الإيراد للفترتين</div>
+            <div class="big ${revTrend.cls}" style="font-size:22px;font-weight:800">${revTrend.arrow} ${revTrend.word} ${revGrowth !== null ? pct(revGrowth) : ''}</div>
+            <div class="muted">${fmt(A.rev)} ج.م (الأولى) مقابل ${fmt(B.rev)} ج.م (الثانية)</div>
+        </div>
+        <div class="cmp-box">
+            <div class="lbl">مقارنة إجمالي العمليات للفترتين</div>
+            <div class="big ${ordTrend.cls}" style="font-size:22px;font-weight:800">${ordTrend.arrow} ${ordTrend.word} ${ordGrowth !== null ? pct(ordGrowth) : ''}</div>
+            <div class="muted">${fmt(A.ord)} عملية (الأولى) مقابل ${fmt(B.ord)} عملية (الثانية)</div>
+        </div>`;
 
     const row = (lbl, a, b, dec = 0) => `<tr><td>${lbl}</td><td><b>${fmt(a, dec)}</b></td><td>${fmt(b, dec)}</td><td>${diffHtml(a, b, dec)}</td></tr>`;
     $('cmp-summary').innerHTML = `
@@ -1565,10 +1573,15 @@ function renderCompare() {
         const br = bRec && bRec.exists ? bRec.rev : null;
         const bo = bRec && bRec.exists ? bRec.ord : null;
         
-        const diff = (ar ?? 0) - (br ?? 0);
-        const dp = br !== null && br > 0 ? diff / br : null;
-        const cls = diff > 0 ? 'up' : (diff < 0 ? 'down' : '');
+        const revDiff = (ar ?? 0) - (br ?? 0);
+        const revDp = br !== null && br > 0 ? revDiff / br : null;
+        const revCls = revDiff > 0 ? 'up' : (revDiff < 0 ? 'down' : '');
+
+        const ordDiff = (ao ?? 0) - (bo ?? 0);
+        const ordDp = bo !== null && bo > 0 ? ordDiff / bo : null;
+        const ordCls = ordDiff > 0 ? 'up' : (ordDiff < 0 ? 'down' : '');
         
+        // تم إضافة نسب وفرق العمليات بجانب الإيراد في الجدول يوم بيوم
         rows.push(`<tr>
             <td>${ad ? esc(ad) : '-'}</td>
             <td>${ar === null ? '<span class="muted">—</span>' : fmt(ar)}</td>
@@ -1576,8 +1589,10 @@ function renderCompare() {
             <td>${bd ? esc(bd) : '-'}</td>
             <td>${br === null ? '<span class="muted">—</span>' : fmt(br)}</td>
             <td>${bo === null ? '<span class="muted">—</span>' : fmt(bo)}</td>
-            <td class="${ar !== null && br !== null ? cls : ''}">${ar !== null && br !== null ? ((diff > 0 ? '+' : '') + fmt(diff)) : '—'}</td>
-            <td class="${ar !== null && br !== null && dp !== null ? cls : ''}">${dp === null ? '—' : pct(dp)}</td>
+            <td class="${ar !== null && br !== null ? revCls : ''}">${ar !== null && br !== null ? ((revDiff > 0 ? '+' : '') + fmt(revDiff)) : '—'}</td>
+            <td class="${ar !== null && br !== null && revDp !== null ? revCls : ''}">${revDp === null ? '—' : pct(revDp)}</td>
+            <td class="${ao !== null && bo !== null ? ordCls : ''}">${ao !== null && bo !== null ? ((ordDiff > 0 ? '+' : '') + fmt(ordDiff)) : '—'}</td>
+            <td class="${ao !== null && bo !== null && ordDp !== null ? ordCls : ''}">${ordDp === null ? '—' : pct(ordDp)}</td>
         </tr>`);
     }
     $('cmp-body').innerHTML = rows.join('');
@@ -1759,6 +1774,14 @@ function importForecastHistory() {
     saveDB(); renderAll();
     $('forecast-history-input').value='';
     toast(`تم إدخال ${added} يوم${overwritten ? ` (تحديث ${overwritten} يوم)` : ''}${skipped ? `، وتجاهل ${skipped} صف` : ''}`);
+}
+
+async function clearForecastHistory() {
+    if(!await askConfirm('هل أنت متأكد من مسح جميع بيانات مبيعات التعلم وسجل الإيرادات لبدء إدخال بيانات جديدة بالكامل؟', 'مسح الكل')) return;
+    S.sales = {};
+    saveDB();
+    renderAll();
+    toast('تم مسح جميع بيانات مبيعات التعلم بنجاح');
 }
 
 function saveForecastEvent() {
