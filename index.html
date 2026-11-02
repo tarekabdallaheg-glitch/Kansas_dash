@@ -36,10 +36,10 @@ body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,-apple-system,sans-serif;b
 .inp.xs{width:140px;max-width:100%;text-align:center}
 .inp:disabled{opacity:.55}
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 input[type=number] {
   -moz-appearance: textfield;
@@ -251,7 +251,7 @@ details.sub[open] summary::before{content:"▾ "}
     .btn-sm{font-size:13px;padding:9px 15px}
     .tabs{width:100%; max-width:none;}
     .tabs .btn{font-size:15px;padding:13px 10px}
-    .tiles{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px; width:100%; max-width:none;}
+    .tiles{grid-template-columns:repeat(6,minmax(0,1fr));gap:16px; width:100%; max-width:none;}
     .tile{padding:32px 18px;border-radius:22px}
     .tico{width:66px;height:66px;border-radius:20px}
     .tico .ico{width:30px;height:30px}
@@ -353,6 +353,17 @@ html:not(.dark) .chip.up{color:#087a52}
 html:not(.dark) .chip.down{color:#b4232b}
 html:not(.dark) details.sub summary{color:#244d78}
 html:not(.dark) .prow{border-color:#dce4ee}
+
+/* ===== إضافات صلاحية المنتجات والمتوقع مقابل الفعلي ===== */
+#print-exp-tmp{display:none}
+tr.rowred td{background:rgba(214,69,69,.12)}
+tr.rowyel td{background:rgba(183,121,31,.14)}
+@media print{
+  body.print-exp-mode > *:not(#print-exp-tmp){display:none!important}
+  #print-exp-tmp{display:block!important;background:#fff;color:#000;padding:8px}
+  #print-exp-tmp table{width:100%;border-collapse:collapse;font-size:12px}
+  #print-exp-tmp th,#print-exp-tmp td{border:1px solid #777;padding:6px;color:#000;text-align:right}
+}
 </style>
 </head>
 <body>
@@ -604,11 +615,18 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 </div>
                 <span class="badge open">توقع 7 أيام</span>
             </div>
+            <div class="row" style="margin-top:12px;gap:10px">
+                
+                <span class="muted">تاريخ الشهر</span>
+                <input type="date" id="fc-start" class="inp sm" onchange="setForecastDate(this.value)">
+                <span class="muted">نسبة النمو % (من 5 لـ 10)</span>
+                <input type="number" id="fc-growth" class="inp xs" min="5" max="10" step="0.5" value="5" onchange="renderForecast();renderVariance()">
+            </div>
             <div id="forecast-summary" class="note" style="margin-top:12px">ابدأ بتسجيل المبيعات أو استيراد بيانات سابقة لبناء التوقع.</div>
             <div class="tbl-wrap" style="margin-top:12px"><table>
-                <thead><tr><th>اليوم والتاريخ</th><th>التوقع المرجح</th><th>المناسبة / التأثير</th><th>مستوى الثقة</th></tr></thead>
+                <thead><tr><th>اليوم</th><th>متوسط الإيراد</th><th>نسبة النمو %</th><th>المتوقع</th><th>الفعلي</th><th>الفرق (الفعلي − المتوقع)</th><th>نسبة الفرق</th><th>نمو عن اليوم السابق</th></tr></thead>
                 <tbody id="forecast-rows"></tbody>
-                <tfoot><tr><th>إجمالي الأسبوع</th><th id="forecast-total">—</th><th colspan="2" id="forecast-confidence">—</th></tr></tfoot>
+                <tfoot><tr><th>الإجمالي (أيام لها فعلي)</th><th></th><th></th><th id="var-tot-exp">—</th><th id="var-tot-act">—</th><th id="var-tot-diff">—</th><th id="var-tot-pct">—</th><th></th></tr></tfoot>
             </table></div>
             <details style="margin-top:14px" open>
                 <summary>إدارة وتغذية النظام ببيانات الأسابيع السابقة</summary>
@@ -631,6 +649,24 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 <div class="row" style="margin-top:8px"><button class="btn btn-gold" onclick="saveForecastEvent()">حفظ المناسبة</button></div>
                 <div id="forecast-events-list" style="margin-top:10px"></div>
             </details>
+
+            <div class="card" style="margin-top:14px">
+                <span id="var-month" class="hidden"></span>
+                <div class="muted" style="margin-bottom:10px">متوسط الإيراد والمتوقع بيتحسبوا تلقائياً، والفعلي بيتسحب من إدخال الإيراد اليومي.</div>
+                <div class="tbl-wrap"><table>
+                    
+                    
+                    
+                </table></div>
+                <div class="h" style="margin-top:16px">حاسبة نسبة النمو</div>
+                <div class="row">
+                    <input id="gr-old" class="inp sm" type="number" placeholder="القيمة القديمة">
+                    <input id="gr-new" class="inp sm" type="number" placeholder="القيمة الجديدة">
+                    <button class="btn btn-gold" onclick="calcGrowth()">احسب</button>
+                    <span id="gr-result" class="chip2"></span>
+                </div>
+            </div>
+
             <div class="row no-print" style="margin-top:14px;justify-content:flex-end"><button class="btn btn-green" onclick="printSalesForecast()">طباعة / حفظ PDF</button></div>
             <div class="muted" style="margin-top:12px">ملاحظة: التوقع تقديري وليس ضمانًا للمبيعات. دقته تتحسن كلما زادت البيانات. تواريخ الأعياد الدينية تتغير سنويًا؛ راجع التاريخ وأضفه عند إعلان الإجازة رسميًا.</div>
         </div>
@@ -666,6 +702,11 @@ html:not(.dark) .prow{border-color:#dce4ee}
                 <span class="tico"><svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/></svg></span>
                 <span class="tname">الطلبيات المتوقعة</span>
                 <span class="tstat">Per 1000 · 7 أيام</span>
+            </button>
+            <button class="tile" onclick="openInv('expiry')">
+                <span class="tico"><svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
+                <span class="tname">صلاحية المنتجات</span>
+                <span class="tstat" id="ts-expiry"></span>
             </button>
         </div>
 
@@ -872,6 +913,55 @@ html:not(.dark) .prow{border-color:#dce4ee}
               </div>
 
             </div>
+
+            <!-- ===== صلاحية المنتجات ===== -->
+            <div id="pn-expiry" class="hidden">
+              <div class="tiles no-print" style="margin-bottom:16px;grid-template-columns:repeat(3,1fr)">
+                <button class="tile" id="exp-tile-define" onclick="switchExpSub('define')">
+                  <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                  <span class="tname">تعريف صلاحية الأصناف</span>
+                  <span class="tstat">كام يوم أو شهر أو سنة</span>
+                </button>
+                <button class="tile" id="exp-tile-daily" onclick="switchExpSub('daily')">
+                  <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg></span>
+                  <span class="tname">إدخال الإنتاج اليومي</span>
+                  <span class="tstat">كميات الإنتاج لكل يوم</span>
+                </button>
+                <button class="tile" id="exp-tile-report" onclick="switchExpSub('report')">
+                  <span class="tico"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/></svg></span>
+                  <span class="tname">الترتيب والتقرير</span>
+                  <span class="tstat">الأقرب للانتهاء أولاً</span>
+                </button>
+              </div>
+
+              <div id="exp-warn" class="note" style="margin-bottom:14px"></div>
+
+              <div class="card hidden" id="exp-sub-define">
+                <div class="h">تعريف مدة صلاحية كل صنف</div>
+                <div class="muted" style="margin-bottom:10px">اختار المدة والوحدة (يوم، شهر، سنة).</div>
+                <div id="exp-define-list"></div>
+                <div class="row" style="margin-top:16px"><button class="btn btn-gold" onclick="saveShelfDefs()">حفظ وإغلاق</button></div>
+              </div>
+
+              <div class="card hidden" id="exp-sub-daily">
+                <div class="row" style="margin-bottom:12px">
+                  <span class="muted">تاريخ الإنتاج</span>
+                  <input type="date" id="exp-day" class="inp sm" onchange="renderExpDaily()">
+                </div>
+                <div id="exp-daily-list"></div>
+                <div class="row" style="margin-top:16px"><button class="btn btn-gold" onclick="saveExpDaily()">حفظ وإغلاق</button></div>
+              </div>
+
+              <div class="card hidden" id="exp-sub-report">
+                <div class="h">جدول الصلاحية (الأقرب للانتهاء أولاً)</div>
+                <div id="exp-report-body"></div>
+                <div class="row no-print" style="margin-top:16px">
+                  <button class="btn btn-green" onclick="exportExpiryXlsx()">تحميل Excel</button>
+                  <button class="btn btn-green" onclick="printExpiry()">تحميل PDF</button>
+                  <button class="btn btn-gold" onclick="closeInv()">حفظ وإغلاق</button>
+                </div>
+              </div>
+            </div>
         </div>
     </section>
 
@@ -977,6 +1067,7 @@ const emptyDB = () => ({
     analyses: [],
     sales: {}, monthly: {}, lyDaily: {}, forecastEvents: {},
     per1000: {}, orderSnapshots: {},
+    expected: {}, shelf: {}, batches: [],
     locks: { sales: {} },
     lastBackup: null
 });
@@ -992,6 +1083,9 @@ function migrate(d) {
     d.forecastEvents = d.forecastEvents || {};
     d.per1000 = d.per1000 || {};
     d.orderSnapshots = d.orderSnapshots || {};
+    d.expected = d.expected || {};
+    d.shelf = d.shelf || {};
+    d.batches = d.batches || [];
     if (d.stock) {
         const days = Object.keys(d.stock).sort();
         days.forEach(day => {
@@ -1020,6 +1114,9 @@ function normalize(d) {
     out.per1000 = out.per1000 || {};
     out.orderSnapshots = out.orderSnapshots || {};
     out.transfers = (out.transfers || []).map(t => ({ ...t, product_id: t.product_id || t.productId }));
+    out.expected = out.expected || {};
+    out.shelf = out.shelf || {};
+    out.batches = out.batches || [];
     return out;
 }
 
@@ -1032,6 +1129,7 @@ let rcDraft = {};
 let rcDraftDay = null;
 let anKey = '';
 let anLoadRows = null;
+let expSub = 'report';
 
 function loadDB() {
     try {
@@ -1135,7 +1233,7 @@ function switchTab(tab) {
     $('tab-btn-revenue').classList.toggle('on', tab === 'revenue');
     $('tab-btn-salesforecast').classList.toggle('on', tab === 'salesforecast');
     $('tab-btn-inventory').classList.toggle('on', tab === 'inventory');
-    if (tab === 'salesforecast') renderForecast();
+    if (tab === 'salesforecast') { renderForecast(); renderVariance(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1345,7 +1443,7 @@ function analyzeRevenue(from, to) {
     const m = salesIn(monthStart(activeMonth), monthEnd(activeMonth));
     const c = cfg(activeMonth);
     const planDaily = c.plan_rev > 0 ? c.plan_rev / dim : 0;
-    
+
     const planPctToDate = (c.plan_rev > 0 && m.rev > 0) ? m.rev / c.plan_rev : null;
     const expectedToDate = planDaily * elapsed;
 
@@ -1365,7 +1463,7 @@ function analyzeRevenue(from, to) {
     const last3Vs = (last3Avg !== null && avgRev > 0) ? (last3Avg - avgRev) / avgRev : null;
 
     return { t, avgRev, avgOrd, avgChk, lyRev, lyOrd, lyDays, lyAvgRev, lyAvgChk,
-        growthLy, avgGrowthLy, ordGrowth, chkGrowth, dim, elapsed, remDays, m, c, planDaily, 
+        growthLy, avgGrowthLy, ordGrowth, chkGrowth, dim, elapsed, remDays, m, c, planDaily,
         planPct: planPctToDate, expected: expectedToDate, pace,
         required, projected, projPlan, lyM,
         wdAvg, best, worst, last3Avg, last3Vs, missing: missingRevenueDays() };
@@ -1584,7 +1682,7 @@ function renderCompare() {
     const ordGrowth = B.ord ? (A.ord - B.ord) / B.ord : null;
     const revTrend = trendWord(revGrowth);
     const ordTrend = trendWord(ordGrowth);
-    
+
     $('cmp-head').innerHTML = `
         <div class="cmp-box">
             <div class="lbl">مقارنة إجمالي الإيراد للفترتين</div>
@@ -1622,7 +1720,7 @@ function renderCompare() {
         const ao = aRec && aRec.exists ? aRec.ord : null;
         const br = bRec && bRec.exists ? bRec.rev : null;
         const bo = bRec && bRec.exists ? bRec.ord : null;
-        
+
         const revDiff = (ar ?? 0) - (br ?? 0);
         const revDp = br !== null && br > 0 ? revDiff / br : null;
         const revCls = revDiff > 0 ? 'up' : (revDiff < 0 ? 'down' : '');
@@ -1630,7 +1728,7 @@ function renderCompare() {
         const ordDiff = (ao ?? 0) - (bo ?? 0);
         const ordDp = bo !== null && bo > 0 ? ordDiff / bo : null;
         const ordCls = ordDiff > 0 ? 'up' : (ordDiff < 0 ? 'down' : '');
-        
+
         rows.push(`<tr>
             <td>${ad ? esc(ad) : '-'}</td>
             <td>${ar === null ? '<span class="muted">—</span>' : fmt(ar)}</td>
@@ -1685,7 +1783,7 @@ function revenueAssistantAnswer(question, a) {
         if (a.pace !== null && a.pace < 1) clues.push(`الإيراد متأخر عن وتيرة الخطة بنسبة ${Math.abs((1 - a.pace) * 100).toFixed(1)}%`);
         return clues.length ? `الأرقام بتوضح المؤشرات دي: ${clues.join('، ')}. دي مؤشرات تساعد في التحقيق، لكنها مش دليل لوحدها على السبب الفعلي. راجع العروض، ساعات الذروة، وقنوات البيع.` : 'الأرقام الحالية لا تثبت وجود انخفاض واضح. قارن عدد العمليات ومتوسط الشيك وساعات البيع قبل تحديد السبب.';
     }
-    return `ملخص الفترة: الإيراد ${money(a.t.rev)} من ${a.t.days} يوم مسجل، بمتوسط يومي ${money(a.avgRev)}, وعدد ${fmt(a.t.ord)} عملية، ومتوسط شيك ${money(a.avgChk)}. ${a.missing.length ? `فيه ${a.missing.length} يوم سابق ناقص التسجيل.` : 'لا توجد أيام سابقة ناقصة حسب البيانات الحالية.'} اسألني عن الخطة أو الشيك أو العمليات أو المقارنة بالسنة الماضية.`;
+    return `ملخص الفترة: الإيراد ${money(a.t.rev)} من ${a.t.days} يوم مسجل، بمتوسط يومي ${money(a.avgRev)}، وعدد ${fmt(a.t.ord)} عملية، ومتوسط شيك ${money(a.avgChk)}. ${a.missing.length ? `فيه ${a.missing.length} يوم سابق ناقص التسجيل.` : 'لا توجد أيام سابقة ناقصة حسب البيانات الحالية.'} اسألني عن الخطة أو الشيك أو العمليات أو المقارنة بالسنة الماضية.`;
 }
 
 function renderRevenueAssistant(a) {
@@ -1744,7 +1842,29 @@ function forecastTrend(history) {
     const factor = Math.max(0.85, Math.min(1.15, raw));
     return { factor, label: factor>1.015 ? 'اتجاه صاعد' : factor<0.985 ? 'اتجاه هابط' : 'اتجاه مستقر' };
 }
-function forecastOne(day, history, trend) {
+function setForecastDate(v) {
+    if (!v) return;
+    activeMonth = monthOf(v);
+    setMonthDefaults();
+    $('month-input').value = activeMonth;
+    renderAll();
+}
+
+function fcStartDate() {
+    const el = $('fc-start');
+    if (!el) return addDays(todayStr(), 1);
+    if (!el.value) el.value = addDays(todayStr(), 1);
+    return el.value;
+}
+function fcGrowth() {
+    const el = $('fc-growth');
+    let g = el ? Number(el.value) : 5;
+    if (!Number.isFinite(g)) g = 5;
+    const c = Math.min(10, Math.max(5, g));
+    if (el && c !== g) el.value = c;
+    return c;
+}
+function forecastOne(day, history, trend, gOverride) {
     const wd = weekdayOf(day);
     const same = history.filter(x=>x.weekday===wd).slice(-8);
     const all = history.slice(-28);
@@ -1778,14 +1898,14 @@ function forecastOne(day, history, trend) {
             if (ratios.length >= 2) confidence = confidence === 'مرتفعة' ? 'مرتفعة' : 'متوسطة';
         }
     }
-    const predicted = Math.max(0, base * trend.factor * (1 + impact/100));
+    const predicted = Math.max(0, base * trend.factor * (1 + impact/100) * (1 + (gOverride ?? fcGrowth())/100));
     return { day, base, predicted, event, impact, learned, confidence, basis };
 }
-function renderForecast() {
+function renderForecastOld() {
     const body = $('forecast-rows'); if (!body) return;
     const history = forecastHistory();
     const trend = forecastTrend(history);
-    const days = Array.from({length:7},(_,i)=>addDays(todayStr(),i+1));
+    const days = Array.from({length:7},(_,i)=>addDays(fcStartDate(),i));
     const rows = days.map(d=>forecastOne(d,history,trend));
     const total = rows.reduce((a,x)=>a+x.predicted,0);
     body.innerHTML = rows.map(x=>`<tr><td>${DAYS_AR[weekdayOf(x.day)]}<br><span class="muted">${x.day}</span></td><td><b>${x.base ? fmt(x.predicted)+' ج.م' : 'بانتظار البيانات'}</b></td><td>${x.event ? esc(x.event.name)+((x.event.impact!==null || x.learned) ? `<br><span class="muted">${x.learned?'تأثير متعلم ':'تأثير محدد '}${x.impact>0?'+':''}${x.impact.toFixed(0)}%</span>` : '<br><span class="muted">التأثير غير محدد؛ لم يُفترض رقم</span>') : 'يوم عادي'}</td><td>${x.confidence}<br><span class="muted">${esc(x.basis)}</span></td></tr>`).join('');
@@ -1850,6 +1970,126 @@ function renderForecastEvents() {
     const el=$('forecast-events-list'); if(!el) return;
     const entries=Object.entries(S.forecastEvents||{}).sort((a,b)=>a[0].localeCompare(b[0]));
     el.innerHTML=entries.length ? `<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>المناسبة</th><th>التأثير</th><th></th></tr></thead><tbody>${entries.map(([d,e])=>`<tr><td>${d}</td><td>${esc(e.name)}</td><td>${e.impact===null||e.impact===undefined?'غير محدد':(e.impact>0?'+':'')+e.impact+'%'}</td><td><button class="btn btn-red btn-sm" onclick="deleteForecastEvent('${d}')">حذف</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="muted">لا توجد مناسبات مضافة يدويًا. الإجازات الثابتة تظهر تلقائيًا في التوقع.</div>';
+}
+
+/* ===== المتوقع مقابل الفعلي ===== */
+function setExpected(d, v) {
+    if (v === '') delete S.expected[d];
+    else {
+        const n = num(v);
+        if (n < 0) return toast('المتوقع لازم يكون صفر أو أكبر', 'error');
+        S.expected[d] = n;
+    }
+    saveDB(); renderVariance();
+}
+
+function renderVarianceOld() {
+    const body = $('var-rows'); if (!body) return;
+    const days = [];
+    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => days.push(d));
+    $('var-month').textContent = `${MONTHS_AR[Number(activeMonth.slice(5)) - 1]} ${activeMonth.slice(0, 4)}`;
+    const hist = forecastHistory();
+    let prev = null, tE = 0, tA = 0;
+    body.innerHTML = days.map(d => {
+        const rec = S.sales[d];
+        const act = rec ? Number(rec.revenue || 0) : null;
+        const exp = expectedFor(d, hist);
+        const both = act !== null && exp !== null;
+        const diff = both ? act - exp : null;
+        const dp = both && exp > 0 ? diff / exp : null;
+        const grow = act !== null && prev !== null && prev > 0 ? (act - prev) / prev : null;
+        if (act !== null) prev = act;
+        if (both) { tE += exp; tA += act; }
+        const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
+        return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
+            <td>${exp === null ? '<span class="muted">—</span>' : fmt(exp)}</td>
+            <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
+            <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
+            <td class="${cls}">${dp === null ? '—' : pct(dp)}</td>
+            <td>${arrowChip(grow)}</td></tr>`;
+    }).join('');
+    const tDiff = tA - tE;
+    $('var-tot-exp').textContent = fmt(tE);
+    $('var-tot-act').textContent = fmt(tA);
+    $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
+    $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
+}
+
+function expectedFor(d, hist) {
+    const before = hist.filter(x => x.date < d);
+    if (!before.length) return null;
+    const f = forecastOne(d, before, forecastTrend(before));
+    return f.base ? f.predicted : null;
+}
+
+function rowGrowth(d) {
+    return S.growth && S.growth[d] !== undefined ? S.growth[d] : fcGrowth();
+}
+
+function setRowGrowth(d, v) {
+    S.growth = S.growth || {};
+    if (v === '') { delete S.growth[d]; }
+    else {
+        let g = Number(v);
+        if (!Number.isFinite(g)) return toast('أدخل نسبة صحيحة', 'error');
+        S.growth[d] = Math.min(10, Math.max(5, g));
+    }
+    saveDB();
+    renderForecast();
+}
+
+function renderForecast() {
+    const body = $('forecast-rows');
+    if (!body) return;
+    renderForecastEvents();
+    const hist = forecastHistory();
+    const days = [];
+    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => days.push(d));
+    let prev = null, tE = 0, tA = 0;
+    body.innerHTML = days.map(d => {
+        const before = hist.filter(x => x.date < d);
+        const f = before.length ? forecastOne(d, before, forecastTrend(before), rowGrowth(d)) : null;
+        const ok = !!(f && f.base);
+        const avg = ok ? f.base : null;
+        const exp = ok ? f.predicted : null;
+        const rec = S.sales[d];
+        const act = rec ? Number(rec.revenue || 0) : null;
+        const both = act !== null && exp !== null;
+        const diff = both ? act - exp : null;
+        const dp = both && exp > 0 ? diff / exp : null;
+        const grow = act !== null && prev !== null && prev > 0 ? (act - prev) / prev : null;
+        if (act !== null) prev = act;
+        if (both) { tE += exp; tA += act; }
+        const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
+        return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
+            <td>${avg === null ? '<span class="muted">—</span>' : fmt(avg)}</td>
+            <td><input class="inp xs" type="number" min="5" max="10" step="0.5" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
+            <td><b>${exp === null ? '—' : fmt(exp)}</b></td>
+            <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
+            <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
+            <td class="${cls}">${dp === null ? '—' : pct(dp)}</td>
+            <td>${arrowChip(grow)}</td></tr>`;
+    }).join('');
+    const tDiff = tA - tE;
+    $('var-tot-exp').textContent = fmt(tE);
+    $('var-tot-act').textContent = fmt(tA);
+    $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
+    $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
+    $('forecast-summary').textContent = hist.length
+        ? `المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع من الإيرادات السابقة × اتجاه الفترة × تأثير المناسبات × نسبة النمو (من 5% إلى 10%، وتقدر تعدلها لكل يوم). الفرق = الفعلي − المتوقع.`
+        : 'لا توجد مبيعات مسجلة بعد. سجّل الإيراد اليومي أو أدخل بيانات سابقة ليبدأ التوقع.';
+    $('forecast-history-count').textContent = `الموجود حاليًا: ${hist.length} يوم`;
+}
+
+function renderVariance() {
+    renderForecast();
+}
+
+function calcGrowth() {
+    const a = num($('gr-old').value), b = num($('gr-new').value);
+    if (!a) { $('gr-result').textContent = 'أدخل القيمة القديمة (أكبر من صفر)'; return; }
+    const g = (b - a) / a * 100;
+    $('gr-result').textContent = `${g >= 0 ? '+' : ''}${g.toFixed(2)}% (${g >= 0 ? 'نمو' : 'نزول'})`;
 }
 
 function renderRevenue() {
@@ -1992,7 +2232,8 @@ function productUsed(pid) {
     return S.transfers.some(t => t.product_id === pid)
         || Object.values(S.receipts).some(d => d[pid] !== undefined)
         || Object.values(S.openings).some(m => m[pid] !== undefined)
-        || S.analyses.some(a => a.rows && a.rows[pid] !== undefined);
+        || S.analyses.some(a => a.rows && a.rows[pid] !== undefined)
+        || S.batches.some(b => b.pid === pid);
 }
 
 function transfersNet(pid, from, to) {
@@ -2031,14 +2272,16 @@ const INV_TITLES = {
     receipts: 'الوارد اليومي',
     transfers: 'التحويلات بين الفروع',
     analysis: 'تحليل المخزون',
-    orders: 'الطلبيات المتوقعة - Per 1000'
+    orders: 'الطلبيات المتوقعة - Per 1000',
+    expiry: 'صلاحية المنتجات'
 };
 const INV_ICONS = {
     opening: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
     receipts: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
     transfers: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>',
     analysis: '<path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/>',
-    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/>'
+    orders: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h3M15 13h1M8 16h8"/>',
+    expiry: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>'
 };
 
 function openInv(v) {
@@ -2124,6 +2367,8 @@ async function deleteProduct(id) {
     if (!p) return;
     if (!await askConfirm(`حذف الصنف "${p.name}"؟`, 'حذف')) return;
     S.products = S.products.filter(x => x.id !== id);
+    delete S.shelf[id];
+    delete S.per1000[id];
     saveDB();
     toast('تم حذف الصنف');
     renderAll();
@@ -2518,10 +2763,10 @@ function liveAn() {
         th.textContent = fmt(res.theo, 2);
         th.className = res.theo < 0 ? 'down' : '';
         const av = $('av-' + p.id);
-        
-        if (res.variance === null) { 
-            av.textContent = '-'; 
-            av.className = ''; 
+
+        if (res.variance === null) {
+            av.textContent = '-';
+            av.className = '';
         } else {
             if (res.variance < 0) {
                 av.textContent = res.variance.toFixed(2);
@@ -2711,6 +2956,165 @@ function exportRevenueXlsx() {
     XLSX.writeFile(wb, 'Kansas_Revenue.xlsx');
 }
 
+/* ===== صلاحية المنتجات ===== */
+const EXP_UNITS = { day: 1, month: 30, year: 365 };
+const EXP_UNIT_AR = { day: 'يوم', month: 'شهر', year: 'سنة' };
+const EXP_RED = 3, EXP_YELLOW = 7;
+
+function shelfDays(pid) {
+    const s = S.shelf[pid];
+    return s && s.value > 0 ? s.value * EXP_UNITS[s.unit] : 0;
+}
+
+function expRows() {
+    return S.batches.map(b => {
+        const p = productById(b.pid);
+        const sd = shelfDays(b.pid);
+        const exp = sd ? addDays(b.day, sd) : null;
+        return { ...b, name: p ? p.name : 'صنف محذوف', unit: p ? p.unit : '', exp, left: exp ? daysBetween(todayStr(), exp) : null };
+    }).sort((a, b) => {
+        if (a.left === null && b.left === null) return a.day < b.day ? -1 : 1;
+        if (a.left === null) return 1;
+        if (b.left === null) return -1;
+        return a.left - b.left;
+    });
+}
+
+function expStatus(left) {
+    if (left === null) return { cls: '', label: 'مدة غير محددة' };
+    if (left < 0) return { cls: 'down', label: 'منتهي' };
+    if (left <= EXP_RED) return { cls: 'down', label: 'حرج' };
+    if (left <= EXP_YELLOW) return { cls: '', label: 'قريب' };
+    return { cls: 'up', label: 'سليم' };
+}
+
+function expTableHtml(rows) {
+    return `<table><thead><tr><th>#</th><th>الصنف</th><th>تاريخ الإنتاج</th><th>الكمية</th><th>تاريخ الانتهاء</th><th>المتبقي (يوم)</th><th>الحالة</th></tr></thead><tbody>${rows.map((r, i) => {
+        const st = expStatus(r.left);
+        const rc = r.left === null ? '' : r.left <= EXP_RED ? 'rowred' : r.left <= EXP_YELLOW ? 'rowyel' : '';
+        return `<tr class="${rc}"><td>${i + 1}</td><td><b>${esc(r.name)}</b> <span class="muted">${esc(r.unit)}</span></td><td>${r.day}</td><td>${fmt(r.qty, 2)}</td><td>${r.exp || '—'}</td><td>${r.left === null ? '—' : r.left}</td><td class="${st.cls}">${st.label}</td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function renderShelfDefs() {
+    const host = $('exp-define-list'); if (!host) return;
+    if (!S.products.length) { host.innerHTML = '<div class="muted">أضف الأصناف أولاً من "الأصناف ورصيد أول الشهر".</div>'; return; }
+    host.innerHTML = S.products.map(p => {
+        const s = S.shelf[p.id] || { value: '', unit: 'day' };
+        const opt = u => `<option value="${u}" ${s.unit === u ? 'selected' : ''}>${EXP_UNIT_AR[u]}</option>`;
+        return `<div class="prow"><div><b>${esc(p.name)}</b> <span class="muted">${esc(p.unit)}</span></div>
+            <div class="pfields2"><input class="inp xs" type="number" min="0" step="1" data-shelf="${esc(p.id)}" value="${s.value}" placeholder="المدة">
+            <select class="inp" data-shelf-unit="${esc(p.id)}" style="width:130px">${opt('day')}${opt('month')}${opt('year')}</select></div></div>`;
+    }).join('');
+}
+
+function saveShelfDefs() {
+    const units = {};
+    document.querySelectorAll('[data-shelf-unit]').forEach(el => { units[el.dataset.shelfUnit] = el.value; });
+    for (const el of document.querySelectorAll('[data-shelf]')) {
+        const pid = el.dataset.shelf, v = el.value.trim();
+        if (v === '') { delete S.shelf[pid]; continue; }
+        const n = Number(v);
+        if (!Number.isFinite(n) || n <= 0) return toast('مدة الصلاحية لازم تكون أكبر من صفر', 'error');
+        S.shelf[pid] = { value: n, unit: units[pid] || 'day' };
+    }
+    saveDB(); toast('تم حفظ مدد الصلاحية'); closeInv();
+}
+
+function renderExpDaily() {
+    const host = $('exp-daily-list'); if (!host) return;
+    if (!$('exp-day').value) $('exp-day').value = todayStr();
+    const d = $('exp-day').value;
+    if (!S.products.length) { host.innerHTML = '<div class="muted">أضف الأصناف أولاً.</div>'; return; }
+    host.innerHTML = S.products.map(p => {
+        const b = S.batches.find(x => x.day === d && x.pid === p.id);
+        const note = shelfDays(p.id) ? '' : ' <span class="muted">(مدة الصلاحية غير محددة)</span>';
+        return `<div class="prow"><div><b>${esc(p.name)}</b> <span class="muted">${esc(p.unit)}</span>${note}</div>
+            <input class="inp xs" type="number" min="0" step="any" data-prod="${esc(p.id)}" value="${b ? b.qty : ''}" placeholder="الكمية"></div>`;
+    }).join('');
+}
+
+function saveExpDaily() {
+    const d = $('exp-day').value;
+    if (!d) return toast('اختر تاريخ الإنتاج', 'error');
+    const inputs = document.querySelectorAll('#exp-daily-list [data-prod]');
+    for (const el of inputs) {
+        if (el.value !== '' && num(el.value) < 0) return toast('الكمية لازم تكون صفر أو أكبر', 'error');
+    }
+    const ids = new Set([...inputs].map(el => el.dataset.prod));
+    S.batches = S.batches.filter(x => !(x.day === d && ids.has(x.pid)));
+    inputs.forEach(el => {
+        const n = num(el.value);
+        if (n > 0) S.batches.push({ id: uid(), pid: el.dataset.prod, day: d, qty: n });
+    });
+    saveDB(); toast('تم حفظ إنتاج اليوم'); closeInv();
+}
+
+function renderExpReport() {
+    const host = $('exp-report-body'); if (!host) return;
+    const rows = expRows();
+    host.innerHTML = rows.length
+        ? `<div class="tbl-wrap">${expTableHtml(rows)}</div>`
+        : '<div class="muted">مفيش إنتاج مسجل. ابدأ من "إدخال الإنتاج اليومي".</div>';
+}
+
+function renderExpWarn() {
+    const el = $('exp-warn'); if (!el) return;
+    const soon = expRows().filter(r => r.left !== null && r.left <= EXP_YELLOW);
+    const best = {};
+    soon.forEach(r => { if (!(r.name in best) || r.left < best[r.name]) best[r.name] = r.left; });
+    const list = Object.entries(best).sort((a, b) => a[1] - b[1]);
+    if (!list.length) {
+        el.className = 'note';
+        el.textContent = 'مفيش منتجات قربت تنتهي خلال 7 أيام.';
+    } else {
+        el.className = 'alert';
+        el.innerHTML = 'تنبيه: منتجات قربت تنتهي: ' + list.slice(0, 8).map(([n, l]) =>
+            `${esc(n)} (${l < 0 ? 'منتهية من ' + Math.abs(l) + ' يوم' : 'باقي ' + l + ' يوم'})`).join('، ') +
+            (list.length > 8 ? '…' : '') + '.';
+    }
+    const t = $('ts-expiry'); if (t) t.textContent = list.length ? `${list.length} منتج قرب ينتهي` : 'كله تمام';
+}
+
+function switchExpSub(k) {
+    expSub = k;
+    ['define', 'daily', 'report'].forEach(x => {
+        $('exp-sub-' + x).classList.toggle('hidden', x !== k);
+        $('exp-tile-' + x).style.borderColor = x === k ? 'var(--gold2)' : 'var(--border)';
+    });
+}
+
+function renderExpiry() {
+    if (!$('exp-warn')) return;
+    renderExpWarn(); renderShelfDefs(); renderExpDaily(); renderExpReport();
+    switchExpSub(expSub);
+}
+
+function exportExpiryXlsx() {
+    const rows = expRows();
+    if (!rows.length) return toast('مفيش بيانات للتصدير', 'error');
+    const data = rows.map((r, i) => ({
+        '#': i + 1, 'الصنف': safeCell(r.name), 'الوحدة': safeCell(r.unit),
+        'تاريخ الإنتاج': r.day, 'الكمية': r.qty, 'تاريخ الانتهاء': r.exp || '',
+        'المتبقي (يوم)': r.left === null ? '' : r.left, 'الحالة': expStatus(r.left).label
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Expiry');
+    XLSX.writeFile(wb, `Kansas_Expiry_${todayStr()}.xlsx`);
+}
+
+function printExpiry() {
+    const rows = expRows();
+    if (!rows.length) return toast('مفيش بيانات للطباعة', 'error');
+    let box = $('print-exp-tmp');
+    if (!box) { box = document.createElement('div'); box.id = 'print-exp-tmp'; document.body.appendChild(box); }
+    box.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير صلاحية المنتجات</div>
+        <div style="text-align:center;margin-bottom:8px">حتى ${todayStr()}</div>${expTableHtml(rows)}`;
+    document.body.classList.add('print-exp-mode');
+    window.addEventListener('afterprint', () => document.body.classList.remove('print-exp-mode'), { once: true });
+    setTimeout(() => window.print(), 80);
+}
+
 function renderInventory() {
     const m = activeMonth;
     const al = $('inv-alert');
@@ -2725,12 +3129,13 @@ function renderInventory() {
     renderTransfers();
     renderAnalysis();
     renderOrderForecast();
+    renderExpiry();
 
     const showPanel = !!invView;
     $('inv-tiles').classList.toggle('hidden', showPanel);
     $('inv-export').classList.toggle('hidden', showPanel);
     $('inv-panel').classList.toggle('hidden', !showPanel);
-    ['opening', 'receipts', 'transfers', 'analysis', 'orders'].forEach(k => {
+    ['opening', 'receipts', 'transfers', 'analysis', 'orders', 'expiry'].forEach(k => {
         $('pn-' + k).classList.toggle('hidden', k !== invView);
     });
     if (showPanel) {
@@ -2743,7 +3148,7 @@ function switchOrderSubTab(tab) {
     $('orders-sub-config').classList.toggle('hidden', tab !== 'config');
     $('orders-sub-table').classList.toggle('hidden', tab !== 'table');
     $('orders-sub-actual').classList.toggle('hidden', tab !== 'actual');
-    
+
     ['config', 'table', 'actual'].forEach(k => {
         const btn = $('order-tile-' + k);
         if (btn) {
@@ -2846,6 +3251,7 @@ function renderAll() {
     renderSalesForm();
     renderRevenue();
     renderForecast();
+    renderVariance();
     renderInventory();
     renderOrderForecast();
     renderBackupAlert();
@@ -2853,3 +3259,4 @@ function renderAll() {
 </script>
 </body>
 </html>
+                                                                                                  
