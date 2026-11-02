@@ -83,6 +83,26 @@ th,td{padding:10px 9px;border-bottom:1px solid var(--border);text-align:right;wh
 th{font-weight:700;color:var(--muted);font-size:12px}
 tr:last-child td{border-bottom:none}
 
+/* Sticky Header */
+header.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+}
+html:not(.dark) header.sticky-header {
+    background: rgba(247, 249, 252, 0.92);
+}
+.dark header.sticky-header {
+    background: rgba(7, 12, 22, 0.92);
+}
+
 /* Header */
 .brand{display:flex;align-items:center;gap:12px}
 .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#1e3a5f,#0f1f36);color:#f2c96b;font-weight:800;font-size:18px;letter-spacing:.5px;box-shadow:inset 0 0 0 1px rgba(242,201,107,.35),0 6px 16px rgba(15,31,54,.35)}
@@ -434,7 +454,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
 <div id="app" class="hidden">
 <div class="wrap">
 
-    <header class="card flat row between no-print" style="gap:12px">
+    <header class="card flat row between no-print sticky-header" style="gap:12px">
         <div class="brand">
             <div class="logo">K</div>
             <div>
@@ -1478,12 +1498,18 @@ function renderItems(blocks) {
     </div>`).join('');
 }
 
-function periodStats(from, to) {
+function getPeriodDates(from, to) {
+    if (!from || !to) return [];
     if (from > to) [from, to] = [to, from];
-    let rev = 0, ord = 0, days = 0;
     const dates = [];
-    eachDay(from, to, d => {
-        dates.push(d);
+    eachDay(from, to, d => dates.push(d));
+    return dates;
+}
+
+function periodStats(from, to) {
+    const dates = getPeriodDates(from, to);
+    let rev = 0, ord = 0, days = 0;
+    dates.forEach(d => {
         const r = S.sales[d];
         if (r && (r.revenue > 0 || r.orders > 0)) { rev += r.revenue; ord += r.orders; days++; }
     });
@@ -1506,7 +1532,7 @@ function diffHtml(a, b, dec = 0) {
 }
 
 function renderCompare() {
-    const pa1 = $('pa-from').value, pa2 = $('pa-to').value, pb1 = $('pb-from').value, pb2 = $('pb-to').value;
+    let pa1 = $('pa-from').value, pa2 = $('pa-to').value, pb1 = $('pb-from').value, pb2 = $('pb-to').value;
     if (!pa1 || !pa2 || !pb1 || !pb2) { $('cmp-head').innerHTML = ''; $('cmp-summary').innerHTML = ''; $('cmp-body').innerHTML = ''; return; }
 
     const A = periodStats(pa1, pa2);
@@ -1514,10 +1540,10 @@ function renderCompare() {
 
     const g = B.avgRev ? (A.avgRev - B.avgRev) / B.avgRev : null;
     const w = trendWord(g);
-    const noData = !A.days || !B.days;
+    
     $('cmp-head').innerHTML = `<div class="tb">
         <div class="muted">متوسط اليوم في الفترة الأولى مقارنة بالثانية</div>
-        <div class="big ${w.cls}">${noData ? 'مفيش بيانات كفاية' : `${w.arrow} ${w.word}${g !== null && g !== 0 ? ' ' + (Math.abs(g) * 100).toFixed(1) + '%' : ''}`}</div>
+        <div class="big ${w.cls}">${w.arrow} ${w.word}${g !== null && g !== 0 ? ' ' + (Math.abs(g) * 100).toFixed(1) + '%' : ''}</div>
         <div class="muted">${fmt(A.avgRev)} ج.م مقابل ${fmt(B.avgRev)} ج.م في اليوم</div>
     </div>`;
 
@@ -1533,22 +1559,25 @@ function renderCompare() {
             ${row('أيام مسجلة', A.days, B.days)}
         </tbody>`;
 
-    const n = Math.max(A.dates.length, B.dates.length);
+    const datesA = A.dates;
+    const datesB = B.dates;
+    const n = Math.max(datesA.length, datesB.length);
     const rows = [];
     for (let i = 0; i < n; i++) {
-        const ad = A.dates[i], bd = B.dates[i];
-        const ar = ad && S.sales[ad] ? S.sales[ad].revenue : null;
-        const br = bd && S.sales[bd] ? S.sales[bd].revenue : null;
+        const ad = datesA[i] || '';
+        const bd = datesB[i] || '';
+        const ar = (ad && S.sales[ad]) ? S.sales[ad].revenue : null;
+        const br = (bd && S.sales[bd]) ? S.sales[bd].revenue : null;
         const diff = (ar ?? 0) - (br ?? 0);
-        const dp = br ? diff / br : null;
+        const dp = br !== null && br > 0 ? diff / br : null;
         const cls = diff > 0 ? 'up' : (diff < 0 ? 'down' : '');
         rows.push(`<tr>
             <td>${ad ? esc(ad) : '-'}</td>
             <td>${ar === null ? '<span class="muted">—</span>' : fmt(ar)}</td>
             <td>${bd ? esc(bd) : '-'}</td>
             <td>${br === null ? '<span class="muted">—</span>' : fmt(br)}</td>
-            <td class="${cls}">${diff > 0 ? '+' : ''}${fmt(diff)}</td>
-            <td class="${cls}">${dp === null ? '—' : pct(dp)}</td>
+            <td class="${ar !== null && br !== null ? cls : ''}">${ar !== null && br !== null ? ((diff > 0 ? '+' : '') + fmt(diff)) : '—'}</td>
+            <td class="${ar !== null && br !== null && dp !== null ? cls : ''}">${dp === null ? '—' : pct(dp)}</td>
         </tr>`);
     }
     $('cmp-body').innerHTML = rows.join('');
@@ -1764,7 +1793,7 @@ function renderRevenue() {
     renderItems(blocks);
     renderCompare();
     const al = $('rev-alert');
-    if (a.missing.length) { al.classList.remove('hidden'); al.textContent = 'أيام سابقة بدون إيراد مسجل: ' + a.missing.join(', '); }
+    if (a.missing.length) { al.classList.remove('hidden'); al.textContent = 'أيام سابقة بدون إيراد مسجلْ: ' + a.missing.join(', '); }
     else al.classList.add('hidden');
 }
 
