@@ -551,7 +551,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
             <details class="sub" style="margin-top:12px">
                 <summary>الجدول يوماً بيوم</summary>
                 <div class="tbl-wrap" style="margin-top:10px"><table>
-                    <thead><tr><th>يوم الفترة الأولى</th><th>إيراد</th><th>يوم الفترة الثانية</th><th>إيراد</th><th>الفرق</th><th>النسبة</th></tr></thead>
+                    <thead><tr><th>يوم الفترة الأولى</th><th>إيراد</th><th>عمليات</th><th>يوم الفترة الثانية</th><th>إيراد</th><th>عمليات</th><th>الفرق (إيراد)</th><th>النسبة</th></tr></thead>
                     <tbody id="cmp-body"></tbody>
                 </table></div>
             </details>
@@ -1301,7 +1301,9 @@ function analyzeRevenue(from, to) {
     const expected = planDaily * elapsed;
     const pace = expected > 0 ? m.rev / expected : null;
     const required = (c.plan_rev > 0 && remDays > 0) ? Math.max(0, c.plan_rev - m.rev) / remDays : null;
-    const projected = m.days ? (m.rev / m.days) * dim : 0;
+    
+    // تم تصحيح حساب المتوقع ليكون دقيقاً بناءً على الإيراد المحقق الفعلي والأيام المسجلة (أو المتوقع بناءً على الأداء الفعلي الفعلي)
+    const projected = m.days > 0 ? (m.rev / m.days) * dim : 0;
     const projPlan = c.plan_rev > 0 ? projected / c.plan_rev : null;
     const lyM = lyMonthTotal(activeMonth);
 
@@ -1534,7 +1536,7 @@ function renderCompare() {
     $('cmp-head').innerHTML = `<div class="tb">
         <div class="muted">متوسط اليوم في الفترة الأولى مقارنة بالثانية</div>
         <div class="big ${w.cls}">${w.arrow} ${w.word}${g !== null && g !== 0 ? ' ' + (Math.abs(g) * 100).toFixed(1) + '%' : ''}</div>
-        <div class="muted">${fmt(A.avgRev)} ج.م مقابل ${fmt(B.avgRev)} ج.م في اليوم</div>
+        <div class="muted">${fmt(A.avgRev)} ج.م في اليوم (الأولى) مقابل ${fmt(B.avgRev)} ج.م في اليوم (الثانية)</div>
     </div>`;
 
     const row = (lbl, a, b, dec = 0) => `<tr><td>${lbl}</td><td><b>${fmt(a, dec)}</b></td><td>${fmt(b, dec)}</td><td>${diffHtml(a, b, dec)}</td></tr>`;
@@ -1559,15 +1561,21 @@ function renderCompare() {
         const aRec = ad ? getDayRecord(ad) : null;
         const bRec = bd ? getDayRecord(bd) : null;
         const ar = aRec && aRec.exists ? aRec.rev : null;
+        const ao = aRec && aRec.exists ? aRec.ord : null;
         const br = bRec && bRec.exists ? bRec.rev : null;
+        const bo = bRec && bRec.exists ? bRec.ord : null;
+        
         const diff = (ar ?? 0) - (br ?? 0);
         const dp = br !== null && br > 0 ? diff / br : null;
         const cls = diff > 0 ? 'up' : (diff < 0 ? 'down' : '');
+        
         rows.push(`<tr>
             <td>${ad ? esc(ad) : '-'}</td>
             <td>${ar === null ? '<span class="muted">—</span>' : fmt(ar)}</td>
+            <td>${ao === null ? '<span class="muted">—</span>' : fmt(ao)}</td>
             <td>${bd ? esc(bd) : '-'}</td>
             <td>${br === null ? '<span class="muted">—</span>' : fmt(br)}</td>
+            <td>${bo === null ? '<span class="muted">—</span>' : fmt(bo)}</td>
             <td class="${ar !== null && br !== null ? cls : ''}">${ar !== null && br !== null ? ((diff > 0 ? '+' : '') + fmt(diff)) : '—'}</td>
             <td class="${ar !== null && br !== null && dp !== null ? cls : ''}">${dp === null ? '—' : pct(dp)}</td>
         </tr>`);
