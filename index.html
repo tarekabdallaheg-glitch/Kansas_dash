@@ -357,6 +357,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
         <input id="login-password" class="inp" type="password" autocomplete="current-password" placeholder="كلمة المرور">
         <p id="lock-err"></p>
         <button class="btn btn-gold" id="unlock-btn" type="button">تسجيل الدخول</button>
+        <button class="btn" id="force-open-btn" type="button" style="background:transparent;border:1px dashed var(--gold);color:var(--gold);font-size:12px;margin-top:2px;">دخول مباشر محلياً (تخطي السحابة مؤقتاً)</button>
     </div>
 </div>
 
@@ -814,7 +815,7 @@ let currentUser = null;
 let unsubscribeSync = null;
 let isSyncingFromCloud = false;
 
-// دالة تسجيل الدخول المحسنة لمنع التعليق
+// دالة تسجيل الدخول مع مانع التعليق
 async function handleLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value.trim();
@@ -844,6 +845,14 @@ async function handleLogin() {
 document.getElementById('unlock-btn').addEventListener('click', handleLogin);
 document.getElementById('login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleLogin();
+});
+
+// زر الدخول المباشر للتخطي المؤقت
+document.getElementById('force-open-btn').addEventListener('click', () => {
+  document.getElementById('lock').classList.add('hidden');
+  if (typeof window.kansasStart === 'function') {
+    window.kansasStart();
+  }
 });
 
 // ترحيل البيانات القديمة من localStorage إلى السحابة
