@@ -351,7 +351,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
         <div class="logo">K</div>
         <div>
             <div class="brand-name">KANSAS PREMIUM</div>
-            <div class="muted">أدخل رمز الحماية (1234)</div>
+            <div class="muted">أدخل رمز الحماية</div>
         </div>
         <input id="unlock-pin" class="inp" type="password" inputmode="numeric" autocomplete="off" placeholder="الرمز">
         <p id="lock-err"></p>
@@ -1018,7 +1018,7 @@ async function confirmFuture(day) {
 window.kansasStart = function () {
     S = loadDB();
     saveDB();
-    checkDailyAutoBackup(); // فحص وتشغيل النسخ التلقائي لنهاية اليوم
+    checkDailyAutoBackup();
     $('app').classList.remove('hidden');
     $('month-input').value = activeMonth;
     $('sales-day').value = todayStr();
@@ -1030,7 +1030,6 @@ window.kansasStart = function () {
     applyTheme(localStorage.getItem('kansas_theme') || 'dark');
 };
 
-// وظيفة النسخ الاحتياطي التلقائي في نهاية اليوم
 function checkDailyAutoBackup() {
     const today = todayStr();
     if (S.lastBackup !== today) {
@@ -1582,7 +1581,7 @@ function revenueAssistantAnswer(question, a) {
         if (a.pace !== null && a.pace < 1) clues.push(`الإيراد متأخر عن وتيرة الخطة بنسبة ${Math.abs((1 - a.pace) * 100).toFixed(1)}%`);
         return clues.length ? `الأرقام بتوضح المؤشرات دي: ${clues.join('، ')}. دي مؤشرات تساعد في التحقيق، لكنها مش دليل لوحدها على السبب الفعلي. راجع العروض، ساعات الذروة، وقنوات البيع.` : 'الأرقام الحالية لا تثبت وجود انخفاض واضح. قارن عدد العمليات ومتوسط الشيك وساعات البيع قبل تحديد السبب.';
     }
-    return `ملخص الفترة: الإيراد ${money(a.t.rev)} من ${a.t.days} يوم مسجل، بمتوسط يومي ${money(a.avgRev)}، وعدد ${fmt(a.t.ord)} عملية، ومتوسط شيك ${money(a.avgChk)}. ${a.missing.length ? `فيه ${a.missing.length} يوم سابق ناقص التسجيل.` : 'لا توجد أيام سابقة ناقصة حسب البيانات الحالية.'} اسألني عن الخطة أو الشيك أو العمليات أو المقارنة بالسنة الماضية.`;
+    return `ملخص الفترة: الإيراد ${money(a.t.rev)} من ${a.t.days} يوم مسجل، بمتوسط يومي ${money(a.avgRev)}, وعدد ${fmt(a.t.ord)} عملية، ومتوسط شيك ${money(a.avgChk)}. ${a.missing.length ? `فيه ${a.missing.length} يوم سابق ناقص التسجيل.` : 'لا توجد أيام سابقة ناقصة حسب البيانات الحالية.'} اسألني عن الخطة أو الشيك أو العمليات أو المقارنة بالسنة الماضية.`;
 }
 
 function renderRevenueAssistant(a) {
@@ -2693,7 +2692,7 @@ function saveOrderSnapshot() {
   const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
   if(!products.length) return toast('اختار الأصناف وأدخل معدلات Per 1000 أولًا','error');
   const rows=days.map(day=>{const f=forecastOne(day,history,trend);return {date:day,weekday:DAYS_AR[weekdayOf(day)],revenue:f.predicted,items:products.map(p=>({productId:p.id,name:p.name,unit:p.unit,rate:Number(S.per1000[p.id].rate),quantity:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100}))}});
-  S.orderSnapshots[start]={start,end:days[6],savedAt:new Date().toLocaleString('ar-EG'),rows}; saveDB(); renderOrderForecast(); toast('تم حفظ نسخة الطلبية المتوقعة للأسبوع');
+  S.orderSnapshots[start]={start,end:days[6],savedAt:new Date().toLocaleString('ar-EG'),rows}; saveDB(); renderOrderForecast(); toast('تم نسخة الطلبية المتوقعة للأسبوع');
 }
 function printOrdersPdf() {
   document.body.classList.add('print-orders');
