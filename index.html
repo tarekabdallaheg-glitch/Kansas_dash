@@ -345,7 +345,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
 </head>
 <body>
 
-<!-- ===== شاشة الدخول برمز بسيط فقط (بدون إيميل) ===== -->
+<!-- ===== شاشة الدخول بررمز بسيط فقط (بدون إيميل) ===== -->
 <div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
@@ -1018,7 +1018,7 @@ async function confirmFuture(day) {
 window.kansasStart = function () {
     S = loadDB();
     saveDB();
-    checkDailyAutoBackup();
+    checkDailyAutoBackup(); // فحص وتشغيل النسخ التلقائي لنهاية اليوم
     $('app').classList.remove('hidden');
     $('month-input').value = activeMonth;
     $('sales-day').value = todayStr();
@@ -1030,6 +1030,7 @@ window.kansasStart = function () {
     applyTheme(localStorage.getItem('kansas_theme') || 'dark');
 };
 
+// وظيفة النسخ الاحتياطي التلقائي في نهاية اليوم
 function checkDailyAutoBackup() {
     const today = todayStr();
     if (S.lastBackup !== today) {
@@ -1037,13 +1038,14 @@ function checkDailyAutoBackup() {
             const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'kansas-auto-backup-' + today + '.json';
+            a.download = 'kansas-end-of-day-backup-' + today + '.json';
             document.body.appendChild(a);
             a.click();
             a.remove();
             setTimeout(() => URL.revokeObjectURL(a.href), 1000);
             S.lastBackup = today;
             saveDB();
+            toast('تم إجراء النسخ الاحتياطي التلقائي لنهاية اليوم بنجاح');
         } catch (e) {
             console.log('فشل النسخ التلقائي:', e);
         }
