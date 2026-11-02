@@ -35,6 +35,17 @@ body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,-apple-system,sans-serif;b
 .inp.sm{width:170px;max-width:100%}
 .inp.xs{width:140px;max-width:100%;text-align:center}
 .inp:disabled{opacity:.55}
+
+/* إخفاء أسهم زيادة ونقصان الرقم في حقول الـ number */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s,border-color .15s,transform .06s,box-shadow .15s}
 .btn:hover{border-color:var(--gold2)}
 .btn:active{transform:translateY(1px)}
