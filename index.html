@@ -1029,35 +1029,8 @@ function toast(msg, type = 'success') {
     setTimeout(() => t.remove(), 3500);
 }
 
-function askConfirm(msg, okText = 'تأكيد') {
-    return new Promise(resolve => {
-        const ov = document.createElement('div');
-        ov.className = 'modal';
-        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
-            <p>${esc(msg)}</p>
-            <div class="row" style="justify-content:flex-end">
-                <button class="btn" data-no>إلغاء</button>
-                <button class="btn btn-gold" data-yes>${esc(okText)}</button>
-            </div>
-        </div>`;
-        document.body.appendChild(ov);
-        let closed = false;
-        const done = v => {
-            if (closed) return;
-            closed = true;
-            document.removeEventListener('keydown', onKey, true);
-            ov.remove();
-            resolve(v);
-        };
-        const onKey = e => {
-            if (e.key === 'Escape') { e.preventDefault(); done(false); }
-            if (e.key === 'Enter') { e.preventDefault(); done(true); }
-        };
-        document.addEventListener('keydown', onKey, true);
-        ov.querySelector('[data-yes]').onclick = () => done(true);
-        ov.querySelector('[data-no]').onclick = () => done(false);
-        ov.querySelector('[data-yes]').focus();
-    });
+function askConfirm(msg) {
+    return askTyped(`${msg}\nاكتب "تأكيد" عشان توافق:`, 'تأكيد');
 }
 
 const emptyDB = () => ({
@@ -1962,24 +1935,26 @@ function parseForecastDate(v) {
     if(m) return `${m[3]}-${pad(Number(m[2]))}-${pad(Number(m[1]))}`;
     return '';
 }
-function importForecastHistory() {
+async function importForecastHistory() {
     const raw=$('forecast-history-input').value.trim();
     if(!raw) return toast('الصق بيانات المبيعات أولًا','error');
-    const lines=raw.split(/\r?\n/).filter(Boolean); let added=0, skipped=0, overwritten=0;
-    lines.forEach(line=>{
+    const rows=[]; let skipped=0;
+    raw.split(/\r?\n/).filter(Boolean).forEach(line=>{
         const cols=line.split(/[\t,;]+/).map(x=>x.trim());
         if(cols.length<2) { skipped++; return; }
         const date=parseForecastDate(cols[0]);
         const revenue=Number(cols[1].replace(/[^0-9.\-]/g,''));
         if(!date || !Number.isFinite(revenue) || revenue<0) { skipped++; return; }
-        if(S.sales[date]) overwritten++;
-        S.sales[date]={ ...(S.sales[date]||{}), revenue };
-        added++;
+        rows.push({date, revenue});
     });
-    if(!added) return toast('لم أتعرف على أي صف. استخدم التاريخ,الإيراد فقط','error');
+    if(!rows.length) return toast('لم أتعرف على أي صف. استخدم التاريخ,الإيراد فقط','error');
+    const overwrite=rows.filter(r=>S.sales[r.date]).length;
+    if(overwrite && !await askTyped(`فيه ${overwrite} يوم إيراد موجود قبل كده، وهيتكتب فوقه الرقم الجديد.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
+    rows.forEach(r=>{ S.sales[r.date]={ ...(S.sales[r.date]||{}), revenue:r.revenue }; });
+    logAction('استيراد بيانات تعلم', '', `${rows.length} يوم${overwrite ? `، منها ${overwrite} اتكتب فوقها` : ''}`);
     saveDB(); renderAll();
     $('forecast-history-input').value='';
-    toast(`تم إدخال ${added} يوم${overwritten ? ` (تحديث ${overwritten} يوم)` : ''}${skipped ? `، وتجاهل ${skipped} صف` : ''}`);
+    toast(`تم إدخال ${rows.length} يوم${overwrite ? ` (تحديث ${overwrite} يوم)` : ''}${skipped ? `، وتجاهل ${skipped} صف` : ''}`);
 }
 
 function askTyped(msg, word) {
@@ -1991,7 +1966,7 @@ function askTyped(msg, word) {
             <input class="inp" data-typed autocomplete="off" placeholder="${esc(word)}">
             <div class="row" style="justify-content:flex-end">
                 <button class="btn" data-no>إلغاء</button>
-                <button class="btn btn-red" data-yes disabled>تأكيد المسح</button>
+                <button class="btn btn-red" data-yes disabled>تأكيد</button>
             </div>
         </div>`;
         document.body.appendChild(ov);
@@ -2025,18 +2000,24 @@ async function clearForecastHistory() {
     toast('تم مسح جميع بيانات الإيراد');
 }
 
-function saveForecastEvent() {
+async function saveForecastEvent() {
     const date=$('forecast-event-date').value, name=$('forecast-event-name').value.trim(), raw=$('forecast-event-impact').value.trim();
     if(!date || !name) return toast('أدخل تاريخ المناسبة واسمها','error');
     const impact=raw==='' ? null : Number(raw);
     if(impact!==null && (!Number.isFinite(impact) || impact < -90 || impact > 300)) return toast('التأثير لازم يكون بين -90% و300%','error');
+    if (S.forecastEvents[date] && !await askConfirm(`فيه مناسبة موجودة بتاريخ ${date} (${S.forecastEvents[date].name}). هتتكتب فوقها.`)) return;
     S.forecastEvents[date]={name,impact}; saveDB();
     $('forecast-event-name').value=''; $('forecast-event-impact').value='';
     renderForecast(); toast('تم حفظ المناسبة');
 }
-function deleteForecastEvent(date) {
-    if(!S.forecastEvents[date]) return;
-    delete S.forecastEvents[date]; saveDB(); renderForecast();
+async function deleteForecastEvent(date) {
+    const ev = S.forecastEvents[date];
+    if (!ev) return;
+    if (!await askTyped(`هتمسح المناسبة "${ev.name}" بتاريخ ${date}، وده هيغيّر التوقع لليوم ده.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
+    logAction('مسح مناسبة', date, ev.name);
+    delete S.forecastEvents[date];
+    saveDB();
+    renderForecast();
 }
 function renderForecastEvents() {
     const el=$('forecast-events-list'); if(!el) return;
@@ -2291,6 +2272,7 @@ async function saveSalesDay() {
     if (revenue > 0 && orders === 0 && !await askConfirm('عدد العمليات صفر والإيراد أكبر من صفر. متأكد؟')) return;
     if (revenue === 0 && orders > 0 && !await askConfirm('الإيراد صفر وفيه عمليات. متأكد؟')) return;
     const prevSale = S.sales[d];
+    if (prevSale && !await askConfirm(`تعديل إيراد يوم ${d} المسجل قبل كده (${prevSale.revenue} ج.م / ${prevSale.orders} عملية). التعديل هيغير التوقع والتحليل.`)) return;
     S.sales[d] = { revenue, orders };
     logAction(prevSale ? 'تعديل إيراد' : 'تسجيل إيراد', d, prevSale ? `من ${prevSale.revenue} ج.م / ${prevSale.orders} عملية إلى ${revenue} ج.م / ${orders} عملية` : `${revenue} ج.م / ${orders} عملية`);
     S.locks.sales[d] = true;
@@ -2329,8 +2311,10 @@ async function unlockSales() {
     renderAll();
 }
 
-function saveSettings() {
+async function saveSettings() {
     const prev = S.monthly[activeMonth] || {};
+    const changed = prev.plan_rev !== undefined && (num($('s-plan').value) !== prev.plan_rev || num($('s-ly-rev').value) !== prev.ly_rev || int($('s-ly-ord').value) !== prev.ly_orders);
+    if (changed && !await askConfirm('هتتغير إعدادات الشهر (الخطة أو بيانات السنة اللي فاتت)، والتغيير ده بيأثر على التحليل والتوقع.')) return;
     S.monthly[activeMonth] = {
         ...prev,
         plan_rev: num($('s-plan').value),
@@ -2342,7 +2326,11 @@ function saveSettings() {
     renderAll();
 }
 
-function saveLyDays() {
+async function saveLyDays() {
+    const monthLy = [];
+    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => { if (S.lyDaily[lyDay(d)]) monthLy.push(lyDay(d)); });
+    if (monthLy.length && !await askTyped(`هيتحدّث بيانات السنة اللي فاتت لـ ${monthLy.length} يوم مسجل. أي يوم اتمسحت قيمته هيتشال.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
+    logAction('تعديل بيانات السنة اللي فاتت', monthStart(activeMonth).slice(0,7), `${monthLy.length} يوم`);
     eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => {
         const rv = document.querySelector(`[data-ly-rev="${d}"]`).value;
         const ov = document.querySelector(`[data-ly-ord="${d}"]`).value;
@@ -2568,7 +2556,7 @@ function suggestOpening() {
     toast(n ? `تم ملء ${n} صنف. راجع الأرقام واضغط حفظ` : 'مفيش جرد محفوظ للشهر اللي فات', n ? 'success' : 'error');
 }
 
-document.addEventListener('change', (e) => {
+document.addEventListener('change', async (e) => {
     const t = e.target;
     if (!t.dataset || !t.dataset.pid || !t.dataset.f) return;
     const p = productById(t.dataset.pid);
@@ -2576,6 +2564,7 @@ document.addEventListener('change', (e) => {
     const value = t.value.trim();
     if (t.dataset.f === 'name' && (!value || value.length > 120)) { toast('اسم الصنف غير صالح', 'error'); return renderAll(); }
     if (t.dataset.f === 'unit' && value.length > 40) { toast('الوحدة طويلة جداً', 'error'); return renderAll(); }
+    if (!await askConfirm(`تعديل ${t.dataset.f === 'name' ? 'اسم' : 'وحدة'} الصنف "${p.name}" إلى "${value}". التعديل ده بيتغير في كل الشهور.`)) return renderAll();
     p[t.dataset.f] = value;
     saveDB();
     toast('تم التحديث');
@@ -2963,6 +2952,7 @@ async function saveAnalysis() {
     if (res.error) return toast(res.error, 'error');
     const anyClosing = Object.values(res.rows).some(x => x.closing !== null);
     if (!anyClosing && !await askConfirm('مفيش جرد فعلي مدخل. تحفظ التحليل على كده؟', 'حفظ')) return;
+    if (S.analyses.some(a => a.to === r.to) && !await askConfirm(`فيه تحليل محفوظ لتاريخ ${r.to}. الحفظ الجديد هيكتب فوقه.`)) return;
     S.analyses = S.analyses.filter(a => a.to !== r.to);
     S.analyses.push({ id: uid(), from: r.from, to: r.to, saved: todayStr(), rows: res.rows });
     saveDB();
@@ -3167,7 +3157,9 @@ function renderShelfDefs() {
     }).join('');
 }
 
-function saveShelfDefs() {
+async function saveShelfDefs() {
+    const existing = Object.keys(S.shelf).length;
+    if (existing && !await askConfirm(`هتتعدل مدد الصلاحية (فيه ${existing} صنف متحدد قبل كده). التغيير ده بيأثر على كل تواريخ الانتهاء.`)) return;
     const units = {};
     document.querySelectorAll('[data-shelf-unit]').forEach(el => { units[el.dataset.shelfUnit] = el.value; });
     for (const el of document.querySelectorAll('[data-shelf]')) {
@@ -3207,7 +3199,7 @@ function addExpRow() {
     last.insertAdjacentHTML('beforebegin', expRowHtml({ id: uid(), pid: S.products[0].id, day: '', qty: '' }));
 }
 
-function saveExpDaily() {
+async function saveExpDaily() {
     const out = [];
     let bad = false;
     document.querySelectorAll('[data-exp-row]').forEach(r => {
@@ -3219,6 +3211,8 @@ function saveExpDaily() {
         out.push({ id: r.dataset.id || uid(), pid, day, qty: qtyRaw === '' ? 0 : num(qtyRaw) });
     });
     if (bad) return toast('كل صنف لازم يكون ليه تاريخ إنتاج، والكمية لازم تكون صفر أو أكبر', 'error');
+    if (S.batches.length && !await askTyped(`هيتم استبدال تواريخ الإنتاج الحالية (${S.batches.length} سطر) بالقائمة الجديدة (${out.length} سطر).\nأي سطر اتشال هيتمسح نهائياً.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
+    logAction('تعديل تواريخ الإنتاج', '', `${S.batches.length} سطر → ${out.length} سطر`);
     S.batches = out;
     saveDB();
     toast('تم حفظ تواريخ الإنتاج');
@@ -3585,7 +3579,10 @@ function saveOrderActual(start, dayIndex, productId, value) {
   if(diffEl) diffEl.textContent=actual===null?'—':`${actual-Number(item.quantity||0)>0?'+':''}${fmt(actual-Number(item.quantity||0),2)}`;
 }
 
-function saveOrderSnapshot() {
+async function saveOrderSnapshot() {
+  const s0 = orderStartDate();
+  if (S.orderSnapshots[s0] && !await askTyped(`فيه نسخة معتمدة لأسبوع ${s0} (${S.orderSnapshots[s0].savedAt||''}). الاعتماد الجديد هيكتب فوقها، والكميات الفعلية اللي اتدخلت هتتمسح.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
+  logAction('اعتماد نسخة طلبية', s0, '');
   const start=orderStartDate();
   const history=forecastHistory(), trend=forecastTrend(history);
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
