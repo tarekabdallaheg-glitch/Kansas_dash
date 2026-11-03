@@ -453,6 +453,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             </div>
         </div>
         <div class="row actions">
+            <button class="btn" onclick="openAudit()">السجل</button>
             <button class="btn" onclick="toggleTheme()" id="theme-btn"></button>
             <button class="btn btn-slate" onclick="exportBackup()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>نسخة</button>
             <label class="btn" style="cursor:pointer"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M4 19h16"/></svg>استيراد<input type="file" accept="application/json" class="hidden" onchange="importBackup(this)"></label>
@@ -1073,7 +1074,7 @@ const emptyDB = () => ({
     analyses: [],
     sales: {}, monthly: {}, lyDaily: {}, forecastEvents: {},
     per1000: {}, orderSnapshots: {},
-    expected: {}, shelf: {}, batches: [],
+    expected: {}, shelf: {}, batches: [], audit: [],
     locks: { sales: {} },
     lastBackup: null
 });
@@ -1123,6 +1124,7 @@ function normalize(d) {
     out.expected = out.expected || {};
     out.shelf = out.shelf || {};
     out.batches = out.batches || [];
+    out.audit = out.audit || [];
     return out;
 }
 
@@ -1161,6 +1163,15 @@ async function confirmFuture(day) {
     return day <= todayStr() || await askConfirm('التاريخ ده في المستقبل. متأكد إنه صح؟');
 }
 
+function showWelcome() {
+    const w = document.createElement('div');
+    w.textContent = 'Welcome back, Tarek';
+    w.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:130;padding:12px 22px;border-radius:14px;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#111827;font-weight:800;font-size:15px;box-shadow:0 10px 30px rgba(0,0,0,.3);pointer-events:none;transition:opacity .4s';
+    document.body.appendChild(w);
+    setTimeout(() => { w.style.opacity = '0'; }, 1600);
+    setTimeout(() => w.remove(), 2100);
+}
+
 window.kansasStart = function () {
     S = loadDB();
     saveDB();
@@ -1174,6 +1185,7 @@ window.kansasStart = function () {
     loadSalesDay();
     renderAll();
     applyTheme(localStorage.getItem('kansas_theme') || 'dark');
+    showWelcome();
 };
 
 function checkDailyAutoBackup() {
@@ -2243,11 +2255,19 @@ async function saveSalesDay() {
     if (d > todayStr()) return toast('ما ينفعش تسجل إيراد ليوم لسه ما جاش', 'error');
     if (revenue > 0 && orders === 0 && !await askConfirm('عدد العمليات صفر والإيراد أكبر من صفر. متأكد؟')) return;
     if (revenue === 0 && orders > 0 && !await askConfirm('الإيراد صفر وفيه عمليات. متأكد؟')) return;
+    const prevSale = S.sales[d];
     S.sales[d] = { revenue, orders };
+    logAction(prevSale ? 'تعديل إيراد' : 'تسجيل إيراد', d, prevSale ? `من ${prevSale.revenue} ج.م / ${prevSale.orders} عملية إلى ${revenue} ج.م / ${orders} عملية` : `${revenue} ج.م / ${orders} عملية`);
     S.locks.sales[d] = true;
     saveDB();
     toast('تم حفظ وقفل إيراد اليوم');
     renderAll();
+}
+
+function logAction(action, day, detail) {
+    S.audit = S.audit || [];
+    S.audit.unshift({ at: new Date().toLocaleString('ar-EG'), action, day: day || '', detail: detail || '' });
+    if (S.audit.length > 500) S.audit.length = 500;
 }
 
 async function deleteSalesDay() {
@@ -2255,6 +2275,7 @@ async function deleteSalesDay() {
     if (!S.sales[d]) return toast('مفيش إيراد مسجل لليوم ده', 'error');
     if (d < todayStr()) return toast('مينفعش تمسح إيراد يوم فات، تقدر تعدله بس', 'error');
     if (!await askConfirm(`مسح إيراد يوم ${d} نهائياً؟ هيتشال من الفعلي والتوقع والتحليل.`, 'مسح')) return;
+    logAction('مسح إيراد', d, `كان ${S.sales[d].revenue} ج.م / ${S.sales[d].orders} عملية`);
     delete S.sales[d];
     delete S.locks.sales[d];
     saveDB();
@@ -2266,6 +2287,7 @@ async function deleteSalesDay() {
 async function unlockSales() {
     const d = $('sales-day').value;
     if (!await askConfirm('فتح تعديل إيراد هذا اليوم؟ بعد التعديل لازم تحفظه تاني.', 'فتح التعديل')) return;
+    logAction('فتح تعديل إيراد', d, '');
     delete S.locks.sales[d];
     saveDB();
     toast('تم فتح اليوم للتعديل');
@@ -2460,6 +2482,7 @@ async function deleteProduct(id) {
     const p = productById(id);
     if (!p) return;
     if (!await askConfirm(`حذف الصنف "${p.name}"؟`, 'حذف')) return;
+    logAction('مسح صنف', '', p.name);
     S.products = S.products.filter(x => x.id !== id);
     delete S.shelf[id];
     delete S.per1000[id];
@@ -2482,6 +2505,7 @@ function saveOpening() {
     }
     S.openings[m] = Object.assign(S.openings[m] || {}, vals);
     S.openLocked[m] = true;
+    logAction('حفظ رصيد أول الشهر', m, `${S.products.length} صنف`);
     saveDB();
     toast('تم حفظ وقفل رصيد أول الشهر');
     closeInv();
@@ -2489,6 +2513,7 @@ function saveOpening() {
 
 async function unlockOpening() {
     if (!await askConfirm('فتح رصيد أول الشهر للتعديل؟ تغييره هيأثر على كل حسابات الشهر ده.', 'فتح التعديل')) return;
+    logAction('فتح رصيد أول الشهر', activeMonth, '');
     delete S.openLocked[activeMonth];
     saveDB();
     toast('تم فتح الرصيد للتعديل');
@@ -2697,6 +2722,7 @@ async function addTransfer() {
     if (branch.length > 120) return toast('اسم الفرع طويل جداً', 'error');
     if (!await confirmFuture(d)) return;
     S.transfers.push({ id: uid(), day: d, type, branch, product_id: pid, qty });
+    logAction('إضافة تحويل', d, `${type === 'in' ? 'وارد من' : 'صادر لـ'} ${branch || '—'} — ${productLabel(pid)} ${qty}`);
     delete S.transferNone[d];
     saveDB();
     $('trans-branch').value = ''; $('trans-qty').value = '';
@@ -2710,6 +2736,7 @@ async function deleteTransfer(id) {
     if (!t) return;
     if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'error');
     if (!await askConfirm('حذف هذا التحويل؟', 'حذف')) return;
+    logAction('مسح تحويل', t.day, `${productLabel(t.product_id)} ${t.qty} (${t.type === 'in' ? 'وارد' : 'صادر'} ${t.branch || '—'})`);
     S.transfers = S.transfers.filter(x => x.id !== id);
     saveDB();
     toast('تم الحذف');
@@ -3240,6 +3267,37 @@ function switchExpSub(k) {
     });
 }
 
+
+function openAudit() {
+    const ov = document.createElement('div');
+    ov.className = 'modal';
+    ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" style="max-width:780px;max-height:85vh;overflow:auto">
+        <div class="row between"><div class="h" style="margin:0">سجل التعديلات</div><button class="btn btn-sm" data-close>إغلاق</button></div>
+        <div class="row"><span class="muted">من</span><input type="date" class="inp sm" data-f="from"><span class="muted">إلى</span><input type="date" class="inp sm" data-f="to"><select class="inp" data-f="type" style="width:220px"></select></div>
+        <div class="muted">آخر 200 عملية. السجل بيتحفظ مع البيانات.</div>
+        <div class="tbl-wrap" data-list></div>
+    </div>`;
+    document.body.appendChild(ov);
+    const types = [...new Set((S.audit || []).map(a => a.action))];
+    ov.querySelector('[data-f="type"]').innerHTML = '<option value="">كل العمليات</option>' + types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+    const draw = () => {
+        const from = ov.querySelector('[data-f="from"]').value;
+        const to = ov.querySelector('[data-f="to"]').value;
+        const ty = ov.querySelector('[data-f="type"]').value;
+        const rows = (S.audit || []).filter(a =>
+            (!ty || a.action === ty) &&
+            (!from || !a.day || a.day >= from) &&
+            (!to || !a.day || a.day <= to)
+        ).slice(0, 200);
+        ov.querySelector('[data-list]').innerHTML = rows.length
+            ? `<table><thead><tr><th>وقت التسجيل</th><th>العملية</th><th>اليوم</th><th>التفاصيل</th></tr></thead><tbody>${rows.map(a => `<tr><td>${esc(a.at)}</td><td>${esc(a.action)}</td><td>${esc(a.day) || '—'}</td><td style="white-space:normal">${esc(a.detail)}</td></tr>`).join('')}</tbody></table>`
+            : '<div class="muted">مفيش عمليات بالفلتر ده.</div>';
+    };
+    ov.querySelectorAll('[data-f]').forEach(el => el.addEventListener('change', draw));
+    ov.querySelector('[data-close]').onclick = () => ov.remove();
+    ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+    draw();
+}
 
 function renderSmartTips() {
     const card = $('smart-tips-card');
