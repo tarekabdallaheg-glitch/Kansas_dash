@@ -355,6 +355,9 @@ html:not(.dark) details.sub summary{color:#244d78}
 html:not(.dark) .prow{border-color:#dce4ee}
 
 /* ===== إضافات صلاحية المنتجات والمتوقع مقابل الفعلي ===== */
+.pname{color:var(--gold2);font-weight:800}
+.punit{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid var(--border);color:var(--muted);background:var(--card2);vertical-align:middle}
+html:not(.dark) .pname{color:#1f4f85}
 #print-exp-tmp{display:none}
 tr.rowred td{background:rgba(214,69,69,.12)}
 tr.rowyel td{background:rgba(183,121,31,.14)}
@@ -2613,7 +2616,7 @@ function renderReceipts() {
     if (locked) {
         const items = S.products.filter(p => rcpt(d, p.id) > 0);
         $('rc-body').innerHTML = items.length
-            ? `<div class="chips">${items.map(p => `<span class="chip2"><b>${esc(p.name)}</b> ${fmt(rcpt(d, p.id), 2)} <span class="muted">${esc(p.unit)}</span></span>`).join('')}</div>`
+            ? `<div class="chips">${items.map(p => `<span class="chip2"><span class="pname">${esc(p.name)}</span> ${fmt(rcpt(d, p.id), 2)} <span class="muted">${esc(p.unit)}</span></span>`).join('')}</div>`
             : `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون توريد.' : 'مفيش وارد مسجل لليوم ده.'}</div>`;
         $('rc-save').classList.add('hidden');
         $('rc-none').classList.add('hidden');
@@ -2627,7 +2630,7 @@ function renderReceipts() {
     $('rc-none').classList.toggle('hidden', hasAny);
     $('rc-edit').classList.add('hidden');
     $('rc-body').innerHTML = S.products.map((p, i) => `<div class="prow" data-search="${esc(searchKey(p))}">
-        <div><b>${esc(p.name)}</b> <span class="muted">${esc(p.unit)}</span></div>
+        <div><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
         <input class="inp xs" type="number" min="0" step="any" data-nav="rec" data-ri="${i}" value="${esc(rcValue(d, p))}" placeholder="0"
             oninput="rcSet('${esc(p.id)}', this.value)">
     </div>`).join('');
@@ -2727,7 +2730,7 @@ function renderTransfers() {
     $('tr-list').innerHTML = list.map(t => `<div class="prow">
         <div>
             <b>${t.type === 'in' ? 'وارد من فرع' : 'صادر لفرع'}</b> · ${esc(t.branch || '—')}
-            <div class="muted">${esc(productLabel(t.product_id) || 'صنف محذوف')} — ${fmt(t.qty, 2)}</div>
+            <div><span class="pname">${esc((productById(t.product_id) || {}).name || 'صنف محذوف')}</span> <span class="punit">${esc((productById(t.product_id) || {}).unit || '')}</span> <span class="muted">— ${fmt(t.qty, 2)}</span></div>
         </div>
         ${locked ? '' : `<button class="btn btn-red btn-sm" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
     </div>`).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
@@ -2875,7 +2878,7 @@ function renderAnalysis() {
         }
         const has = hasOpening(p.id, m);
         return `<div class="pcard" data-search="${esc(searchKey(p))}">
-            <div class="ptitle">${esc(p.name)} <span class="muted">${esc(p.unit)}</span></div>
+            <div class="ptitle"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
             <div class="pgrid">
                 <div class="fld"><span>أول الشهر (ثابت)</span><b>${has ? fmt(openingFor(p.id, m), 2) : '<span class="muted">لم يُدخل</span>'}</b></div>
                 <div class="fld"><span>الوارد (من أول الشهر)</span><b id="ar-${esc(p.id)}">-</b></div>
@@ -3151,7 +3154,7 @@ function renderShelfDefs() {
     host.innerHTML = S.products.map(p => {
         const s = S.shelf[p.id] || { value: '', unit: 'day' };
         const opt = u => `<option value="${u}" ${s.unit === u ? 'selected' : ''}>${EXP_UNIT_AR[u]}</option>`;
-        return `<div class="prow"><div><b>${esc(p.name)}</b> <span class="muted">${esc(p.unit)}</span></div>
+        return `<div class="prow"><div><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
             <div class="pfields2"><input class="inp xs" type="number" min="0" step="1" data-shelf="${esc(p.id)}" value="${s.value}" placeholder="المدة">
             <select class="inp" data-shelf-unit="${esc(p.id)}" style="width:130px">${opt('day')}${opt('month')}${opt('year')}</select></div></div>`;
     }).join('');
