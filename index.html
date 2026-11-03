@@ -492,6 +492,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             <div class="row" style="margin-top:14px">
                 <button class="btn btn-gold" id="sales-save" data-save onclick="saveSalesDay()">حفظ وقفل اليوم</button>
                 <button class="btn" id="sales-unlock" onclick="unlockSales()">فتح التعديل</button>
+                <button class="btn btn-red" id="sales-delete" onclick="deleteSalesDay()">مسح إيراد اليوم</button>
             </div>
         </div>
 
@@ -2238,13 +2239,25 @@ async function saveSalesDay() {
     if (rv === '' || ov === '') return toast('أدخل الإيراد وعدد العمليات', 'error');
     const revenue = num(rv), orders = int(ov);
     if (revenue < 0) return toast('الإيراد لا يكون بالسالب', 'error');
-    if (!await confirmFuture(d)) return;
+    if (d > todayStr()) return toast('ما ينفعش تسجل إيراد ليوم لسه ما جاش', 'error');
     if (revenue > 0 && orders === 0 && !await askConfirm('عدد العمليات صفر والإيراد أكبر من صفر. متأكد؟')) return;
     if (revenue === 0 && orders > 0 && !await askConfirm('الإيراد صفر وفيه عمليات. متأكد؟')) return;
     S.sales[d] = { revenue, orders };
     S.locks.sales[d] = true;
     saveDB();
     toast('تم حفظ وقفل إيراد اليوم');
+    renderAll();
+}
+
+async function deleteSalesDay() {
+    const d = $('sales-day').value;
+    if (!S.sales[d]) return toast('مفيش إيراد مسجل لليوم ده', 'error');
+    if (!await askConfirm(`مسح إيراد يوم ${d} نهائياً؟ هيتشال من الفعلي والتوقع والتحليل.`, 'مسح')) return;
+    delete S.sales[d];
+    delete S.locks.sales[d];
+    saveDB();
+    loadSalesDay();
+    toast('تم مسح إيراد اليوم');
     renderAll();
 }
 
