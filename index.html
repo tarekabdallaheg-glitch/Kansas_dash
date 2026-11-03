@@ -1982,12 +1982,47 @@ function importForecastHistory() {
     toast(`تم إدخال ${added} يوم${overwritten ? ` (تحديث ${overwritten} يوم)` : ''}${skipped ? `، وتجاهل ${skipped} صف` : ''}`);
 }
 
+function askTyped(msg, word) {
+    return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal';
+        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
+            <p style="white-space:pre-line">${esc(msg)}</p>
+            <input class="inp" data-typed autocomplete="off" placeholder="${esc(word)}">
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" data-no>إلغاء</button>
+                <button class="btn btn-red" data-yes disabled>تأكيد المسح</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        const input = ov.querySelector('[data-typed]');
+        const yes = ov.querySelector('[data-yes]');
+        const done = v => { ov.remove(); resolve(v); };
+        input.addEventListener('input', () => { yes.disabled = input.value.trim() !== word; });
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !yes.disabled) done(true);
+            if (e.key === 'Escape') done(false);
+        });
+        ov.querySelector('[data-no]').onclick = () => done(false);
+        yes.onclick = () => done(true);
+        input.focus();
+    });
+}
+
 async function clearForecastHistory() {
-    if(!await askConfirm('هل أنت متأكد من مسح جميع بيانات مبيعات التعلم وسجل الإيرادات لبدء إدخال بيانات جديدة بالكامل؟', 'مسح الكل')) return;
+    const days = Object.keys(S.sales || {});
+    if (!days.length) return toast('مفيش إيرادات مسجلة لمسحها', 'error');
+    const total = days.reduce((a, d) => a + Number(S.sales[d].revenue || 0), 0);
+    const ok = await askTyped(
+        `هيتمسح ${days.length} يوم إيراد مسجل (إجمالي ${fmt(total)} ج.م) من كل الشهور في الفعلي والتوقع والتحليل.\nمش هيرجع إلا بالنسخة الاحتياطية.\n\nعشان تأكد، اكتب كلمة "مسح" بالظبط:`,
+        'مسح');
+    if (!ok) return;
+    logAction('مسح كل الإيرادات', '', `${days.length} يوم، إجمالي ${fmt(total)} ج.م`);
     S.sales = {};
+    S.locks.sales = {};
     saveDB();
     renderAll();
-    toast('تم مسح جميع بيانات مبيعات التعلم بنجاح');
+    toast('تم مسح جميع بيانات الإيراد');
 }
 
 function saveForecastEvent() {
