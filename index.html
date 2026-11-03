@@ -3226,6 +3226,8 @@ function switchExpSub(k) {
 
 
 function renderSmartTips() {
+    const card = $('smart-tips-card');
+    if (card) card.classList.toggle('hidden', !!invView);
     const host = $('smart-tips'); if (!host) return;
     const tips = [];
     const N = n => esc(n);
