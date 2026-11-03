@@ -2614,7 +2614,8 @@ async function saveReceipts() {
     const d = $('rc-day').value;
     if (!d) return toast('اختر التاريخ', 'error');
     if (S.receiptLocked[d]) return toast('اليوم ده مقفول', 'error');
-    if (!await confirmFuture(d)) return;
+    if (d > todayStr()) return toast('ما ينفعش تسجل وارد ليوم لسه ما جاش', 'error');
+    if (d < todayStr() && !await askConfirm('ده تعديل على وارد يوم فات. متأكد؟', 'تأكيد التعديل')) return;
     const rec = {};
     for (const p of S.products) {
         const v = rcValue(d, p);
@@ -2720,7 +2721,8 @@ async function addTransfer() {
     if (!pid) return toast('اختر صنفاً الأول', 'error');
     if (qty <= 0) return toast('الكمية لازم تكون أكبر من صفر', 'error');
     if (branch.length > 120) return toast('اسم الفرع طويل جداً', 'error');
-    if (!await confirmFuture(d)) return;
+    if (d > todayStr()) return toast('ما ينفعش تسجل تحويل ليوم لسه ما جاش', 'error');
+    if (d < todayStr() && !await askConfirm('ده تحويل ليوم فات. متأكد؟', 'تأكيد')) return;
     S.transfers.push({ id: uid(), day: d, type, branch, product_id: pid, qty });
     logAction('إضافة تحويل', d, `${type === 'in' ? 'وارد من' : 'صادر لـ'} ${branch || '—'} — ${productLabel(pid)} ${qty}`);
     delete S.transferNone[d];
@@ -2735,6 +2737,7 @@ async function deleteTransfer(id) {
     const t = S.transfers.find(x => x.id === id);
     if (!t) return;
     if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'error');
+    if (t.day < todayStr() && !await askConfirm('ده مسح لتحويل يوم فات. متأكد؟', 'مسح')) return;
     if (!await askConfirm('حذف هذا التحويل؟', 'حذف')) return;
     logAction('مسح تحويل', t.day, `${productLabel(t.product_id)} ${t.qty} (${t.type === 'in' ? 'وارد' : 'صادر'} ${t.branch || '—'})`);
     S.transfers = S.transfers.filter(x => x.id !== id);
