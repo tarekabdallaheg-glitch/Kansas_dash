@@ -1889,14 +1889,15 @@ function fcGrowth() {
 }
 function forecastOne(day, history, trend, gOverride) {
     const wd = weekdayOf(day);
-    const same = history.filter(x=>x.weekday===wd).slice(-8);
-    const all = history.slice(-28);
+    const winStart = addDays(day,-28);
+    const same = history.filter(x=>x.weekday===wd && x.date>=winStart && x.date<day);
+    const all = history.filter(x=>x.date>=winStart && x.date<day);
     let base = 0, confidence = 'ضعيفة', basis = '';
     if (same.length) {
         const weights = same.map((_,i)=>i+1);
         base = same.reduce((sum,x,i)=>sum+x.revenue*weights[i],0)/weights.reduce((a,b)=>a+b,0);
-        confidence = same.length>=8 ? 'مرتفعة' : same.length>=4 ? 'متوسطة' : 'مبدئية';
-        basis = `مبني على ${same.length} من أيام ${DAYS_AR[wd]} السابقة`;
+        confidence = same.length>=4 ? 'مرتفعة' : same.length>=2 ? 'متوسطة' : 'مبدئية';
+        basis = `مبني على ${same.length} من أيام ${DAYS_AR[wd]} في آخر 4 أسابيع`;
     } else if (all.length) {
         base = mean(all.map(x=>x.revenue));
         confidence = 'ضعيفة'; basis = 'متوسط الأيام المسجلة لعدم وجود نفس اليوم';
