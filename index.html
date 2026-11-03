@@ -710,6 +710,11 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             </button>
         </div>
 
+        <div class="card" id="smart-tips-card">
+            <div class="h">نصائح التشغيل الذكي</div>
+            <div class="muted" style="margin-bottom:10px">نصائح مبنية على بياناتك الحالية لتقليل التكلفة وزيادة الربحية وتشديد الكنترول على أهم الأصناف.</div>
+            <div id="smart-tips" class="ins-list"></div>
+        </div>
         <div class="card" id="inv-export">
             <div class="h">تحميل شيت الوارد والتحويلات والإيراد</div>
             <div class="exp">
@@ -1297,6 +1302,25 @@ function renderBackupAlert() {
 }
 
 function isVisible(el) { return !!el && el.offsetParent !== null; }
+
+// تنقل موحد بين الخانات: Enter وسهم شمال = التالي، سهم يمين = السابق، ومنع تغيير الأرقام بالأسهم
+document.addEventListener('keydown', function (e) {
+    const t = e.target;
+    if (!t || !t.tagName || !/^(INPUT|SELECT)$/.test(t.tagName)) return;
+    if (t.type === 'number' && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) e.preventDefault();
+    if (t.dataset && t.dataset.nav) return;
+    if (t.hasAttribute('onkeydown') || t.hasAttribute('data-no-nav')) return;
+    if (!(e.key === 'Enter' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+    const scope = t.closest('.card, .mbox') || document;
+    const list = [...scope.querySelectorAll('input:not([type=checkbox]):not([type=file]), select')]
+        .filter(el => !el.disabled && isVisible(el));
+    const i = list.indexOf(t);
+    if (i < 0) return;
+    const dir = (e.key === 'ArrowRight') ? -1 : 1;
+    const next = list[i + dir];
+    if (next) { e.preventDefault(); next.focus(); if (next.select) next.select(); }
+}, true);
+
 function rowCells(scope, ri) { return [...scope.querySelectorAll(`[data-nav][data-ri="${ri}"]`)].filter(isVisible); }
 function nextRowCells(scope, ri, dir) {
     for (let r = ri + dir, guard = 0; guard < 3000; r += dir, guard++) {
@@ -1310,7 +1334,7 @@ function nextRowCells(scope, ri, dir) {
 // منع زيادة/نقص الأرقام عند لف عجلة الماوس فوق خانات الأرقام
 document.addEventListener('wheel', function(e) {
     if (document.activeElement && document.activeElement.type === 'number') {
-        document.activeElement.blur();
+        e.preventDefault(); document.activeElement.blur();
     }
 }, { passive: false });
 
@@ -3200,7 +3224,109 @@ function switchExpSub(k) {
     });
 }
 
+
+function renderSmartTips() {
+    const host = $('smart-tips'); if (!host) return;
+    const tips = [];
+    const N = n => esc(n);
+    const rows = expRows();
+    const lastA = [...S.analyses].sort((a, b) => (a.to < b.to ? 1 : -1))[0];
+
+    if (!S.products.length) {
+        tips.push({ type: 'tip', text: 'ابدأ بإضافة الأصناف، وابدأ بالغالية منها (اللحوم والزيوت والجبن)، لأن التوفير فيها بيفرق أكتر.' });
+    }
+
+    // فروقات الجرد لكل صنف: عجز (وفر فيه) أو مطابق (حافظ عليه) أو زيادة (راجع التسجيل)
+    if (lastA) {
+        S.products.forEach(p => {
+            const x = lastA.rows && lastA.rows[p.id];
+            if (!x || x.closing === null || x.closing === undefined) return;
+            const c = calcRow(p.id, { from: lastA.from, to: lastA.to }, x.opening, x.sold, x.closing);
+            if (c.variance < 0) tips.push({ type: 'warn', text: `وفر في ${N(p.name)}: عجز ${fmt(-c.variance, 2)} ${N(p.unit)} في جرد ${lastA.to}. راجع الوزن عند التحضير والتسليم، وسجّل الهالك فوراً.` });
+            else if (c.variance > 0) tips.push({ type: 'tip', text: `راجع تسجيل ${N(p.name)}: الجرد أعلى من النظري بـ ${fmt(c.variance, 2)} ${N(p.unit)}. غالباً فيه مبيعات أو تحويل ما اتسجلش، صححه عشان التكلفة تطلع صح.` });
+            else tips.push({ type: 'good', text: `حافظ على ${N(p.name)}: الجرد مطابق للنظري في ${lastA.to}. استمر بنفس طريقة الوزن والتسليم.` });
+        });
+    } else {
+        tips.push({ type: 'tip', text: 'حافظ على الكنترول: اعمل جرد فعلي لأهم الأصناف كل أسبوع، ده أول خطوة للتوفير لأنك هتعرف فين الفلوس بتروح.' });
+    }
+
+    // الدفعات المنتهية: وفر في الإنتاج
+    const expiredBy = {};
+    rows.filter(r => r.left !== null && r.left < 0).forEach(r => { expiredBy[r.name] = (expiredBy[r.name] || 0) + 1; });
+    Object.entries(expiredBy).forEach(([n, c]) => tips.push({ type: 'warn', text: `وفر في ${N(n)}: فيه ${c} دفعة انتهت قبل ما تتباع. أنتج كمية أقل وعلى قد الطلب اليومي.` }));
+
+    // الدفعات القريبة: حافظ عليها بالترتيب
+    rows.filter(r => r.left !== null && r.left >= 0 && r.left <= EXP_YELLOW).slice(0, 5).forEach(r =>
+        tips.push({ type: r.left <= EXP_RED ? 'warn' : 'tip', text: `حافظ على ${N(r.name)}: دفعة إنتاج ${r.day} ${r.left <= EXP_RED ? 'حرجة' : 'قريبة'} (باقي ${r.left} يوم). بيعها الأول قبل أي دفعة أحدث (FIFO).` }));
+
+    // الأصناف بدون مدة صلاحية: الكنترول عليها ناقص
+    S.products.filter(p => !shelfDays(p.id)).slice(0, 3).forEach(p =>
+        tips.push({ type: 'tip', text: `حافظ على ${N(p.name)}: حدد مدة صلاحيته عشان تعرف امتى تبيعه قبل ما يخسر.` }));
+
+    // أعلى صنف في الطلبية: أي توفير فيه بيفرق
+    const per = S.products.filter(p => S.per1000[p.id] && S.per1000[p.id].enabled && Number(S.per1000[p.id].rate) > 0);
+    if (per.length) {
+        const start = orderStartDate();
+        const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+        const totalRev = days.reduce((a, d) => a + planForecast(d).predicted, 0);
+        const totals = per.map(p => ({ p, q: totalRev / 1000 * Number(S.per1000[p.id].rate) })).sort((a, b) => b.q - a.q);
+        if (totals[0].q > 0) tips.push({ type: 'tip', text: `ركّز الكنترول على ${N(totals[0].p.name)}: أعلى كمية في طلبية الأسبوع (حوالي ${fmt(totals[0].q, 2)} ${N(totals[0].p.unit)}). أي توفير فيه بيفرق في التكلفة أكتر من غيره.` });
+        tips.push({ type: 'tip', text: 'وفر في الطلب: اطلب على قد التوقع، واعتمد نسخة الأسبوع قبل الطلب، عشان الزيادة ما تتحولش لهالك مع الصلاحية.' });
+    }
+
+    // الوارد الناقص: الكنترول بيبوظ
+    const mr = missingDays(coveredReceipt).length;
+    if (mr) tips.push({ type: 'warn', text: `حافظ على الكنترول: فيه ${mr} يوم من غير وارد مسجل. سجّل الوارد عشان تعرف تكلفة كل صنف بدقة.` });
+
+    // التحويلات: التحويل اللي ما اتسجلش بيعمل عجز وهمي
+    if (S.transfers.length) tips.push({ type: 'tip', text: 'حافظ على الكنترول: سجّل كل تحويل بين الفروع في يومه، التحويل اللي ما اتسجلش بيطلع عجز وهمي وبيضيّع وقت المراجعة.' });
+
+    host.innerHTML = tips.map(t => tipHtml(t)).join('');
+}
+
+function renderSmartTipsOld() {
+    const host = $('smart-tips'); if (!host) return;
+    const tips = [];
+    if (!S.products.length) {
+        tips.push({ type: 'tip', text: 'ابدأ بإضافة الأصناف الأساسية، وخصوصاً الغالية (اللحوم والزيوت والجبن والتغليف)، عشان الكنترول يبدأ عليها.' });
+    } else {
+        const rows = expRows();
+        const soon = rows.filter(r => r.left !== null && r.left <= EXP_YELLOW);
+        const expired = rows.filter(r => r.left !== null && r.left < 0);
+        if (expired.length) tips.push({ type: 'warn', text: `فيه ${expired.length} دفعة منتهية. شيلها من الرف وسجّلها كهالك عشان تعرف حجم الخسارة وتقللها.` });
+        if (soon.length) tips.push({ type: 'warn', text: `فيه ${soon.length} دفعة قربت تنتهي. بيع الأقدم الأول (FIFO) وقلل الإنتاج الجديد لحد ما تخلص دي.` });
+        const noShelf = S.products.filter(p => !shelfDays(p.id));
+        if (noShelf.length) tips.push({ type: 'tip', text: `حدد مدة صلاحية ${noShelf.length} صنف على الأقل، عشان تحذيرات الصلاحية تبقى دقيقة.` });
+
+        const lastA = [...S.analyses].sort((a, b) => (a.to < b.to ? 1 : -1))[0];
+        if (lastA) {
+            const neg = [];
+            S.products.forEach(p => {
+                const x = lastA.rows && lastA.rows[p.id];
+                if (!x || x.closing === null || x.closing === undefined) return;
+                const c = calcRow(p.id, { from: lastA.from, to: lastA.to }, x.opening, x.sold, x.closing);
+                if (c.variance < 0) neg.push(`${p.name} (${fmt(c.variance, 2)})`);
+            });
+            if (neg.length) tips.push({ type: 'warn', text: `عجز في جرد ${lastA.to}: ${neg.slice(0, 5).join('، ')}. راجع الوزن والهدر والتسليم قبل ما تطلب تاني.` });
+            else tips.push({ type: 'good', text: `مفيش عجز في آخر جرد (${lastA.to}). حافظ على نفس طريقة الوزن والتسليم.` });
+        } else {
+            tips.push({ type: 'tip', text: 'اعمل جرد فعلي للأصناف الغالية كل أسبوع، والتحليل بيقولك فين العجز بالظبط.' });
+        }
+
+        const mr = missingDays(coveredReceipt).length;
+        if (mr) tips.push({ type: 'warn', text: `فيه ${mr} يوم من غير تسجيل وارد. الوارد الناقص بيخلي التحليل والعجز غلط، سجّله أو أكد إنه بدون توريد.` });
+
+        const per = S.products.filter(p => S.per1000[p.id] && S.per1000[p.id].enabled);
+        if (per.length) tips.push({ type: 'tip', text: 'اطلب على قد التوقع مش على الاحتياط. أي زيادة في الطلب بتتحول لهالك مع الصلاحية. اعتمد نسخة الأسبوع قبل الطلب.' });
+    }
+    tips.push({ type: 'tip', text: 'اعمل جرد يومي للأصناف الأغلى بدل الأسبوعي، لأن الخسارة فيها بتكبر بسرعة.' });
+    tips.push({ type: 'tip', text: 'حدد حد أدنى لكل صنف، وخلّي التطبيق يقولك لما الرصيد يقرب يخلص، عشان متشتريش بكميات زيادة تقعد وتنتهي.' });
+    tips.push({ type: 'tip', text: 'قارن المتوقع بالفعلي في الطلبيات كل أسبوع، وراجع أي صنف فرقه أكبر من 5%.' });
+    host.innerHTML = tips.map(t => tipHtml(t)).join('');
+}
+
 function renderExpiry() {
+    renderSmartTips();
     if (!$('exp-warn')) return;
     renderExpWarn(); renderShelfDefs(); renderExpDaily(); renderExpReport();
     switchExpSub(expSub);
@@ -3381,4 +3507,3 @@ function renderAll() {
 </script>
 </body>
 </html>
-
