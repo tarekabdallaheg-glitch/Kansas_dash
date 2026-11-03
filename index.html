@@ -2222,6 +2222,7 @@ function renderSalesForm() {
     $('sales-unlock').classList.toggle('hidden', !locked);
     $('sales-badge').textContent = locked ? 'مغلق ومحفوظ' : 'مفتوح';
     $('sales-badge').className = 'badge ' + (locked ? 'closed' : 'open');
+    $('sales-delete').classList.toggle('hidden', d < todayStr());
 }
 
 function loadSalesDay() {
@@ -2252,6 +2253,7 @@ async function saveSalesDay() {
 async function deleteSalesDay() {
     const d = $('sales-day').value;
     if (!S.sales[d]) return toast('مفيش إيراد مسجل لليوم ده', 'error');
+    if (d < todayStr()) return toast('مينفعش تمسح إيراد يوم فات، تقدر تعدله بس', 'error');
     if (!await askConfirm(`مسح إيراد يوم ${d} نهائياً؟ هيتشال من الفعلي والتوقع والتحليل.`, 'مسح')) return;
     delete S.sales[d];
     delete S.locks.sales[d];
