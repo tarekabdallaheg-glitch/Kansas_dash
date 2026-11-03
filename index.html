@@ -619,8 +619,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 
                 <span class="muted">من</span>
                 <input type="date" id="fc-from" class="inp sm" onchange="renderForecast()"><span class="muted">إلى</span><input type="date" id="fc-to" class="inp sm" onchange="renderForecast()">
-                <span class="muted">نسبة النمو % (من 5 لـ 10)</span>
-                <input type="number" id="fc-growth" class="inp xs" min="5" max="10" step="0.5" value="5" onchange="renderForecast();renderVariance()">
+                <span class="muted">نسبة النمو %</span>
+                <input type="number" id="fc-growth" class="inp xs" step="any" value="5" onchange="renderForecast();renderVariance()">
             </div>
             <div id="forecast-summary" class="note" style="margin-top:12px">ابدأ بتسجيل المبيعات أو استيراد بيانات سابقة لبناء التوقع.</div>
             <div class="tbl-wrap" style="margin-top:12px"><table>
@@ -1861,9 +1861,7 @@ function fcGrowth() {
     const el = $('fc-growth');
     let g = el ? Number(el.value) : 5;
     if (!Number.isFinite(g)) g = 5;
-    const c = Math.min(10, Math.max(5, g));
-    if (el && c !== g) el.value = c;
-    return c;
+    return g;
 }
 function forecastOne(day, history, trend, gOverride) {
     const wd = weekdayOf(day);
@@ -2033,7 +2031,7 @@ function setRowGrowth(d, v) {
     else {
         let g = Number(v);
         if (!Number.isFinite(g)) return toast('أدخل نسبة صحيحة', 'error');
-        S.growth[d] = Math.min(10, Math.max(5, g));
+        S.growth[d] = g;
     }
     saveDB();
     renderForecast();
@@ -2074,7 +2072,7 @@ function renderForecast() {
         const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
         return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
             <td>${avg === null ? '<span class="muted">—</span>' : fmt(avg) + '<br><span class="muted">' + esc(f.basis) + '</span>'}</td>
-            <td><input class="inp xs" type="number" min="5" max="10" step="0.5" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
+            <td><input class="inp xs" type="number" step="any" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
             <td><b>${exp === null ? '—' : fmt(exp)}</b></td>
             <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
             <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
@@ -2119,7 +2117,7 @@ function renderForecastUnusedOld() {
         const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
         return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
             <td>${avg === null ? '<span class="muted">—</span>' : fmt(avg)}</td>
-            <td><input class="inp xs" type="number" min="5" max="10" step="0.5" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
+            <td><input class="inp xs" type="number" step="any" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
             <td><b>${exp === null ? '—' : fmt(exp)}</b></td>
             <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
             <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
@@ -2132,7 +2130,7 @@ function renderForecastUnusedOld() {
     $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
     $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
     $('forecast-summary').textContent = hist.length
-        ? `المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع من الإيرادات السابقة × اتجاه الفترة × تأثير المناسبات × نسبة النمو (من 5% إلى 10%، وتقدر تعدلها لكل يوم). الفرق = الفعلي − المتوقع.`
+        ? `المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع من الإيرادات السابقة × اتجاه الفترة × تأثير المناسبات × نسبة النمو (تقدر تكتب أي نسبة، وتعدلها لكل يوم). الفرق = الفعلي − المتوقع.`
         : 'لا توجد مبيعات مسجلة بعد. سجّل الإيراد اليومي أو أدخل بيانات سابقة ليبدأ التوقع.';
     $('forecast-history-count').textContent = `الموجود حاليًا: ${hist.length} يوم`;
 }
@@ -3383,3 +3381,4 @@ function renderAll() {
 </script>
 </body>
 </html>
+
