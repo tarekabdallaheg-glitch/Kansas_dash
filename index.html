@@ -389,6 +389,16 @@ html:not(.dark) .prow{border-color:#dce4ee}
   body.print-analysis #pn-analysis .up{color:#065f46!important}
 }
 
+/* ===== منطقة طباعة مستقلة (للطلبيات): مخفية على الشاشة، وبتظهر بس وقت الطباعة ===== */
+#print-area{display:none}
+@media print{
+  body > *:not(#print-area){display:none!important}
+  #print-area{display:block!important;background:#fff;color:#000;padding:8px}
+  #print-area table{width:100%;border-collapse:collapse;font-size:12px}
+  #print-area th,#print-area td{border:1px solid #777;padding:6px;color:#000;text-align:right;white-space:normal}
+  #print-area th{background:#eeeeee!important}
+}
+
 /* ===== ألوان الطباعة لكل صفحات البرنامج ===== */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -1027,6 +1037,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 </div>
 
 <div class="toasts" id="toasts"></div>
+<div id="print-area" aria-hidden="true"></div>
 
 <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -3696,10 +3707,20 @@ async function saveOrderSnapshot() {
   S.orderSnapshots[start]={start,end:days[6],savedAt:new Date().toLocaleString('ar-EG'),rows}; saveDB(); renderOrderForecast(); toast('تم نسخة الطلبية المتوقعة للأسبوع');
 }
 function printOrdersPdf() {
-  document.body.classList.add('print-orders');
-  const clean=()=>document.body.classList.remove('print-orders');
-  window.addEventListener('afterprint',clean,{once:true});
-  setTimeout(()=>window.print(),80);
+  const area = $('print-area');
+  const heading = $('orders-print-heading');
+  const table = $('orders-table');
+  if (!area || !heading || !table) return toast('افتح جدول الأسبوع الأول', 'error');
+  const wrap = document.createElement('div');
+  [heading, table].forEach(el => {
+    const c = el.cloneNode(true);
+    c.removeAttribute('id');
+    c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+    wrap.appendChild(c);
+  });
+  area.innerHTML = '';
+  area.appendChild(wrap);
+  window.print();
 }
 function printSalesForecast() {
   document.body.classList.add('print-salesforecast');
