@@ -3070,6 +3070,14 @@ async function deleteAnalysis(id) {
     renderAll();
 }
 
+// وضع الطباعة بيخفي عناصر مؤقتاً. لو المتصفح ما بعتش حدث afterprint (زي بعض متصفحات الموبايل)،
+// بنرجّع الشكل الطبيعي عند أول تفاعل حتى الصفحة ما تفضلش مقفولة
+const PRINT_MODE_CLASSES = ['print-orders', 'print-salesforecast', 'print-analysis', 'print-exp-mode'];
+function resetPrintMode() { PRINT_MODE_CLASSES.forEach(c => document.body.classList.remove(c)); }
+window.addEventListener('afterprint', resetPrintMode);
+window.addEventListener('focus', resetPrintMode);
+document.addEventListener('pointerdown', resetPrintMode);
+
 function printAnalysis() {
     const r = anRange();
     if (!r || !r.to) return toast('اختر تاريخ النهاية الأول', 'error');
