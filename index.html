@@ -323,6 +323,9 @@ details.sub[open] summary::before{content:"▾ "}
   body.print-orders #pn-orders .muted, body.print-salesforecast #sales-forecast .muted{color:#222!important;font-weight:800!important}
   body.print-orders #pn-orders *, body.print-salesforecast #sales-forecast *{font-weight:800!important}
   body.print-orders #pn-orders, body.print-salesforecast #sales-forecast{font-size:12px!important}
+  /* تبويب المخزون كان مخفي في الطباعة العامة، فبنرجّعه ظاهر لطباعة الطلبيات بس */
+  body.print-orders #tab-inventory, body.print-orders #inv-panel{display:block!important}
+  body.print-orders .pnl-head, body.print-orders #pn-orders .tiles, body.print-orders #pn-orders .no-print{display:none!important}
 }
 
 html:not(.dark){
