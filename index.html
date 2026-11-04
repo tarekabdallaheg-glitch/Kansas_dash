@@ -356,6 +356,32 @@ html:not(.dark) .chip.down{color:#b4232b}
 html:not(.dark) details.sub summary{color:#244d78}
 html:not(.dark) .prow{border-color:#dce4ee}
 
+/* ===== طباعة تحليل المخزون ===== */
+.an-print-head{display:none}
+@media print{
+  body.print-analysis *{visibility:hidden!important}
+  body.print-analysis #tab-inventory,
+  body.print-analysis #inv-panel,
+  body.print-analysis #pn-analysis{display:block!important}
+  body.print-analysis #pn-analysis,
+  body.print-analysis #pn-analysis *{visibility:visible!important}
+  body.print-analysis #pn-analysis{position:absolute!important;top:0;right:0;left:0;width:100%!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important;border:0!important;box-shadow:none!important}
+  body.print-analysis #pn-analysis .an-print-head{display:block!important}
+  body.print-analysis #pn-analysis button,
+  body.print-analysis #pn-analysis .search,
+  body.print-analysis #pn-analysis details,
+  body.print-analysis #pn-analysis .no-print{display:none!important}
+  body.print-analysis #pn-analysis .pcard{break-inside:avoid;border:1px solid #777!important;background:#fff!important;box-shadow:none!important}
+  body.print-analysis #pn-analysis .pname,
+  body.print-analysis #pn-analysis .ptitle,
+  body.print-analysis #pn-analysis .fld b{color:#000!important}
+  body.print-analysis #pn-analysis .muted,
+  body.print-analysis #pn-analysis .fld{color:#222!important}
+  body.print-analysis #pn-analysis input{border:1px solid #777!important;background:#fff!important;color:#000!important}
+  body.print-analysis #pn-analysis .down{color:#b00000!important}
+  body.print-analysis #pn-analysis .up{color:#065f46!important}
+}
+
 /* ===== إضافات صلاحية المنتجات والمتوقع مقابل الفعلي ===== */
 .pname{color:var(--gold2);font-weight:800}
 .punit{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid var(--border);color:var(--muted);background:var(--card2);vertical-align:middle}
@@ -819,6 +845,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 
             <!-- التحليل -->
             <div class="card hidden" id="pn-analysis" data-scope>
+                <div id="an-print-head" class="an-print-head" style="margin-bottom:10px"></div>
                 <div class="muted" style="margin-bottom:14px">التحليل دايماً من أول الشهر لحد التاريخ اللي تختاره. أول الشهر ثابت، ومش بيتغير غير من قسم الأصناف.</div>
                 <div class="row" style="margin-bottom:12px">
                     <span class="muted">لحد تاريخ</span>
@@ -837,7 +864,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="row" style="margin-top:18px">
                     <button class="btn btn-gold" id="an-save" data-save onclick="saveAnalysis()">حفظ وإغلاق</button>
                     <button class="btn btn-green" onclick="exportAnalysisXlsx()">تحميل شيت التحليل</button>
-                    <button class="btn" onclick="window.print()">طباعة</button>
+                    <button class="btn" onclick="printAnalysis()">طباعة</button>
+                    <button class="btn btn-slate" onclick="printAnalysis()">حفظ PDF</button>
                 </div>
                 <details style="margin-top:18px">
                     <summary>التحليلات المحفوظة</summary>
@@ -3025,6 +3053,18 @@ async function deleteAnalysis(id) {
     saveDB();
     toast('تم الحذف');
     renderAll();
+}
+
+function printAnalysis() {
+    const r = anRange();
+    if (!r || !r.to) return toast('اختر تاريخ النهاية الأول', 'error');
+    const head = $('an-print-head');
+    if (head) head.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تحليل المخزون</div>
+        <div style="text-align:center;font-weight:800">من ${esc(r.from)} إلى ${esc(r.to)}</div>`;
+    document.body.classList.add('print-analysis');
+    const clean = () => document.body.classList.remove('print-analysis');
+    window.addEventListener('afterprint', clean, { once: true });
+    setTimeout(() => window.print(), 80);
 }
 
 function setExportMonth() {
