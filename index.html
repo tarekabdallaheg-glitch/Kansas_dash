@@ -204,6 +204,8 @@ details.sub[open] summary::before{content:"▾ "}
 .search .inp{padding-right:14px}
 .missing-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
+.waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
+.waste-btn:hover{border-color:var(--bad)}
 
 .lock{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 .lock .card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;text-align:center;padding:30px}
@@ -2840,6 +2842,27 @@ function calcRow(pid, r, opening, sold, closingStr) {
     return { rec, net, theo, variance };
 }
 
+// أيقونة زر الهالك (سلة المهملات)
+const WASTE_ICON = '<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg> ';
+
+// قراءة خانة الهالك لصنف (اختيارية - لو مش ظاهرة أو فاضية = صفر)
+function wasteValue(pid) {
+    const el = $('aw-' + pid);
+    if (!el || el.value === '') return 0;
+    return Math.max(0, num(el.value));
+}
+
+// إظهار / إخفاء خانة الهالك لصنف
+function toggleWaste(pid) {
+    const row = $('awr-' + pid);
+    if (!row) return;
+    const nowHidden = row.classList.toggle('hidden');
+    if (!nowHidden) {
+        const el = $('aw-' + pid);
+        if (el) el.focus();
+    }
+}
+
 function renderAnalysis() {
     const r = anRange();
     const cards = $('an-cards');
@@ -2857,8 +2880,8 @@ function renderAnalysis() {
     const keep = {};
     if (key === anKey && !anLoadRows) {
         S.products.forEach(p => {
-            const s = $('as-' + p.id), c = $('ac-' + p.id);
-            if (s) keep[p.id] = { s: s.value, c: c.value };
+            const s = $('as-' + p.id), c = $('ac-' + p.id), w = $('aw-' + p.id);
+            if (s) keep[p.id] = { s: s.value, c: c.value, w: w ? w.value : '' };
         });
     }
     const loaded = anLoadRows;
@@ -2869,14 +2892,16 @@ function renderAnalysis() {
 
     const m = activeMonth;
     cards.innerHTML = S.products.map((p, i) => {
-        let s = '', c = '';
+        let s = '', c = '', w = '';
         if (loaded && loaded[p.id]) {
             s = loaded[p.id].sold;
             c = loaded[p.id].closing === null ? '' : loaded[p.id].closing;
+            w = loaded[p.id].waste ? loaded[p.id].waste : '';
         } else if (keep[p.id]) {
-            s = keep[p.id].s; c = keep[p.id].c;
+            s = keep[p.id].s; c = keep[p.id].c; w = keep[p.id].w;
         }
         const has = hasOpening(p.id, m);
+        const hasW = w !== '' && num(w) > 0;
         return `<div class="pcard" data-search="${esc(searchKey(p))}">
             <div class="ptitle"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
             <div class="pgrid">
@@ -2888,7 +2913,9 @@ function renderAnalysis() {
                 <label class="fld"><span>الجرد الفعلي (في تاريخ النهاية)</span>
                     <input class="inp" type="number" min="0" step="any" id="ac-${esc(p.id)}" data-nav="close" data-ri="${i}" value="${esc(c)}" placeholder="بعد العد" oninput="liveAn()"></label>
                 <div class="fld"><span>النظري</span><b id="ath-${esc(p.id)}">-</b></div>
-                <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة</span><b id="av-${esc(p.id)}">-</b></div>
+                <label class="fld"><span>الهالك (اختياري)</span>
+                    <input class="inp" type="number" min="0" step="any" id="aw-${esc(p.id)}" data-nav="waste" data-ri="${i}" value="${esc(w)}" placeholder="0" oninput="liveAn()"></label>
+                <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم الهالك)</span><b id="av-${esc(p.id)}">-</b></div>
             </div>
         </div>`;
     }).join('');
@@ -2905,7 +2932,10 @@ function liveAn() {
         const as = $('as-' + p.id);
         if (!as) return;
         const opening = openingFor(p.id, activeMonth);
+        const waste = wasteValue(p.id);
         const res = calcRow(p.id, r, opening, num(as.value), $('ac-' + p.id).value);
+        // العجز/الزيادة بعد خصم الهالك (الهالك بيتخصم تلقائياً لو موجود، ولو مفيش يبقى صفر)
+        if (res.variance !== null) res.variance += waste;
         $('ar-' + p.id).textContent = fmt(res.rec, 2);
         const at = $('at-' + p.id);
         at.textContent = (res.net > 0 ? '+' : '') + fmt(res.net, 2);
@@ -2930,6 +2960,7 @@ function liveAn() {
                 av.className = '';
             }
         }
+
     });
 }
 
@@ -2942,7 +2973,8 @@ function readAnalysisRows() {
         rows[p.id] = {
             opening: openingFor(p.id, activeMonth),
             sold: s ? num(s.value) : 0,
-            closing: cv === '' ? null : num(cv)
+            closing: cv === '' ? null : num(cv),
+            waste: wasteValue(p.id)
         };
     }
     return { rows };
@@ -3081,11 +3113,13 @@ function exportAnalysisXlsx() {
     const rows = S.products.map(p => {
         const x = res.rows[p.id];
         const c = calcRow(p.id, r, x.opening, x.sold, x.closing === null ? '' : x.closing);
+        const wasteQty = x.waste || 0;
         return {
             'الصنف': safeCell(p.name), 'الوحدة': safeCell(p.unit),
             'أول الشهر': x.opening, 'الوارد': c.rec, 'التحويلات (صافي)': c.net,
             'المباع': x.sold, 'النظري': c.theo,
-            'الجرد الفعلي': x.closing ?? '', 'العجز / الزيادة': c.variance ?? ''
+            'الجرد الفعلي': x.closing ?? '', 'الهالك': wasteQty,
+            'العجز / الزيادة (بعد خصم الهالك)': c.variance === null ? '' : Number((c.variance + wasteQty).toFixed(2))
         };
     });
     if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
@@ -3347,15 +3381,16 @@ function renderSmartTips() {
         tips.push({ type: 'tip', text: 'ابدأ بإضافة الأصناف، وابدأ بالغالية منها (اللحوم والزيوت والجبن)، لأن التوفير فيها بيفرق أكتر.' });
     }
 
-    // فروقات الجرد لكل صنف: عجز (وفر فيه) أو مطابق (حافظ عليه) أو زيادة (راجع التسجيل)
+    // فروقات الجرد لكل صنف (بعد احتساب الهالك المسجل): عجز (وفر فيه) أو مطابق (حافظ عليه) أو زيادة (راجع التسجيل)
     if (lastA) {
         S.products.forEach(p => {
             const x = lastA.rows && lastA.rows[p.id];
             if (!x || x.closing === null || x.closing === undefined) return;
             const c = calcRow(p.id, { from: lastA.from, to: lastA.to }, x.opening, x.sold, x.closing);
-            if (c.variance < 0) tips.push({ type: 'warn', text: `وفر في ${N(p.name)}: عجز ${fmt(-c.variance, 2)} ${N(p.unit)} في جرد ${lastA.to}. راجع الوزن عند التحضير والتسليم، وسجّل الهالك فوراً.` });
-            else if (c.variance > 0) tips.push({ type: 'tip', text: `راجع تسجيل ${N(p.name)}: الجرد أعلى من النظري بـ ${fmt(c.variance, 2)} ${N(p.unit)}. غالباً فيه مبيعات أو تحويل ما اتسجلش، صححه عشان التكلفة تطلع صح.` });
-            else tips.push({ type: 'good', text: `حافظ على ${N(p.name)}: الجرد مطابق للنظري في ${lastA.to}. استمر بنفس طريقة الوزن والتسليم.` });
+            const v = c.variance + (x.waste || 0);
+            if (v < 0) tips.push({ type: 'warn', text: `وفر في ${N(p.name)}: عجز ${fmt(-v, 2)} ${N(p.unit)} في جرد ${lastA.to} بعد الهالك المسجل. راجع الوزن عند التحضير والتسليم.` });
+            else if (v > 0) tips.push({ type: 'tip', text: `راجع تسجيل ${N(p.name)}: الجرد أعلى من النظري بـ ${fmt(v, 2)} ${N(p.unit)} بعد الهالك. غالباً فيه مبيعات أو تحويل ما اتسجلش، صححه عشان التكلفة تطلع صح.` });
+            else tips.push({ type: 'good', text: `حافظ على ${N(p.name)}: الجرد مطابق للنظري بعد الهالك في ${lastA.to}. استمر بنفس طريقة الوزن والتسليم.` });
         });
     } else {
         tips.push({ type: 'tip', text: 'حافظ على الكنترول: اعمل جرد فعلي لأهم الأصناف كل أسبوع، ده أول خطوة للتوفير لأنك هتعرف فين الفلوس بتروح.' });
