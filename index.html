@@ -359,6 +359,10 @@ html:not(.dark) .prow{border-color:#dce4ee}
 /* ===== طباعة تحليل المخزون ===== */
 .an-print-head{display:none}
 @media print{
+  * {-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  /* الوضع الداكن بيخلي الكلام فاتح، فوق الورق الأبيض بيبقى مش واضح. وقت الطباعة نجبر الألوان تبقى داكنة على خلفية بيضا */
+  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#000000;--gold2:#777777;--accent:#000000;--ok:#065f46;--bad:#b00000}
+  html, body{background:#ffffff!important;color:#000000!important}
   body.print-analysis *{visibility:hidden!important}
   body.print-analysis #tab-inventory,
   body.print-analysis #inv-panel,
@@ -380,6 +384,17 @@ html:not(.dark) .prow{border-color:#dce4ee}
   body.print-analysis #pn-analysis input{border:1px solid #777!important;background:#fff!important;color:#000!important}
   body.print-analysis #pn-analysis .down{color:#b00000!important}
   body.print-analysis #pn-analysis .up{color:#065f46!important}
+}
+
+/* ===== ألوان الطباعة لكل صفحات البرنامج ===== */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#000000;--gold2:#777777;--accent:#000000;--ok:#065f46;--bad:#b00000}
+  html,body{background:#ffffff!important;color:#000000!important}
+  .card,.tb,.quick,.icard,.tile,.tabs,.pcard,.cmp-box,.chip2,.tip,.hero,.note,.alert,.mbox{background:#ffffff!important;color:#000000!important}
+  .pname,.pname *,.ilbl,.muted,.fld,.quick .lbl,.quick .sub,.tstat,th{color:#000000!important}
+  .down{color:#b00000!important}
+  .up{color:#065f46!important}
 }
 
 /* ===== إضافات صلاحية المنتجات والمتوقع مقابل الفعلي ===== */
