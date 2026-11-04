@@ -392,7 +392,7 @@ html:not(.dark) .prow{border-color:#dce4ee}
 /* ===== منطقة طباعة مستقلة (للطلبيات): مخفية على الشاشة، وبتظهر بس وقت الطباعة ===== */
 #print-area{display:none}
 @media print{
-  body > *:not(#print-area){display:none!important}
+  body.print-area-mode > *:not(#print-area){display:none!important}
   #print-area{display:block!important;background:#fff;color:#000;padding:8px}
   #print-area table{width:100%;border-collapse:collapse;font-size:12px}
   #print-area th,#print-area td{border:1px solid #777;padding:6px;color:#000;text-align:right;white-space:normal}
@@ -812,6 +812,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="row" style="margin-top:16px">
                     <input id="new-prod-name" class="inp" placeholder="اسم الصنف الجديد" style="max-width:260px">
                     <input id="new-prod-unit" class="inp" placeholder="الوحدة (شد، كرتونة، كيلو)" style="max-width:220px">
+                    <input id="new-prod-price" class="inp" type="number" min="0" step="any" placeholder="سعر الوحدة (اختياري)" style="max-width:200px">
                     <button class="btn btn-gold" onclick="addProduct()">إضافة صنف</button>
                 </div>
                 <div class="row" style="margin-top:18px">
@@ -888,6 +889,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div id="an-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="an-note" class="note hidden" style="margin-bottom:14px"></div>
+                <div id="cause-summary" class="card" style="margin-bottom:14px;padding:14px"></div>
                 <div id="an-cards" class="cards-grid"></div>
                 <div class="row" style="margin-top:18px">
                     <button class="btn btn-gold" id="an-save" data-save onclick="saveAnalysis()">حفظ وإغلاق</button>
@@ -1152,7 +1154,7 @@ function normalize(d) {
     d = migrate(d);
     const out = Object.assign(emptyDB(), d);
     out.locks = { sales: (d.locks && d.locks.sales) || {} };
-    out.products = (out.products || []).map(p => ({ id: p.id, name: p.name || '', unit: p.unit || '' }));
+    out.products = (out.products || []).map(p => ({ id: p.id, name: p.name || '', unit: p.unit || '', price: (p.price === undefined || p.price === null || p.price === '') ? null : num(p.price) }));
     out.per1000 = out.per1000 || {};
     out.orderSnapshots = out.orderSnapshots || {};
     out.transfers = (out.transfers || []).map(t => ({ ...t, product_id: t.product_id || t.productId }));
@@ -2528,6 +2530,7 @@ function renderOpening() {
             <div class="pfields">
                 <input class="inp" data-pid="${esc(p.id)}" data-f="name" value="${esc(p.name)}" aria-label="اسم الصنف">
                 <input class="inp" data-pid="${esc(p.id)}" data-f="unit" value="${esc(p.unit)}" placeholder="الوحدة" aria-label="الوحدة">
+                <input class="inp xs" type="number" min="0" step="any" value="${p.price === null || p.price === undefined ? '' : p.price}" placeholder="سعر الوحدة (اختياري)" aria-label="سعر الوحدة" onchange="setProductPrice('${esc(p.id)}', this.value)">
             </div>
             <div class="pfields2">
                 <input class="inp xs" type="number" step="any" id="op-${esc(p.id)}" data-nav="open" data-ri="${i}"
@@ -2555,7 +2558,11 @@ function addProduct() {
     if (!name) return toast('اكتب اسم الصنف', 'error');
     if (name.length > 120 || unit.length > 40) return toast('الاسم أو الوحدة طويل جداً', 'error');
     if (S.products.some(p => p.name === name && p.unit === unit)) return toast('الصنف ده موجود قبل كده', 'error');
-    S.products.push({ id: uid(), name, unit });
+    const priceRaw = $('new-prod-price').value.trim();
+    const price = priceRaw === '' ? null : Number(priceRaw);
+    if (price !== null && (!Number.isFinite(price) || price < 0)) return toast('السعر لازم يكون رقم صفر أو أكبر', 'error');
+    S.products.push({ id: uid(), name, unit, price });
+    $('new-prod-price').value = '';
     saveDB();
     $('new-prod-name').value = ''; $('new-prod-unit').value = '';
     toast('تمت إضافة الصنف. ادخل رصيد أول الشهر له');
@@ -2574,6 +2581,21 @@ async function deleteProduct(id) {
     saveDB();
     toast('تم حذف الصنف');
     renderAll();
+}
+
+function setProductPrice(id, value) {
+    const p = productById(id);
+    if (!p) return;
+    const v = String(value).trim();
+    if (v === '') p.price = null;
+    else {
+        const n = Number(v);
+        if (!Number.isFinite(n) || n < 0) return toast('السعر لازم يكون رقم صفر أو أكبر', 'error');
+        p.price = n;
+    }
+    logAction('تعديل سعر صنف', '', `${p.name}: ${p.price === null ? 'بدون سعر' : p.price}`);
+    saveDB();
+    toast('تم حفظ سعر الصنف');
 }
 
 function saveOpening() {
@@ -2905,7 +2927,7 @@ const WASTE_ICON = '<svg class="ico" width="14" height="14" viewBox="0 0 24 24" 
 // قراءة خانة الهالك لصنف (اختيارية - لو مش ظاهرة أو فاضية = صفر)
 function wasteValue(pid) {
     const el = $('aw-' + pid);
-    if (!el || el.value === '') return 0;
+    if (!el || el.disabled || el.value === '') return 0;
     return Math.max(0, num(el.value));
 }
 
@@ -2938,7 +2960,7 @@ function renderAnalysis() {
     if (key === anKey && !anLoadRows) {
         S.products.forEach(p => {
             const s = $('as-' + p.id), c = $('ac-' + p.id), w = $('aw-' + p.id);
-            if (s) keep[p.id] = { s: s.value, c: c.value, w: w ? w.value : '' };
+            if (s) keep[p.id] = { s: s.value, c: c.value, w: w ? w.value : '', cs: $('acs-' + p.id) ? $('acs-' + p.id).value : '', cn: $('acn-' + p.id) ? $('acn-' + p.id).value : '' };
         });
     }
     const loaded = anLoadRows;
@@ -2949,13 +2971,16 @@ function renderAnalysis() {
 
     const m = activeMonth;
     cards.innerHTML = S.products.map((p, i) => {
-        let s = '', c = '', w = '';
+        let s = '', c = '', w = '', cs = '', cn = '';
         if (loaded && loaded[p.id]) {
             s = loaded[p.id].sold;
             c = loaded[p.id].closing === null ? '' : loaded[p.id].closing;
             w = loaded[p.id].waste ? loaded[p.id].waste : '';
+            cs = loaded[p.id].cause || '';
+            cn = loaded[p.id].causeNote || '';
         } else if (keep[p.id]) {
             s = keep[p.id].s; c = keep[p.id].c; w = keep[p.id].w;
+            cs = keep[p.id].cs || ''; cn = keep[p.id].cn || '';
         }
         const has = hasOpening(p.id, m);
         const hasW = w !== '' && num(w) > 0;
@@ -2972,7 +2997,13 @@ function renderAnalysis() {
                 <div class="fld"><span>النظري</span><b id="ath-${esc(p.id)}">-</b></div>
                 <label class="fld"><span>الهالك (اختياري)</span>
                     <input class="inp" type="number" min="0" step="any" id="aw-${esc(p.id)}" data-nav="waste" data-ri="${i}" value="${esc(w)}" placeholder="0" oninput="liveAn()"></label>
+                <label class="fld"><span>سبب الهالك</span>
+                    <select class="inp" id="acs-${esc(p.id)}" onchange="liveAn()">${causeOptions(cs)}</select></label>
+                <div class="fld ${cs === 'أخرى' ? '' : 'hidden'}" id="acnw-${esc(p.id)}" style="grid-column:1/-1"><span>وضح السبب</span>
+                    <input class="inp" type="text" id="acn-${esc(p.id)}" value="${esc(cn)}" placeholder="اكتب السبب" oninput="liveAn()"></div>
                 <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم الهالك)</span><b id="av-${esc(p.id)}">-</b></div>
+                <div class="fld" style="grid-column:1/-1"><span>القيمة بالفلوس</span><b id="avl-${esc(p.id)}">-</b></div>
+                <div class="fld hidden" id="awh-${esc(p.id)}" style="grid-column:1/-1;color:var(--ok)">فيه زيادة في الجرد، الهالك والسبب مقفولين</div>
             </div>
         </div>`;
     }).join('');
@@ -2983,16 +3014,21 @@ function renderAnalysis() {
 }
 
 function liveAn() {
+    renderCauseSummary();
     const r = anRange();
     if (!r || !r.to) return;
     S.products.forEach(p => {
         const as = $('as-' + p.id);
         if (!as) return;
         const opening = openingFor(p.id, activeMonth);
-        const waste = wasteValue(p.id);
         const res = calcRow(p.id, r, opening, num(as.value), $('ac-' + p.id).value);
+        const rawVar = res.variance;
+        lockWasteFields(p.id, rawVar);
+        const waste = wasteValue(p.id);
         // العجز/الزيادة بعد خصم الهالك (الهالك بيتخصم تلقائياً لو موجود، ولو مفيش يبقى صفر)
         if (res.variance !== null) res.variance += waste;
+        validateWasteField(p.id, waste, rawVar !== null && rawVar < 0 ? -rawVar : 0);
+        updateValueCell(p.id, res.variance);
         $('ar-' + p.id).textContent = fmt(res.rec, 2);
         const at = $('at-' + p.id);
         at.textContent = (res.net > 0 ? '+' : '') + fmt(res.net, 2);
@@ -3021,6 +3057,95 @@ function liveAn() {
     });
 }
 
+// قايمة أسباب الهالك/العجز
+const CAUSES = ['كسر', 'انتهاء صلاحية', 'تلف أو سوء تخزين', 'هدر تحضير طبيعي', 'سرقة محتملة', 'غير مفسر', 'أخرى'];
+function causeOptions(selected) {
+    return '<option value="">— اختار السبب —</option>' + CAUSES.map(c => `<option value="${esc(c)}" ${c === selected ? 'selected' : ''}>${esc(c)}</option>`).join('');
+}
+
+// لو الجرد أعلى من النظري (زيادة): الهالك والسبب بيتقفلوا
+function lockWasteFields(pid, rawVar) {
+    const surplus = rawVar !== null && rawVar > 0;
+    const aw = $('aw-' + pid), cs = $('acs-' + pid), cn = $('acn-' + pid);
+    if (aw) aw.disabled = surplus;
+    if (cs) cs.disabled = surplus;
+    if (cn) cn.disabled = surplus;
+    const hint = $('awh-' + pid);
+    if (hint) hint.classList.toggle('hidden', !surplus);
+    const noteWrap = $('acnw-' + pid);
+    if (noteWrap && cs) noteWrap.classList.toggle('hidden', cs.value !== 'أخرى');
+}
+
+// الهالك مينفعش يعدّي العجز الفعلي: الخانة بتتلون بالأحمر
+function validateWasteField(pid, waste, shortage) {
+    const aw = $('aw-' + pid);
+    if (!aw) return;
+    aw.style.borderColor = waste > shortage + 1e-9 ? 'var(--bad)' : '';
+}
+
+// القيمة بالفلوس = الكمية الصافية × السعر (لو السعر متسجل)
+function updateValueCell(pid, net) {
+    const el = $('avl-' + pid);
+    if (!el) return;
+    const p = productById(pid);
+    if (net === null) { el.textContent = '-'; el.className = ''; return; }
+    if (!p || p.price === null || p.price === undefined) { el.textContent = 'غير محددة'; el.className = 'muted'; return; }
+    const v = net * p.price;
+    el.textContent = (v > 0 ? '+' : '') + fmt(v, 2) + ' ج.م';
+    el.className = v < 0 ? 'down' : (v > 0 ? 'up' : '');
+}
+
+// تحقق قبل الحفظ: أي خطأ بيقفل الحفظ تماماً
+function validateAnalysisRows(r, rows) {
+    for (const p of S.products) {
+        const x = rows[p.id];
+        if (!x) continue;
+        if (x.closing === null) {
+            if (x.waste > 0) return `اكتب الجرد الفعلي للصنف "${p.name}" قبل تسجيل الهالك`;
+            continue;
+        }
+        const res = calcRow(p.id, r, x.opening, x.sold, x.closing);
+        const raw = res.variance;
+        if (raw > 0 && x.waste > 0) return `الصنف "${p.name}" فيه زيادة، مينفعش يتسجل له هالك`;
+        const shortage = raw < 0 ? -raw : 0;
+        if (x.waste > shortage + 1e-9) return `الهالك في "${p.name}" أكبر من العجز الفعلي، صححه قبل الحفظ`;
+        if (x.waste > 0 && !x.cause) return `اختار سبب الهالك للصنف "${p.name}"`;
+        if (x.cause === 'أخرى' && !x.causeNote) return `اكتب السبب في خانة "أخرى" للصنف "${p.name}"`;
+    }
+    return '';
+}
+
+// ملخص العجز بالفلوس (الزيادة ما تدخلش فيه). الصنف اللي سعره مش معروف ما يدخلش
+function renderCauseSummary() {
+    const host = $('cause-summary');
+    if (!host) return;
+    const r = anRange();
+    if (!r || !r.to) { host.innerHTML = ''; return; }
+    const buckets = {};
+    let total = 0;
+    S.products.forEach(p => {
+        const as = $('as-' + p.id), ac = $('ac-' + p.id);
+        if (!as || !ac || ac.value === '') return;
+        const res = calcRow(p.id, r, openingFor(p.id, activeMonth), num(as.value), ac.value);
+        lockWasteFields(p.id, res.variance);
+        if (res.variance === null || res.variance >= 0) return;
+        if (p.price === null || p.price === undefined) return;
+        const shortage = -res.variance;
+        const waste = Math.min(wasteValue(p.id), shortage);
+        const csEl = $('acs-' + p.id);
+        const cause = csEl && csEl.value ? csEl.value : 'غير مفسر';
+        const unexplained = shortage - waste;
+        buckets[cause] = (buckets[cause] || 0) + waste * p.price;
+        buckets['غير مفسر'] = (buckets['غير مفسر'] || 0) + unexplained * p.price;
+        total += shortage * p.price;
+    });
+    const rowsHtml = CAUSES.filter(c => (buckets[c] || 0) > 0.005)
+        .map(c => `<tr><td>${esc(c)}</td><td class="down">${fmt(0 - buckets[c], 2)} ج.م</td></tr>`).join('');
+    host.innerHTML = `<div class="h" style="margin:0 0 8px">ملخص العجز بالفلوس</div>
+        <table><tbody>${rowsHtml || '<tr><td class="muted">مفيش عجز متقيم بسعر في الفترة دي</td></tr>'}
+        <tr><th>الإجمالي الكلي للعجز</th><th class="down">${fmt(0 - total, 2)} ج.م</th></tr></tbody></table>`;
+}
+
 function readAnalysisRows() {
     const rows = {};
     for (const p of S.products) {
@@ -3031,7 +3156,9 @@ function readAnalysisRows() {
             opening: openingFor(p.id, activeMonth),
             sold: s ? num(s.value) : 0,
             closing: cv === '' ? null : num(cv),
-            waste: wasteValue(p.id)
+            waste: wasteValue(p.id),
+            cause: ($('acs-' + p.id) && !$('acs-' + p.id).disabled) ? $('acs-' + p.id).value : '',
+            causeNote: ($('acn-' + p.id) && !$('acn-' + p.id).disabled) ? $('acn-' + p.id).value.trim() : ''
         };
     }
     return { rows };
@@ -3042,6 +3169,8 @@ async function saveAnalysis() {
     if (!r || !r.to) return toast('اختر تاريخ النهاية', 'error');
     const res = readAnalysisRows();
     if (res.error) return toast(res.error, 'error');
+    const bad = validateAnalysisRows(r, res.rows);
+    if (bad) return toast(bad, 'error');
     const anyClosing = Object.values(res.rows).some(x => x.closing !== null);
     if (!anyClosing && !await askConfirm('مفيش جرد فعلي مدخل. تحفظ التحليل على كده؟', 'حفظ')) return;
     if (S.analyses.some(a => a.to === r.to) && !await askConfirm(`فيه تحليل محفوظ لتاريخ ${r.to}. الحفظ الجديد هيكتب فوقه.`)) return;
@@ -3196,7 +3325,9 @@ function exportAnalysisXlsx() {
             'أول الشهر': x.opening, 'الوارد': c.rec, 'التحويلات (صافي)': c.net,
             'المباع': x.sold, 'النظري': c.theo,
             'الجرد الفعلي': x.closing ?? '', 'الهالك': wasteQty,
-            'العجز / الزيادة (بعد خصم الهالك)': c.variance === null ? '' : Number((c.variance + wasteQty).toFixed(2))
+            'العجز / الزيادة (بعد خصم الهالك)': c.variance === null ? '' : Number((c.variance + wasteQty).toFixed(2)),
+            'السبب': x.cause || '',
+            'القيمة (ج.م)': (c.variance === null || p.price === null || p.price === undefined) ? '' : Number(((c.variance + wasteQty) * p.price).toFixed(2))
         };
     });
     if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
@@ -3626,11 +3757,43 @@ function switchOrderSubTab(tab) {
 function renderPer1000Products() {
   const host = $('per1000-products'); if (!host) return;
   if (!S.products.length) { host.innerHTML = '<div class="alert">أضف الأصناف أولًا من صفحة المخزون، ثم ارجع لاختيارها هنا.</div>'; return; }
-  host.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>اختيار</th><th>الصنف</th><th>الوحدة</th><th>معدل الكمية لكل 1000 جنيه</th></tr></thead><tbody>${S.products.map(p=>{
+  host.innerHTML = `${perWarnHtml()}<div class="tbl-wrap"><table><thead><tr><th>اختيار</th><th>الصنف</th><th>الوحدة</th><th>معدل الكمية لكل 1000 جنيه</th><th>المعدل الفعلي</th><th>الفرق</th><th>أيام محسوبة</th></tr></thead><tbody>${S.products.map(p=>{
     const cfg=S.per1000[p.id] || {}; const enabled=cfg.enabled===true;
-    return `<tr><td><input type="checkbox" ${enabled?'checked':''} aria-label="تفعيل ${esc(p.name)}" onchange="setPer1000Enabled('${esc(p.id)}',this.checked)"></td><td><b>${esc(p.name)}</b></td><td>${esc(p.unit||'—')}</td><td><input class="inp xs" type="number" min="0" step="0.01" value="${cfg.rate===undefined?'':esc(String(cfg.rate))}" placeholder="مثال: 1" onchange="setPer1000Rate('${esc(p.id)}',this.value)" ${enabled?'':'disabled'}></td></tr>`;
+    return `<tr><td><input type="checkbox" ${enabled?'checked':''} aria-label="تفعيل ${esc(p.name)}" onchange="setPer1000Enabled('${esc(p.id)}',this.checked)"></td><td><b>${esc(p.name)}</b></td><td>${esc(p.unit||'—')}</td><td><input class="inp xs" type="number" min="0" step="0.01" value="${cfg.rate===undefined?'':esc(String(cfg.rate))}" placeholder="مثال: 1" onchange="setPer1000Rate('${esc(p.id)}',this.value)" ${enabled?'':'disabled'}></td>${actualCells(p.id, cfg.rate)}</tr>`;
   }).join('')}</tbody></table></div>`;
 }
+// المعدل الفعلي: المباع من آخر تحليل محفوظ في الشهر ÷ (إيراد الشهر لحد نفس التاريخ ÷ 1000)
+function actualPer1000(pid) {
+  const cands = S.analyses.filter(a => monthOf(a.to) === activeMonth && a.rows && a.rows[pid]);
+  if (!cands.length) return null;
+  const last = [...cands].sort((a, b) => (a.to < b.to ? 1 : -1))[0];
+  const rev = salesIn(monthStart(activeMonth), last.to);
+  const sold = Number(last.rows[pid].sold) || 0;
+  let missing = 0;
+  eachDay(monthStart(activeMonth), last.to, d => { if (!S.sales[d]) missing++; });
+  return { to: last.to, sold, rev: rev.rev, days: rev.days, missing, rate: rev.rev > 0 ? sold / (rev.rev / 1000) : null };
+}
+
+// الخلايا الثلاثة: المعدل الفعلي، الفرق عن المستخدم (أحمر لو أكبر من 5%، أخضر لو أقل)، عدد الأيام المحسوبة
+function actualCells(pid, used) {
+  const a = actualPer1000(pid);
+  if (!a || a.rate === null) return '<td class="muted">-</td><td class="muted">-</td><td class="muted">-</td>';
+  const u = Number(used) || 0;
+  const diffPct = u > 0 ? (a.rate - u) / u : null;
+  const cls = diffPct === null ? '' : (Math.abs(diffPct) > 0.05 ? 'down' : 'up');
+  return `<td><b>${fmt(a.rate, 3)}</b></td><td class="${cls}">${diffPct === null ? '-' : pct(diffPct)}</td><td>${a.days}${a.missing ? ` <span class="muted">(ناقص ${a.missing})</span>` : ''}</td>`;
+}
+
+// تنبيه احتياطي: أيام ناقصة الإيراد لحد آخر تحليل في الشهر
+function perWarnHtml() {
+  const list = S.analyses.filter(a => monthOf(a.to) === activeMonth);
+  if (!list.length) return '<div class="muted" style="margin-bottom:10px">المعدل الفعلي بيظهر بعد ما تحفظ تحليل للشهر ده.</div>';
+  const last = [...list].sort((a, b) => (a.to < b.to ? 1 : -1))[0];
+  let n = 0;
+  eachDay(monthStart(activeMonth), last.to, d => { if (!S.sales[d]) n++; });
+  return n ? `<div class="alert" style="margin-bottom:10px">تنبيه: فيه ${n} يوم من أول الشهر لحد ${last.to} بدون إيراد مسجل، فالمعدل الفعلي ممكن يطلع غلط. سجّل الإيراد الناقص الأول.</div>` : '';
+}
+
 function setPer1000Enabled(id, enabled) {
   S.per1000[id]=S.per1000[id]||{rate:0}; S.per1000[id].enabled=!!enabled; saveDB(); renderOrderForecast(); renderPer1000Products();
 }
@@ -3720,6 +3883,8 @@ function printOrdersPdf() {
   });
   area.innerHTML = '';
   area.appendChild(wrap);
+  document.body.classList.add('print-area-mode');
+  window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
   window.print();
 }
 function printSalesForecast() {
