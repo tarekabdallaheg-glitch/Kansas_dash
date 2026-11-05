@@ -889,6 +889,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div id="an-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="an-note" class="note hidden" style="margin-bottom:14px"></div>
+                <div id="food-cost" class="card" style="margin-bottom:14px;padding:14px"></div>
                 <div id="cause-summary" class="card" style="margin-bottom:14px;padding:14px"></div>
                 <div id="an-cards" class="cards-grid"></div>
                 <div class="row" style="margin-top:18px">
@@ -1154,7 +1155,7 @@ function normalize(d) {
     d = migrate(d);
     const out = Object.assign(emptyDB(), d);
     out.locks = { sales: (d.locks && d.locks.sales) || {} };
-    out.products = (out.products || []).map(p => ({ id: p.id, name: p.name || '', unit: p.unit || '', price: (p.price === undefined || p.price === null || p.price === '') ? null : num(p.price) }));
+    out.products = (out.products || []).map(p => ({ id: p.id, name: p.name || '', unit: p.unit || '', price: (p.price === undefined || p.price === null || p.price === '') ? null : num(p.price), std: (p.std === undefined || p.std === null || p.std === '') ? null : num(p.std), target: !!p.target }));
     out.per1000 = out.per1000 || {};
     out.orderSnapshots = out.orderSnapshots || {};
     out.transfers = (out.transfers || []).map(t => ({ ...t, product_id: t.product_id || t.productId }));
@@ -2587,6 +2588,29 @@ async function deleteProduct(id) {
     renderAll();
 }
 
+function setProductStd(id, value) {
+    if (S.openLocked[activeMonth]) return toast('افتح تعديل الرصيد الأول عشان تغيّر المعياري', 'error');
+    const p = productById(id);
+    if (!p) return;
+    const v = String(value).trim();
+    if (v === '') p.std = null;
+    else {
+        const n = Number(v);
+        if (!Number.isFinite(n) || n <= 0) return toast('المعياري لازم يكون رقم أكبر من صفر', 'error');
+        p.std = n;
+    }
+    saveDB();
+    toast('تم حفظ المعياري');
+}
+
+function setProductTarget(id, checked) {
+    const p = productById(id);
+    if (!p) return;
+    p.target = !!checked;
+    saveDB();
+    renderAnalysis();
+}
+
 function setProductPrice(id, value) {
     if (S.openLocked[activeMonth]) return toast('افتح تعديل الرصيد الأول عشان تغيّر السعر', 'error');
     const p = productById(id);
@@ -3003,7 +3027,7 @@ function renderAnalysis() {
         const has = hasOpening(p.id, m);
         const hasW = w !== '' && num(w) > 0;
         return `<div class="pcard" data-search="${esc(searchKey(p))}">
-            <div class="ptitle"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
+            <div class="ptitle"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span> ${isTargetProduct(p) ? '<span class="muted" style="margin-inline-start:6px">هدف +20%</span>' : ''}</div>
             <div class="pgrid">
                 <div class="fld"><span>أول الشهر (ثابت)</span><b>${has ? fmt(openingFor(p.id, m), 2) : '<span class="muted">لم يُدخل</span>'}</b></div>
                 <div class="fld"><span>الوارد (من أول الشهر)</span><b id="ar-${esc(p.id)}">-</b></div>
@@ -3019,8 +3043,9 @@ function renderAnalysis() {
                     <select class="inp" id="acs-${esc(p.id)}" onchange="liveAn()">${causeOptions(cs)}</select></label>
                 <div class="fld ${cs === 'أخرى' ? '' : 'hidden'}" id="acnw-${esc(p.id)}" style="grid-column:1/-1"><span>وضح السبب</span>
                     <input class="inp" type="text" id="acn-${esc(p.id)}" value="${esc(cn)}" placeholder="اكتب السبب" oninput="liveAn()"></div>
-                <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم الهالك)</span><b id="av-${esc(p.id)}">-</b></div>
+                <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم الهالك)</span><b id="av-${esc(p.id)}">-</b> <small id="avp-${esc(p.id)}" class="muted"></small></div>
                 <div class="fld" style="grid-column:1/-1"><span>القيمة بالفلوس</span><b id="avl-${esc(p.id)}">-</b></div>
+                <div class="fld" style="grid-column:1/-1"><span>نسبة الـ Yield (المعياري − الفعلي) ÷ الفعلي</span><b id="yl-${esc(p.id)}">-</b></div>
                 <div class="fld hidden" id="awh-${esc(p.id)}" style="grid-column:1/-1;color:var(--ok)">فيه زيادة في الجرد، الهالك والسبب مقفولين</div>
             </div>
         </div>`;
@@ -3033,6 +3058,7 @@ function renderAnalysis() {
 
 function liveAn() {
     renderCauseSummary();
+    renderFoodCost();
     const r = anRange();
     if (!r || !r.to) return;
     S.products.forEach(p => {
@@ -3047,6 +3073,36 @@ function liveAn() {
         if (res.variance !== null) res.variance += waste;
         validateWasteField(p.id, waste, rawVar !== null && rawVar < 0 ? -rawVar : 0);
         updateValueCell(p.id, res.variance);
+        const yl = $('yl-' + p.id);
+        if (yl) {
+            const closingTxt = $('ac-' + p.id).value;
+            if (closingTxt === '') { yl.textContent = '-'; yl.className = ''; }
+            else {
+                const soldQty = num(as.value);
+                const ideal = soldQty;
+                const actualGross = opening + res.rec + res.net - num(closingTxt);
+                const actualNet = actualGross - waste;
+                if (soldQty <= 0 || actualNet <= 0) { yl.textContent = '-'; yl.className = ''; }
+                else {
+                    const yPct = (ideal - actualNet) / actualNet * 100;
+                    const hit = yPct >= 20;
+                    const tgt = isTargetProduct(p);
+                    const tag = tgt ? (hit ? ' · حقق الهدف +20%' : ' · تحت الهدف +20%') : '';
+                    yl.textContent = `${yPct.toFixed(1)}%${tag}`;
+                    yl.className = tgt ? (hit ? 'up' : 'down') : (yPct < 0 ? 'down' : 'up');
+                }
+            }
+        }
+        const avp = $('avp-' + p.id);
+        if (avp) {
+            const soldQty = num(as.value);
+            if (res.variance === null || soldQty <= 0) { avp.textContent = ''; avp.className = 'muted'; }
+            else {
+                const pc = res.variance / soldQty * 100;
+                avp.textContent = `(${pc > 0 ? '+' : ''}${pc.toFixed(1)}% من المباع)`;
+                avp.className = pc < 0 ? 'down' : (pc > 0 ? 'up' : 'muted');
+            }
+        }
         $('ar-' + p.id).textContent = fmt(res.rec, 2);
         const at = $('at-' + p.id);
         at.textContent = (res.net > 0 ? '+' : '') + fmt(res.net, 2);
@@ -3073,6 +3129,13 @@ function liveAn() {
         }
 
     });
+}
+
+// الأصناف اللي ليها هدف +20% بس (بالاسم)
+const TARGET_WORDS = ['شورتنج', 'فرايز', 'سلو', 'أرز', 'دقيق'];
+function isTargetProduct(p) {
+    const nm = String(p.name || '').trim();
+    return TARGET_WORDS.some(w => nm.includes(w));
 }
 
 // قايمة أسباب الهالك/العجز
@@ -3160,6 +3223,38 @@ function renderCauseSummary() {
         <tr><th>الإجمالي الكلي للأوفر</th><th class="up">+${fmt(overTotal, 2)} ج.م</th></tr>
         <tr><th>الفرق بينهم</th><th class="${diff < 0 ? 'down' : 'up'}">${diff > 0 ? '+' : ''}${fmt(diff, 2)} ج.م</th></tr>
         </tbody></table>`;
+}
+
+// نسبة التكلفة الغذائية: صافي الإيراد = الإيراد ÷ 1.14 (الضريبة ثابتة)، وتكلفة الخامات شاملة الهالك
+const TAX_FACTOR = 1.14;
+function renderFoodCost() {
+    const host = $('food-cost');
+    if (!host) return;
+    const r = anRange();
+    if (!r || !r.to) { host.innerHTML = ''; return; }
+    const netRev = salesIn(monthStart(activeMonth), r.to).rev / TAX_FACTOR;
+    let cost = 0, shortage = 0, noPrice = 0;
+    S.products.forEach(p => {
+        const as = $('as-' + p.id), ac = $('ac-' + p.id);
+        if (!as || !ac || ac.value === '') return;
+        const opening = openingFor(p.id, activeMonth);
+        const res = calcRow(p.id, r, opening, num(as.value), ac.value);
+        if (p.price === null || p.price === undefined) { noPrice++; return; }
+        // الاستهلاك الفعلي شامل الهالك = أول الشهر + الوارد + صافي التحويلات − الجرد
+        const consumed = opening + res.rec + res.net - num(ac.value);
+        cost += consumed * p.price;
+        // العجز بعد خصم الهالك
+        const net = res.variance + wasteValue(p.id);
+        if (net < 0) shortage += -net * p.price;
+    });
+    const pctOf = (v) => (netRev > 0 ? fmt(v / netRev * 100, 1) + '%' : '-');
+    host.innerHTML = `<div class="h" style="margin:0 0 8px">نسبة التكلفة الغذائية</div>
+        <table><tbody>
+        <tr><th>صافي الإيراد (بعد ÷ 1.14)</th><td>${fmt(netRev, 2)} ج.م</td></tr>
+        <tr><th>تكلفة الخامات (شامل الهالك)</th><td>${fmt(cost, 2)} ج.م</td></tr>
+        <tr><th>نسبة التكلفة الغذائية</th><td><b>${pctOf(cost)}</b> <span class="muted">= ${fmt(cost, 2)} ج من صافي الإيراد</span></td></tr>
+        </tbody></table>
+        ${noPrice ? `<div class="muted" style="margin-top:6px">فيه ${noPrice} صنف من غير سعر، فالنسبة أقل من الحقيقي.</div>` : ''}`;
 }
 
 function readAnalysisRows() {
@@ -3343,7 +3438,14 @@ function exportAnalysisXlsx() {
             'الجرد الفعلي': x.closing ?? '', 'الهالك': wasteQty,
             'العجز / الزيادة (بعد خصم الهالك)': c.variance === null ? '' : Number((c.variance + wasteQty).toFixed(2)),
             'السبب': x.cause || '',
-            'القيمة (ج.م)': (c.variance === null || p.price === null || p.price === undefined) ? '' : Number(((c.variance + wasteQty) * p.price).toFixed(2))
+            'القيمة (ج.م)': (c.variance === null || p.price === null || p.price === undefined) ? '' : Number(((c.variance + wasteQty) * p.price).toFixed(2)),
+            'نسبة الـ Yield %': (() => {
+                if (x.closing === null) return '';
+                const actualNet = x.opening + c.rec + c.net - x.closing - wasteQty;
+                if (x.sold <= 0 || actualNet <= 0) return '';
+                return Number(((x.sold - actualNet) / actualNet * 100).toFixed(2));
+            })(),
+            'هدف +20%': isTargetProduct(p) ? (x.closing === null ? '' : ((x.sold - (x.opening + c.rec + c.net - x.closing - wasteQty)) / (x.opening + c.rec + c.net - x.closing - wasteQty) * 100 >= 20 ? 'حقق' : 'لم يحقق')) : ''
         };
     });
     if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
