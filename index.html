@@ -813,7 +813,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <input id="new-prod-name" class="inp" placeholder="اسم الصنف الجديد" style="max-width:260px">
                     <input id="new-prod-unit" class="inp" placeholder="الوحدة (شد، كرتونة، كيلو)" style="max-width:220px">
                     <input id="new-prod-price" class="inp" type="number" min="0" step="any" placeholder="سعر الوحدة (اختياري)" style="max-width:200px">
-                    <button class="btn btn-gold" onclick="addProduct()">إضافة صنف</button>
+                    <button class="btn btn-gold" id="btn-add-prod" onclick="addProduct()">إضافة صنف</button>
                 </div>
                 <div class="row" style="margin-top:18px">
                     <button class="btn btn-ghost" id="open-suggest" onclick="suggestOpening()">اقتراح من آخر جرد للشهر اللي فات</button>
@@ -2528,9 +2528,9 @@ function renderOpening() {
         const dis = locked && has ? 'disabled' : '';
         return `<div class="prow">
             <div class="pfields">
-                <input class="inp" data-pid="${esc(p.id)}" data-f="name" value="${esc(p.name)}" aria-label="اسم الصنف">
-                <input class="inp" data-pid="${esc(p.id)}" data-f="unit" value="${esc(p.unit)}" placeholder="الوحدة" aria-label="الوحدة">
-                <input class="inp xs" type="number" min="0" step="any" value="${p.price === null || p.price === undefined ? '' : p.price}" placeholder="سعر الوحدة (اختياري)" aria-label="سعر الوحدة" onchange="setProductPrice('${esc(p.id)}', this.value)">
+                <input class="inp" data-pid="${esc(p.id)}" data-f="name" value="${esc(p.name)}" aria-label="اسم الصنف" ${locked ? 'disabled' : ''}>
+                <input class="inp" data-pid="${esc(p.id)}" data-f="unit" value="${esc(p.unit)}" placeholder="الوحدة" aria-label="الوحدة" ${locked ? 'disabled' : ''}>
+                <input class="inp xs" type="number" min="0" step="any" value="${p.price === null || p.price === undefined ? '' : p.price}" placeholder="سعر الوحدة (اختياري)" aria-label="سعر الوحدة" onchange="setProductPrice('${esc(p.id)}', this.value)" ${locked ? 'disabled' : ''}>
             </div>
             <div class="pfields2">
                 <input class="inp xs" type="number" step="any" id="op-${esc(p.id)}" data-nav="open" data-ri="${i}"
@@ -2550,9 +2550,12 @@ function renderOpening() {
     $('open-save').classList.toggle('hidden', locked && allDone);
     $('open-suggest').classList.toggle('hidden', locked);
     $('open-unlock').classList.toggle('hidden', !locked);
+    ['new-prod-name', 'new-prod-unit', 'new-prod-price'].forEach(id => { $(id).disabled = locked; });
+    $('btn-add-prod').disabled = locked;
 }
 
 function addProduct() {
+    if (S.openLocked[activeMonth]) return toast('افتح تعديل الرصيد الأول عشان تضيف صنف', 'error');
     const name = $('new-prod-name').value.trim();
     const unit = $('new-prod-unit').value.trim();
     if (!name) return toast('اكتب اسم الصنف', 'error');
@@ -2570,6 +2573,7 @@ function addProduct() {
 }
 
 async function deleteProduct(id) {
+    if (S.openLocked[activeMonth]) return toast('افتح تعديل الرصيد الأول عشان تحذف صنف', 'error');
     if (productUsed(id)) return toast('الصنف ده عليه حركات، مينفعش يتحذف', 'error');
     const p = productById(id);
     if (!p) return;
@@ -2584,6 +2588,7 @@ async function deleteProduct(id) {
 }
 
 function setProductPrice(id, value) {
+    if (S.openLocked[activeMonth]) return toast('افتح تعديل الرصيد الأول عشان تغيّر السعر', 'error');
     const p = productById(id);
     if (!p) return;
     const v = String(value).trim();
@@ -2643,6 +2648,7 @@ function suggestOpening() {
 document.addEventListener('change', async (e) => {
     const t = e.target;
     if (!t.dataset || !t.dataset.pid || !t.dataset.f) return;
+    if (S.openLocked[activeMonth]) return renderAll();
     const p = productById(t.dataset.pid);
     if (!p) return;
     const value = t.value.trim();
@@ -3123,11 +3129,13 @@ function renderCauseSummary() {
     if (!r || !r.to) { host.innerHTML = ''; return; }
     const buckets = {};
     let total = 0;
+    let overTotal = 0;
     S.products.forEach(p => {
         const as = $('as-' + p.id), ac = $('ac-' + p.id);
         if (!as || !ac || ac.value === '') return;
         const res = calcRow(p.id, r, openingFor(p.id, activeMonth), num(as.value), ac.value);
         lockWasteFields(p.id, res.variance);
+        if (res.variance !== null && res.variance > 0 && p.price !== null && p.price !== undefined) overTotal += res.variance * p.price;
         if (res.variance === null || res.variance >= 0) return;
         if (p.price === null || p.price === undefined) return;
         const shortage = -res.variance;
@@ -3143,7 +3151,9 @@ function renderCauseSummary() {
         .map(c => `<tr><td>${esc(c)}</td><td class="down">${fmt(0 - buckets[c], 2)} ج.م</td></tr>`).join('');
     host.innerHTML = `<div class="h" style="margin:0 0 8px">ملخص العجز بالفلوس</div>
         <table><tbody>${rowsHtml || '<tr><td class="muted">مفيش عجز متقيم بسعر في الفترة دي</td></tr>'}
-        <tr><th>الإجمالي الكلي للعجز</th><th class="down">${fmt(0 - total, 2)} ج.م</th></tr></tbody></table>`;
+        <tr><th>الإجمالي الكلي للعجز</th><th class="down">${fmt(0 - total, 2)} ج.م</th></tr>
+        <tr><th>الأوفر (زيادة)</th><th class="up">+${fmt(overTotal, 2)} ج.م</th></tr>
+        <tr><th>الفرق بينهم (أوفر − عجز)</th><th class="${overTotal - total < 0 ? 'down' : 'up'}">${overTotal - total > 0 ? '+' : ''}${fmt(overTotal - total, 2)} ج.م</th></tr></tbody></table>`;
 }
 
 function readAnalysisRows() {
