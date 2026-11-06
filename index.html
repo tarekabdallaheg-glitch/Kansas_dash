@@ -249,6 +249,10 @@ details.card[open]>summary{margin-bottom:12px}
 .pcard .fld small{font-size:12px}
 details.trr-tot-det>summary::-webkit-details-marker{display:none}
 details.trr-tot-det[open]>summary{color:var(--gold2)}
+details>summary.h{list-style:none}
+details>summary.h::-webkit-details-marker{display:none}
+details>summary.h::after{content:" ▾";color:var(--muted)}
+details[open]>summary.h::after{content:" ▴"}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -3328,7 +3332,7 @@ function renderAnalysis() {
                 <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم الهالك)</span><b id="av-${esc(p.id)}">-</b> <small id="avp-${esc(p.id)}" class="muted"></small></div>
                 <div class="fld" style="grid-column:1/-1"><span>القيمة بالفلوس</span><b id="avl-${esc(p.id)}">-</b></div>
                 <div class="fld" style="grid-column:1/-1"><span>نسبة الـ Yield (المعياري − الفعلي) ÷ الفعلي</span><b id="yl-${esc(p.id)}">-</b></div>
-                <div class="fld hidden" id="awh-${esc(p.id)}" style="grid-column:1/-1;color:var(--ok)">فيه زيادة في الجرد، الهالك والسبب مقفولين</div>
+                <div class="fld hidden" id="awh-${esc(p.id)}" style="grid-column:1/-1;color:var(--gold2)">الهالك والسبب بيتفتحوا بعد كتابة المباع والجرد الفعلي، ويتقفلوا لو فيه زيادة</div>
             </div>
         </div>`;
     }).join('');
@@ -3460,13 +3464,17 @@ function causeOptions(selected) {
 
 // لو الجرد أعلى من النظري (زيادة): الهالك والسبب بيتقفلوا
 function lockWasteFields(pid, rawVar) {
+    // الهالك والسبب مقفولين لحد ما يتكتب المباع والجرد الفعلي، ولو فيه زيادة
+    const asEl = $('as-' + pid), acEl = $('ac-' + pid);
+    const incomplete = !asEl || asEl.value === '' || !acEl || acEl.value === '';
     const surplus = rawVar !== null && rawVar > 0;
+    const locked = surplus || incomplete;
     const aw = $('aw-' + pid), cs = $('acs-' + pid), cn = $('acn-' + pid);
-    if (aw) aw.disabled = surplus;
-    if (cs) cs.disabled = surplus;
-    if (cn) cn.disabled = surplus;
+    if (aw) aw.disabled = locked;
+    if (cs) cs.disabled = locked;
+    if (cn) cn.disabled = locked;
     const hint = $('awh-' + pid);
-    if (hint) hint.classList.toggle('hidden', !surplus);
+    if (hint) hint.classList.toggle('hidden', !locked);
     const noteWrap = $('acnw-' + pid);
     if (noteWrap && cs) noteWrap.classList.toggle('hidden', cs.value !== 'أخرى');
 }
@@ -3533,12 +3541,12 @@ function renderCauseSummary() {
         else if (net > 0) overTotal += net * p.price;
     });
     const diff = overTotal - total;
-    host.innerHTML = `<div class="h" style="margin:0 0 8px">📉 ملخص العجز بالفلوس</div>
+    host.innerHTML = `<details open><summary class="h" style="cursor:pointer;margin:0 0 8px">📉 ملخص العجز بالفلوس</summary>
         <table class="sum-tbl"><tbody>
         <tr class="sum-red"><th>الإجمالي الكلي للعجز</th><td>${fmt(0 - total, 2)} ج.م</td></tr>
         <tr class="sum-green"><th>الإجمالي الكلي للأوفر</th><td>+${fmt(overTotal, 2)} ج.م</td></tr>
         <tr class="sum-total"><th>الفرق بينهم</th><td class="${diff < 0 ? 'down' : 'up'}">${diff > 0 ? '+' : ''}${fmt(diff, 2)} ج.م</td></tr>
-        </tbody></table>`;
+        </tbody></table></details>`;
 }
 
 // نسبة التكلفة الغذائية: صافي الإيراد = الإيراد ÷ 1.14 (الضريبة ثابتة)، وتكلفة الخامات شاملة الهالك
@@ -3564,13 +3572,14 @@ function renderFoodCost() {
         if (net < 0) shortage += -net * p.price;
     });
     const pctOf = (v) => (netRev > 0 ? fmt(v / netRev * 100, 1) + '%' : '-');
-    host.innerHTML = `<div class="h" style="margin:0 0 8px">🍽️ نسبة التكلفة الغذائية</div>
+    host.innerHTML = `<details open><summary class="h" style="cursor:pointer;margin:0 0 8px">🍽️ نسبة التكلفة الغذائية</summary>
         <table class="sum-tbl"><tbody>
         <tr class="sum-gold"><th>صافي الإيراد (بعد ÷ 1.14)</th><td>${fmt(netRev, 2)} ج.م</td></tr>
         <tr class="sum-red"><th>تكلفة الخامات (شامل الهالك)</th><td>${fmt(cost, 2)} ج.م</td></tr>
         <tr class="sum-total"><th>نسبة التكلفة الغذائية</th><td>${pctOf(cost)} <span class="muted" style="font-weight:600;color:var(--muted)">= ${fmt(cost, 2)} ج من صافي الإيراد</span></td></tr>
         </tbody></table>
-        ${noPrice ? `<div class="muted" style="margin-top:6px">فيه ${noPrice} صنف من غير سعر، فالنسبة أقل من الحقيقي.</div>` : ''}`;
+        ${noPrice ? `<div class="muted" style="margin-top:6px">فيه ${noPrice} صنف من غير سعر، فالنسبة أقل من الحقيقي.</div>` : ''}
+        </details>`;
 }
 
 function readAnalysisRows() {
