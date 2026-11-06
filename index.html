@@ -956,7 +956,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div class="search">
                     <input id="an-search" class="inp" placeholder="ابحث عن صنف في التحليل" oninput="applySearch('an-cards','an-search','an-nomatch')">
-                    <select id="an-crit" class="inp" style="max-width:170px" onchange="applyCritFilter()"><option value="all">كل الأصناف</option><option value="crit">الحرجة فقط</option></select>
+                    <select id="an-crit" class="inp" style="max-width:170px" onchange="sortCritFirst();applyCritFilter()"><option value="all">كل الأصناف</option><option value="crit">الحرجة فقط</option></select>
                 </div>
                 <div id="an-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="an-note" class="note hidden" style="margin-bottom:14px"></div>
@@ -3368,6 +3368,7 @@ function liveAn() {
         }
 
     });
+    applyCritFilter();
 }
 
 // الأصناف اللي ليها هدف +20% بس (بالاسم)
@@ -3386,20 +3387,19 @@ function sortCritFirst() {
     const box = $('an-cards');
     if (!box) return;
     const cards = [...box.querySelectorAll('.pcard')];
-    cards.sort((a, b) => critOf(b) - critOf(a));
-    cards.forEach(c => box.appendChild(c));
+    const sorted = [...cards].sort((a, b) => critOf(b) - critOf(a));
+    if (sorted.every((c, i) => c === cards[i])) return;
+    sorted.forEach(c => box.appendChild(c));
 }
 
 function applyCritFilter() {
     const sel = $('an-crit');
     const mode = sel ? sel.value : 'all';
-    sortCritFirst();
     document.querySelectorAll('#an-cards .pcard').forEach(pc => {
         const av = pc.querySelector('[id^="av-"]');
         const crit = pc.classList.contains('st-bad') || (av && av.classList.contains('down'));
         pc.classList.toggle('hidden', mode === 'crit' && !crit);
     });
-    applyCritFilter();
 }
 
 // فلتر الحرجة: الصنف تحت الهدف أو فيه عجز غير متفسر
