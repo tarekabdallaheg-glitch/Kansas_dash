@@ -231,6 +231,22 @@ details.sub[open] summary::before{content:"▾ "}
 .rc-filled{background:rgba(15,157,107,.08);border-radius:10px;padding-inline:8px}
 .rc-prog{font-size:13px;font-weight:700;color:var(--ok);margin-bottom:8px}
 .tt-btn{min-width:110px}
+.rc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 10px;border-bottom:0.5px solid var(--border);border-radius:12px}
+.rc-row .pname{font-size:16px}
+.rc-row input.inp{width:130px;max-width:45%;font-size:18px;font-weight:800;text-align:center;padding:10px}
+.rc-row.rc-filled input.inp{border-color:var(--ok)}
+.tab-dot{display:none;min-width:18px;padding:0 6px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;font-weight:800;margin-inline-start:4px;line-height:18px;text-align:center}
+#to-top{display:none}
+.row-today td{background:rgba(214,158,46,.14)!important;font-weight:800}
+/* الدفعة الأخيرة: إبراز الأرقام الأساسية وتنسيق القوالب الداخلية */
+#quick .quick:first-child .val{color:var(--gold2)}
+#quick .quick .val{font-variant-numeric:tabular-nums}
+.tb .big{font-variant-numeric:tabular-nums}
+details.card>summary{padding:2px 0;border-bottom:0.5px solid var(--border);margin-bottom:0}
+details.card[open]>summary{margin-bottom:12px}
+#open-list .prow .pfields .inp[data-f="name"]{font-weight:800}
+#exp-define-list .prow .pname,#open-list .prow .pname{font-size:15px}
+.pcard .fld small{font-size:12px}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -558,9 +574,9 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     </div>
 
     <nav class="tabs no-print">
-        <button class="btn on" id="tab-btn-revenue" onclick="switchTab('revenue')">تقرير الإيرادات</button>
+        <button class="btn on" id="tab-btn-revenue" onclick="switchTab('revenue')">تقرير الإيرادات <span id="tab-badge-rev" class="tab-dot"></span></button>
         <button class="btn" id="tab-btn-salesforecast" onclick="switchTab('salesforecast')">Sales Forecasting</button>
-        <button class="btn" id="tab-btn-inventory" onclick="switchTab('inventory')">المخزون</button>
+        <button class="btn" id="tab-btn-inventory" onclick="switchTab('inventory')">المخزون <span id="tab-badge-inv" class="tab-dot"></span></button>
     </nav>
 
     <!-- ================= الإيرادات ================= -->
@@ -898,6 +914,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     </div>
                     <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp" placeholder="الكمية" style="max-width:150px" onkeydown="if(event.key==='Enter'){event.preventDefault();addTransfer();}"><button class="btn btn-gold" onclick="addTransfer()">إضافة</button></div>
                 </div>
+                <div id="tr-confirm" style="margin-top:10px;font-weight:700;color:var(--ok)"></div>
                 <div id="tr-list" style="margin-top:14px"></div>
 
                 <div class="trr-card" style="margin-top:18px">
@@ -1017,6 +1034,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                   <div style="font-size:17px;font-weight:800">جدول توقع الإيرادات والطلبيات</div>
                   <div id="orders-print-period" class="muted"></div>
                 </div>
+                <div id="orders-kpi" class="grid g2" style="margin-bottom:12px"></div>
                 <div class="tbl-wrap"><table id="orders-table">
                   <thead id="orders-head"><tr><th>اليوم والتاريخ</th><th>الإيراد المتوقع</th></tr></thead>
                   <tbody id="orders-rows"></tbody>
@@ -1093,6 +1111,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 </div>
 </div>
 
+<button id="to-top" class="btn btn-gold no-print" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" style="position:fixed;bottom:70px;left:14px;z-index:90;border-radius:99px;padding:10px 14px">↑ لأعلى</button>
 <div class="toasts" id="toasts"></div>
 <div id="print-area" aria-hidden="true"></div>
 
@@ -2244,7 +2263,7 @@ function renderForecast() {
         if (exp !== null) tEall += exp;
         if (both) { tE += exp; tA += act; }
         const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
-        return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
+        return `<tr class="${d === todayStr() ? 'row-today' : ''}"><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
             <td>${avg === null ? '<span class="muted">—</span>' : fmt(avg) + '<br><span class="muted">' + esc(f.basis) + '</span>'}</td>
             <td><input class="inp xs" type="number" step="any" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
             <td><b>${exp === null ? '—' : fmt(exp)}</b></td>
@@ -2759,7 +2778,7 @@ function renderReceipts() {
     if (miss.length) {
         al.classList.remove('hidden');
         al.innerHTML = `<div>فيه ${miss.length} يوم من أول الشهر بدون وارد مسجل ولا تأكيد:</div>
-            <div class="missing-chips">${dayNums(miss).map(n => `<span class="mchip">${n}</span>`).join('')}</div>
+            <div class="missing-chips">${miss.map(d => `<button type="button" class="mchip" onclick="jumpRcDay('${d}')">${Number(d.slice(8))}</button>`).join('')}</div>
             <button class="btn btn-sm" onclick="bulkReceiptNone()">تأكيد كل الأيام دي كـ "بدون توريد"</button>`;
     } else {
         al.classList.add('hidden');
@@ -2796,7 +2815,7 @@ function renderReceipts() {
     $('rc-save').classList.remove('hidden');
     $('rc-none').classList.toggle('hidden', hasAny);
     $('rc-edit').classList.add('hidden');
-    $('rc-body').innerHTML = S.products.map((p, i) => `<div class="prow${norm(rcValue(d, p)) !== '' ? ' rc-filled' : ''}" data-search="${esc(searchKey(p))}">
+    $('rc-body').innerHTML = S.products.map((p, i) => `<div class="rc-row${norm(rcValue(d, p)) !== '' ? ' rc-filled' : ''}" data-search="${esc(searchKey(p))}">
         <div><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
         <input class="inp xs" type="number" min="0" step="any" data-nav="rec" data-ri="${i}" value="${esc(rcValue(d, p))}" placeholder="0"
             oninput="rcSet('${esc(p.id)}', this.value)">
@@ -2808,6 +2827,13 @@ function renderReceipts() {
         prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>تم إدخال ${filledN} من ${S.products.length} صنف</span><b>${pctF}%</b></div><div style="height:8px;border-radius:99px;background:var(--card2);overflow:hidden"><div style="height:100%;width:${pctF}%;background:var(--ok);transition:width .3s"></div></div>`;
     }
     applySearch('rc-body', 'rc-search', 'rc-nomatch');
+}
+
+function jumpRcDay(d) {
+    $('rc-day').value = d;
+    rcDraft = {};
+    renderReceipts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function saveReceipts() {
@@ -2914,7 +2940,7 @@ function renderTransfers() {
             const pr = productById(t.product_id) || {};
             return `<div class="prow">
                 <div><span class="pname">${esc(pr.name || 'صنف محذوف')}</span> <span class="punit">${esc(pr.unit || '')}</span> <span class="muted">— ${fmt(t.qty, 2)}</span></div>
-                ${locked ? '' : `<button class="btn btn-red btn-sm" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
+                ${locked ? '' : `<button class="btn btn-ghost btn-sm" style="color:var(--bad)" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
             </div>`;
         }).join('')}
     </div>`).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
@@ -2944,7 +2970,7 @@ async function addTransfer() {
     $('trans-search').value = ''; fillTransProducts();
     $('trans-qty').focus();
     const addedP = productById(pid);
-    toast(`أضفت ${addedP ? addedP.name : ''} ${qty}`);
+    $('tr-confirm').textContent = `أضفت ${addedP ? addedP.name : ''} ${qty} ${addedP ? addedP.unit : ''}`;
     renderAll();
 }
 
@@ -4192,6 +4218,8 @@ function renderOrderForecast() {
   const totals=products.map(p=>quantities.reduce((a,row)=>a+(row.find(x=>x.id===p.id)?.qty||0),0));
   $('orders-foot').innerHTML=`<tr><th>إجمالي الأسبوع</th><th>${fmt(totalRev)} ج.م</th>${totals.map(q=>`<th>${fmt(q,2)}</th>`).join('')}</tr>`;
   $('orders-print-period').textContent=`من ${days[0]} إلى ${days[6]}`;
+  const kpiHost = $('orders-kpi');
+  if (kpiHost) kpiHost.innerHTML = `<div class="tb"><div class="muted">إجمالي الإيراد المتوقع للأسبوع</div><div class="big">${fmt(totalRev)} ج.م</div></div><div class="tb"><div class="muted">عدد الأصناف المفعّلة</div><div class="big">${products.length}</div></div>`;
   $('orders-note').textContent=products.length?`تم حساب ${products.length} صنفًا من توقع الإيراد. المعدل = كمية الصنف لكل 1000 جنيه مبيعات. الكميات معروضة حتى منزلتين عشريتين.`:'اختار صنفًا واحدًا على الأقل وأدخل معدل Per 1000 أكبر من صفر لعرض الطلبيات.';
   const saved=S.orderSnapshots[start];
   $('orders-snapshot-status').textContent=saved?`يوجد اعتماد محفوظ لهذا الأسبوع بتاريخ ${saved.savedAt||''}. حفظ اعتماد جديد سيحدّث النسخة.`:'';
@@ -4266,7 +4294,23 @@ function renderAll() {
     renderInventory();
     renderOrderForecast();
     renderBackupAlert();
+    renderTabBadges();
 }
+
+// عداد الأيام الناقصة على التابات (إيراد ومخزون)
+function renderTabBadges() {
+    const rv = missingRevenueDays().length;
+    const inv = missingDays(coveredReceipt).length;
+    const br = $('tab-badge-rev'), bi = $('tab-badge-inv');
+    if (br) { br.textContent = rv || ''; br.style.display = rv ? 'inline-block' : 'none'; }
+    if (bi) { bi.textContent = inv || ''; bi.style.display = inv ? 'inline-block' : 'none'; }
+}
+
+// زرار الرجوع لأعلى بيظهر بعد السكرول
+window.addEventListener('scroll', () => {
+    const b = $('to-top');
+    if (b) b.style.display = window.scrollY > 400 ? 'block' : 'none';
+});
 </script>
 </body>
 </html>
