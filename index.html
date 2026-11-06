@@ -253,6 +253,29 @@ details>summary.h{list-style:none}
 details>summary.h::-webkit-details-marker{display:none}
 details>summary.h::after{content:" ▾";color:var(--muted)}
 details[open]>summary.h::after{content:" ▴"}
+/* ألوان الأقسام: كل قالب ليه لون وخلفية تعبر عنه */
+[onclick="openInv('opening')"]{--c:#3b82f6}
+[onclick="openInv('receipts')"]{--c:#22c55e}
+[onclick="openInv('transfers')"]{--c:#f97316}
+[onclick="openInv('analysis')"]{--c:#d69e2e}
+[onclick="openInv('orders')"]{--c:#8b5cf6}
+[onclick="openInv('expiry')"]{--c:#ef4444}
+.tile .tico{background:color-mix(in srgb,var(--c,#8fb4e8) 16%,transparent);color:var(--c,#8fb4e8);border:1px solid color-mix(in srgb,var(--c,#8fb4e8) 40%,transparent);border-radius:18px}
+.tile:hover{border-color:var(--c,var(--gold2))}
+body[data-sec="opening"]{--sec:#3b82f6}
+body[data-sec="receipts"]{--sec:#22c55e}
+body[data-sec="transfers"]{--sec:#f97316}
+body[data-sec="analysis"]{--sec:#d69e2e}
+body[data-sec="orders"]{--sec:#8b5cf6}
+body[data-sec="expiry"]{--sec:#ef4444}
+.pnl-title .tico{background:color-mix(in srgb,var(--sec,#8fb4e8) 18%,transparent);color:var(--sec,#8fb4e8);border:1px solid color-mix(in srgb,var(--sec,#8fb4e8) 45%,transparent)}
+.pnl-title{color:var(--text)}
+.pnl-head>.btn{border-radius:99px;padding:8px 16px;background:color-mix(in srgb,var(--sec,#8fb4e8) 12%,transparent);border:1px solid color-mix(in srgb,var(--sec,#8fb4e8) 45%,transparent);color:var(--text);font-weight:800}
+.pnl-head>.btn:hover{background:color-mix(in srgb,var(--sec,#8fb4e8) 22%,transparent)}
+.pnl-head>.btn svg{color:var(--sec,#8fb4e8)}
+@keyframes okPulse{0%{box-shadow:0 0 0 0 rgba(15,157,107,.55)}100%{box-shadow:0 0 0 14px rgba(15,157,107,0)}}
+.pulse-ok{animation:okPulse .7s ease-out}
+.st-ico{margin-inline-end:4px}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -1024,7 +1047,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div id="per1000-products"></div>
                 <div class="note" style="margin-top:12px">مثال: معدل الدجاج 1 لكل 1000 جنيه، وتوقع الإيراد 40,000 جنيه = احتياج 40 دجاجة.</div>
                 <div class="row" style="margin-top:16px;justify-content:flex-end">
-                  <button class="btn btn-gold" onclick="switchOrderSubTab('table')">حفظ وتوجه لجدول الأسبوع ←</button>
+                  <button class="btn btn-gold" onclick="savePer1000Close()">حفظ وإغلاق</button>
+                  <button class="btn" onclick="switchOrderSubTab('table')">جدول الأسبوع ←</button>
                 </div>
               </div>
 
@@ -1103,7 +1127,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                   
                 </div>
                 <div id="exp-daily-list"></div>
-                <div class="row" style="margin-top:16px"><button class="btn btn-gold" onclick="saveExpDaily()">حفظ وإغلاق</button></div>
+                <div class="row" style="margin-top:16px;position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border)"><button class="btn btn-gold" onclick="saveExpDaily()">حفظ وإغلاق</button></div>
               </div>
 
               <div class="card hidden" id="exp-sub-report">
@@ -1169,6 +1193,19 @@ const ICON_PATHS = {
 function ico(name, size = 17) {
     return `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ''}</svg>`;
 }
+
+// تأثير خفيف على زراير الحفظ والإغلاق
+document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('button');
+    if (!b || b.disabled) return;
+    const oc = b.getAttribute('onclick') || '';
+    if (b.hasAttribute('data-save') || /save|Save|lockTransfers|Close\(\)|closeInv/.test(oc)) {
+        b.classList.remove('pulse-ok');
+        void b.offsetWidth;
+        b.classList.add('pulse-ok');
+        setTimeout(() => b.classList.remove('pulse-ok'), 800);
+    }
+});
 
 function toast(msg, type = 'success') {
     const t = document.createElement('div');
@@ -2606,12 +2643,14 @@ const INV_ICONS = {
 
 function openInv(v) {
     invView = v;
+    document.body.dataset.sec = v;
     renderInventory();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function closeInv() {
     invView = null;
+    document.body.removeAttribute('data-sec');
     renderAll();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2628,6 +2667,26 @@ function renderTiles() {
     $('ts-transfers').textContent = mt ? `${mt} يوم ناقص` : 'كل الأيام مغطاة';
 
     $('ts-analysis').textContent = $('an-to').value ? 'لحد ' + $('an-to').value : 'اختار تاريخ';
+
+    // علامة الحالة: ✓ تمام، ! فيه حاجة ناقصة
+    const expOk = expRows().filter(r => r.left !== null && r.left <= EXP_YELLOW).length === 0;
+    markTile('ts-opening', S.products.length > 0 && S.products.every(p => hasOpening(p.id, m)) && !!S.openLocked[m]);
+    markTile('ts-receipts', mr === 0);
+    markTile('ts-transfers', mt === 0);
+    markTile('ts-analysis', !!$('an-to').value);
+    markTile('ts-expiry', expOk);
+}
+
+function markTile(id, ok) {
+    const el = $(id);
+    if (!el) return;
+    el.querySelectorAll('.st-ico').forEach(n => n.remove());
+    const s = document.createElement('span');
+    s.className = 'st-ico';
+    s.textContent = ok ? '✓' : '!';
+    s.style.color = ok ? 'var(--ok)' : 'var(--gold2)';
+    s.style.fontWeight = '900';
+    el.prepend(s);
 }
 
 function renderOpening() {
@@ -2665,7 +2724,7 @@ function renderOpening() {
             ? (missing.length ? `فيه ${missing.length} صنف لسه ما اتدخلش له رصيد الشهر. دخله واحفظ.` : 'الرصيد محفوظ ومقفول. لو محتاج تغيّره افتح التعديل.')
             : 'ادخل رصيد أول الشهر لكل صنف (Enter أو ↓ للصنف اللي بعده) واضغط حفظ وإغلاق.';
 
-    $('open-save').classList.toggle('hidden', locked && allDone);
+    $('open-save').classList.remove('hidden');
     $('open-suggest').classList.toggle('hidden', locked);
     $('open-unlock').classList.toggle('hidden', !locked);
     ['new-prod-name', 'new-prod-unit', 'new-prod-price'].forEach(id => { $(id).disabled = locked; });
@@ -4250,6 +4309,13 @@ function setPer1000Rate(id, value) {
   S.per1000[id]=S.per1000[id]||{enabled:true}; S.per1000[id].rate=rate; if(S.per1000[id].enabled===undefined) S.per1000[id].enabled=true;
   saveDB(); renderOrderForecast();
 }
+function savePer1000Close() {
+  saveDB();
+  toast('تم حفظ إعدادات Per 1000');
+  renderOrderForecast();
+  switchOrderSubTab('table');
+}
+
 function planForecast(d) {
   // نفس الأرقام اللي في جدول التخطيط للمبيعات (متوسط × اتجاه × مناسبات × نسبة النمو لكل يوم)
   const before = forecastHistory().filter(x => x.date < d);
