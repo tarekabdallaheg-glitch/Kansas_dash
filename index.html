@@ -906,7 +906,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     </div>
                     <input id="trans-branch" class="inp" placeholder="اسم الفرع" list="trans-branch-list">
                     <datalist id="trans-branch-list"></datalist>
-                    <div id="trans-branch-chips" class="row" style="gap:6px;margin-top:6px"></div>
+                    <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toggleBranchChips()">الفروع ▾</button>
+                    <div id="trans-branch-chips" class="row hidden" style="gap:6px;margin-top:6px"></div>
                     <div>
                         <input id="trans-search" class="inp" placeholder="ابحث عن الصنف" oninput="fillTransProducts()" style="margin-bottom:6px">
                         <select id="trans-prod" class="inp"></select>
@@ -3032,6 +3033,11 @@ async function unlockTransfers() {
 }
 
 // ===== تقرير التحويلات =====
+function toggleBranchChips() {
+    const box = $('trans-branch-chips');
+    if (box) box.classList.toggle('hidden');
+}
+
 function setTransType(v) {
     const sel = $('trans-type');
     if (!sel) return;
@@ -3044,7 +3050,7 @@ function fillTransferFilters() {
     const dl = $('trans-branch-list');
     if (dl) dl.innerHTML = [...new Set(S.transfers.map(t => t.branch).filter(Boolean))].map(b => `<option value="${esc(b)}">`).join('');
     const chipsHost = $('trans-branch-chips');
-    if (chipsHost) chipsHost.innerHTML = [...new Set(S.transfers.map(t => t.branch).filter(Boolean))].slice(0, 12).map(b => `<button type="button" class="btn btn-ghost btn-sm" data-b="${esc(b)}" onclick="$('trans-branch').value=this.dataset.b">${esc(b)}</button>`).join('');
+    if (chipsHost) chipsHost.innerHTML = [...new Set(S.transfers.map(t => t.branch).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar')).map(b => `<button type="button" class="btn btn-ghost btn-sm" data-b="${esc(b)}" onclick="$('trans-branch').value=this.dataset.b;$('trans-branch-chips').classList.add('hidden')">${esc(b)}</button>`).join('');
     const bSel = $('trr-branch'), pSel = $('trr-prod');
     if (!bSel || !pSel) return;
     if (!$('trr-from').value) { $('trr-from').value = monthStart(activeMonth); $('trr-to').value = monthEnd(activeMonth); }
