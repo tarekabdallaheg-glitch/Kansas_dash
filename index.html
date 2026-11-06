@@ -904,11 +904,11 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                         <button type="button" id="tt-in" class="btn btn-sm tt-btn" onclick="setTransType('in')">وارد من فرع</button>
                         <button type="button" id="tt-out" class="btn btn-sm tt-btn" onclick="setTransType('out')">صادر لفرع</button>
                     </div>
-                    <div>
+                    <div style="position:relative">
                         <input id="trans-branch" class="inp" placeholder="اسم الفرع" list="trans-branch-list">
                         <datalist id="trans-branch-list"></datalist>
                         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toggleBranchChips()">الفروع ▾</button>
-                        <div id="trans-branch-chips" class="hidden" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;max-height:160px;overflow-y:auto"></div>
+                        <div id="trans-branch-chips" class="hidden" style="position:absolute;top:100%;left:0;right:0;z-index:50;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:6px;display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto"></div>
                     </div>
                     <div>
                         <input id="trans-search" class="inp" placeholder="ابحث عن الصنف" oninput="fillTransProducts()" style="margin-bottom:6px">
@@ -3052,7 +3052,7 @@ function fillTransferFilters() {
     const dl = $('trans-branch-list');
     if (dl) dl.innerHTML = [...new Set(S.transfers.map(t => t.branch).filter(Boolean))].map(b => `<option value="${esc(b)}">`).join('');
     const chipsHost = $('trans-branch-chips');
-    if (chipsHost) chipsHost.innerHTML = [...new Set(S.transfers.map(t => t.branch).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar')).map(b => `<button type="button" class="btn btn-ghost btn-sm" data-b="${esc(b)}" onclick="$('trans-branch').value=this.dataset.b;$('trans-branch-chips').classList.add('hidden')">${esc(b)}</button>`).join('');
+    if (chipsHost) chipsHost.innerHTML = [...new Set(S.transfers.map(t => t.branch).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar')).map(b => `<button type="button" class="btn btn-ghost" style="width:100%;justify-content:flex-start;padding:8px 10px" data-b="${esc(b)}" onclick="$('trans-branch').value=this.dataset.b;$('trans-branch-chips').classList.add('hidden')">${esc(b)}</button>`).join('');
     const bSel = $('trr-branch'), pSel = $('trr-prod');
     if (!bSel || !pSel) return;
     if (!$('trr-from').value) { $('trr-from').value = monthStart(activeMonth); $('trr-to').value = monthEnd(activeMonth); }
