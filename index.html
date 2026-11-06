@@ -247,6 +247,8 @@ details.card[open]>summary{margin-bottom:12px}
 #open-list .prow .pfields .inp[data-f="name"]{font-weight:800}
 #exp-define-list .prow .pname,#open-list .prow .pname{font-size:15px}
 .pcard .fld small{font-size:12px}
+details.trr-tot-det>summary::-webkit-details-marker{display:none}
+details.trr-tot-det[open]>summary{color:var(--gold2)}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -923,8 +925,9 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="trr-card" style="margin-top:18px">
                     <div class="row between" style="margin-bottom:10px">
                         <div class="h" style="margin:0">📊 تقرير التحويلات</div>
-                        <span class="muted">مجمّع لكل فرع وصنف، والتفاصيل بالتاريخ جنب كل سطر</span>
+                        <div class="row" style="gap:8px"><span class="muted">مجمّع لكل فرع وصنف، والتفاصيل بالتاريخ جنب كل سطر</span><button type="button" class="btn btn-ghost btn-sm" onclick="toggleTrReport()">طي / فرد ▴▾</button></div>
                     </div>
+                    <div id="trr-body">
                     <div class="grid g3">
                         <div><label class="muted">من تاريخ</label><input type="date" id="trr-from" class="inp"></div>
                         <div><label class="muted">إلى تاريخ</label><input type="date" id="trr-to" class="inp"></div>
@@ -937,8 +940,9 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                         <button class="btn btn-slate" onclick="printTransferReport()">طباعة / حفظ PDF</button>
                     </div>
                     <div id="trr-out" style="margin-top:14px"></div>
+                    </div>
                 </div>
-                <div class="row" style="margin-top:16px">
+                <div class="row" style="margin-top:16px;position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border)">
                     <button class="btn btn-gold" id="trans-lock" data-save onclick="lockTransfers()">تأكيد وحفظ وإغلاق</button>
                     <button class="btn" id="trans-none" onclick="markTransfersNone()">لا توجد تحويلات في اليوم ده</button>
                     <button class="btn" id="trans-unlock" onclick="unlockTransfers()">فتح التعديل</button>
@@ -3035,6 +3039,11 @@ async function unlockTransfers() {
 }
 
 // ===== تقرير التحويلات =====
+function toggleTrReport() {
+    const b = $('trr-body');
+    if (b) b.classList.toggle('hidden');
+}
+
 function toggleBranchChips() {
     const box = $('trans-branch-chips');
     if (box) box.classList.toggle('hidden');
@@ -3137,11 +3146,13 @@ function renderTransferReport() {
             <thead><tr><th>الفرع</th><th>الصنف</th><th>وارد</th><th>صادر</th><th>الصافي</th><th></th></tr></thead>
             <tbody>${body}</tbody>
         </table></div>
-        <div class="h trr-tot">إجمالي كل صنف (على كل الفروع)</div>
+        <details class="trr-tot-det">
+        <summary class="h" style="cursor:pointer;margin-top:14px">إجمالي كل صنف (على كل الفروع) ▾</summary>
         <div class="tbl-wrap"><table class="trr">
             <thead><tr><th colspan="2">الصنف</th><th>وارد</th><th>صادر</th><th>الصافي</th></tr></thead>
             <tbody>${totRows}</tbody>
-        </table></div>`;
+        </table></div>
+        </details>`;
 }
 
 function exportTransferReportXlsx() {
