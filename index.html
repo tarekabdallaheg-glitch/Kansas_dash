@@ -204,6 +204,33 @@ details.sub[open] summary::before{content:"▾ "}
 .search .inp{padding-right:14px}
 .missing-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .mchip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(183,121,31,.10);border:1px solid rgba(183,121,31,.35);color:var(--gold)}
+.trr-card{border:1px solid var(--gold2);border-radius:18px;padding:16px;background:linear-gradient(180deg,rgba(214,158,46,.06),transparent 40%),var(--card)}
+.trr{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.trr thead th{background:linear-gradient(180deg,#1e3a5f,#244d78);color:#fff;font-weight:800;padding:10px;text-align:right;border:none}
+.trr tbody tr.trr-main td{padding:10px;border-bottom:1px solid var(--border);background:var(--card)}
+.trr tbody tr.trr-main:nth-child(4n+1) td{background:rgba(143,180,232,.08)}
+.trr tfoot th{background:var(--card2);padding:10px;border-top:2px solid var(--gold2);text-align:right}
+.trr-det{width:100%;border-collapse:collapse;margin:6px 0 10px;background:var(--card2);border-radius:12px;overflow:hidden}
+.trr-det th{background:rgba(214,158,46,.18);color:var(--text);padding:6px 10px;font-size:12px}
+.trr-det td{padding:6px 10px;border-top:1px solid var(--border)}
+.trr-tot{margin-top:14px}
+.sum-tbl{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:14px}
+.sum-tbl th{text-align:right;font-weight:700;color:var(--muted);padding:11px 14px;background:var(--card2);border-radius:12px 0 0 12px;border-inline-start:4px solid var(--accent)}
+.sum-tbl td{text-align:left;font-weight:800;font-size:15px;padding:11px 14px;background:var(--card2);border-radius:0 12px 12px 0;direction:ltr}
+.sum-tbl tr.sum-red th{border-inline-start-color:var(--bad)}
+.sum-tbl tr.sum-red td{color:var(--bad)}
+.sum-tbl tr.sum-green th{border-inline-start-color:var(--ok)}
+.sum-tbl tr.sum-green td{color:var(--ok)}
+.sum-tbl tr.sum-gold th{border-inline-start-color:var(--gold2)}
+.sum-tbl tr.sum-gold td{color:var(--gold2)}
+.sum-tbl tr.sum-total th{background:linear-gradient(90deg,rgba(214,158,46,.25),var(--card2));font-weight:900;color:var(--text)}
+.sum-tbl tr.sum-total td{background:linear-gradient(90deg,var(--card2),rgba(214,158,46,.25));font-size:16px}
+.trr-tot th{background:rgba(15,157,107,.14);color:var(--text)}
+.pcard.st-ok{border-top:3px solid var(--ok)}
+.pcard.st-bad{border-top:3px solid var(--bad)}
+.rc-filled{background:rgba(15,157,107,.08);border-radius:10px;padding-inline:8px}
+.rc-prog{font-size:13px;font-weight:700;color:var(--ok);margin-bottom:8px}
+.tt-btn{min-width:110px}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -836,6 +863,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <input id="rc-search" class="inp" placeholder="ابحث عن صنف" oninput="applySearch('rc-body','rc-search','rc-nomatch')">
                 </div>
                 <div id="rc-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
+                <div id="rc-progress" class="rc-prog no-print"></div>
                 <div id="rc-body"></div>
                 <div class="row" style="margin-top:16px">
                     <button class="btn btn-gold" id="rc-save" data-save onclick="saveReceipts()">حفظ وإغلاق</button>
@@ -855,8 +883,13 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div id="tr-alert" class="note hidden"></div>
                 <div id="trans-form" class="grid g3" style="margin-top:4px">
-                    <select id="trans-type" class="inp"><option value="in">وارد من فرع</option><option value="out">صادر لفرع</option></select>
-                    <input id="trans-branch" class="inp" placeholder="اسم الفرع">
+                    <div class="row" style="gap:6px">
+                        <select id="trans-type" class="inp hidden"><option value="in">وارد من فرع</option><option value="out">صادر لفرع</option></select>
+                        <button type="button" id="tt-in" class="btn btn-sm tt-btn" onclick="setTransType('in')">وارد من فرع</button>
+                        <button type="button" id="tt-out" class="btn btn-sm tt-btn" onclick="setTransType('out')">صادر لفرع</button>
+                    </div>
+                    <input id="trans-branch" class="inp" placeholder="اسم الفرع" list="trans-branch-list">
+                    <datalist id="trans-branch-list"></datalist>
                     <div>
                         <input id="trans-search" class="inp" placeholder="ابحث عن الصنف" oninput="fillTransProducts()" style="margin-bottom:6px">
                         <select id="trans-prod" class="inp"></select>
@@ -865,6 +898,25 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp" placeholder="الكمية" style="max-width:150px" onkeydown="if(event.key==='Enter'){event.preventDefault();addTransfer();}"><button class="btn btn-gold" onclick="addTransfer()">إضافة</button></div>
                 </div>
                 <div id="tr-list" style="margin-top:14px"></div>
+
+                <div class="trr-card" style="margin-top:18px">
+                    <div class="row between" style="margin-bottom:10px">
+                        <div class="h" style="margin:0">📊 تقرير التحويلات</div>
+                        <span class="muted">مجمّع لكل فرع وصنف، والتفاصيل بالتاريخ جنب كل سطر</span>
+                    </div>
+                    <div class="grid g3">
+                        <div><label class="muted">من تاريخ</label><input type="date" id="trr-from" class="inp"></div>
+                        <div><label class="muted">إلى تاريخ</label><input type="date" id="trr-to" class="inp"></div>
+                        <div><label class="muted">الفرع</label><select id="trr-branch" class="inp"></select></div>
+                        <div><label class="muted">الصنف</label><select id="trr-prod" class="inp"></select></div>
+                    </div>
+                    <div class="row" style="margin-top:12px">
+                        <button class="btn btn-gold" onclick="renderTransferReport()">عرض التقرير</button>
+                        <button class="btn btn-green" onclick="exportTransferReportXlsx()">تحميل Excel</button>
+                        <button class="btn btn-slate" onclick="printTransferReport()">طباعة / حفظ PDF</button>
+                    </div>
+                    <div id="trr-out" style="margin-top:14px"></div>
+                </div>
                 <div class="row" style="margin-top:16px">
                     <button class="btn btn-gold" id="trans-lock" data-save onclick="lockTransfers()">تأكيد وحفظ وإغلاق</button>
                     <button class="btn" id="trans-none" onclick="markTransfersNone()">لا توجد تحويلات في اليوم ده</button>
@@ -886,6 +938,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div class="search">
                     <input id="an-search" class="inp" placeholder="ابحث عن صنف في التحليل" oninput="applySearch('an-cards','an-search','an-nomatch')">
+                    <select id="an-crit" class="inp" style="max-width:170px" onchange="applyCritFilter()"><option value="all">كل الأصناف</option><option value="crit">الحرجة فقط</option></select>
                 </div>
                 <div id="an-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="an-note" class="note hidden" style="margin-bottom:14px"></div>
@@ -1050,6 +1103,7 @@ const STORE_KEY = 'kansas_v8';
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
 const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+const norm = v => String(v ?? '').trim();
 const int = v => { const n = parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : 0; };
 const fmt = (n, d = 0) => (Number.isFinite(n) ? n : 0).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 const pct = (n, d = 1) => (n === null || !Number.isFinite(n)) ? '—' : (n >= 0 ? '+' : '') + (n * 100).toFixed(d) + '%';
@@ -2534,6 +2588,7 @@ function renderOpening() {
                 <input class="inp xs" type="number" min="0" step="any" value="${p.price === null || p.price === undefined ? '' : p.price}" placeholder="سعر الوحدة (اختياري)" aria-label="سعر الوحدة" onchange="setProductPrice('${esc(p.id)}', this.value)" ${locked ? 'disabled' : ''}>
             </div>
             <div class="pfields2">
+                ${locked ? '<span class="badge closed">مقفول</span>' : ''}
                 <input class="inp xs" type="number" step="any" id="op-${esc(p.id)}" data-nav="open" data-ri="${i}"
                     value="${has ? openingFor(p.id, m) : ''}" placeholder="رصيد أول الشهر" ${dis}>
                 ${productUsed(p.id) ? '' : `<button class="btn btn-red btn-sm" onclick="deleteProduct('${esc(p.id)}')">حذف</button>`}
@@ -2740,11 +2795,14 @@ function renderReceipts() {
     $('rc-save').classList.remove('hidden');
     $('rc-none').classList.toggle('hidden', hasAny);
     $('rc-edit').classList.add('hidden');
-    $('rc-body').innerHTML = S.products.map((p, i) => `<div class="prow" data-search="${esc(searchKey(p))}">
+    $('rc-body').innerHTML = S.products.map((p, i) => `<div class="prow${norm(rcValue(d, p)) !== '' ? ' rc-filled' : ''}" data-search="${esc(searchKey(p))}">
         <div><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
         <input class="inp xs" type="number" min="0" step="any" data-nav="rec" data-ri="${i}" value="${esc(rcValue(d, p))}" placeholder="0"
             oninput="rcSet('${esc(p.id)}', this.value)">
     </div>`).join('');
+    const filledN = S.products.filter(p => norm(rcValue(d, p)) !== '').length;
+    const prog = $('rc-progress');
+    if (prog) prog.textContent = `تم إدخال ${filledN} من ${S.products.length} صنف`;
     applySearch('rc-body', 'rc-search', 'rc-nomatch');
 }
 
@@ -2846,7 +2904,7 @@ function renderTransfers() {
         if (!g) { g = { key, type: t.type, branch: t.branch || '', items: [] }; groups.push(g); }
         g.items.push(t);
     });
-    $('tr-list').innerHTML = groups.map(g => `<div class="card" style="margin-top:10px;padding:12px">
+    $('tr-list').innerHTML = groups.map(g => `<div class="card" style="margin-top:10px;padding:12px;border-top:3px solid ${g.type === 'in' ? 'var(--ok)' : 'var(--bad)'}">
         <div class="row between" style="margin-bottom:6px"><b>${g.type === 'in' ? 'وارد من فرع' : 'صادر لفرع'}</b><span class="muted">${esc(g.branch || '—')}</span></div>
         ${g.items.map(t => {
             const pr = productById(t.product_id) || {};
@@ -2857,6 +2915,8 @@ function renderTransfers() {
         }).join('')}
     </div>`).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
     fillTransProducts();
+    fillTransferFilters();
+    setTransType($('trans-type').value || 'in');
 }
 
 async function addTransfer() {
@@ -2879,7 +2939,8 @@ async function addTransfer() {
     $('trans-qty').value = '';
     $('trans-search').value = ''; fillTransProducts();
     $('trans-qty').focus();
-    toast('تمت إضافة التحويل');
+    const addedP = productById(pid);
+    toast(`أضفت ${addedP ? addedP.name : ''} ${qty}`);
     renderAll();
 }
 
@@ -2938,6 +2999,145 @@ async function unlockTransfers() {
     saveDB();
     toast('تم فتح التحويلات للتعديل');
     renderAll();
+}
+
+// ===== تقرير التحويلات =====
+function setTransType(v) {
+    const sel = $('trans-type');
+    if (!sel) return;
+    sel.value = v;
+    $('tt-in').className = 'btn btn-sm tt-btn' + (v === 'in' ? ' btn-green' : '');
+    $('tt-out').className = 'btn btn-sm tt-btn' + (v === 'out' ? ' btn-red' : '');
+}
+
+function fillTransferFilters() {
+    const dl = $('trans-branch-list');
+    if (dl) dl.innerHTML = [...new Set(S.transfers.map(t => t.branch).filter(Boolean))].map(b => `<option value="${esc(b)}">`).join('');
+    const bSel = $('trr-branch'), pSel = $('trr-prod');
+    if (!bSel || !pSel) return;
+    if (!$('trr-from').value) { $('trr-from').value = monthStart(activeMonth); $('trr-to').value = monthEnd(activeMonth); }
+    const curB = bSel.value, curP = pSel.value;
+    const branches = [...new Set(S.transfers.map(t => t.branch || '—'))].sort((a, b) => a.localeCompare(b, 'ar'));
+    bSel.innerHTML = '<option value="">كل الفروع</option>' + branches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+    pSel.innerHTML = '<option value="">كل الأصناف</option>' + S.products.map(p => `<option value="${esc(p.id)}">${esc(p.name)} (${esc(p.unit)})</option>`).join('');
+    bSel.value = curB; pSel.value = curP;
+}
+
+function trReportRows() {
+    const from = $('trr-from').value || monthStart(activeMonth);
+    const to = $('trr-to').value || monthEnd(activeMonth);
+    const br = $('trr-branch').value, pid = $('trr-prod').value;
+    return S.transfers.filter(t => inRange(t.day, from, to)
+        && (!br || (t.branch || '—') === br)
+        && (!pid || t.product_id === pid));
+}
+
+function trReportGroups(rows) {
+    const map = new Map();
+    rows.forEach(t => {
+        const branch = t.branch || '—';
+        const key = branch + '|' + t.product_id;
+        if (!map.has(key)) map.set(key, { branch, pid: t.product_id, inQty: 0, outQty: 0, items: [] });
+        const g = map.get(key);
+        if (t.type === 'in') g.inQty += t.qty; else g.outQty += t.qty;
+        g.items.push(t);
+    });
+    return [...map.values()].sort((a, b) => a.branch.localeCompare(b.branch, 'ar') || productLabel(a.pid).localeCompare(productLabel(b.pid), 'ar'));
+}
+
+function trProductTotals(groups) {
+    const map = new Map();
+    groups.forEach(g => {
+        if (!map.has(g.pid)) map.set(g.pid, { pid: g.pid, inQty: 0, outQty: 0 });
+        const t = map.get(g.pid);
+        t.inQty += g.inQty; t.outQty += g.outQty;
+    });
+    return [...map.values()].sort((a, b) => productLabel(a.pid).localeCompare(productLabel(b.pid), 'ar'));
+}
+
+function toggleTrDetail(i) {
+    const r = $('trd-' + i);
+    if (r) r.classList.toggle('hidden');
+}
+
+function renderTransferReport() {
+    const host = $('trr-out');
+    if (!host) return;
+    const rows = trReportRows();
+    if (!rows.length) { host.innerHTML = '<div class="muted">مفيش تحويلات في الفلتر ده</div>'; return; }
+    const groups = trReportGroups(rows);
+    const body = groups.map((g, i) => {
+        const p = productById(g.pid) || {};
+        const net = g.inQty - g.outQty;
+        const det = [...g.items].sort((a, b) => (a.day < b.day ? -1 : 1));
+        return `<tr class="trr-main">
+            <td><b>${esc(g.branch)}</b></td>
+            <td><span class="pname">${esc(p.name || 'صنف محذوف')}</span> <span class="punit">${esc(p.unit || '')}</span></td>
+            <td class="up">${g.inQty ? fmt(g.inQty, 2) : '-'}</td>
+            <td class="down">${g.outQty ? fmt(g.outQty, 2) : '-'}</td>
+            <td class="${net > 0 ? 'up' : (net < 0 ? 'down' : '')}"><b>${net > 0 ? '+' : ''}${fmt(net, 2)}</b></td>
+            <td><button class="btn btn-ghost btn-sm" onclick="toggleTrDetail(${i})">عرض التفاصيل ▾</button></td>
+        </tr>
+        <tr id="trd-${i}" class="hidden"><td colspan="6" style="padding:0 10px 10px">
+            <table class="trr-det"><thead><tr><th>التاريخ</th><th>النوع</th><th>الكمية</th></tr></thead><tbody>
+            ${det.map(t => `<tr><td>${t.day}</td><td class="${t.type === 'in' ? 'up' : 'down'}">${t.type === 'in' ? 'وارد' : 'صادر'}</td><td>${fmt(t.qty, 2)}</td></tr>`).join('')}
+            </tbody></table>
+        </td></tr>`;
+    }).join('');
+    const prodTot = trProductTotals(groups);
+    const totRows = prodTot.map(t => {
+        const p = productById(t.pid) || {};
+        const net = t.inQty - t.outQty;
+        return `<tr class="trr-main"><td colspan="2"><span class="pname">${esc(p.name || 'صنف محذوف')}</span> <span class="punit">${esc(p.unit || '')}</span></td>
+            <td class="up">${fmt(t.inQty, 2)}</td><td class="down">${fmt(t.outQty, 2)}</td>
+            <td class="${net > 0 ? 'up' : (net < 0 ? 'down' : '')}"><b>${net > 0 ? '+' : ''}${fmt(net, 2)}</b></td></tr>`;
+    }).join('');
+    host.innerHTML = `
+        <div class="tbl-wrap"><table class="trr">
+            <thead><tr><th>الفرع</th><th>الصنف</th><th>وارد</th><th>صادر</th><th>الصافي</th><th></th></tr></thead>
+            <tbody>${body}</tbody>
+        </table></div>
+        <div class="h trr-tot">إجمالي كل صنف (على كل الفروع)</div>
+        <div class="tbl-wrap"><table class="trr">
+            <thead><tr><th colspan="2">الصنف</th><th>وارد</th><th>صادر</th><th>الصافي</th></tr></thead>
+            <tbody>${totRows}</tbody>
+        </table></div>`;
+}
+
+function exportTransferReportXlsx() {
+    const rows = trReportRows();
+    if (!rows.length) return toast('مفيش تحويلات في الفلتر ده', 'error');
+    const groups = trReportGroups(rows);
+    const summary = groups.map(g => {
+        const p = productById(g.pid) || {};
+        return { 'الفرع': safeCell(g.branch), 'الصنف': safeCell(p.name || ''), 'الوحدة': safeCell(p.unit || ''),
+            'وارد': g.inQty, 'صادر': g.outQty, 'الصافي': g.inQty - g.outQty };
+    });
+    const detail = [...rows].sort((a, b) => (a.day < b.day ? -1 : 1)).map(t => {
+        const p = productById(t.product_id) || {};
+        return { 'التاريخ': t.day, 'الفرع': safeCell(t.branch || '—'), 'الصنف': safeCell(p.name || ''),
+            'الوحدة': safeCell(p.unit || ''), 'النوع': t.type === 'in' ? 'وارد' : 'صادر', 'الكمية': t.qty };
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'الملخص');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail), 'التفاصيل');
+    XLSX.writeFile(wb, `Kansas_Transfers_${$('trr-from').value || monthStart(activeMonth)}_${$('trr-to').value || monthEnd(activeMonth)}.xlsx`);
+}
+
+function printTransferReport() {
+    const out = $('trr-out');
+    const area = $('print-area');
+    if (!out || !area || !out.innerHTML.trim()) return toast('اعرض التقرير الأول', 'error');
+    const clone = out.cloneNode(true);
+    clone.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
+    clone.querySelectorAll('button').forEach(b => b.remove());
+    const from = $('trr-from').value || monthStart(activeMonth), to = $('trr-to').value || monthEnd(activeMonth);
+    area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير التحويلات</div>
+        <div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
+    area.appendChild(clone);
+    document.body.classList.add('print-area-mode');
+    window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
+    window.print();
 }
 
 function anRange() {
@@ -3053,6 +3253,7 @@ function renderAnalysis() {
 
     liveAn();
     applySearch('an-cards', 'an-search', 'an-nomatch');
+    sortCritFirst();
     renderSavedAnalyses();
 }
 
@@ -3092,6 +3293,12 @@ function liveAn() {
                     yl.className = tgt ? (hit ? 'up' : 'down') : (yPct < 0 ? 'down' : 'up');
                 }
             }
+        }
+        const pcEl = yl ? yl.closest('.pcard') : null;
+        if (pcEl) {
+            pcEl.classList.remove('st-ok', 'st-bad');
+            if (isTargetProduct(p) && yl.className === 'up') pcEl.classList.add('st-ok');
+            else if (isTargetProduct(p) && yl.className === 'down') pcEl.classList.add('st-bad');
         }
         const avp = $('avp-' + p.id);
         if (avp) {
@@ -3138,7 +3345,32 @@ function isTargetProduct(p) {
     return TARGET_WORDS.some(w => nm.includes(w));
 }
 
-// قايمة أسباب الهالك/العجز
+// فلتر الحرجة: الصنف تحت الهدف أو فيه عجز غير متفسر
+function critOf(pc) {
+    const av = pc.querySelector('[id^="av-"]');
+    return (pc.classList.contains('st-bad') || (av && av.classList.contains('down'))) ? 1 : 0;
+}
+function sortCritFirst() {
+    const box = $('an-cards');
+    if (!box) return;
+    const cards = [...box.querySelectorAll('.pcard')];
+    cards.sort((a, b) => critOf(b) - critOf(a));
+    cards.forEach(c => box.appendChild(c));
+}
+
+function applyCritFilter() {
+    const sel = $('an-crit');
+    const mode = sel ? sel.value : 'all';
+    sortCritFirst();
+    document.querySelectorAll('#an-cards .pcard').forEach(pc => {
+        const av = pc.querySelector('[id^="av-"]');
+        const crit = pc.classList.contains('st-bad') || (av && av.classList.contains('down'));
+        pc.classList.toggle('hidden', mode === 'crit' && !crit);
+    });
+    applyCritFilter();
+}
+
+// فلتر الحرجة: الصنف تحت الهدف أو فيه عجز غير متفسر
 const CAUSES = ['كسر', 'انتهاء صلاحية', 'تلف أو سوء تخزين', 'هدر تحضير طبيعي', 'سرقة محتملة', 'غير مفسر', 'أخرى'];
 function causeOptions(selected) {
     return '<option value="">— اختار السبب —</option>' + CAUSES.map(c => `<option value="${esc(c)}" ${c === selected ? 'selected' : ''}>${esc(c)}</option>`).join('');
@@ -3205,6 +3437,7 @@ function renderCauseSummary() {
     // الصافي بعد خصم الهالك لكل صنف: العجز بيتخصم منه الهالك، والزيادة بتتجمع في الأوفر
     let total = 0;
     let overTotal = 0;
+    let soldVal = 0;
     S.products.forEach(p => {
         const as = $('as-' + p.id), ac = $('ac-' + p.id);
         if (!as || !ac || ac.value === '') return;
@@ -3213,15 +3446,16 @@ function renderCauseSummary() {
         if (res.variance === null) return;
         lockWasteFields(p.id, res.variance);
         const net = res.variance + wasteValue(p.id);
+        soldVal += num(as.value) * p.price;
         if (net < 0) total += -net * p.price;
         else if (net > 0) overTotal += net * p.price;
     });
     const diff = overTotal - total;
-    host.innerHTML = `<div class="h" style="margin:0 0 8px">ملخص العجز بالفلوس</div>
-        <table><tbody>
-        <tr><th>الإجمالي الكلي للعجز</th><th class="down">${fmt(0 - total, 2)} ج.م</th></tr>
-        <tr><th>الإجمالي الكلي للأوفر</th><th class="up">+${fmt(overTotal, 2)} ج.م</th></tr>
-        <tr><th>الفرق بينهم</th><th class="${diff < 0 ? 'down' : 'up'}">${diff > 0 ? '+' : ''}${fmt(diff, 2)} ج.م</th></tr>
+    host.innerHTML = `<div class="h" style="margin:0 0 8px">📉 ملخص العجز بالفلوس</div>
+        <table class="sum-tbl"><tbody>
+        <tr class="sum-red"><th>الإجمالي الكلي للعجز</th><td>${fmt(0 - total, 2)} ج.م</td></tr>
+        <tr class="sum-green"><th>الإجمالي الكلي للأوفر</th><td>+${fmt(overTotal, 2)} ج.م</td></tr>
+        <tr class="sum-total"><th>الفرق بينهم</th><td class="${diff < 0 ? 'down' : 'up'}">${diff > 0 ? '+' : ''}${fmt(diff, 2)} ج.م</td></tr>
         </tbody></table>`;
 }
 
@@ -3248,11 +3482,11 @@ function renderFoodCost() {
         if (net < 0) shortage += -net * p.price;
     });
     const pctOf = (v) => (netRev > 0 ? fmt(v / netRev * 100, 1) + '%' : '-');
-    host.innerHTML = `<div class="h" style="margin:0 0 8px">نسبة التكلفة الغذائية</div>
-        <table><tbody>
-        <tr><th>صافي الإيراد (بعد ÷ 1.14)</th><td>${fmt(netRev, 2)} ج.م</td></tr>
-        <tr><th>تكلفة الخامات (شامل الهالك)</th><td>${fmt(cost, 2)} ج.م</td></tr>
-        <tr><th>نسبة التكلفة الغذائية</th><td><b>${pctOf(cost)}</b> <span class="muted">= ${fmt(cost, 2)} ج من صافي الإيراد</span></td></tr>
+    host.innerHTML = `<div class="h" style="margin:0 0 8px">🍽️ نسبة التكلفة الغذائية</div>
+        <table class="sum-tbl"><tbody>
+        <tr class="sum-gold"><th>صافي الإيراد (بعد ÷ 1.14)</th><td>${fmt(netRev, 2)} ج.م</td></tr>
+        <tr class="sum-red"><th>تكلفة الخامات (شامل الهالك)</th><td>${fmt(cost, 2)} ج.م</td></tr>
+        <tr class="sum-total"><th>نسبة التكلفة الغذائية</th><td>${pctOf(cost)} <span class="muted" style="font-weight:600;color:var(--muted)">= ${fmt(cost, 2)} ج من صافي الإيراد</span></td></tr>
         </tbody></table>
         ${noPrice ? `<div class="muted" style="margin-top:6px">فيه ${noPrice} صنف من غير سعر، فالنسبة أقل من الحقيقي.</div>` : ''}`;
 }
@@ -3593,7 +3827,11 @@ function expWarnListHtml() {
 function renderExpReport() {
     const host = $('exp-report-body'); if (!host) return;
     const rows = expRows();
-    host.innerHTML = expWarnListHtml()
+    const cnt = { 'منتهي': 0, 'حرج': 0, 'قريب': 0, 'سليم': 0, 'غير محددة': 0 };
+    rows.forEach(r => { const k = r.left === null ? 'غير محددة' : expStatus(r.left).label; cnt[k] = (cnt[k] || 0) + 1; });
+    const chip = (label, n, cls) => `<span class="badge ${cls}" style="font-size:13px">${label}: ${n}</span>`;
+    const counters = `<div class="row" style="margin-bottom:10px">${chip('منتهي', cnt['منتهي'], 'closed')}${chip('حرج', cnt['حرج'], 'closed')}${chip('قريب', cnt['قريب'], 'closed')}${chip('سليم', cnt['سليم'], 'open')}${chip('غير محددة', cnt['غير محددة'], 'open')}</div>`;
+    host.innerHTML = counters + expWarnListHtml()
         + (rows.length
             ? `<div class="tbl-wrap" style="margin-top:12px">${expTableHtml(rows)}</div>`
             : '<div class="muted" style="margin-top:12px">مفيش إنتاج مسجل. ابدأ من "إدخال تاريخ إنتاج الأصناف".</div>');
