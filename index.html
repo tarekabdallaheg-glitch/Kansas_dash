@@ -696,7 +696,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div><div class="muted" style="margin-bottom:6px">إجمالي إيراد نفس الشهر السنة اللي فاتت</div><input type="number" min="0" id="s-ly-rev" class="inp" data-nav="slr" data-ri="0"></div>
                 <div><div class="muted" style="margin-bottom:6px">إجمالي عمليات نفس الشهر السنة اللي فاتت</div><input type="number" min="0" id="s-ly-ord" class="inp" data-nav="slo" data-ri="0"></div>
             </div>
-            <div class="row" style="margin-top:16px"><button class="btn btn-gold" onclick="saveSettings()">حفظ الإعدادات</button></div>
+            <div class="row" style="margin-top:16px"><button class="btn btn-gold" id="set-save" onclick="saveSettings()">حفظ وإغلاق</button><button class="btn" id="set-unlock" onclick="unlockSettings()">فتح تعديل الإعدادات</button></div>
         </details>
 
         <details class="card no-print" data-scope>
@@ -706,7 +706,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <thead><tr><th>يوم</th><th>تاريخ السنة اللي فاتت</th><th>إيراد</th><th>عمليات</th></tr></thead>
                 <tbody id="ly-grid"></tbody>
             </table></div>
-            <div class="row" style="margin-top:14px"><button class="btn btn-gold" data-save onclick="saveLyDays()">حفظ بيانات السنة اللي فاتت</button></div>
+            <div class="row" style="margin-top:14px"><button class="btn btn-gold" id="ly-save" data-save onclick="saveLyDays()">حفظ وإغلاق</button><button class="btn" id="ly-unlock" onclick="unlockLyDays()">فتح تعديل بيانات السنة</button></div>
         </details>
     </section>
 
@@ -2366,25 +2366,33 @@ function renderRevenue() {
 function renderLyGrid() {
     const rows = [];
     let i = 0;
+    const lyL = !!(S.lyLocked || {})[activeMonth];
     eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => {
         const ly = lyDay(d);
         const v = S.lyDaily[ly];
         rows.push(`<tr>
             <td>${Number(d.slice(8))}</td>
             <td>${esc(ly)}</td>
-            <td><input type="number" min="0" step="any" class="inp xs" data-nav="lyr" data-ri="${i}" data-ly-rev="${esc(d)}" value="${v ? v.rev : ''}"></td>
-            <td><input type="number" min="0" step="1" class="inp xs" data-nav="lyo" data-ri="${i}" data-ly-ord="${esc(d)}" value="${v ? v.orders : ''}"></td>
+            <td><input type="number" min="0" step="any" class="inp xs" data-nav="lyr" data-ri="${i}" data-ly-rev="${esc(d)}" value="${v ? v.rev : ''}" ${lyL ? 'disabled' : ''}></td>
+            <td><input type="number" min="0" step="1" class="inp xs" data-nav="lyo" data-ri="${i}" data-ly-ord="${esc(d)}" value="${v ? v.orders : ''}" ${lyL ? 'disabled' : ''}></td>
         </tr>`);
         i++;
     });
     $('ly-grid').innerHTML = rows.join('');
+    const lyBtn = $('ly-save'), lyUn = $('ly-unlock');
+    if (lyBtn) lyBtn.classList.toggle('hidden', lyL);
+    if (lyUn) lyUn.classList.toggle('hidden', !lyL);
 }
 
 function renderSettings() {
     const c = cfg(activeMonth);
+    const sL = !!(S.settingsLocked || {})[activeMonth];
     $('s-plan').value = c.plan_rev || '';
     $('s-ly-rev').value = c.ly_rev || '';
     $('s-ly-ord').value = c.ly_orders || '';
+    ['s-plan', 's-ly-rev', 's-ly-ord'].forEach(id => { $(id).disabled = sL; });
+    $('set-save').classList.toggle('hidden', sL);
+    $('set-unlock').classList.toggle('hidden', !sL);
 }
 
 function renderSalesForm() {
@@ -2467,8 +2475,29 @@ async function saveSettings() {
         ly_rev: num($('s-ly-rev').value),
         ly_orders: int($('s-ly-ord').value)
     };
+    S.settingsLocked = S.settingsLocked || {};
+    S.settingsLocked[activeMonth] = true;
+    logAction('حفظ إعدادات الشهر', activeMonth, `خطة ${num($('s-plan').value)}`);
     saveDB();
-    toast('تم حفظ الإعدادات');
+    toast('تم حفظ الإعدادات وقفلها');
+    renderAll();
+}
+
+async function unlockSettings() {
+    if (!await askTyped(`فتح إعدادات الشهر للتعديل؟ الخطة وبيانات السنة اللي فاتت هيأثروا على التحليل والتوقع.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
+    logAction('فتح إعدادات الشهر', activeMonth, '');
+    delete S.settingsLocked[activeMonth];
+    saveDB();
+    toast('تم فتح الإعدادات للتعديل');
+    renderAll();
+}
+
+async function unlockLyDays() {
+    if (!await askTyped(`فتح بيانات السنة اللي فاتت للتعديل؟ التغيير هيأثر على التحليل والتوقع.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
+    logAction('فتح بيانات السنة اللي فاتت', activeMonth, '');
+    delete S.lyLocked[activeMonth];
+    saveDB();
+    toast('تم فتح بيانات السنة للتعديل');
     renderAll();
 }
 
@@ -2484,8 +2513,10 @@ async function saveLyDays() {
         if (rv === '' && ov === '') { delete S.lyDaily[ly]; return; }
         S.lyDaily[ly] = { rev: num(rv), orders: int(ov) };
     });
+    S.lyLocked = S.lyLocked || {};
+    S.lyLocked[activeMonth] = true;
     saveDB();
-    toast('تم حفظ بيانات السنة اللي فاتت');
+    toast('تم حفظ بيانات السنة اللي فاتت وقفلها');
     renderAll();
 }
 
@@ -4325,10 +4356,21 @@ function renderTabBadges() {
     if (bi) { bi.textContent = inv || ''; bi.style.display = inv ? 'inline-block' : 'none'; }
 }
 
-// زرار الرجوع لأعلى بيظهر بعد السكرول
+// زرار الرجوع لأعلى: يظهر لما تسكرول لفوق بس، ويختفي تلقائياً بعد لحظات ما تتحركش
+let lastScrollY = 0, toTopTimer = null;
 window.addEventListener('scroll', () => {
     const b = $('to-top');
-    if (b) b.style.display = window.scrollY > 400 ? 'block' : 'none';
+    if (!b) return;
+    const y = window.scrollY;
+    const goingUp = y < lastScrollY;
+    lastScrollY = y;
+    clearTimeout(toTopTimer);
+    if (goingUp && y > 400) {
+        b.style.display = 'block';
+        toTopTimer = setTimeout(() => { b.style.display = 'none'; }, 2000);
+    } else {
+        b.style.display = 'none';
+    }
 });
 </script>
 </body>
