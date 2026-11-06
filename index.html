@@ -904,10 +904,12 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                         <button type="button" id="tt-in" class="btn btn-sm tt-btn" onclick="setTransType('in')">وارد من فرع</button>
                         <button type="button" id="tt-out" class="btn btn-sm tt-btn" onclick="setTransType('out')">صادر لفرع</button>
                     </div>
-                    <input id="trans-branch" class="inp" placeholder="اسم الفرع" list="trans-branch-list">
-                    <datalist id="trans-branch-list"></datalist>
-                    <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toggleBranchChips()">الفروع ▾</button>
-                    <div id="trans-branch-chips" class="row hidden" style="gap:6px;margin-top:6px"></div>
+                    <div>
+                        <input id="trans-branch" class="inp" placeholder="اسم الفرع" list="trans-branch-list">
+                        <datalist id="trans-branch-list"></datalist>
+                        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toggleBranchChips()">الفروع ▾</button>
+                        <div id="trans-branch-chips" class="hidden" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;max-height:160px;overflow-y:auto"></div>
+                    </div>
                     <div>
                         <input id="trans-search" class="inp" placeholder="ابحث عن الصنف" oninput="fillTransProducts()" style="margin-bottom:6px">
                         <select id="trans-prod" class="inp"></select>
