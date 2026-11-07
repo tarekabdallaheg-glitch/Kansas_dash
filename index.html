@@ -97,8 +97,6 @@ header.sticky-header {
     border-bottom: 1px solid var(--border);
     margin-bottom: 6px;
 }
-    background: rgba(247, 249, 252, 0.92);
-}
 .dark header.sticky-header {
     background: rgba(7, 12, 22, 0.92);
 }
@@ -441,7 +439,7 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 @media print{
   * {-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   /* الوضع الداكن بيخلي الكلام فاتح، فوق الورق الأبيض بيبقى مش واضح. وقت الطباعة نجبر الألوان تبقى داكنة على خلفية بيضا */
-  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#000000;--gold2:#777777;--accent:#000000;--ok:#065f46;--bad:#b00000}
+  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#A16207;--gold2:#CA8A04;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B}
   html, body{background:#ffffff!important;color:#000000!important}
   body.print-analysis *{visibility:hidden!important}
   body.print-analysis #tab-inventory,
@@ -455,7 +453,7 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
   body.print-analysis #pn-analysis .search,
   body.print-analysis #pn-analysis details,
   body.print-analysis #pn-analysis .no-print{display:none!important}
-  body.print-analysis #pn-analysis .pcard{break-inside:avoid;border:1px solid #777!important;background:#fff!important;box-shadow:none!important}
+  body.print-analysis #pn-analysis .pcard{break-inside:avoid;border:1px solid #cbd5e1;background:#fff!important;box-shadow:none!important}
   body.print-analysis #pn-analysis .pname,
   body.print-analysis #pn-analysis .ptitle,
   body.print-analysis #pn-analysis .fld b{color:#000!important}
@@ -479,12 +477,12 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 /* ===== ألوان الطباعة لكل صفحات البرنامج ===== */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#000000;--gold2:#777777;--accent:#000000;--ok:#065f46;--bad:#b00000}
+  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#A16207;--gold2:#CA8A04;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B}
   html,body{background:#ffffff!important;color:#000000!important}
   .card,.tb,.quick,.icard,.tile,.tabs,.pcard,.cmp-box,.chip2,.tip,.hero,.note,.alert,.mbox{background:#ffffff!important;color:#000000!important}
-  .pname,.pname *,.ilbl,.muted,.fld,.quick .lbl,.quick .sub,.tstat,th{color:#000000!important}
+  .pname,.pname *,.ilbl,.muted,.fld,.quick .lbl,.quick .sub,.tstat,th{color:#111827!important}
   .down{color:#b00000!important}
-  .up{color:#065f46!important}
+  .up{color:#166534!important}
 }
 
 /* ===== إضافات صلاحية المنتجات والمتوقع مقابل الفعلي ===== */
