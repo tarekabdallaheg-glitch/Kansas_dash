@@ -309,6 +309,17 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 .rep-net.up{background:rgba(22,101,52,.10);border-color:rgba(22,101,52,.30)}
 .rep-net.down{background:rgba(185,28,28,.10);border-color:rgba(185,28,28,.30)}
 .trr tbody tr.trr-main:hover td{background:var(--card2)}
+.ptitle.band{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:-18px -18px 14px;padding:12px 16px;border-radius:18px 18px 12px 12px;background:linear-gradient(135deg,var(--card2),var(--bg2));border-bottom:1px solid var(--border)}
+.ptitle.band::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(128,128,128,.07) 0 8px,transparent 8px 16px);pointer-events:none}
+.ptitle.band>*{position:relative}
+.ptitle.band .pname{font-size:15px;font-weight:800}
+.ptitle.band .punit{font-size:11px}
+.ptitle.band-target{background:linear-gradient(135deg,rgba(214,158,46,.38),rgba(214,158,46,.10));border-bottom:2px solid var(--gold2)}
+.ptitle.band-target .pname{font-size:19px;font-weight:900;color:var(--gold2)}
+.band-badge{font-size:12px;font-weight:900;padding:4px 12px;border-radius:99px;background:var(--gold2);color:#111827;white-space:nowrap}
+#pn-analysis .pcard{border:1.5px solid #94A3B8}
+#pn-analysis .pcard.st-bad{border:2px solid var(--bad)}
+#pn-analysis .pcard.st-ok{border:2px solid var(--ok)}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -393,11 +404,14 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 @page{size:A4;margin:9mm}
 @media print{
     .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,details,.entry{display:none!important}
-    body{background:#fff;color:#000;font-size:10.5px;padding:0}
     .wrap{padding:0;gap:6px;max-width:none}
-    .card,.icard,.quick,.tb{box-shadow:none;border:1px solid #bbb;padding:6px;border-radius:8px;break-inside:avoid}
-    .hero{background:#fff;color:#000;padding:8px;border-radius:8px;box-shadow:none;border:1px solid #bbb}
-    .hero *{color:#000!important}
+    .card,.icard,.quick,.tb{box-shadow:none;padding:6px;border-radius:8px;break-inside:avoid}
+    .hero{box-shadow:none;padding:8px;border-radius:8px}
+    html.print-light body{background:#fff;color:#000}
+    html.print-light .card,html.print-light .icard,html.print-light .quick,html.print-light .tb{border:1px solid #bbb}
+    html.print-light .hero{background:#fff;color:#000;border:1px solid #bbb}
+    html.print-light .hero *{color:#000!important}
+    body{font-size:10.5px;padding:0}
     .hero h2{font-size:14px}
     .hero-sum{font-size:10.5px;margin-top:6px}
     .tb .big{font-size:14px}
@@ -438,30 +452,32 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 .an-print-head{display:none}
 @media print{
   * {-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  /* الوضع الداكن بيخلي الكلام فاتح، فوق الورق الأبيض بيبقى مش واضح. وقت الطباعة نجبر الألوان تبقى داكنة على خلفية بيضا */
-  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#A16207;--gold2:#CA8A04;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B}
-  html, body{background:#ffffff!important;color:#000000!important}
+  /* خلفية فاتحة: بتتطبق بس لو اخترت "خلفية فاتحة" وقت الطباعة */
+  html.print-light.dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#A16207;--gold2:#CA8A04;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B}
+  html.print-light, html.print-light body{background:#ffffff!important;color:#000000!important}
   body.print-analysis *{visibility:hidden!important}
   body.print-analysis #tab-inventory,
   body.print-analysis #inv-panel,
   body.print-analysis #pn-analysis{display:block!important}
   body.print-analysis #pn-analysis,
   body.print-analysis #pn-analysis *{visibility:visible!important}
-  body.print-analysis #pn-analysis{position:absolute!important;top:0;right:0;left:0;width:100%!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important;border:0!important;box-shadow:none!important}
+  body.print-analysis #pn-analysis{position:absolute!important;top:0;right:0;left:0;width:100%!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}
   body.print-analysis #pn-analysis .an-print-head{display:block!important}
   body.print-analysis #pn-analysis button,
   body.print-analysis #pn-analysis .search,
   body.print-analysis #pn-analysis details,
   body.print-analysis #pn-analysis .no-print{display:none!important}
-  body.print-analysis #pn-analysis .pcard{break-inside:avoid;border:1px solid #cbd5e1;background:#fff!important;box-shadow:none!important}
-  body.print-analysis #pn-analysis .pname,
-  body.print-analysis #pn-analysis .ptitle,
-  body.print-analysis #pn-analysis .fld b{color:#000!important}
-  body.print-analysis #pn-analysis .muted,
-  body.print-analysis #pn-analysis .fld{color:#222!important}
-  body.print-analysis #pn-analysis input{border:1px solid #777!important;background:#fff!important;color:#000!important}
+  body.print-analysis #pn-analysis .pcard{break-inside:avoid;box-shadow:none!important}
+  html.print-light body.print-analysis #pn-analysis{background:#fff!important;color:#000!important}
+  html.print-light body.print-analysis #pn-analysis .pcard{background:#fff!important}
+  html.print-light body.print-analysis #pn-analysis .pname,
+  html.print-light body.print-analysis #pn-analysis .ptitle,
+  html.print-light body.print-analysis #pn-analysis .fld b{color:#000!important}
+  html.print-light body.print-analysis #pn-analysis .muted,
+  html.print-light body.print-analysis #pn-analysis .fld{color:#222!important}
+  html.print-light body.print-analysis #pn-analysis input{border:1px solid #777!important;background:#fff!important;color:#000!important}
   body.print-analysis #pn-analysis .down{color:#b00000!important}
-  body.print-analysis #pn-analysis .up{color:#065f46!important}
+  body.print-analysis #pn-analysis .up{color:#166534!important}
 }
 
 /* ===== منطقة طباعة مستقلة (للطلبيات): مخفية على الشاشة، وبتظهر بس وقت الطباعة ===== */
@@ -477,10 +493,10 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 /* ===== ألوان الطباعة لكل صفحات البرنامج ===== */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#A16207;--gold2:#CA8A04;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B}
-  html,body{background:#ffffff!important;color:#000000!important}
-  .card,.tb,.quick,.icard,.tile,.tabs,.pcard,.cmp-box,.chip2,.tip,.hero,.note,.alert,.mbox{background:#ffffff!important;color:#000000!important}
-  .pname,.pname *,.ilbl,.muted,.fld,.quick .lbl,.quick .sub,.tstat,th{color:#111827!important}
+  html.print-light.dark{--bg:#ffffff;--bg2:#ffffff;--card:#ffffff;--card2:#ffffff;--inp:#ffffff;--text:#000000;--muted:#333333;--border:#777777;--gold:#A16207;--gold2:#CA8A04;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B}
+  html.print-light, html.print-light body{background:#ffffff!important;color:#000000!important}
+  html.print-light .card,html.print-light .tb,html.print-light .quick,html.print-light .icard,html.print-light .tile,html.print-light .tabs,html.print-light .pcard,html.print-light .cmp-box,html.print-light .chip2,html.print-light .tip,html.print-light .hero,html.print-light .note,html.print-light .alert,html.print-light .mbox{background:#ffffff!important;color:#000000!important}
+  html.print-light .pname,html.print-light .pname *,html.print-light .ilbl,html.print-light .muted,html.print-light .fld,html.print-light .quick .lbl,html.print-light .quick .sub,html.print-light .tstat,html.print-light th{color:#111827!important}
   .down{color:#b00000!important}
   .up{color:#166534!important}
 }
@@ -713,7 +729,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div class="exp-row">
                     <button class="btn btn-green" onclick="exportRevenueXlsx()">تحميل شيت الإيراد</button>
-                    <button class="btn" onclick="window.print()">طباعة التقرير</button>
+                    <button class="btn" onclick="printNow()">طباعة التقرير</button>
                 </div>
             </div>
         </div>
@@ -3481,7 +3497,7 @@ function printTransferReport() {
     area.appendChild(clone);
     document.body.classList.add('print-area-mode');
     window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
-    window.print();
+    printNow();
 }
 
 function anRange() {
@@ -3571,7 +3587,7 @@ function renderAnalysis() {
         const has = hasOpening(p.id, m);
         const hasW = w !== '' && num(w) > 0;
         return `<div class="pcard" data-search="${esc(searchKey(p))}">
-            <div class="ptitle"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span> ${isTargetProduct(p) ? '<span class="muted" style="margin-inline-start:6px">هدف +20%</span>' : ''}</div>
+            <div class="ptitle band${isTargetProduct(p) ? ' band-target' : ''}"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span>${isTargetProduct(p) ? '<span class="band-badge">هدف +20%</span>' : ''}</div>
             <div class="pgrid">
                 <div class="fld"><span>أول الشهر (ثابت)</span><b>${has ? fmt(openingFor(p.id, m), 2) : '<span class="muted">لم يُدخل</span>'}</b></div>
                 <div class="fld"><span>الوارد (من أول الشهر)</span><b id="ar-${esc(p.id)}">-</b></div>
@@ -3589,7 +3605,7 @@ function renderAnalysis() {
                     <input class="inp" type="text" id="acn-${esc(p.id)}" value="${esc(cn)}" placeholder="اكتب السبب" oninput="liveAn()"></div>
                 <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم الهالك)</span><b id="av-${esc(p.id)}">-</b> <small id="avp-${esc(p.id)}" class="muted"></small></div>
                 <div class="fld" style="grid-column:1/-1"><span>القيمة بالفلوس</span><b id="avl-${esc(p.id)}">-</b></div>
-                <div class="fld" style="grid-column:1/-1"><span>نسبة الـ Yield (المعياري − الفعلي) ÷ الفعلي</span><b id="yl-${esc(p.id)}">-</b></div>
+                ${isTargetProduct(p) ? `<div class="fld" style="grid-column:1/-1"><span>نسبة الـ Yield (المعياري − الفعلي) ÷ الفعلي</span><b id="yl-${esc(p.id)}">-</b></div>` : ''}
                 <div class="fld hidden" id="awh-${esc(p.id)}" style="grid-column:1/-1;color:var(--gold2)">الهالك والسبب بيتفتحوا بعد كتابة المباع والجرد الفعلي، ويتقفلوا لو فيه زيادة</div>
             </div>
         </div>`;
@@ -3633,17 +3649,18 @@ function liveAn() {
                     const yPct = (ideal - actualNet) / actualNet * 100;
                     const hit = yPct >= 20;
                     const tgt = isTargetProduct(p);
-                    const tag = tgt ? (hit ? ' · حقق الهدف +20%' : ' · تحت الهدف +20%') : '';
+                    const tag = '';
                     yl.textContent = `${yPct.toFixed(1)}%${tag}`;
                     yl.className = tgt ? (hit ? 'up' : 'down') : (yPct < 0 ? 'down' : 'up');
                 }
             }
         }
-        const pcEl = yl ? yl.closest('.pcard') : null;
+        // حافة الكارت: أحمر لو عجز، أخضر لو زيادة، محايدة لو مفيش فرق (بعد خصم الهالك)
+        const pcEl = as.closest('.pcard');
         if (pcEl) {
             pcEl.classList.remove('st-ok', 'st-bad');
-            if (isTargetProduct(p) && yl.className === 'up') pcEl.classList.add('st-ok');
-            else if (isTargetProduct(p) && yl.className === 'down') pcEl.classList.add('st-bad');
+            if (res.variance !== null && res.variance < 0) pcEl.classList.add('st-bad');
+            else if (res.variance !== null && res.variance > 0) pcEl.classList.add('st-ok');
         }
         const avp = $('avp-' + p.id);
         if (avp) {
@@ -3961,6 +3978,19 @@ async function deleteAnalysis(id) {
 // وضع الطباعة بيخفي عناصر مؤقتاً. لو المتصفح ما بعتش حدث afterprint (زي بعض متصفحات الموبايل)،
 // بنرجّع الشكل الطبيعي عند أول تفاعل حتى الصفحة ما تفضلش مقفولة
 const PRINT_MODE_CLASSES = ['print-orders', 'print-salesforecast', 'print-analysis', 'print-exp-mode'];
+// قبل الطباعة/الحفظ PDF: نسأل شكل الملف (ثيم الشاشة أو خلفية فاتحة)
+function printNow() {
+    // الضغط على زرار الاختيار بيمسح أوضاع الطباعة المؤقتة، فبنحفظها ونرجعها قبل الطباعة
+    const saved = PRINT_MODE_CLASSES.filter(c => document.body.classList.contains(c));
+    return askChoice('شكل الملف:\nبنفس ثيم الشاشة، أو خلفية فاتحة (أوفر حبر وأوضح على الورق)', 'بنفس ثيم الشاشة', 'خلفية فاتحة').then(c => {
+        if (c === -1) { saved.forEach(x => document.body.classList.remove(x)); return; }
+        const root = document.documentElement;
+        if (c === 1) root.classList.add('print-light');
+        saved.forEach(x => document.body.classList.add(x));
+        window.addEventListener('afterprint', () => root.classList.remove('print-light'), { once: true });
+        window.print();
+    });
+}
 function resetPrintMode() { PRINT_MODE_CLASSES.forEach(c => document.body.classList.remove(c)); }
 window.addEventListener('afterprint', resetPrintMode);
 window.addEventListener('focus', resetPrintMode);
@@ -3975,7 +4005,7 @@ function printAnalysis() {
     document.body.classList.add('print-analysis');
     const clean = () => document.body.classList.remove('print-analysis');
     window.addEventListener('afterprint', clean, { once: true });
-    setTimeout(() => window.print(), 80);
+    setTimeout(() => printNow(), 80);
 }
 
 function setExportMonth() {
@@ -4079,7 +4109,7 @@ function exportAnalysisXlsx() {
                 if (x.sold <= 0 || actualNet <= 0) return '';
                 return Number(((x.sold - actualNet) / actualNet * 100).toFixed(2));
             })(),
-            'هدف +20%': isTargetProduct(p) ? (x.closing === null ? '' : ((x.sold - (x.opening + c.rec + c.net - x.closing - wasteQty)) / (x.opening + c.rec + c.net - x.closing - wasteQty) * 100 >= 20 ? 'حقق' : 'لم يحقق')) : ''
+            'هدف +20%': isTargetProduct(p) ? (x.closing === null ? '' : ((x.sold - (x.opening + c.rec + c.net - x.closing - wasteQty)) / (x.opening + c.rec + c.net - x.closing - wasteQty) * 100 >= 20 ? 'حقق الهدف' : 'تحت الهدف')) : ''
         };
     });
     if (!rows.length) return toast('لا توجد بيانات للتصدير', 'error');
@@ -4486,7 +4516,7 @@ function printExpiry() {
         <div style="text-align:center;margin-bottom:8px">حتى ${todayStr()}</div>${expTableHtml(rows)}`;
     document.body.classList.add('print-exp-mode');
     window.addEventListener('afterprint', () => document.body.classList.remove('print-exp-mode'), { once: true });
-    setTimeout(() => window.print(), 80);
+    setTimeout(() => printNow(), 80);
 }
 
 function renderInventory() {
@@ -4672,13 +4702,13 @@ function printOrdersPdf() {
   area.appendChild(wrap);
   document.body.classList.add('print-area-mode');
   window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
-  window.print();
+  printNow();
 }
 function printSalesForecast() {
   document.body.classList.add('print-salesforecast');
   const clean=()=>document.body.classList.remove('print-salesforecast');
   window.addEventListener('afterprint',clean,{once:true});
-  setTimeout(()=>window.print(),80);
+  setTimeout(()=>printNow(),80);
 }
 
 function renderAll() {
