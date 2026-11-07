@@ -2440,6 +2440,10 @@ function renderSettings() {
 function renderSalesForm() {
     const d = $('sales-day').value;
     const locked = !!S.locks.sales[d];
+    if (locked && S.sales[d]) {
+        $('sales-rev').value = S.sales[d].revenue;
+        $('sales-ord').value = S.sales[d].orders;
+    }
     $('sales-rev').disabled = locked;
     $('sales-ord').disabled = locked;
     $('sales-save').classList.toggle('hidden', locked);
@@ -4772,6 +4776,7 @@ function saveDraft() {
     DRAFTS[k] = draftValues();
 }
 function restoreDraft() {
+    if (activeTab === 'revenue' && $('sales-day') && S.locks.sales[$('sales-day').value]) return;
     const d = DRAFTS[draftKey()];
     if (!d) return;
     const els = [];
@@ -4849,9 +4854,11 @@ window.closeInv = function () {
 
 /* ===== تذكير عند فتح البرنامج: الوارد والتحويلات لليوم (شريط صغير فوق، مش بيقفل الشاشة) ===== */
 let REMINDER_DISMISSED = false;
+// التذكيرة متعطلة بطلب المستخدم: الدالة بتشيل أي شريط ظاهر ومش بتعرض جديد
 function showOpenReminder() {
     const old = $('open-reminder');
     if (old) old.remove();
+    return;
     // يظهر بس في الشاشة الرئيسية للمخزون (مش جوه الوارد أو التحويلات)
     const onPage = activeTab === 'inventory' && !invView;
     if (REMINDER_DISMISSED || !onPage || !S.products.length) return;
