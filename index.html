@@ -2973,7 +2973,24 @@ function rcValue(d, p) {
     return Object.prototype.hasOwnProperty.call(rcDraft, p.id) ? rcDraft[p.id] : (rcpt(d, p.id) || '');
 }
 
-function rcSet(pid, v) { rcDraft[pid] = v; unusualRcNote(pid); }
+function rcSet(pid, v) { rcDraft[pid] = v; unusualRcNote(pid); updateRcProgress(); }
+
+// العداد بيتحدّث وإنت بتكتب: عدد الأصناف اللي ليها كمية (من المسودة أو المحفوظ)
+function updateRcProgress() {
+    const prog = $('rc-progress');
+    if (!prog) return;
+    const d = $('rc-day').value;
+    const row = (p) => { const el = $('unu-' + p.id); return el ? el.closest('.rc-row') : null; };
+    let filledN = 0;
+    S.products.forEach(p => {
+        const has = norm(rcValue(d, p)) !== '';
+        if (has) filledN++;
+        const r = row(p);
+        if (r) r.classList.toggle('rc-filled', has);
+    });
+    const pctF = S.products.length ? Math.round(filledN / S.products.length * 100) : 0;
+    prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>تم إدخال ${filledN} من ${S.products.length} صنف</span><b>${pctF}%</b></div><div style="height:8px;border-radius:99px;background:var(--card2);overflow:hidden"><div style="height:100%;width:${pctF}%;background:var(--ok);transition:width .3s"></div></div>`;
+}
 
 // متوسط الوارد الفعلي للصنف في آخر 30 يوم (بدون اليوم الحالي)
 function rcAvg(pid, d) {
@@ -3024,6 +3041,7 @@ function renderReceipts() {
     if (!d) { $('rc-body').innerHTML = ''; return; }
 
     if (!S.products.length) {
+        if ($('rc-progress')) $('rc-progress').innerHTML = '';
         $('rc-body').innerHTML = '<div class="muted">أضف أصنافك من الأصناف ورصيد أول الشهر الأول.</div>';
         $('rc-save').classList.add('hidden'); $('rc-edit').classList.add('hidden'); $('rc-none').classList.add('hidden');
         $('rc-nomatch').classList.add('hidden');
@@ -3032,6 +3050,13 @@ function renderReceipts() {
 
     if (locked) {
         const items = S.products.filter(p => rcpt(d, p.id) > 0);
+        // العداد لازم يتحدّث بالمحفوظ، مش بالخانات الفاضية
+        const prog0 = $('rc-progress');
+        if (prog0) {
+            const n0 = items.length;
+            const pct0 = S.products.length ? Math.round(n0 / S.products.length * 100) : 0;
+            prog0.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>تم إدخال ${n0} من ${S.products.length} صنف</span><b>${pct0}%</b></div><div style="height:8px;border-radius:99px;background:var(--card2);overflow:hidden"><div style="height:100%;width:${pct0}%;background:var(--ok);transition:width .3s"></div></div>`;
+        }
         $('rc-body').innerHTML = items.length
             ? `<div class="chips">${items.map(p => `<span class="chip2"><span class="pname">${esc(p.name)}</span> ${fmt(rcpt(d, p.id), 2)} <span class="muted">${esc(p.unit)}</span></span>`).join('')}</div>`
             : `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون توريد.' : 'مفيش وارد مسجل لليوم ده.'}</div>`;
@@ -4827,8 +4852,8 @@ let REMINDER_DISMISSED = false;
 function showOpenReminder() {
     const old = $('open-reminder');
     if (old) old.remove();
-    // يظهر بس في صفحة المخزون وصفحة الوارد، ومش في الصفحة الرئيسية
-    const onPage = activeTab === 'inventory' && (!invView || invView === 'receipts');
+    // يظهر بس في الشاشة الرئيسية للمخزون (مش جوه الوارد أو التحويلات)
+    const onPage = activeTab === 'inventory' && !invView;
     if (REMINDER_DISMISSED || !onPage || !S.products.length) return;
     const today = todayStr();
     const miss = [];
