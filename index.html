@@ -302,6 +302,15 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 #pn-analysis .ptitle .pname{font-weight:800}
 .tabs .on{background:var(--bg2);color:var(--text);box-shadow:inset 0 -3px 0 var(--accent)}
 .undo-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow-lg);z-index:140;display:flex;gap:12px;align-items:center;max-width:94vw}
+.rep-branch{display:inline-flex;align-items:center;gap:8px;font-weight:800}
+.rep-branch i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.rep-qty{font-weight:800;font-variant-numeric:tabular-nums}
+.rep-qty.up{color:var(--ok)}
+.rep-qty.down{color:var(--bad)}
+.rep-net{display:inline-block;min-width:74px;text-align:center;padding:4px 10px;border-radius:99px;font-weight:800;font-variant-numeric:tabular-nums;background:var(--card2);border:1px solid var(--border)}
+.rep-net.up{background:rgba(22,101,52,.10);border-color:rgba(22,101,52,.30)}
+.rep-net.down{background:rgba(185,28,28,.10);border-color:rgba(185,28,28,.30)}
+.trr tbody tr.trr-main:hover td{background:var(--card2)}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -3162,6 +3171,15 @@ function fillTransProducts() {
     $('trans-nomatch').classList.toggle('hidden', !(q && list.length === 0));
 }
 
+// لون ثابت لكل فرع حسب اسمه (مش أخضر/أحمر/ذهبي عشان ما يتخلطوش مع الوارد والصادر والتنبيهات)
+const BRANCH_COLORS = ['#3B82F6', '#A855F7', '#14B8A6', '#EC4899', '#6366F1', '#0EA5E9', '#84CC16'];
+function branchColor(name) {
+    const s = String(name || '');
+    let hsh = 0;
+    for (let i = 0; i < s.length; i++) hsh = (hsh * 31 + s.charCodeAt(i)) >>> 0;
+    return BRANCH_COLORS[hsh % BRANCH_COLORS.length];
+}
+
 function renderTransfers() {
     const d = $('tr-day').value;
     const locked = !!S.transferLocked[d];
@@ -3204,11 +3222,12 @@ function renderTransfers() {
         return Object.entries(m).map(([u, q]) => `${fmt(q, 2)} ${esc(u)}`).join(' · ');
     };
     $('tr-list').innerHTML = [...byBranch.values()].map(g => {
+        const bc = branchColor(g.branch);
         const inTxt = sumBy(g.items, 'in'), outTxt = sumBy(g.items, 'out');
         const sorted = g.items.slice().sort((a, b) => (a.type === 'in' ? 0 : 1) - (b.type === 'in' ? 0 : 1));
-        return `<div class="card" style="margin-top:10px;padding:12px;border-top:3px solid var(--accent)">
+        return `<div class="card" style="margin-top:10px;padding:12px;border-top:3px solid ${bc}">
         <div class="row between" style="margin-bottom:8px;flex-wrap:wrap">
-            <span style="font-weight:800;font-size:15px;color:var(--text)">${esc(g.branch || '—')}</span>
+            <span style="font-weight:800;font-size:15px;color:var(--text);display:inline-flex;align-items:center;gap:8px"><i style="width:10px;height:10px;border-radius:50%;background:${bc};display:inline-block"></i>${esc(g.branch || '—')}</span>
         </div>
         ${sorted.map(t => {
             const pr = productById(t.product_id) || {};
@@ -3389,21 +3408,23 @@ function renderTransferReport() {
     const rows = trReportRows();
     if (!rows.length) { host.innerHTML = '<div class="muted">مفيش تحويلات في الفلتر ده</div>'; return; }
     const groups = trReportGroups(rows);
+    const netCell = net => `<span class="rep-net ${net > 0 ? 'up' : (net < 0 ? 'down' : '')}">${net > 0 ? '+' : ''}${fmt(net, 2)}</span>`;
     const body = groups.map((g, i) => {
         const p = productById(g.pid) || {};
         const net = g.inQty - g.outQty;
         const det = [...g.items].sort((a, b) => (a.day < b.day ? -1 : 1));
+        const bc = branchColor(g.branch);
         return `<tr class="trr-main">
-            <td><b>${esc(g.branch)}</b></td>
+            <td><span class="rep-branch"><i style="background:${bc}"></i>${esc(g.branch)}</span></td>
             <td><span class="pname">${esc(p.name || 'صنف محذوف')}</span> <span class="punit">${esc(p.unit || '')}</span></td>
-            <td class="up">${g.inQty ? fmt(g.inQty, 2) : '-'}</td>
-            <td class="down">${g.outQty ? fmt(g.outQty, 2) : '-'}</td>
-            <td class="${net > 0 ? 'up' : (net < 0 ? 'down' : '')}"><b>${net > 0 ? '+' : ''}${fmt(net, 2)}</b></td>
-            <td><button class="btn btn-ghost btn-sm" onclick="toggleTrDetail(${i})">عرض التفاصيل ▾</button></td>
+            <td>${g.inQty ? `<span class="rep-qty up">+${fmt(g.inQty, 2)}</span>` : '<span class="muted">—</span>'}</td>
+            <td>${g.outQty ? `<span class="rep-qty down">-${fmt(g.outQty, 2)}</span>` : '<span class="muted">—</span>'}</td>
+            <td>${netCell(net)}</td>
+            <td><button class="btn btn-ghost btn-sm" onclick="toggleTrDetail(${i})">التفاصيل ▾</button></td>
         </tr>
         <tr id="trd-${i}" class="hidden"><td colspan="6" style="padding:0 10px 10px">
             <table class="trr-det"><thead><tr><th>التاريخ</th><th>النوع</th><th>الكمية</th></tr></thead><tbody>
-            ${det.map(t => `<tr><td>${t.day}</td><td class="${t.type === 'in' ? 'up' : 'down'}">${t.type === 'in' ? 'وارد' : 'صادر'}</td><td>${fmt(t.qty, 2)}</td></tr>`).join('')}
+            ${det.map(t => `<tr><td>${t.day}</td><td><span class="chip ${t.type === 'in' ? 'up' : 'down'}">${t.type === 'in' ? 'وارد' : 'صادر'}</span></td><td>${fmt(t.qty, 2)}</td></tr>`).join('')}
             </tbody></table>
         </td></tr>`;
     }).join('');
@@ -3412,8 +3433,8 @@ function renderTransferReport() {
         const p = productById(t.pid) || {};
         const net = t.inQty - t.outQty;
         return `<tr class="trr-main"><td colspan="2"><span class="pname">${esc(p.name || 'صنف محذوف')}</span> <span class="punit">${esc(p.unit || '')}</span></td>
-            <td class="up">${fmt(t.inQty, 2)}</td><td class="down">${fmt(t.outQty, 2)}</td>
-            <td class="${net > 0 ? 'up' : (net < 0 ? 'down' : '')}"><b>${net > 0 ? '+' : ''}${fmt(net, 2)}</b></td></tr>`;
+            <td><span class="rep-qty up">+${fmt(t.inQty, 2)}</span></td><td><span class="rep-qty down">-${fmt(t.outQty, 2)}</span></td>
+            <td>${netCell(net)}</td></tr>`;
     }).join('');
     host.innerHTML = `
         <div class="tbl-wrap"><table class="trr">
