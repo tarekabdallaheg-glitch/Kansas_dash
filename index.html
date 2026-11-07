@@ -7,15 +7,17 @@
 <title>Kansas Premium</title>
 <style>
 :root{
-  --bg:#f3f5f9;--bg2:#e9edf4;--card:#ffffff;--card2:#f7f9fc;--text:#0f1729;--muted:#5b6880;--border:#dfe5ee;
-  --inp:#ffffff;--gold:#b7791f;--gold2:#d69e2e;--accent:#1e3a5f;--ok:#0f9d6b;--bad:#d64545;
+  --s-open:#1D4ED8;--s-recv:#15803D;--s-trans:#C2410C;--s-an:#A16207;--s-ord:#6D28D9;--s-exp:#B91C1C;
+  --bg:#F5F7FA;--bg2:#EDF1F6;--card:#FFFFFF;--card2:#F8FAFC;--text:#0F172A;--muted:#475569;--border:#E2E8F0;
+  --inp:#FFFFFF;--gold:#A16207;--gold2:#CA8A04;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B;
   --shadow:0 1px 2px rgba(15,23,42,.05),0 6px 20px rgba(15,23,42,.06);
   --shadow-lg:0 2px 4px rgba(15,23,42,.06),0 18px 40px rgba(15,23,42,.10);
-  --ring:0 0 0 3px rgba(214,158,46,.30);
+  --ring:0 0 0 3px rgba(202,138,4,.30);
 }
 .dark{
-  --bg:#070c16;--bg2:#0b1322;--card:#101a2d;--card2:#0c1525;--text:#eef3fb;--muted:#9fb0c8;--border:#22324d;
-  --inp:#0a1322;--gold:#e0b04a;--gold2:#f2c96b;--accent:#8fb4e8;--ok:#34d399;--bad:#f87171;
+  --s-open:#60A5FA;--s-recv:#4ADE80;--s-trans:#FB923C;--s-an:#F2C96B;--s-ord:#A78BFA;--s-exp:#FB7185;
+  --bg:#0B1220;--bg2:#0F1A2D;--card:#111B2E;--card2:#0E1729;--text:#F1F5F9;--muted:#CBD5E1;--border:#22324D;
+  --inp:#0A1322;--gold:#F2C96B;--gold2:#F2C96B;--accent:#60A5FA;--ok:#4ADE80;--bad:#FB7185;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
   --shadow-lg:0 2px 6px rgba(0,0,0,.45),0 22px 50px rgba(0,0,0,.45);
   --ring:0 0 0 3px rgba(242,201,107,.28);
@@ -95,7 +97,6 @@ header.sticky-header {
     border-bottom: 1px solid var(--border);
     margin-bottom: 6px;
 }
-html:not(.dark) header.sticky-header {
     background: rgba(247, 249, 252, 0.92);
 }
 .dark header.sticky-header {
@@ -158,7 +159,7 @@ details.sub summary::before{content:"▸ ";color:var(--gold)}
 details.sub[open] summary::before{content:"▾ "}
 
 .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:5px;box-shadow:var(--shadow)}
-.tabs .btn{flex:1;border:none;background:transparent;padding:11px 8px;font-size:14px;color:var(--muted)}
+.tabs .btn{flex:1;border:none;background:transparent;padding:11px 8px;font-size:14px;color:var(--text);font-weight:600}
 .tabs .btn:hover{color:var(--text);border:none}
 .tabs .on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(30,58,95,.25)}
 .dark .tabs .on{background:var(--gold2);color:#111827;box-shadow:none}
@@ -231,7 +232,8 @@ details.sub[open] summary::before{content:"▾ "}
 .rc-filled{background:rgba(15,157,107,.08);border-radius:10px;padding-inline:8px}
 .rc-prog{font-size:13px;font-weight:700;color:var(--ok);margin-bottom:8px}
 .tt-btn{min-width:110px}
-.rc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 10px;border-bottom:0.5px solid var(--border);border-radius:12px}
+.rc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 10px;border-bottom:0.5px solid var(--border);border-radius:12px;flex-wrap:wrap}
+.rc-row .unu{flex-basis:100%;font-size:12px;font-weight:700;color:var(--gold2)}
 .rc-row .pname{font-size:16px}
 .rc-row input.inp{width:130px;max-width:45%;font-size:18px;font-weight:800;text-align:center;padding:10px}
 .rc-row.rc-filled input.inp{border-color:var(--ok)}
@@ -254,20 +256,20 @@ details>summary.h::-webkit-details-marker{display:none}
 details>summary.h::after{content:" ▾";color:var(--muted)}
 details[open]>summary.h::after{content:" ▴"}
 /* ألوان الأقسام: كل قالب ليه لون وخلفية تعبر عنه */
-[onclick="openInv('opening')"]{--c:#3b82f6}
-[onclick="openInv('receipts')"]{--c:#22c55e}
-[onclick="openInv('transfers')"]{--c:#f97316}
-[onclick="openInv('analysis')"]{--c:#d69e2e}
-[onclick="openInv('orders')"]{--c:#8b5cf6}
-[onclick="openInv('expiry')"]{--c:#ef4444}
+[onclick="openInv('opening')"]{--c:var(--s-open)}
+[onclick="openInv('receipts')"]{--c:var(--s-recv)}
+[onclick="openInv('transfers')"]{--c:var(--s-trans)}
+[onclick="openInv('analysis')"]{--c:var(--s-an)}
+[onclick="openInv('orders')"]{--c:var(--s-ord)}
+[onclick="openInv('expiry')"]{--c:var(--s-exp)}
 .tile .tico{background:color-mix(in srgb,var(--c,#8fb4e8) 16%,transparent);color:var(--c,#8fb4e8);border:1px solid color-mix(in srgb,var(--c,#8fb4e8) 40%,transparent);border-radius:18px}
 .tile:hover{border-color:var(--c,var(--gold2))}
-body[data-sec="opening"]{--sec:#3b82f6}
-body[data-sec="receipts"]{--sec:#22c55e}
-body[data-sec="transfers"]{--sec:#f97316}
-body[data-sec="analysis"]{--sec:#d69e2e}
-body[data-sec="orders"]{--sec:#8b5cf6}
-body[data-sec="expiry"]{--sec:#ef4444}
+body[data-sec="opening"]{--sec:var(--s-open)}
+body[data-sec="receipts"]{--sec:var(--s-recv)}
+body[data-sec="transfers"]{--sec:var(--s-trans)}
+body[data-sec="analysis"]{--sec:var(--s-an)}
+body[data-sec="orders"]{--sec:var(--s-ord)}
+body[data-sec="expiry"]{--sec:var(--s-exp)}
 .pnl-title .tico{background:color-mix(in srgb,var(--sec,#8fb4e8) 18%,transparent);color:var(--sec,#8fb4e8);border:1px solid color-mix(in srgb,var(--sec,#8fb4e8) 45%,transparent)}
 .pnl-title{color:var(--text)}
 .pnl-head>.btn{border-radius:99px;padding:8px 16px;background:color-mix(in srgb,var(--sec,#8fb4e8) 12%,transparent);border:1px solid color-mix(in srgb,var(--sec,#8fb4e8) 45%,transparent);color:var(--text);font-weight:800}
@@ -276,6 +278,30 @@ body[data-sec="expiry"]{--sec:#ef4444}
 @keyframes okPulse{0%{box-shadow:0 0 0 0 rgba(15,157,107,.55)}100%{box-shadow:0 0 0 14px rgba(15,157,107,0)}}
 .pulse-ok{animation:okPulse .7s ease-out}
 .st-ico{margin-inline-end:4px}
+/* تجربة: تحليل المخزون بشكل لوحة تحكم (كروت ناعمة بدل الجداول) */
+#pn-analysis{background:linear-gradient(160deg,rgba(143,180,232,.07),transparent 55%),var(--card);border-radius:22px}
+#pn-analysis .h{font-size:17px;letter-spacing:.2px}
+#pn-analysis .cards-grid{gap:16px}
+#pn-analysis .pcard{border:0;border-radius:18px;padding:18px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:0 10px 30px rgba(0,0,0,.22)}
+#pn-analysis .pcard.st-ok{border-top:3px solid var(--ok)}
+#pn-analysis .pcard.st-bad{border-top:3px solid var(--bad)}
+#pn-analysis .ptitle{font-size:16px;margin-bottom:14px}
+#pn-analysis .pgrid{gap:14px 16px}
+#pn-analysis .fld{font-size:12px;letter-spacing:.2px;color:var(--muted)}
+#pn-analysis .fld b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+#pn-analysis .inp{border-radius:14px;background:rgba(255,255,255,.04);border-color:transparent}
+#pn-analysis .inp:focus{border-color:var(--gold2)}
+#pn-analysis .sum-tbl td{font-size:16px}
+#pn-analysis .card{border:0;box-shadow:0 8px 26px rgba(0,0,0,.2)}
+#pn-analysis .chip,#pn-analysis .badge{border-radius:99px}
+/* ألوان الكتابة للوضعين: نهاري وليلي (تحليل المخزون) */
+.dark #pn-analysis{--muted:#c3cfe2;--ok:#4ade80;--bad:#fb7185;--gold2:#f2c96b}
+.dark #pn-analysis .fld b{color:#ffffff}
+.dark #pn-analysis .h{color:#f5f8ff}
+#pn-analysis .fld{font-weight:600}
+#pn-analysis .ptitle .pname{font-weight:800}
+.tabs .on{background:var(--bg2);color:var(--text);box-shadow:inset 0 -3px 0 var(--accent)}
+.undo-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow-lg);z-index:140;display:flex;gap:12px;align-items:center;max-width:94vw}
 .waste-btn{color:var(--bad);border-color:rgba(214,69,69,.35);background:rgba(214,69,69,.07);padding:5px 10px}
 .waste-btn:hover{border-color:var(--bad)}
 
@@ -400,36 +426,6 @@ body[data-sec="expiry"]{--sec:#ef4444}
   body.print-orders .pnl-head, body.print-orders #pn-orders .tiles, body.print-orders #pn-orders .no-print{display:none!important}
 }
 
-html:not(.dark){
-  --bg:#f7f9fc;--bg2:#edf2f8;--card:#ffffff;--card2:#f5f8fc;--text:#172033;--muted:#46546b;--border:#d5deea;--inp:#ffffff;--gold:#94600b;--gold2:#e3ad32;--accent:#244d78;--ok:#087a52;--bad:#c52e36;
-  --shadow:0 1px 3px rgba(22,34,52,.07),0 5px 16px rgba(22,34,52,.07);
-  --shadow-lg:0 2px 5px rgba(22,34,52,.08),0 14px 32px rgba(22,34,52,.11);
-}
-html:not(.dark) body{background-color:var(--bg);background-image:linear-gradient(180deg,#f9fbfe 0%,#f1f5fa 100%);color:var(--text);}
-html:not(.dark) .card,html:not(.dark) .tb,html:not(.dark) .quick,html:not(.dark) .icard,html:not(.dark) .tile,html:not(.dark) .tabs{background:#fff;border-color:#d5deea;color:#172033;box-shadow:0 3px 12px rgba(25,42,66,.07);}
-html:not(.dark) .pcard,html:not(.dark) .cmp-box,html:not(.dark) .chip2,html:not(.dark) .tip{background:#f5f8fc;border-color:#d5deea;color:#172033;}
-html:not(.dark) .muted,html:not(.dark) .brand-sub,html:not(.dark) .fld,html:not(.dark) .ilbl,html:not(.dark) .quick .lbl,html:not(.dark) .quick .sub,html:not(.dark) .tstat,html:not(.dark) th{color:#46546b;}
-html:not(.dark) td,html:not(.dark) .fld b,html:not(.dark) .ilines,html:not(.dark) .tname,html:not(.dark) .ptitle{color:#172033;}
-html:not(.dark) th{background:#edf2f8;font-weight:900;}
-html:not(.dark) tr:nth-child(even) td{background:#fafcff}
-html:not(.dark) .inp{background:#fff;color:#172033;border-color:#cbd6e4;}
-html:not(.dark) .inp::placeholder{color:#78869a;opacity:1}
-html:not(.dark) .btn:not(.btn-gold):not(.btn-green):not(.btn-red):not(.btn-slate){background:#f2f6fb;color:#24364d;border-color:#cbd6e4;}
-html:not(.dark) .tabs .btn.on{background:#244d78;color:#fff}
-html:not(.dark) .tico{background:linear-gradient(145deg,#eaf1f9,#f8fbff);color:#244d78;border-color:#d3deeb;}
-html:not(.dark) .hero{background:linear-gradient(135deg,#e8f0fa 0%,#dce9f7 60%,#d2e2f3 100%);color:#172b43;border:1px solid #c8d8ea;}
-html:not(.dark) .hero .eyebrow{color:#87570b}
-html:not(.dark) .hero .muted{color:#405873}
-html:not(.dark) .hero-sum{color:#263d57}
-html:not(.dark) .status{color:#203b59;background:rgba(255,255,255,.7);border-color:#b8cce2;}
-html:not(.dark) .note{color:#67470c;background:#fff8e8;border-color:#ead39c;}
-html:not(.dark) .alert{color:#a5222b;background:#fff0f0;border-color:#efc2c5;}
-html:not(.dark) .badge.open{color:#087a52;background:#eaf8f1;border-color:#a9dfc7}
-html:not(.dark) .badge.closed{color:#80540b;background:#fff7e5;border-color:#ead39c}
-html:not(.dark) .chip.up{color:#087a52}
-html:not(.dark) .chip.down{color:#b4232b}
-html:not(.dark) details.sub summary{color:#244d78}
-html:not(.dark) .prow{border-color:#dce4ee}
 
 /* ===== طباعة تحليل المخزون ===== */
 .an-print-head{display:none}
@@ -485,7 +481,6 @@ html:not(.dark) .prow{border-color:#dce4ee}
 /* ===== إضافات صلاحية المنتجات والمتوقع مقابل الفعلي ===== */
 .pname{color:var(--gold2);font-weight:800}
 .punit{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid var(--border);color:var(--muted);background:var(--card2);vertical-align:middle}
-html:not(.dark) .pname{color:#1f4f85}
 #print-exp-tmp{display:none}
 tr.rowred td{background:rgba(214,69,69,.12)}
 tr.rowyel td{background:rgba(183,121,31,.14)}
@@ -723,7 +718,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div><div class="muted" style="margin-bottom:6px">إجمالي إيراد نفس الشهر السنة اللي فاتت</div><input type="number" min="0" id="s-ly-rev" class="inp" data-nav="slr" data-ri="0"></div>
                 <div><div class="muted" style="margin-bottom:6px">إجمالي عمليات نفس الشهر السنة اللي فاتت</div><input type="number" min="0" id="s-ly-ord" class="inp" data-nav="slo" data-ri="0"></div>
             </div>
-            <div class="row" style="margin-top:16px"><button class="btn btn-gold" id="set-save" onclick="saveSettings()">حفظ وإغلاق</button><button class="btn" id="set-unlock" onclick="unlockSettings()">فتح تعديل الإعدادات</button></div>
+            <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:16px"><button class="btn btn-gold" id="set-save" onclick="saveSettings()">حفظ وإغلاق</button><button class="btn" id="set-unlock" onclick="unlockSettings()">فتح تعديل الإعدادات</button></div>
         </details>
 
         <details class="card no-print" data-scope>
@@ -733,7 +728,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <thead><tr><th>يوم</th><th>تاريخ السنة اللي فاتت</th><th>إيراد</th><th>عمليات</th></tr></thead>
                 <tbody id="ly-grid"></tbody>
             </table></div>
-            <div class="row" style="margin-top:14px"><button class="btn btn-gold" id="ly-save" data-save onclick="saveLyDays()">حفظ وإغلاق</button><button class="btn" id="ly-unlock" onclick="unlockLyDays()">فتح تعديل بيانات السنة</button></div>
+            <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:14px"><button class="btn btn-gold" id="ly-save" data-save onclick="saveLyDays()">حفظ وإغلاق</button><button class="btn" id="ly-unlock" onclick="unlockLyDays()">فتح تعديل بيانات السنة</button></div>
         </details>
     </section>
 
@@ -844,8 +839,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
         </div>
 
         <div class="card" id="smart-tips-card">
-            <div class="h">نصائح التشغيل الذكي</div>
-            <div class="muted" style="margin-bottom:10px">نصائح مبنية على بياناتك الحالية لتقليل التكلفة وزيادة الربحية وتشديد الكنترول على أهم الأصناف.</div>
+            <div class="h">كاشف الأخطاء الذكي – SMART ERROR DETECTOR</div>
+            <div class="muted" style="margin-bottom:10px">تنبيهات مبنية على بياناتك الفعلية: الوارد، والتحويلات، والصلاحية، وأداء آخر جرد محفوظ.</div>
             <div id="smart-tips" class="ins-list"></div>
         </div>
         <div class="card" id="inv-export">
@@ -887,7 +882,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <input id="new-prod-price" class="inp" type="number" min="0" step="any" placeholder="سعر الوحدة (اختياري)" style="max-width:200px">
                     <button class="btn btn-gold" id="btn-add-prod" onclick="addProduct()">إضافة صنف</button>
                 </div>
-                <div class="row" style="margin-top:18px">
+                <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:18px">
                     <button class="btn btn-ghost" id="open-suggest" onclick="suggestOpening()">اقتراح من آخر جرد للشهر اللي فات</button>
                     <button class="btn btn-gold" id="open-save" data-save onclick="saveOpening()">حفظ وإغلاق</button>
                     <button class="btn" id="open-unlock" onclick="unlockOpening()">فتح تعديل الرصيد</button>
@@ -899,7 +894,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="row between" style="margin-bottom:14px">
                     <div class="row">
                         <span class="muted">التاريخ</span>
-                        <input type="date" id="rc-day" class="inp sm" onchange="renderReceipts()">
+                        <input type="date" id="rc-day" class="inp sm" onchange="rcDayChanged()">
                     </div>
                     <span id="rc-badge" class="badge open">مفتوح</span>
                 </div>
@@ -922,7 +917,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="row between" style="margin-bottom:14px">
                     <div class="row">
                         <span class="muted">التاريخ</span>
-                        <input type="date" id="tr-day" class="inp sm" onchange="renderTransfers()">
+                        <input type="date" id="tr-day" class="inp sm" onchange="trDayChanged()">
                     </div>
                     <span id="trans-badge" class="badge open">مفتوح</span>
                 </div>
@@ -982,7 +977,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="muted" style="margin-bottom:14px">التحليل دايماً من أول الشهر لحد التاريخ اللي تختاره. أول الشهر ثابت، ومش بيتغير غير من قسم الأصناف.</div>
                 <div class="row" style="margin-bottom:12px">
                     <span class="muted">لحد تاريخ</span>
-                    <input type="date" id="an-to" class="inp sm" onchange="renderAnalysis()">
+                    <input type="date" id="an-to" class="inp sm" onchange="anToChanged()">
                 </div>
                 <div class="row" style="margin-bottom:14px">
                     <button class="btn btn-sm" onclick="quickAn('day')">تاريخ اليوم المختار في الوارد</button>
@@ -995,9 +990,13 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div id="an-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="an-note" class="note hidden" style="margin-bottom:14px"></div>
                 <div id="food-cost" class="card" style="margin-bottom:14px;padding:14px"></div>
+                <details class="card" id="waste-allow" style="margin-bottom:14px;padding:14px">
+                    <summary class="h" style="cursor:pointer;margin:0">🧾 ملخص الهالك المسموح</summary>
+                    <div id="waste-allow-body" style="margin-top:12px"></div>
+                </details>
                 <div id="cause-summary" class="card" style="margin-bottom:14px;padding:14px"></div>
                 <div id="an-cards" class="cards-grid"></div>
-                <div class="row" style="margin-top:18px">
+                <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:18px">
                     <button class="btn btn-gold" id="an-save" data-save onclick="saveAnalysis()">حفظ وإغلاق</button>
                     <button class="btn btn-green" onclick="exportAnalysisXlsx()">تحميل شيت التحليل</button>
                     <button class="btn" onclick="printAnalysis()">طباعة</button>
@@ -1046,7 +1045,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div id="per1000-products"></div>
                 <div class="note" style="margin-top:12px">مثال: معدل الدجاج 1 لكل 1000 جنيه، وتوقع الإيراد 40,000 جنيه = احتياج 40 دجاجة.</div>
-                <div class="row" style="margin-top:16px;justify-content:flex-end">
+                <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:16px;justify-content:flex-end">
                   <button class="btn btn-gold" onclick="savePer1000Close()">حفظ وإغلاق</button>
                   <button class="btn" onclick="switchOrderSubTab('table')">جدول الأسبوع ←</button>
                 </div>
@@ -1118,7 +1117,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div class="h">تعريف مدة صلاحية كل صنف</div>
                 <div class="muted" style="margin-bottom:10px">اختار المدة والوحدة (يوم، شهر، سنة).</div>
                 <div id="exp-define-list"></div>
-                <div class="row" style="margin-top:16px"><button class="btn btn-gold" onclick="saveShelfDefs()">حفظ وإغلاق</button></div>
+                <div class="row" style="margin-top:16px;position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border)"><button class="btn btn-gold" onclick="saveShelfDefs()">حفظ وإغلاق</button></div>
               </div>
 
               <div class="card hidden" id="exp-sub-daily">
@@ -1494,7 +1493,7 @@ document.addEventListener('keydown', function (e) {
     if (next) { e.preventDefault(); next.focus(); if (next.select) next.select(); }
 }, true);
 
-function rowCells(scope, ri) { return [...scope.querySelectorAll(`[data-nav][data-ri="${ri}"]`)].filter(isVisible); }
+function rowCells(scope, ri) { return [...scope.querySelectorAll(`[data-nav][data-ri="${ri}"]`)].filter(el => isVisible(el) && !el.disabled); }
 function nextRowCells(scope, ri, dir) {
     for (let r = ri + dir, guard = 0; guard < 3000; r += dir, guard++) {
         const cells = rowCells(scope, r);
@@ -2141,6 +2140,7 @@ async function importForecastHistory() {
     logAction('استيراد بيانات تعلم', '', `${rows.length} يوم${overwrite ? `، منها ${overwrite} اتكتب فوقها` : ''}`);
     saveDB(); renderAll();
     $('forecast-history-input').value='';
+    guardArm();
     toast(`تم إدخال ${rows.length} يوم${overwrite ? ` (تحديث ${overwrite} يوم)` : ''}${skipped ? `، وتجاهل ${skipped} صف` : ''}`);
 }
 
@@ -2195,6 +2195,7 @@ async function saveForecastEvent() {
     if (S.forecastEvents[date] && !await askConfirm(`فيه مناسبة موجودة بتاريخ ${date} (${S.forecastEvents[date].name}). هتتكتب فوقها.`)) return;
     S.forecastEvents[date]={name,impact}; saveDB();
     $('forecast-event-name').value=''; $('forecast-event-impact').value='';
+    guardArm();
     renderForecast(); toast('تم حفظ المناسبة');
 }
 async function deleteForecastEvent(date) {
@@ -2606,7 +2607,7 @@ function applySearch(containerId, inputId, msgId) {
     const items = $(containerId).querySelectorAll('[data-search]');
     let shown = 0;
     items.forEach(el => {
-        const ok = !q || el.dataset.search.includes(q);
+        const ok = nameMatchesPrefix(el.dataset.search, q);
         el.classList.toggle('hidden', !ok);
         if (ok) shown++;
     });
@@ -2731,13 +2732,24 @@ function renderOpening() {
     $('btn-add-prod').disabled = locked;
 }
 
-function addProduct() {
+async function addProduct() {
     if (S.openLocked[activeMonth]) return toast('افتح تعديل الرصيد الأول عشان تضيف صنف', 'error');
     const name = $('new-prod-name').value.trim();
     const unit = $('new-prod-unit').value.trim();
     if (!name) return toast('اكتب اسم الصنف', 'error');
     if (name.length > 120 || unit.length > 40) return toast('الاسم أو الوحدة طويل جداً', 'error');
     if (S.products.some(p => p.name === name && p.unit === unit)) return toast('الصنف ده موجود قبل كده', 'error');
+    const similar = S.products.find(p => similarNames(p.name, name));
+    if (similar) {
+        const choice = await askChoice(`الاسم "${name}" قريب من صنف موجود: "${similar.name}".\nهل تقصد نفس الصنف؟`, 'استخدام الصنف الموجود', 'إضافة صنف جديد');
+        if (choice === -1) return;
+        if (choice === 0) {
+            $('new-prod-name').value = ''; $('new-prod-unit').value = ''; $('new-prod-price').value = '';
+            guardArm();
+    toast('تم اختيار الصنف الموجود، مش هتتضاف نسخة جديدة');
+            return;
+        }
+    }
     const priceRaw = $('new-prod-price').value.trim();
     const price = priceRaw === '' ? null : Number(priceRaw);
     if (price !== null && (!Number.isFinite(price) || price < 0)) return toast('السعر لازم يكون رقم صفر أو أكبر', 'error');
@@ -2745,6 +2757,7 @@ function addProduct() {
     $('new-prod-price').value = '';
     saveDB();
     $('new-prod-name').value = ''; $('new-prod-unit').value = '';
+    guardArm();
     toast('تمت إضافة الصنف. ادخل رصيد أول الشهر له');
     renderAll();
 }
@@ -2754,14 +2767,21 @@ async function deleteProduct(id) {
     if (productUsed(id)) return toast('الصنف ده عليه حركات، مينفعش يتحذف', 'error');
     const p = productById(id);
     if (!p) return;
-    if (!await askConfirm(`حذف الصنف "${p.name}"؟`, 'حذف')) return;
+    const idx = S.products.indexOf(p);
+    const savedShelf = S.shelf[id], savedPer = S.per1000[id];
     logAction('مسح صنف', '', p.name);
     S.products = S.products.filter(x => x.id !== id);
     delete S.shelf[id];
     delete S.per1000[id];
     saveDB();
-    toast('تم حذف الصنف');
     renderAll();
+    showUndo(`تم حذف "${p.name}"`, () => {
+        S.products.splice(Math.min(idx, S.products.length), 0, p);
+        if (savedShelf) S.shelf[id] = savedShelf;
+        if (savedPer) S.per1000[id] = savedPer;
+        saveDB();
+        renderAll();
+    });
 }
 
 function setProductStd(id, value) {
@@ -2854,18 +2874,128 @@ document.addEventListener('change', async (e) => {
     const value = t.value.trim();
     if (t.dataset.f === 'name' && (!value || value.length > 120)) { toast('اسم الصنف غير صالح', 'error'); return renderAll(); }
     if (t.dataset.f === 'unit' && value.length > 40) { toast('الوحدة طويلة جداً', 'error'); return renderAll(); }
-    if (!await askConfirm(`تعديل ${t.dataset.f === 'name' ? 'اسم' : 'وحدة'} الصنف "${p.name}" إلى "${value}". التعديل ده بيتغير في كل الشهور.`)) return renderAll();
+    if (!await askOk(`تعديل ${t.dataset.f === 'name' ? 'اسم' : 'وحدة'} الصنف "${p.name}" إلى "${value}". التعديل ده بيتغير في كل الشهور.`)) return renderAll();
     p[t.dataset.f] = value;
     saveDB();
     toast('تم التحديث');
     renderAll();
 });
 
+// تطبيع النص العربي للبحث والمقارنة
+function arNorm(s) {
+    return String(s ?? '').toLowerCase()
+        .replace(/[\u064B-\u065F\u0640]/g, '')
+        .replace(/[إأآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+        .replace(/\s+/g, ' ').trim();
+}
+// بحث بالأحرف الأولى: الاسم أو أي كلمة فيه تبدأ بالحروف المكتوبة
+function nameMatchesPrefix(text, q) {
+    const t = arNorm(text), qq = arNorm(q);
+    if (!qq) return true;
+    return t.startsWith(qq) || t.split(' ').some(w => w.startsWith(qq));
+}
+function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) {
+        dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    return dp[m][n];
+}
+// تشابه الأسماء: نفس الاسم بعد التطبيع، أو فرق حرف/حرفين حسب طول الاسم
+function similarNames(a, b) {
+    const x = arNorm(a).replace(/\s/g, ''), y = arNorm(b).replace(/\s/g, '');
+    if (!x || !y) return false;
+    if (x === y) return true;
+    const maxD = Math.max(x.length, y.length) <= 5 ? 1 : 2;
+    return levenshtein(x, y) <= maxD;
+}
+// نافذة اختيار بسيطة: ترجع 0 أو 1، أو -1 للإلغاء
+function askChoice(msg, b0, b1) {
+    return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal';
+        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
+            <p style="white-space:pre-line">${esc(msg)}</p>
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" data-c="-1">إلغاء</button>
+                <button class="btn btn-gold" data-c="0">${esc(b0)}</button>
+                <button class="btn btn-slate" data-c="1">${esc(b1)}</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        ov.addEventListener('click', e => {
+            const c = e.target.dataset ? e.target.dataset.c : undefined;
+            if (c !== undefined) { ov.remove(); resolve(Number(c)); }
+        });
+    });
+}
+
+// شريط التراجع بعد الحذف (يظهر 8 ثوانٍ)
+let undoTimer = null;
+function hideUndo() {
+    clearTimeout(undoTimer);
+    const b = $('undo-bar');
+    if (b) b.remove();
+}
+function showUndo(msg, cb) {
+    hideUndo();
+    const bar = document.createElement('div');
+    bar.id = 'undo-bar';
+    bar.className = 'undo-bar';
+    bar.innerHTML = `<span>${esc(msg)}</span><button type="button" class="btn btn-gold btn-sm" id="undo-btn">تراجع</button>`;
+    document.body.appendChild(bar);
+    $('undo-btn').onclick = () => { hideUndo(); cb(); toast('تم التراجع واستعادة العنصر'); };
+    undoTimer = setTimeout(hideUndo, 8000);
+}
+// تأكيد بسيط بزرار موافق (للتعديلات البسيطة بدل كتابة كلمة)
+function askOk(msg) {
+    return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal';
+        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
+            <p style="white-space:pre-line">${esc(msg)}</p>
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" data-ok="0">إلغاء</button>
+                <button class="btn btn-gold" data-ok="1">موافق</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        ov.addEventListener('click', e => {
+            const v = e.target.dataset ? e.target.dataset.ok : undefined;
+            if (v !== undefined) { ov.remove(); resolve(v === '1'); }
+        });
+    });
+}
+
 function rcValue(d, p) {
     return Object.prototype.hasOwnProperty.call(rcDraft, p.id) ? rcDraft[p.id] : (rcpt(d, p.id) || '');
 }
 
-function rcSet(pid, v) { rcDraft[pid] = v; }
+function rcSet(pid, v) { rcDraft[pid] = v; unusualRcNote(pid); }
+
+// متوسط الوارد الفعلي للصنف في آخر 30 يوم (بدون اليوم الحالي)
+function rcAvg(pid, d) {
+    let sum = 0, n = 0;
+    Object.keys(S.receipts).forEach(day => {
+        if (day < d && day >= addDays(d, -30)) {
+            const v = Number((S.receipts[day] || {})[pid]) || 0;
+            if (v > 0) { sum += v; n++; }
+        }
+    });
+    return n ? sum / n : 0;
+}
+// تنبيه استرشادي فقط: الكمية أعلى من المعتاد بأكتر من ضعفين ونص، ومش بيمنع الحفظ
+function unusualRcNote(pid) {
+    const el = $('unu-' + pid);
+    if (!el) return;
+    const d = $('rc-day').value;
+    const raw = rcDraft[pid] !== undefined ? rcDraft[pid] : rcpt(d, pid);
+    const v = num(raw);
+    const avg = rcAvg(pid, d);
+    el.textContent = (avg > 0 && v > avg * 2.5) ? `الكمية أعلى من المعتاد (متوسط ${fmt(avg, 2)})` : '';
+}
 
 function renderReceipts() {
     const d = $('rc-day').value;
@@ -2920,6 +3050,7 @@ function renderReceipts() {
         <div><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span></div>
         <input class="inp xs" type="number" min="0" step="any" data-nav="rec" data-ri="${i}" value="${esc(rcValue(d, p))}" placeholder="0"
             oninput="rcSet('${esc(p.id)}', this.value)">
+        <div class="unu" id="unu-${esc(p.id)}"></div>
     </div>`).join('');
     const filledN = S.products.filter(p => norm(rcValue(d, p)) !== '').length;
     const prog = $('rc-progress');
@@ -2995,7 +3126,7 @@ async function unlockReceipts() {
 
 function fillTransProducts() {
     const q = ($('trans-search').value || '').trim().toLowerCase();
-    const list = S.products.filter(p => !q || searchKey(p).includes(q));
+    const list = S.products.filter(p => nameMatchesPrefix(searchKey(p), q));
     const cur = $('trans-prod').value;
     $('trans-prod').innerHTML = list.map(p => `<option value="${esc(p.id)}">${esc(p.name)} (${esc(p.unit)})</option>`).join('');
     if (list.some(p => p.id === cur)) $('trans-prod').value = cur;
@@ -3069,6 +3200,7 @@ async function addTransfer() {
     saveDB();
     $('trans-qty').value = '';
     $('trans-search').value = ''; fillTransProducts();
+    guardArm();
     $('trans-qty').focus();
     const addedP = productById(pid);
     $('tr-confirm').textContent = `أضفت ${addedP ? addedP.name : ''} ${qty} ${addedP ? addedP.unit : ''}`;
@@ -3080,12 +3212,16 @@ async function deleteTransfer(id) {
     if (!t) return;
     if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'error');
     if (t.day < todayStr() && !await askConfirm('ده مسح لتحويل يوم فات. متأكد؟', 'مسح')) return;
-    if (!await askConfirm('حذف هذا التحويل؟', 'حذف')) return;
+    const idx = S.transfers.indexOf(t);
     logAction('مسح تحويل', t.day, `${productLabel(t.product_id)} ${t.qty} (${t.type === 'in' ? 'وارد' : 'صادر'} ${t.branch || '—'})`);
     S.transfers = S.transfers.filter(x => x.id !== id);
     saveDB();
-    toast('تم الحذف');
     renderAll();
+    showUndo('تم حذف التحويل', () => {
+        S.transfers.splice(Math.min(idx, S.transfers.length), 0, t);
+        saveDB();
+        renderAll();
+    });
 }
 
 async function lockTransfers() {
@@ -3405,6 +3541,7 @@ function renderAnalysis() {
 function liveAn() {
     renderCauseSummary();
     renderFoodCost();
+    renderWasteAllowance();
     const r = anRange();
     if (!r || !r.to) return;
     S.products.forEach(p => {
@@ -3575,6 +3712,56 @@ function validateAnalysisRows(r, rows) {
         if (x.cause === 'أخرى' && !x.causeNote) return `اكتب السبب في خانة "أخرى" للصنف "${p.name}"`;
     }
     return '';
+}
+
+// ملخص الهالك المسموح: 0.9% من صافي الإيراد لنفس فترة التحليل
+const WASTE_ALLOW_RATE = 0.009;
+function renderWasteAllowance() {
+    const body = $('waste-allow-body');
+    if (!body) return;
+    const r = anRange();
+    if (!r || !r.to) { body.innerHTML = '<div class="muted">اختار تاريخ النهاية في التحليل عشان يظهر الحساب.</div>'; return; }
+    const netRev = salesIn(monthStart(activeMonth), r.to).rev / TAX_FACTOR;
+    let wasteVal = 0;
+    const noPrice = [];
+    S.products.forEach(p => {
+        const w = wasteValue(p.id);
+        if (w <= 0) return;
+        if (p.price === null || p.price === undefined) { noPrice.push(p.name); return; }
+        wasteVal += w * p.price;
+    });
+    let missingSales = 0;
+    eachDay(monthStart(activeMonth), r.to, d => { if (!S.sales[d]) missingSales++; });
+    if (netRev <= 0) {
+        body.innerHTML = '<div class="note">مفيش إيراد مسجل للفترة دي، فالحد المسموح ما يتحسبش. سجّل الإيراد الأول.</div>';
+        return;
+    }
+    if (noPrice.length) {
+        body.innerHTML = `<div class="note">فيه هالك على أصناف من غير سعر (${esc(noPrice.join('، '))})، حط سعرها عشان الحد يتحسب صح.</div>`;
+        return;
+    }
+    const allowed = netRev * WASTE_ALLOW_RATE;
+    const remaining = allowed - wasteVal;
+    const used = allowed > 0 ? wasteVal / allowed * 100 : 0;
+    const within = wasteVal <= allowed + 1e-9;
+    const barW = Math.min(used, 100);
+    const barColor = within ? 'var(--ok)' : 'var(--bad)';
+    body.innerHTML = `
+        <div class="tip ${within ? 'good' : 'warn'}" style="margin-bottom:10px"><span class="dot"></span><span>
+            <b>${within ? 'داخل الحد المسموح' : 'تجاوز الحد المسموح'}</b>${within ? '' : ` بقيمة <b>${fmt(wasteVal - allowed, 2)} ج.م</b>`}
+        </span></div>
+        <table class="sum-tbl"><tbody>
+            <tr class="sum-gold"><th>صافي الإيراد</th><td>${fmt(netRev, 2)} ج.م</td></tr>
+            <tr class="sum-gold"><th>نسبة الهالك المسموح</th><td>0.9%</td></tr>
+            <tr class="sum-green"><th>قيمة الهالك المسموح</th><td>${fmt(allowed, 2)} ج.م</td></tr>
+            <tr class="sum-red"><th>قيمة الهالك الفعلي المسجل</th><td>${fmt(wasteVal, 2)} ج.م</td></tr>
+            <tr class="${remaining >= 0 ? 'sum-green' : 'sum-red'}"><th>المتبقي من حد الهالك</th><td>${remaining >= 0 ? '' : '-'}${fmt(Math.abs(remaining), 2)} ج.م</td></tr>
+            <tr class="sum-total"><th>نسبة استهلاك حد الهالك</th><td>${fmt(used, 2)}%</td></tr>
+        </tbody></table>
+        <div style="margin-top:12px;height:10px;border-radius:99px;background:var(--card2);overflow:hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(barW)}">
+            <div style="height:100%;width:${barW.toFixed(2)}%;background:${barColor};transition:width .3s"></div>
+        </div>
+        ${missingSales ? `<div class="muted" style="margin-top:8px">فيه ${missingSales} يوم بدون إيراد مسجل، فالحد ممكن يطلع أقل من الحقيقي.</div>` : ''}`;
 }
 
 // ملخص العجز بالفلوس (الزيادة ما تدخلش فيه). الصنف اللي سعره مش معروف ما يدخلش
@@ -4085,63 +4272,85 @@ function openAudit() {
 function renderSmartTips() {
     const card = $('smart-tips-card');
     if (card) card.classList.toggle('hidden', !!invView);
-    const host = $('smart-tips'); if (!host) return;
-    const tips = [];
-    const N = n => esc(n);
-    const rows = expRows();
+    const host = $('smart-tips');
+    if (!host) return;
+    const today = todayStr();
+
+    // 1) الوارد والتحويلات لليوم
+    const recvDone = !!S.receiptNone[today] || Object.values(S.receipts[today] || {}).some(v => v > 0);
+    const transDone = !!S.transferNone[today] || S.transfers.some(t => t.day === today);
+
+    // 2) الصلاحية: أقل من أو 10 أيام
+    const soon = expRows().filter(r => r.left !== null && r.left >= 0 && r.left <= 10);
+    const expired = expRows().filter(r => r.left !== null && r.left < 0);
+
+    // 3) أداء المخزون من آخر جرد محفوظ
     const lastA = [...S.analyses].sort((a, b) => (a.to < b.to ? 1 : -1))[0];
-
-    if (!S.products.length) {
-        tips.push({ type: 'tip', text: 'ابدأ بإضافة الأصناف، وابدأ بالغالية منها (اللحوم والزيوت والجبن)، لأن التوفير فيها بيفرق أكتر.' });
-    }
-
-    // فروقات الجرد لكل صنف (بعد احتساب الهالك المسجل): عجز (وفر فيه) أو مطابق (حافظ عليه) أو زيادة (راجع التسجيل)
+    let shortMoney = 0, overMoney = 0, soldVal = 0, nShort = 0, nOver = 0, unexplainedShort = 0, analyzedN = 0;
+    const shortList = [];
     if (lastA) {
         S.products.forEach(p => {
             const x = lastA.rows && lastA.rows[p.id];
             if (!x || x.closing === null || x.closing === undefined) return;
             const c = calcRow(p.id, { from: lastA.from, to: lastA.to }, x.opening, x.sold, x.closing);
-            const v = c.variance + (x.waste || 0);
-            if (v < 0) tips.push({ type: 'warn', text: `وفر في ${N(p.name)}: عجز ${fmt(-v, 2)} ${N(p.unit)} في جرد ${lastA.to} بعد الهالك المسجل. راجع الوزن عند التحضير والتسليم.` });
-            else if (v > 0) tips.push({ type: 'tip', text: `راجع تسجيل ${N(p.name)}: الجرد أعلى من النظري بـ ${fmt(v, 2)} ${N(p.unit)} بعد الهالك. غالباً فيه مبيعات أو تحويل ما اتسجلش، صححه عشان التكلفة تطلع صح.` });
-            else tips.push({ type: 'good', text: `حافظ على ${N(p.name)}: الجرد مطابق للنظري بعد الهالك في ${lastA.to}. استمر بنفس طريقة الوزن والتسليم.` });
+            if (c.variance === null) return;
+            analyzedN++;
+            const pr = p.price === null || p.price === undefined ? 0 : p.price;
+            const net = c.variance + (x.waste || 0);
+            soldVal += (Number(x.sold) || 0) * pr;
+            if (net < 0) {
+                nShort++;
+                const v = -net * pr;
+                shortMoney += v;
+                if (!x.waste) unexplainedShort += v;
+                shortList.push({ name: p.name, v, qty: -net });
+            } else if (net > 0) {
+                nOver++;
+                overMoney += net * pr;
+            }
         });
+    }
+    const perf = soldVal > 0 ? shortMoney / soldVal * 100 : null;
+    let rating = '', ratingCls = 'good';
+    if (perf !== null) {
+        if (perf <= 1) { rating = 'ممتاز'; ratingCls = 'good'; }
+        else if (perf <= 2) { rating = 'جيد'; ratingCls = 'good'; }
+        else if (perf <= 4) { rating = 'يحتاج متابعة'; ratingCls = 'warn'; }
+        else { rating = 'ضعيف'; ratingCls = 'warn'; }
+    }
+
+    const item = (ok, text, btn) => `<div class="tip ${ok ? 'good' : 'warn'}"><span class="dot"></span><span style="flex:1">${text}</span>${btn || ''}</div>`;
+    const parts = [];
+    parts.push(item(recvDone, recvDone ? '✓ الوارد مكتمل' : '⚠️ الوارد لم يتم تسجيله اليوم', recvDone ? '' : `<button class="btn btn-ghost btn-sm" onclick="openInv('receipts')">افتح الوارد</button>`));
+    parts.push(item(transDone, transDone ? '✓ التحويلات مكتملة' : '⚠️ التحويلات لم يتم تسجيلها اليوم', transDone ? '' : `<button class="btn btn-ghost btn-sm" onclick="openInv('transfers')">افتح التحويلات</button>`));
+    if (expired.length || soon.length) {
+        const names = [...expired, ...soon].slice(0, 5).map(r => `${esc(r.name)} (${r.left < 0 ? 'منتهي' : 'باقي ' + r.left + ' يوم'})`).join('، ');
+        parts.push(item(false, `⚠️ صلاحية: ${names}`, ''));
     } else {
-        tips.push({ type: 'tip', text: 'حافظ على الكنترول: اعمل جرد فعلي لأهم الأصناف كل أسبوع، ده أول خطوة للتوفير لأنك هتعرف فين الفلوس بتروح.' });
+        parts.push(item(true, '✓ مفيش منتجات قربت تنتهي خلال 10 أيام'));
+    }
+    if (perf === null) {
+        parts.push(`<div class="tip warn"><span class="dot"></span><span>يجب تنفيذ تحليل مخزون أولًا</span></div>`);
+    } else {
+        parts.push(`<div class="tip ${ratingCls}"><span class="dot"></span><span style="flex:1"><b>مؤشر أداء المخزون: ${rating}</b> · العجز ${fmt(perf, 2)}% من قيمة المباع · تحليل بتاريخ ${esc(lastA.to)}</span></div>`);
     }
 
-    // الدفعات المنتهية: وفر في الإنتاج
-    const expiredBy = {};
-    rows.filter(r => r.left !== null && r.left < 0).forEach(r => { expiredBy[r.name] = (expiredBy[r.name] || 0) + 1; });
-    Object.entries(expiredBy).forEach(([n, c]) => tips.push({ type: 'warn', text: `وفر في ${N(n)}: فيه ${c} دفعة انتهت قبل ما تتباع. أنتج كمية أقل وعلى قد الطلب اليومي.` }));
+    const topList = shortList.sort((a, b) => b.v - a.v).slice(0, 3)
+        .map(x => `${esc(x.name)}: ${fmt(x.v, 2)} ج.م`).join('<br>') || 'لا يوجد';
+    parts.push(`<details style="margin-top:6px"><summary style="cursor:pointer;font-weight:700">تفاصيل التقييم وأسباب النتيجة</summary>
+        <div class="muted" style="margin:8px 0;line-height:1.9">
+            إجمالي قيمة العجز: <b>${fmt(shortMoney, 2)} ج.م</b><br>
+            إجمالي قيمة الزيادة: <b>${fmt(overMoney, 2)} ج.م</b><br>
+            عدد الأصناف التي تم تحليلها: <b>${analyzedN}</b><br>
+            عدد الأصناف بعجز: <b>${nShort}</b> · عدد الأصناف بزيادة: <b>${nOver}</b><br>
+            أساس النسبة: العجز ÷ قيمة المباع (المباع × السعر) للأصناف اللي ليها سعر.<br>
+            أكثر الأصناف تأثيراً:<br>${topList}<br>
+            <span style="color:var(--text)">مؤكد من البيانات:</span> ${fmt(shortMoney - unexplainedShort, 2)} ج.م (عجز عليه هالك مسجل)<br>
+            <span style="color:var(--text)">يحتاج مراجعة:</span> ${fmt(unexplainedShort, 2)} ج.م (عجز من غير سبب مسجل)
+        </div>
+    </details>`);
 
-    // الدفعات القريبة: حافظ عليها بالترتيب
-    rows.filter(r => r.left !== null && r.left >= 0 && r.left <= EXP_YELLOW).slice(0, 5).forEach(r =>
-        tips.push({ type: r.left <= EXP_RED ? 'warn' : 'tip', text: `حافظ على ${N(r.name)}: دفعة إنتاج ${r.day} ${r.left <= EXP_RED ? 'حرجة' : 'قريبة'} (باقي ${r.left} يوم). بيعها الأول قبل أي دفعة أحدث (FIFO).` }));
-
-    // الأصناف بدون مدة صلاحية: الكنترول عليها ناقص
-    S.products.filter(p => !shelfDays(p.id)).slice(0, 3).forEach(p =>
-        tips.push({ type: 'tip', text: `حافظ على ${N(p.name)}: حدد مدة صلاحيته عشان تعرف امتى تبيعه قبل ما يخسر.` }));
-
-    // أعلى صنف في الطلبية: أي توفير فيه بيفرق
-    const per = S.products.filter(p => S.per1000[p.id] && S.per1000[p.id].enabled && Number(S.per1000[p.id].rate) > 0);
-    if (per.length) {
-        const start = orderStartDate();
-        const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
-        const totalRev = days.reduce((a, d) => a + planForecast(d).predicted, 0);
-        const totals = per.map(p => ({ p, q: totalRev / 1000 * Number(S.per1000[p.id].rate) })).sort((a, b) => b.q - a.q);
-        if (totals[0].q > 0) tips.push({ type: 'tip', text: `ركّز الكنترول على ${N(totals[0].p.name)}: أعلى كمية في طلبية الأسبوع (حوالي ${fmt(totals[0].q, 2)} ${N(totals[0].p.unit)}). أي توفير فيه بيفرق في التكلفة أكتر من غيره.` });
-        tips.push({ type: 'tip', text: 'وفر في الطلب: اطلب على قد التوقع، واعتمد نسخة الأسبوع قبل الطلب، عشان الزيادة ما تتحولش لهالك مع الصلاحية.' });
-    }
-
-    // الوارد الناقص: الكنترول بيبوظ
-    const mr = missingDays(coveredReceipt).length;
-    if (mr) tips.push({ type: 'warn', text: `حافظ على الكنترول: فيه ${mr} يوم من غير وارد مسجل. سجّل الوارد عشان تعرف تكلفة كل صنف بدقة.` });
-
-    // التحويلات: التحويل اللي ما اتسجلش بيعمل عجز وهمي
-    if (S.transfers.length) tips.push({ type: 'tip', text: 'حافظ على الكنترول: سجّل كل تحويل بين الفروع في يومه، التحويل اللي ما اتسجلش بيطلع عجز وهمي وبيضيّع وقت المراجعة.' });
-
-    host.innerHTML = tips.map(t => tipHtml(t)).join('');
+    host.innerHTML = parts.join('');
 }
 
 function renderSmartTipsOld() {
@@ -4420,6 +4629,7 @@ function renderAll() {
     renderOrderForecast();
     renderBackupAlert();
     renderTabBadges();
+    showOpenReminder();
 }
 
 // عداد الأيام الناقصة على التابات (إيراد ومخزون)
@@ -4447,6 +4657,216 @@ window.addEventListener('scroll', () => {
         b.style.display = 'none';
     }
 });
+
+/* ===== حماية التغييرات غير المحفوظة + مسار الرجوع ===== */
+const GUARD_BASE = {};
+function guardCtxKey() {
+    return [activeTab, invView || '', invView === 'orders' ? orderSubTab : '', invView === 'expiry' ? expSub : ''].join('|');
+}
+function guardSelectors() {
+    if (activeTab === 'revenue') return ['#sales-day', '#sales-rev', '#sales-ord', '#s-plan', '#s-ly-rev', '#s-ly-ord', '#ly-grid input'];
+    if (activeTab === 'salesforecast') return ['#forecast-history-input', '#forecast-event-date', '#forecast-event-name', '#forecast-event-impact'];
+    if (invView === 'opening') return ['#open-list input', '#new-prod-name', '#new-prod-unit', '#new-prod-price'];
+    if (invView === 'receipts') return ['#rc-body input'];
+    if (invView === 'transfers') return ['#trans-branch', '#trans-qty'];
+    if (invView === 'analysis') return ['#an-cards input', '#an-cards select'];
+    if (invView === 'expiry' && expSub === 'define') return ['#exp-define-list input', '#exp-define-list select'];
+    if (invView === 'expiry' && expSub === 'daily') return ['#exp-daily-list input', '#exp-daily-list select'];
+    return [];
+}
+function guardSnapshot() {
+    const app = $('app');
+    if (!app || app.classList.contains('hidden')) return '';
+    const parts = [];
+    guardSelectors().forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => parts.push(el.value));
+    });
+    return parts.join('\u0001');
+}
+// نحفظ قيم الخانات الحالية كنقطة "محفوظة" للقسم ده
+function guardArm() {
+    GUARD_BASE[guardCtxKey()] = guardSnapshot();
+}
+// تنبيه التغييرات غير المحفوظة متعطل
+function guardDirty() {
+    return false;
+}
+// تأكيد الخروج: نرجّع الخانات للمحفوظ
+function guardDiscard() {
+    rcDraft = {}; rcDraftDay = null;
+    anKey = ''; anLoadRows = null;
+    ['trans-branch', 'trans-qty', 'new-prod-name', 'new-prod-unit', 'new-prod-price',
+     'forecast-history-input', 'forecast-event-name', 'forecast-event-impact', 'forecast-event-date']
+        .forEach(id => { const el = $(id); if (el) el.value = ''; });
+    renderAll();
+}
+function askLeave() {
+    return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal';
+        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
+            <div class="h" style="margin:0">تنبيه: توجد تغييرات غير محفوظة</div>
+            <p style="white-space:pre-line;font-weight:600">لم يتم حفظ البيانات اللي أدخلتها.\nهل أنت متأكد أنك تريد الخروج دون حفظ؟</p>
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" data-l="0">إلغاء الخروج</button>
+                <button class="btn btn-red" data-l="1">تأكيد الخروج</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        ov.addEventListener('click', e => {
+            const v = e.target.dataset ? e.target.dataset.l : undefined;
+            if (v !== undefined) { ov.remove(); resolve(v === '1'); }
+        });
+    });
+}
+// أي تنقل: لو فيه تغييرات غير محفوظة نسأل الأول
+function guardedNav(fn) {
+    saveDraft();
+    fn();
+}
+
+// مسودات مؤقتة في الذاكرة: لو خرجت من قسم وفيه كتابة مش محفوظة، ترجع لما ترجع للقسم
+const DRAFTS = {};
+function draftKey() {
+    const dayPick =
+        invView === 'receipts' ? $('rc-day').value :
+        invView === 'transfers' ? $('tr-day').value :
+        invView === 'analysis' ? $('an-to').value :
+        (activeTab === 'revenue' ? $('sales-day').value : '');
+    return guardCtxKey() + '|' + activeMonth + '|' + dayPick;
+}
+function draftValues() {
+    const vals = [];
+    guardSelectors().forEach(sel => document.querySelectorAll(sel).forEach(el => vals.push(el.value)));
+    return vals;
+}
+function saveDraft() {
+    const k = draftKey();
+    const base = GUARD_BASE[guardCtxKey()];
+    if (base === undefined || guardSnapshot() === base) { delete DRAFTS[k]; return; }
+    DRAFTS[k] = draftValues();
+}
+function restoreDraft() {
+    const d = DRAFTS[draftKey()];
+    if (!d) return;
+    const els = [];
+    guardSelectors().forEach(sel => document.querySelectorAll(sel).forEach(el => els.push(el)));
+    if (els.length !== d.length) return;
+    els.forEach((el, i) => { el.value = d[i]; });
+    if (invView === 'analysis' && typeof liveAn === 'function') liveAn();
+}
+function rcDayChanged() { guardedNav(() => { rcDraft = {}; rcDraftDay = null; renderReceipts(); guardArm(); }); }
+function trDayChanged() { guardedNav(() => { renderTransfers(); guardArm(); }); }
+function anToChanged() { guardedNav(() => { renderAnalysis(); guardArm(); }); }
+
+// تغطية التنقل: التابات، الصفحات الفرعية، الأقسام الداخلية، وتغيير الشهر
+(function wrapNavigation() {
+    const wrap = (name, after) => {
+        const orig = window[name];
+        window[name] = function (...args) {
+            guardedNav(() => { orig.apply(this, args); if (after) after(); guardArm(); restoreDraft(); });
+        };
+    };
+    wrap('switchTab');
+    wrap('openInv');
+    wrap('closeInv');
+    wrap('switchOrderSubTab');
+    wrap('switchExpSub');
+    wrap('loadSalesDay');
+    const cm = window.changeMonth;
+    window.changeMonth = function () {
+        const prev = activeMonth;
+        if (!guardDirty()) { cm(); guardArm(); return; }
+        askLeave().then(ok => {
+            if (ok) { guardDiscard(); cm(); guardArm(); }
+            else { $('month-input').value = prev; }
+        });
+    };
+    const ks = window.kansasStart;
+    window.kansasStart = function () { ks(); guardArm(); showOpenReminder(); };
+})();
+
+/* ===== مسار الرجوع الداخلي: كل زرار رجوع بيرجّع للصفحة اللي جيت منها ===== */
+const NAV_STACK = [];
+function navState() { return { tab: activeTab, inv: invView, ord: orderSubTab, exp: expSub }; }
+function pushNav() {
+    const s = navState();
+    const top = NAV_STACK[NAV_STACK.length - 1];
+    if (top && top.tab === s.tab && top.inv === s.inv && top.ord === s.ord && top.exp === s.exp) return;
+    NAV_STACK.push(s);
+    if (NAV_STACK.length > 40) NAV_STACK.shift();
+}
+function applyNavState(s) {
+    activeTab = s.tab; invView = s.inv; orderSubTab = s.ord; expSub = s.exp;
+    $('tab-revenue').classList.toggle('hidden', activeTab !== 'revenue');
+    $('tab-salesforecast').classList.toggle('hidden', activeTab !== 'salesforecast');
+    $('tab-inventory').classList.toggle('hidden', activeTab !== 'inventory');
+    $('tab-btn-revenue').classList.toggle('on', activeTab === 'revenue');
+    $('tab-btn-salesforecast').classList.toggle('on', activeTab === 'salesforecast');
+    $('tab-btn-inventory').classList.toggle('on', activeTab === 'inventory');
+    if (invView) document.body.dataset.sec = invView; else document.body.removeAttribute('data-sec');
+    renderAll();
+}
+['openInv', 'switchTab', 'switchOrderSubTab', 'switchExpSub'].forEach(name => {
+    const orig = window[name];
+    window[name] = function (...args) { pushNav(); return orig.apply(this, args); };
+});
+const sameNav = (a, b) => a.tab === b.tab && a.inv === b.inv && a.ord === b.ord && a.exp === b.exp;
+window.closeInv = function () {
+    let prev = NAV_STACK.pop();
+    while (prev && sameNav(prev, navState())) prev = NAV_STACK.pop();
+    if (prev) applyNavState(prev);
+    else { invView = null; document.body.removeAttribute('data-sec'); renderAll(); }
+    guardArm();
+    restoreDraft();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/* ===== تذكير عند فتح البرنامج: الوارد والتحويلات لليوم (شريط صغير فوق، مش بيقفل الشاشة) ===== */
+let REMINDER_DISMISSED = false;
+function showOpenReminder() {
+    const old = $('open-reminder');
+    if (old) old.remove();
+    // يظهر بس في صفحة المخزون وصفحة الوارد، ومش في الصفحة الرئيسية
+    const onPage = activeTab === 'inventory' && (!invView || invView === 'receipts');
+    if (REMINDER_DISMISSED || !onPage || !S.products.length) return;
+    const today = todayStr();
+    const miss = [];
+    if (!coveredReceipt(today)) miss.push({ text: '⚠️ الوارد لم يتم تسجيله اليوم', view: 'receipts', btn: 'افتح الوارد' });
+    if (!coveredTransfer(today)) miss.push({ text: '⚠️ التحويلات لم يتم تسجيلها اليوم', view: 'transfers', btn: 'افتح التحويلات' });
+    if (!miss.length) return;
+    const bar = document.createElement('div');
+    bar.id = 'open-reminder';
+    bar.setAttribute('role', 'status');
+    bar.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:125;max-width:94vw;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--gold2);box-shadow:var(--shadow-lg);font-weight:700;font-size:13.5px';
+    bar.innerHTML = `<span>${miss.map(m => m.text).join(' · ')}</span>`
+        + miss.map(m => `<button type="button" class="btn btn-gold btn-sm" data-view="${m.view}">${m.btn}</button>`).join('')
+        + `<button type="button" class="btn btn-ghost btn-sm" data-close aria-label="إغلاق">✕</button>`;
+    document.body.appendChild(bar);
+    bar.querySelectorAll('[data-view]').forEach(b => { b.onclick = () => { bar.remove(); openInv(b.dataset.view); }; });
+    bar.querySelector('[data-close]').onclick = () => { REMINDER_DISMISSED = true; bar.remove(); };
+}
+
+// أي حفظ فعلي بيعيد ضبط نقطة "المحفوظ" للقسم الحالي
+const _saveDBorig = saveDB;
+saveDB = function () { _saveDBorig(); guardArm(); };
+
+// تحديث التاريخ تلقائياً لو الصفحة فضلت مفتوحة لبعد نص الليل (بس لو التاريخ كان على اليوم القديم)
+let lastKnownDay = todayStr();
+function checkNewDay() {
+    const now = todayStr();
+    if (now === lastKnownDay) return;
+    const old = lastKnownDay;
+    lastKnownDay = now;
+    if ($('sales-day') && $('sales-day').value === old) { $('sales-day').value = now; loadSalesDay(); }
+    if ($('rc-day') && $('rc-day').value === old) { $('rc-day').value = now; rcDraft = {}; rcDraftDay = null; renderReceipts(); }
+    if ($('tr-day') && $('tr-day').value === old) { $('tr-day').value = now; renderTransfers(); }
+}
+setInterval(checkNewDay, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
+
+// تحذير المتصفح عند إغلاق التبويب لو فيه تغييرات غير محفوظة
+
 </script>
 </body>
 </html>
