@@ -3117,7 +3117,7 @@ async function saveReceipts() {
     rcDraft = {};
     saveDB();
     toast('تم حفظ وقفل وارد اليوم');
-    closeInv();
+    renderAll();
 }
 
 async function markReceiptNone() {
@@ -3129,7 +3129,7 @@ async function markReceiptNone() {
     rcDraft = {};
     saveDB();
     toast('تم تأكيد اليوم بدون توريد');
-    closeInv();
+    renderAll();
 }
 
 async function bulkReceiptNone() {
@@ -3188,23 +3188,42 @@ function renderTransfers() {
     $('trans-unlock').classList.toggle('hidden', !locked);
 
     // عرض مجمّع: كل فرع + نوع تحويل في كارت واحد، وتحته المنتجات بكمياتها (الداتا نفسها سطور منفصلة)
-    const groups = [];
+    // كارت واحد لكل فرع في اليوم: الوارد والصادر جواه، والإجمالي لكل وحدة
+    const byBranch = new Map();
     list.forEach(t => {
-        const key = t.type + '|' + (t.branch || '');
-        let g = groups.find(x => x.key === key);
-        if (!g) { g = { key, type: t.type, branch: t.branch || '', items: [] }; groups.push(g); }
-        g.items.push(t);
+        const key = t.branch || '';
+        if (!byBranch.has(key)) byBranch.set(key, { branch: key, items: [] });
+        byBranch.get(key).items.push(t);
     });
-    $('tr-list').innerHTML = groups.map(g => `<div class="card" style="margin-top:10px;padding:12px;border-top:3px solid ${g.type === 'in' ? 'var(--ok)' : 'var(--bad)'}">
-        <div class="row between" style="margin-bottom:6px"><b>${g.type === 'in' ? 'وارد من فرع' : 'صادر لفرع'}</b><span class="muted">${esc(g.branch || '—')}</span></div>
-        ${g.items.map(t => {
+    const sumBy = (items, type) => {
+        const m = {};
+        items.filter(t => t.type === type).forEach(t => {
+            const u = (productById(t.product_id) || {}).unit || '';
+            m[u] = (m[u] || 0) + t.qty;
+        });
+        return Object.entries(m).map(([u, q]) => `${fmt(q, 2)} ${esc(u)}`).join(' · ');
+    };
+    $('tr-list').innerHTML = [...byBranch.values()].map(g => {
+        const inTxt = sumBy(g.items, 'in'), outTxt = sumBy(g.items, 'out');
+        const sorted = g.items.slice().sort((a, b) => (a.type === 'in' ? 0 : 1) - (b.type === 'in' ? 0 : 1));
+        return `<div class="card" style="margin-top:10px;padding:12px;border-top:3px solid var(--accent)">
+        <div class="row between" style="margin-bottom:8px;flex-wrap:wrap">
+            <span style="font-weight:800;font-size:15px;color:var(--text)">${esc(g.branch || '—')}</span>
+            <div class="row" style="gap:6px;flex-wrap:wrap">
+                ${inTxt ? `<span class="chip up">وارد: ${inTxt}</span>` : ''}
+                ${outTxt ? `<span class="chip down">صادر: ${outTxt}</span>` : ''}
+            </div>
+        </div>
+        ${sorted.map(t => {
             const pr = productById(t.product_id) || {};
+            const isIn = t.type === 'in';
             return `<div class="prow">
-                <div><span class="pname">${esc(pr.name || 'صنف محذوف')}</span> <span class="punit">${esc(pr.unit || '')}</span> <span class="muted">— ${fmt(t.qty, 2)}</span></div>
+                <div class="row" style="gap:8px"><span class="chip ${isIn ? 'up' : 'down'}">${isIn ? 'وارد' : 'صادر'}</span><span class="pname">${esc(pr.name || 'صنف محذوف')}</span> <span class="punit">${esc(pr.unit || '')}</span> <span class="muted">— ${fmt(t.qty, 2)}</span></div>
                 ${locked ? '' : `<button class="btn btn-ghost btn-sm" style="color:var(--bad)" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
             </div>`;
         }).join('')}
-    </div>`).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
+    </div>`;
+    }).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
     fillTransProducts();
     fillTransferFilters();
     setTransType($('trans-type').value || 'in');
@@ -3263,7 +3282,7 @@ async function lockTransfers() {
     S.transferLocked[d] = true;
     saveDB();
     toast('تم حفظ وقفل تحويلات اليوم');
-    closeInv();
+    renderAll();
 }
 
 async function markTransfersNone() {
@@ -3274,7 +3293,7 @@ async function markTransfersNone() {
     S.transferLocked[d] = true;
     saveDB();
     toast('تم تأكيد اليوم بدون تحويلات');
-    closeInv();
+    renderAll();
 }
 
 async function bulkTransfersNone() {
@@ -3889,7 +3908,7 @@ async function saveAnalysis() {
     S.analyses.push({ id: uid(), from: r.from, to: r.to, saved: todayStr(), rows: res.rows });
     saveDB();
     toast('تم حفظ التحليل');
-    closeInv();
+    renderAll();
 }
 
 function renderSavedAnalyses() {
