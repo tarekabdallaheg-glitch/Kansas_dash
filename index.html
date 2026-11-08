@@ -618,7 +618,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     };
     var authOverlay = document.getElementById('auth');
     var lockOverlay = document.getElementById('lock');
-    var appRoot = document.getElementById('app');
+    function appEl() { return document.getElementById('app'); }
     var emailEl = document.getElementById('auth-email');
     var passEl = document.getElementById('auth-pass');
     var errEl = document.getElementById('auth-err');
@@ -636,16 +636,19 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     };
     function showErr(msg) { errEl.textContent = msg || ''; }
     function setBusy(b) { btn.disabled = b; btn.textContent = b ? 'جارٍ الدخول...' : 'تسجيل الدخول'; }
+    var resolved = false;
     function showAuth() {
-        lockOverlay.classList.add('hidden');
-        appRoot.classList.add('hidden');
+        resolved = true;
         authOverlay.classList.remove('hidden');
+        lockOverlay.classList.add('hidden');
+        if (appEl()) appEl().classList.add('hidden');
         setBusy(false);
         setTimeout(function () { emailEl.focus(); }, 0);
     }
     function showPin() {
+        resolved = true;
         authOverlay.classList.add('hidden');
-        appRoot.classList.add('hidden');
+        if (appEl()) appEl().classList.add('hidden');
         var unlocked = false;
         try { unlocked = sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) {}
         if (unlocked && window.kansasOpenApp) { window.kansasOpenApp(); return; }
@@ -653,17 +656,34 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
         var pin = document.getElementById('unlock-pin');
         if (pin) setTimeout(function () { pin.focus(); }, 0);
     }
+    function failStart(msg) {
+        showAuth();
+        showErr(msg);
+    }
     if (!window.firebase || !firebase.initializeApp) {
-        authOverlay.classList.remove('hidden');
-        showErr('تعذر تحميل خدمة الحساب. تأكد من الإنترنت وحدّث الصفحة.');
+        failStart('تعذر تحميل خدمة الحساب. تأكد من الإنترنت وحدّث الصفحة.');
         return;
     }
-    firebase.initializeApp(firebaseConfig);
-    var auth = firebase.auth();
-    // الجلسة بتفضل على الجهاز (LOCAL)، ومش بنخزن كلمة المرور في أي مكان
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () {});
+    var auth;
+    try {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        // الجلسة بتفضل على الجهاز (LOCAL)، ومش بنخزن كلمة المرور في أي مكان
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () {});
+    } catch (e) {
+        failStart('تعذر تشغيل خدمة الحساب. حدّث الصفحة أو راجع الإعدادات.');
+        return;
+    }
+    // لو مفيش رد من الحساب خلال 10 ثواني، نظهر شاشة الدخول بدل ما نفضل منتظرين
+    setTimeout(function () {
+        if (!resolved) failStart('الاتصال بخدمة الحساب بطيء. جرّب تاني أو حدّث الصفحة.');
+    }, 10000);
     auth.onAuthStateChanged(function (user) {
-        if (user) showPin(); else showAuth();
+        try {
+            if (user) showPin(); else showAuth();
+        } catch (e) {
+            failStart('حصلت مشكلة أثناء فتح الشاشة. حدّث الصفحة.');
+        }
     });
     function login() {
         var email = emailEl.value.trim(), pass = passEl.value;
