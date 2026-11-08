@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; style-src 'self' 'unsafe-inline'; connect-src https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>Kansas Premium</title>
 <style>
 :root{
@@ -520,7 +520,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 </head>
 <body>
 
-<div id="lock" class="lock hidden">
+<div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
         <div>
@@ -584,129 +584,12 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     btn.addEventListener('click', tryUnlock);
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
 
-    // يُستدعى من تسجيل الدخول بعد التأكد من جلسة Firebase
-    window.kansasOpenApp = function () { openApp(); };
-})();
-</script>
-
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-<div id="auth" class="lock hidden">
-    <div class="card">
-        <div class="logo">K</div>
-        <div>
-            <div class="brand-name">KANSAS PREMIUM</div>
-            <div class="muted">سجّل دخول حسابك</div>
-        </div>
-        <input id="auth-email" class="inp" type="email" autocomplete="username" inputmode="email" placeholder="البريد الإلكتروني">
-        <input id="auth-pass" class="inp" type="password" autocomplete="current-password" placeholder="كلمة المرور">
-        <p id="auth-err" style="font-weight:700;font-size:13px;min-height:20px;margin:0;color:var(--bad);text-align:right"></p>
-        <button class="btn btn-gold" id="auth-btn" type="button">تسجيل الدخول</button>
-    </div>
-</div>
-<script>
-(function () {
-    var firebaseConfig = {
-        apiKey: "AIzaSyCvbeR9xSN7PsOy_F4uPi4iGS2HoGBTeT4",
-        authDomain: "my-power-1d1eb.firebaseapp.com",
-        projectId: "my-power-1d1eb",
-        storageBucket: "my-power-1d1eb.firebasestorage.app",
-        messagingSenderId: "251799413902",
-        appId: "1:251799413902:web:43798fce64e6b9a0b5d5df"
-    };
-    var authOverlay = document.getElementById('auth');
-    var lockOverlay = document.getElementById('lock');
-    function appEl() { return document.getElementById('app'); }
-    var emailEl = document.getElementById('auth-email');
-    var passEl = document.getElementById('auth-pass');
-    var errEl = document.getElementById('auth-err');
-    var btn = document.getElementById('auth-btn');
-    // رسائل واضحة بدل أخطاء Firebase الخام (مفيش بيانات حساسة في الرسالة)
-    var ERR = {
-        'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
-        'auth/user-not-found': 'الحساب ده مش موجود',
-        'auth/wrong-password': 'كلمة المرور غير صحيحة',
-        'auth/invalid-credential': 'البريد أو كلمة المرور غير صحيحة',
-        'auth/too-many-requests': 'محاولات كتير. استنى شوية وجرب تاني',
-        'auth/network-request-failed': 'مفيش اتصال بالإنترنت',
-        'auth/user-disabled': 'الحساب ده موقوف',
-        'auth/operation-not-allowed': 'تسجيل الدخول بالبريد مش مفعّل في Firebase'
-    };
-    function showErr(msg) { errEl.textContent = msg || ''; }
-    function setBusy(b) { btn.disabled = b; btn.textContent = b ? 'جارٍ الدخول...' : 'تسجيل الدخول'; }
-    var resolved = false;
-    function showAuth() {
-        resolved = true;
-        authOverlay.classList.remove('hidden');
-        lockOverlay.classList.add('hidden');
-        if (appEl()) appEl().classList.add('hidden');
-        setBusy(false);
-        setTimeout(function () { emailEl.focus(); }, 0);
-    }
-    function showPin() {
-        resolved = true;
-        authOverlay.classList.add('hidden');
-        if (appEl()) appEl().classList.add('hidden');
+    window.addEventListener('load', function () {
         var unlocked = false;
         try { unlocked = sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) {}
-        if (unlocked && window.kansasOpenApp) { window.kansasOpenApp(); return; }
-        lockOverlay.classList.remove('hidden');
-        var pin = document.getElementById('unlock-pin');
-        if (pin) setTimeout(function () { pin.focus(); }, 0);
-    }
-    function failStart(msg) {
-        showAuth();
-        showErr(msg);
-    }
-    if (!window.firebase || !firebase.initializeApp) {
-        failStart('تعذر تحميل خدمة الحساب. تأكد من الإنترنت وحدّث الصفحة.');
-        return;
-    }
-    var auth;
-    try {
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        // الجلسة بتفضل على الجهاز (LOCAL)، ومش بنخزن كلمة المرور في أي مكان
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () {});
-    } catch (e) {
-        failStart('تعذر تشغيل خدمة الحساب. حدّث الصفحة أو راجع الإعدادات.');
-        return;
-    }
-    // لو مفيش رد من الحساب خلال 10 ثواني، نظهر شاشة الدخول بدل ما نفضل منتظرين
-    setTimeout(function () {
-        if (!resolved) failStart('الاتصال بخدمة الحساب بطيء. جرّب تاني أو حدّث الصفحة.');
-    }, 10000);
-    auth.onAuthStateChanged(function (user) {
-        try {
-            if (user) showPin(); else showAuth();
-        } catch (e) {
-            failStart('حصلت مشكلة أثناء فتح الشاشة. حدّث الصفحة.');
-        }
+        if (unlocked) openApp();
+        else input.focus();
     });
-    function login() {
-        var email = emailEl.value.trim(), pass = passEl.value;
-        if (!email || !pass) { showErr('اكتب البريد وكلمة المرور'); return; }
-        showErr('');
-        setBusy(true);
-        auth.signInWithEmailAndPassword(email, pass).then(function () {
-            passEl.value = '';
-        }).catch(function (err) {
-            passEl.value = '';
-            showErr(ERR[err && err.code] || 'تعذر تسجيل الدخول. جرّب تاني');
-            setBusy(false);
-        });
-    }
-    btn.addEventListener('click', login);
-    passEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); });
-    // تسجيل الخروج من الحساب بس: البيانات المحلية والنسخ الاحتياطية ما بتتمسحش
-    window.firebaseLogout = function () {
-        auth.signOut().then(function () {
-            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
-            location.reload();
-        }).catch(function () { showErr('تعذر تسجيل الخروج. جرّب تاني'); });
-    };
 })();
 </script>
 
@@ -726,7 +609,6 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             <button class="btn" onclick="toggleTheme()" id="theme-btn"></button>
             <button class="btn btn-slate" onclick="exportBackup()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>نسخة</button>
             <label class="btn" style="cursor:pointer"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M4 19h16"/></svg>استيراد<input type="file" accept="application/json" class="hidden" onchange="importBackup(this)"></label>
-            <button class="btn btn-ghost" onclick="firebaseLogout()">خروج الحساب</button>
             <button class="btn btn-red" onclick="lockSystem()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>قفل</button>
         </div>
     </header>
