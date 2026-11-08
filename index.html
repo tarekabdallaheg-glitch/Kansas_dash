@@ -1192,6 +1192,7 @@ const safeCell = v => (typeof v === 'string' && /^[=+\-@]/.test(v)) ? "'" + v : 
 const uid = () => 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const DAYS_AR = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const TAX_FACTOR = 1.14;
 
 const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const monthOf = day => day.slice(0, 7);
@@ -1335,17 +1336,16 @@ function loadDB() {
 }
 
 function saveDB() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
+    try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(S));
+        guardArm();
+    }
     catch (e) { toast('تعذر الحفظ (مساحة المتصفح ممتلئة؟)', 'error'); }
 }
 
 function cfg(key) {
     const c = S.monthly[key] || {};
     return { plan_rev: c.plan_rev || 0, ly_rev: c.ly_rev || 0, ly_orders: c.ly_orders || 0 };
-}
-
-async function confirmFuture(day) {
-    return day <= todayStr() || await askConfirm('التاريخ ده في المستقبل. متأكد إنه صح؟');
 }
 
 function showWelcome() {
@@ -1465,6 +1465,17 @@ function exportBackup() {
     renderBackupAlert();
 }
 
+function isValidBackup(d) {
+    const objOk = v => v && typeof v === 'object' && !Array.isArray(v);
+    return objOk(d)
+        && (d.products === undefined || Array.isArray(d.products))
+        && (d.transfers === undefined || Array.isArray(d.transfers))
+        && (d.analyses === undefined || Array.isArray(d.analyses))
+        && (d.batches === undefined || Array.isArray(d.batches))
+        && (d.sales === undefined || objOk(d.sales))
+        && (d.receipts === undefined || objOk(d.receipts));
+}
+
 async function importBackup(input) {
     const f = input.files[0];
     if (!f) return;
@@ -1473,7 +1484,7 @@ async function importBackup(input) {
     r.onload = () => {
         try {
             const d = JSON.parse(r.result);
-            if (!d || typeof d !== 'object') throw new Error('bad');
+            if (!isValidBackup(d)) throw new Error('bad');
             S = normalize(d);
             saveDB();
             toast('تم استيراد النسخة');
@@ -2123,22 +2134,6 @@ function forecastOne(day, history, trend, gOverride) {
     const predicted = Math.max(0, base * trend.factor * (1 + impact/100) * (1 + (gOverride ?? fcGrowth())/100));
     return { day, base, predicted, event, impact, learned, confidence, basis };
 }
-function renderForecastOld() {
-    const body = $('forecast-rows'); if (!body) return;
-    const history = forecastHistory();
-    const trend = forecastTrend(history);
-    const days = Array.from({length:7},(_,i)=>addDays(fcStartDate(),i));
-    const rows = days.map(d=>forecastOne(d,history,trend));
-    const total = rows.reduce((a,x)=>a+x.predicted,0);
-    body.innerHTML = rows.map(x=>`<tr><td>${DAYS_AR[weekdayOf(x.day)]}<br><span class="muted">${x.day}</span></td><td><b>${x.base ? fmt(x.predicted)+' ج.م' : 'بانتظار البيانات'}</b></td><td>${x.event ? esc(x.event.name)+((x.event.impact!==null || x.learned) ? `<br><span class="muted">${x.learned?'تأثير متعلم ':'تأثير محدد '}${x.impact>0?'+':''}${x.impact.toFixed(0)}%</span>` : '<br><span class="muted">التأثير غير محدد؛ لم يُفترض رقم</span>') : 'يوم عادي'}</td><td>${x.confidence}<br><span class="muted">${esc(x.basis)}</span></td></tr>`).join('');
-    $('forecast-total').textContent = history.length ? fmt(total)+' ج.م' : 'بانتظار البيانات';
-    $('forecast-confidence').textContent = history.length ? `${history.length} يوم مسجل · ${trend.label}` : 'أدخل بيانات سابقة أو ابدأ التسجيل اليومي';
-    $('forecast-summary').textContent = history.length
-        ? `النظام يستخدم ${history.length} يومًا مسجلًا، ويقارن كل يوم بالأيام السابقة من نفس يوم الأسبوع. ${trend.label}. التوقع الحالي مبدئي ويتحسن مع كل تسجيل جديد.`
-        : 'لا توجد مبيعات مسجلة بعد. أدخل بيانات سابقة من المربع أدناه أو سجل المبيعات اليومية المعتادة ليبدأ النظام التعلم.';
-    $('forecast-history-count').textContent = `الموجود حاليًا: ${history.length} يوم`;
-    renderForecastEvents();
-}
 function parseForecastDate(v) {
     v=String(v||'').trim();
     let m=v.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
@@ -2250,38 +2245,6 @@ function setExpected(d, v) {
     saveDB(); renderVariance();
 }
 
-function renderVarianceOld() {
-    const body = $('var-rows'); if (!body) return;
-    const days = [];
-    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => days.push(d));
-    $('var-month').textContent = `${MONTHS_AR[Number(activeMonth.slice(5)) - 1]} ${activeMonth.slice(0, 4)}`;
-    const hist = forecastHistory();
-    let prev = null, tE = 0, tA = 0;
-    body.innerHTML = days.map(d => {
-        const rec = S.sales[d];
-        const act = rec ? Number(rec.revenue || 0) : null;
-        const exp = expectedFor(d, hist);
-        const both = act !== null && exp !== null;
-        const diff = both ? act - exp : null;
-        const dp = both && exp > 0 ? diff / exp : null;
-        const grow = act !== null && prev !== null && prev > 0 ? (act - prev) / prev : null;
-        if (act !== null) prev = act;
-        if (both) { tE += exp; tA += act; }
-        const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
-        return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
-            <td>${exp === null ? '<span class="muted">—</span>' : fmt(exp)}</td>
-            <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
-            <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
-            <td class="${cls}">${dp === null ? '—' : pct(dp)}</td>
-            <td>${arrowChip(grow)}</td></tr>`;
-    }).join('');
-    const tDiff = tA - tE;
-    $('var-tot-exp').textContent = fmt(tE);
-    $('var-tot-act').textContent = fmt(tA);
-    $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
-    $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
-}
-
 function expectedFor(d, hist) {
     const before = hist.filter(x => x.date < d);
     if (!before.length) return null;
@@ -2356,49 +2319,6 @@ function renderForecast() {
     $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
     $('forecast-summary').textContent = hist.length
         ? `الفترة من ${range.from} إلى ${range.to}. المتوقع للفترة: ${fmt(tEall)} ج.م، والمحقق فعلاً: ${fmt(tA)} ج.م${achieved !== null ? ` (${(achieved * 100).toFixed(1)}% من المتوقع)` : ''}. المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع × اتجاه الفترة × تأثير المناسبات × نسبة النمو. الفرق = الفعلي − المتوقع.`
-        : 'لا توجد مبيعات مسجلة بعد. سجّل الإيراد اليومي أو أدخل بيانات سابقة ليبدأ التوقع.';
-    $('forecast-history-count').textContent = `الموجود حاليًا: ${hist.length} يوم`;
-}
-
-function renderForecastUnusedOld() {
-    const body = $('forecast-rows');
-    if (!body) return;
-    renderForecastEvents();
-    const hist = forecastHistory();
-    const days = [];
-    eachDay(monthStart(activeMonth), monthEnd(activeMonth), d => days.push(d));
-    let prev = null, tE = 0, tA = 0;
-    body.innerHTML = days.map(d => {
-        const before = hist.filter(x => x.date < d);
-        const f = before.length ? forecastOne(d, before, forecastTrend(before), rowGrowth(d)) : null;
-        const ok = !!(f && f.base);
-        const avg = ok ? f.base : null;
-        const exp = ok ? f.predicted : null;
-        const rec = S.sales[d];
-        const act = rec ? Number(rec.revenue || 0) : null;
-        const both = act !== null && exp !== null;
-        const diff = both ? act - exp : null;
-        const dp = both && exp > 0 ? diff / exp : null;
-        const grow = act !== null && prev !== null && prev > 0 ? (act - prev) / prev : null;
-        if (act !== null) prev = act;
-        if (both) { tE += exp; tA += act; }
-        const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
-        return `<tr><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
-            <td>${avg === null ? '<span class="muted">—</span>' : fmt(avg)}</td>
-            <td><input class="inp xs" type="number" step="any" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
-            <td><b>${exp === null ? '—' : fmt(exp)}</b></td>
-            <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
-            <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
-            <td class="${cls}">${dp === null ? '—' : pct(dp)}</td>
-            <td>${arrowChip(grow)}</td></tr>`;
-    }).join('');
-    const tDiff = tA - tE;
-    $('var-tot-exp').textContent = fmt(tE);
-    $('var-tot-act').textContent = fmt(tA);
-    $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
-    $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
-    $('forecast-summary').textContent = hist.length
-        ? `المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع من الإيرادات السابقة × اتجاه الفترة × تأثير المناسبات × نسبة النمو (تقدر تكتب أي نسبة، وتعدلها لكل يوم). الفرق = الفعلي − المتوقع.`
         : 'لا توجد مبيعات مسجلة بعد. سجّل الإيراد اليومي أو أدخل بيانات سابقة ليبدأ التوقع.';
     $('forecast-history-count').textContent = `الموجود حاليًا: ${hist.length} يوم`;
 }
@@ -3537,16 +3457,6 @@ function wasteValue(pid) {
 }
 
 // إظهار / إخفاء خانة الهالك لصنف
-function toggleWaste(pid) {
-    const row = $('awr-' + pid);
-    if (!row) return;
-    const nowHidden = row.classList.toggle('hidden');
-    if (!nowHidden) {
-        const el = $('aw-' + pid);
-        if (el) el.focus();
-    }
-}
-
 function renderAnalysis() {
     const r = anRange();
     const cards = $('an-cards');
@@ -3879,7 +3789,6 @@ function renderCauseSummary() {
 }
 
 // نسبة التكلفة الغذائية: صافي الإيراد = الإيراد ÷ 1.14 (الضريبة ثابتة)، وتكلفة الخامات شاملة الهالك
-const TAX_FACTOR = 1.14;
 function renderFoodCost() {
     const host = $('food-cost');
     if (!host) return;
@@ -4270,43 +4179,6 @@ function renderExpReport() {
             : '<div class="muted" style="margin-top:12px">مفيش إنتاج مسجل. ابدأ من "إدخال تاريخ إنتاج الأصناف".</div>');
 }
 
-function renderExpDailyOld() {
-    const host = $('exp-daily-list'); if (!host) return;
-    if (!$('exp-day').value) $('exp-day').value = todayStr();
-    const d = $('exp-day').value;
-    if (!S.products.length) { host.innerHTML = '<div class="muted">أضف الأصناف أولاً.</div>'; return; }
-    host.innerHTML = S.products.map(p => {
-        const b = S.batches.find(x => x.day === d && x.pid === p.id);
-        const note = shelfDays(p.id) ? '' : ' <span class="muted">(مدة الصلاحية غير محددة)</span>';
-        return `<div class="prow"><div><b>${esc(p.name)}</b> <span class="muted">${esc(p.unit)}</span>${note}</div>
-            <input class="inp xs" type="number" min="0" step="any" data-prod="${esc(p.id)}" value="${b ? b.qty : ''}" placeholder="الكمية"></div>`;
-    }).join('');
-}
-
-function saveExpDailyOld() {
-    const d = $('exp-day').value;
-    if (!d) return toast('اختر تاريخ الإنتاج', 'error');
-    const inputs = document.querySelectorAll('#exp-daily-list [data-prod]');
-    for (const el of inputs) {
-        if (el.value !== '' && num(el.value) < 0) return toast('الكمية لازم تكون صفر أو أكبر', 'error');
-    }
-    const ids = new Set([...inputs].map(el => el.dataset.prod));
-    S.batches = S.batches.filter(x => !(x.day === d && ids.has(x.pid)));
-    inputs.forEach(el => {
-        const n = num(el.value);
-        if (n > 0) S.batches.push({ id: uid(), pid: el.dataset.prod, day: d, qty: n });
-    });
-    saveDB(); toast('تم حفظ إنتاج اليوم'); closeInv();
-}
-
-function renderExpReportOld() {
-    const host = $('exp-report-body'); if (!host) return;
-    const rows = expRows();
-    host.innerHTML = rows.length
-        ? `<div class="tbl-wrap">${expTableHtml(rows)}</div>`
-        : '<div class="muted">مفيش إنتاج مسجل. ابدأ من "إدخال الإنتاج اليومي".</div>';
-}
-
 function renderExpWarn() {
     const el = $('exp-warn'); if (!el) return;
     const soon = expRows().filter(r => r.left !== null && r.left <= EXP_YELLOW);
@@ -4447,47 +4319,6 @@ function renderSmartTips() {
     </details>`);
 
     host.innerHTML = parts.join('');
-}
-
-function renderSmartTipsOld() {
-    const host = $('smart-tips'); if (!host) return;
-    const tips = [];
-    if (!S.products.length) {
-        tips.push({ type: 'tip', text: 'ابدأ بإضافة الأصناف الأساسية، وخصوصاً الغالية (اللحوم والزيوت والجبن والتغليف)، عشان الكنترول يبدأ عليها.' });
-    } else {
-        const rows = expRows();
-        const soon = rows.filter(r => r.left !== null && r.left <= EXP_YELLOW);
-        const expired = rows.filter(r => r.left !== null && r.left < 0);
-        if (expired.length) tips.push({ type: 'warn', text: `فيه ${expired.length} دفعة منتهية. شيلها من الرف وسجّلها كهالك عشان تعرف حجم الخسارة وتقللها.` });
-        if (soon.length) tips.push({ type: 'warn', text: `فيه ${soon.length} دفعة قربت تنتهي. بيع الأقدم الأول (FIFO) وقلل الإنتاج الجديد لحد ما تخلص دي.` });
-        const noShelf = S.products.filter(p => !shelfDays(p.id));
-        if (noShelf.length) tips.push({ type: 'tip', text: `حدد مدة صلاحية ${noShelf.length} صنف على الأقل، عشان تحذيرات الصلاحية تبقى دقيقة.` });
-
-        const lastA = [...S.analyses].sort((a, b) => (a.to < b.to ? 1 : -1))[0];
-        if (lastA) {
-            const neg = [];
-            S.products.forEach(p => {
-                const x = lastA.rows && lastA.rows[p.id];
-                if (!x || x.closing === null || x.closing === undefined) return;
-                const c = calcRow(p.id, { from: lastA.from, to: lastA.to }, x.opening, x.sold, x.closing);
-                if (c.variance < 0) neg.push(`${p.name} (${fmt(c.variance, 2)})`);
-            });
-            if (neg.length) tips.push({ type: 'warn', text: `عجز في جرد ${lastA.to}: ${neg.slice(0, 5).join('، ')}. راجع الوزن والهدر والتسليم قبل ما تطلب تاني.` });
-            else tips.push({ type: 'good', text: `مفيش عجز في آخر جرد (${lastA.to}). حافظ على نفس طريقة الوزن والتسليم.` });
-        } else {
-            tips.push({ type: 'tip', text: 'اعمل جرد فعلي للأصناف الغالية كل أسبوع، والتحليل بيقولك فين العجز بالظبط.' });
-        }
-
-        const mr = missingDays(coveredReceipt).length;
-        if (mr) tips.push({ type: 'warn', text: `فيه ${mr} يوم من غير تسجيل وارد. الوارد الناقص بيخلي التحليل والعجز غلط، سجّله أو أكد إنه بدون توريد.` });
-
-        const per = S.products.filter(p => S.per1000[p.id] && S.per1000[p.id].enabled);
-        if (per.length) tips.push({ type: 'tip', text: 'اطلب على قد التوقع مش على الاحتياط. أي زيادة في الطلب بتتحول لهالك مع الصلاحية. اعتمد نسخة الأسبوع قبل الطلب.' });
-    }
-    tips.push({ type: 'tip', text: 'اعمل جرد يومي للأصناف الأغلى بدل الأسبوعي، لأن الخسارة فيها بتكبر بسرعة.' });
-    tips.push({ type: 'tip', text: 'حدد حد أدنى لكل صنف، وخلّي التطبيق يقولك لما الرصيد يقرب يخلص، عشان متشتريش بكميات زيادة تقعد وتنتهي.' });
-    tips.push({ type: 'tip', text: 'قارن المتوقع بالفعلي في الطلبيات كل أسبوع، وراجع أي صنف فرقه أكبر من 5%.' });
-    host.innerHTML = tips.map(t => tipHtml(t)).join('');
 }
 
 function renderExpiry() {
@@ -4926,29 +4757,8 @@ function showOpenReminder() {
     const old = $('open-reminder');
     if (old) old.remove();
     return;
-    // يظهر بس في الشاشة الرئيسية للمخزون (مش جوه الوارد أو التحويلات)
-    const onPage = activeTab === 'inventory' && !invView;
-    if (REMINDER_DISMISSED || !onPage || !S.products.length) return;
-    const today = todayStr();
-    const miss = [];
-    if (!coveredReceipt(today)) miss.push({ text: '⚠️ الوارد لم يتم تسجيله اليوم', view: 'receipts', btn: 'افتح الوارد' });
-    if (!coveredTransfer(today)) miss.push({ text: '⚠️ التحويلات لم يتم تسجيلها اليوم', view: 'transfers', btn: 'افتح التحويلات' });
-    if (!miss.length) return;
-    const bar = document.createElement('div');
-    bar.id = 'open-reminder';
-    bar.setAttribute('role', 'status');
-    bar.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:125;max-width:94vw;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--gold2);box-shadow:var(--shadow-lg);font-weight:700;font-size:13.5px';
-    bar.innerHTML = `<span>${miss.map(m => m.text).join(' · ')}</span>`
-        + miss.map(m => `<button type="button" class="btn btn-gold btn-sm" data-view="${m.view}">${m.btn}</button>`).join('')
-        + `<button type="button" class="btn btn-ghost btn-sm" data-close aria-label="إغلاق">✕</button>`;
-    document.body.appendChild(bar);
-    bar.querySelectorAll('[data-view]').forEach(b => { b.onclick = () => { bar.remove(); openInv(b.dataset.view); }; });
-    bar.querySelector('[data-close]').onclick = () => { REMINDER_DISMISSED = true; bar.remove(); };
 }
 
-// أي حفظ فعلي بيعيد ضبط نقطة "المحفوظ" للقسم الحالي
-const _saveDBorig = saveDB;
-saveDB = function () { _saveDBorig(); guardArm(); };
 
 // تحديث التاريخ تلقائياً لو الصفحة فضلت مفتوحة لبعد نص الليل (بس لو التاريخ كان على اليوم القديم)
 let lastKnownDay = todayStr();
