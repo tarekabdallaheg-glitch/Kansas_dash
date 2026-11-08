@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; style-src 'self' 'unsafe-inline'; connect-src https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>Kansas Premium</title>
 <style>
 :root{
@@ -520,7 +520,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 </head>
 <body>
 
-<div id="lock" class="lock hidden">
+<div id="lock" class="lock">
     <div class="card">
         <div class="logo">K</div>
         <div>
@@ -584,129 +584,12 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     btn.addEventListener('click', tryUnlock);
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
 
-    // يُستدعى من تسجيل الدخول بعد التأكد من جلسة Firebase
-    window.kansasOpenApp = function () { openApp(); };
-})();
-</script>
-
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-<div id="auth" class="lock hidden">
-    <div class="card">
-        <div class="logo">K</div>
-        <div>
-            <div class="brand-name">KANSAS PREMIUM</div>
-            <div class="muted">سجّل دخول حسابك</div>
-        </div>
-        <input id="auth-email" class="inp" type="email" autocomplete="username" inputmode="email" placeholder="البريد الإلكتروني">
-        <input id="auth-pass" class="inp" type="password" autocomplete="current-password" placeholder="كلمة المرور">
-        <p id="auth-err" style="font-weight:700;font-size:13px;min-height:20px;margin:0;color:var(--bad);text-align:right"></p>
-        <button class="btn btn-gold" id="auth-btn" type="button">تسجيل الدخول</button>
-    </div>
-</div>
-<script>
-(function () {
-    var firebaseConfig = {
-        apiKey: "AIzaSyCvbeR9xSN7PsOy_F4uPi4iGS2HoGBTeT4",
-        authDomain: "my-power-1d1eb.firebaseapp.com",
-        projectId: "my-power-1d1eb",
-        storageBucket: "my-power-1d1eb.firebasestorage.app",
-        messagingSenderId: "251799413902",
-        appId: "1:251799413902:web:43798fce64e6b9a0b5d5df"
-    };
-    var authOverlay = document.getElementById('auth');
-    var lockOverlay = document.getElementById('lock');
-    function appEl() { return document.getElementById('app'); }
-    var emailEl = document.getElementById('auth-email');
-    var passEl = document.getElementById('auth-pass');
-    var errEl = document.getElementById('auth-err');
-    var btn = document.getElementById('auth-btn');
-    // رسائل واضحة بدل أخطاء Firebase الخام (مفيش بيانات حساسة في الرسالة)
-    var ERR = {
-        'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
-        'auth/user-not-found': 'الحساب ده مش موجود',
-        'auth/wrong-password': 'كلمة المرور غير صحيحة',
-        'auth/invalid-credential': 'البريد أو كلمة المرور غير صحيحة',
-        'auth/too-many-requests': 'محاولات كتير. استنى شوية وجرب تاني',
-        'auth/network-request-failed': 'مفيش اتصال بالإنترنت',
-        'auth/user-disabled': 'الحساب ده موقوف',
-        'auth/operation-not-allowed': 'تسجيل الدخول بالبريد مش مفعّل في Firebase'
-    };
-    function showErr(msg) { errEl.textContent = msg || ''; }
-    function setBusy(b) { btn.disabled = b; btn.textContent = b ? 'جارٍ الدخول...' : 'تسجيل الدخول'; }
-    var resolved = false;
-    function showAuth() {
-        resolved = true;
-        authOverlay.classList.remove('hidden');
-        lockOverlay.classList.add('hidden');
-        if (appEl()) appEl().classList.add('hidden');
-        setBusy(false);
-        setTimeout(function () { emailEl.focus(); }, 0);
-    }
-    function showPin() {
-        resolved = true;
-        authOverlay.classList.add('hidden');
-        if (appEl()) appEl().classList.add('hidden');
+    window.addEventListener('load', function () {
         var unlocked = false;
         try { unlocked = sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) {}
-        if (unlocked && window.kansasOpenApp) { window.kansasOpenApp(); return; }
-        lockOverlay.classList.remove('hidden');
-        var pin = document.getElementById('unlock-pin');
-        if (pin) setTimeout(function () { pin.focus(); }, 0);
-    }
-    function failStart(msg) {
-        showAuth();
-        showErr(msg);
-    }
-    if (!window.firebase || !firebase.initializeApp) {
-        failStart('تعذر تحميل خدمة الحساب. تأكد من الإنترنت وحدّث الصفحة.');
-        return;
-    }
-    var auth;
-    try {
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        // الجلسة بتفضل على الجهاز (LOCAL)، ومش بنخزن كلمة المرور في أي مكان
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () {});
-    } catch (e) {
-        failStart('تعذر تشغيل خدمة الحساب. حدّث الصفحة أو راجع الإعدادات.');
-        return;
-    }
-    // لو مفيش رد من الحساب خلال 10 ثواني، نظهر شاشة الدخول بدل ما نفضل منتظرين
-    setTimeout(function () {
-        if (!resolved) failStart('الاتصال بخدمة الحساب بطيء. جرّب تاني أو حدّث الصفحة.');
-    }, 10000);
-    auth.onAuthStateChanged(function (user) {
-        try {
-            if (user) showPin(); else showAuth();
-        } catch (e) {
-            failStart('حصلت مشكلة أثناء فتح الشاشة. حدّث الصفحة.');
-        }
+        if (unlocked) openApp();
+        else input.focus();
     });
-    function login() {
-        var email = emailEl.value.trim(), pass = passEl.value;
-        if (!email || !pass) { showErr('اكتب البريد وكلمة المرور'); return; }
-        showErr('');
-        setBusy(true);
-        auth.signInWithEmailAndPassword(email, pass).then(function () {
-            passEl.value = '';
-        }).catch(function (err) {
-            passEl.value = '';
-            showErr(ERR[err && err.code] || 'تعذر تسجيل الدخول. جرّب تاني');
-            setBusy(false);
-        });
-    }
-    btn.addEventListener('click', login);
-    passEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); });
-    // تسجيل الخروج من الحساب بس: البيانات المحلية والنسخ الاحتياطية ما بتتمسحش
-    window.firebaseLogout = function () {
-        auth.signOut().then(function () {
-            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
-            location.reload();
-        }).catch(function () { showErr('تعذر تسجيل الخروج. جرّب تاني'); });
-    };
 })();
 </script>
 
@@ -726,7 +609,6 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             <button class="btn" onclick="toggleTheme()" id="theme-btn"></button>
             <button class="btn btn-slate" onclick="exportBackup()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>نسخة</button>
             <label class="btn" style="cursor:pointer"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M4 19h16"/></svg>استيراد<input type="file" accept="application/json" class="hidden" onchange="importBackup(this)"></label>
-            <button class="btn btn-ghost" onclick="firebaseLogout()">خروج الحساب</button>
             <button class="btn btn-red" onclick="lockSystem()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>قفل</button>
         </div>
     </header>
@@ -1081,9 +963,9 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <div>
                         <input id="trans-search" class="inp" placeholder="ابحث عن الصنف" oninput="fillTransProducts()" style="margin-bottom:6px">
                         <select id="trans-prod" class="inp"></select>
-                        <div id="trans-nomatch" class="muted hidden" style="margin-top:4px">مفيش صنف بالاسم ده</div>
+                        <div id="trans-nomatch" class="muted Hidden" style="margin-top:4px">مفيش صنف بالاسم ده</div>
                     </div>
-                    <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp" placeholder="الكمية" style="max-width:150px" onkeydown="if(event.key==='Enter'){event.preventDefault();addTransfer();}"><button class="btn btn-gold" onclick="addTransfer()">إضافة</button></div>
+                    <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp" placeholder="الكمية" style="max-width:150px" onkeydown="if(event.key==='Enter'){event.preventDefault();addTransfer();}"><button class="btn btn-gold" onclick="addTransfer()"> نقل</button></div>
                 </div>
                 <div id="tr-confirm" style="margin-top:10px;font-weight:700;color:var(--ok)"></div>
                 <div id="tr-list" style="margin-top:14px"></div>
@@ -1095,14 +977,14 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     </div>
                     <div id="trr-body">
                     <div class="grid g3">
-                        <div><label class="muted">من تاريخ</label><input type="date" id="trr-from" class="inp"></div>
-                        <div><label class="muted">إلى تاريخ</label><input type="date" id="trr-to" class="inp"></div>
+                        <div><label class="muted">من التاريخ</label><input type="date" id="trr-from" class="inp"></div>
+                        <div><label class="muted">إلى التاريخ</label><input type="date" id="trr-to" class="inp"></div>
                         <div><label class="muted">الفرع</label><select id="trr-branch" class="inp"></select></div>
-                        <div><label class="muted">الصنف</label><select id="trr-prod" class="inp"></select></div>
+                        <div><label class="muted">المجتمع</label><select id="trr-prod" class="inp"></select></div>
                     </div>
                     <div class="row" style="margin-top:12px">
                         <button class="btn btn-gold" onclick="renderTransferReport()">عرض التقرير</button>
-                        <button class="btn btn-green" onclick="exportTransferReportXlsx()">تحميل Excel</button>
+                        <button class="btn btn-green" onclick="exportTransferReportXlsx()">تحميل ملف Excel</button>
                         <button class="btn btn-slate" onclick="printTransferReport()">طباعة / حفظ PDF</button>
                     </div>
                     <div id="trr-out" style="margin-top:14px"></div>
@@ -3207,12 +3089,12 @@ function renderReceipts() {
         }
         $('rc-body').innerHTML = items.length
             ? `<div class="chips">${items.map(p => `<span class="chip2"><span class="pname">${esc(p.name)}</span> ${fmt(rcpt(d, p.id), 2)} <span class="muted">${esc(p.unit)}</span></span>`).join('')}</div>`
-            : `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون توريد.' : 'مفيش وارد مسجل لليوم ده.'}</div>`;
+            : `<div class="muted">${none ؟ "اليوم ده اتأكد انه بدون توريد." : 'مسجل وارد لليوم ده.'}</div>`;
         $('rc-save').classList.add('hidden');
         $('rc-none').classList.add('hidden');
         $('rc-edit').classList.remove('hidden');
         $('rc-nomatch').classList.add('hidden');
-        return;
+        يعود؛
     }
 
     const hasAny = coveredReceipt(d) && !none;
@@ -3227,14 +3109,14 @@ function renderReceipts() {
     </div>`).join('');
     const filledN = S.products.filter(p => norm(rcValue(d, p)) !== '').length;
     const prog = $('rc-progress');
-    if (prog) {
+    إذا (prog) {
         const pctF = S.products.length ? Math.round(filledN / S.products.length * 100) : 0;
-        prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>تم إدخال ${filledN} من ${S.products.length} صنف</span><b>${pctF}%</b></div><div style="height:8px;border-radius:99px;background:var(--card2);overflow:hidden"><div style="height:100%;width:${pctF}%;background:var(--ok);transition:width .3s"></div></div>`;
+        prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>تم تحديد ${filledN} من ${S.products.length} </span><b>${pctF}%</b></div><div style="height:8px;border-radius:99px;background:var(--card2);overflow:hidden"><div style="height:100%;width:${pctF}%;background:var(--ok);transition:width .3s"></div></div>`;
     }
     applySearch('rc-body', 'rc-search', 'rc-nomatch');
 }
 
-function jumpRcDay(d) {
+دالة jumpRcDay(d) {
     $('rc-day').value = d;
     rcDraft = {};
     renderReceipts();
@@ -3243,8 +3125,8 @@ function jumpRcDay(d) {
 
 async function saveReceipts() {
     const d = $('rc-day').value;
-    if (!d) return toast('اختر التاريخ', 'error');
-    if (S.receiptLocked[d]) return toast('اليوم ده مقفول', 'error');
+    if (!d) return toast('اختر التاريخ', 'خطأ');
+    if (S.receiptLocked[d]) return toast('اليوم ده مقفول', 'خطأ');
     if (d > todayStr()) return toast('ما ينفعش تسجل وارد ليوم لسه ما جاش', 'error');
     if (d < todayStr() && !await askConfirm('ده تعديل على وارد يوم فات. متأكد؟', 'تأكيد التعديل')) return;
     const rec = {};
@@ -3368,47 +3250,47 @@ function renderTransfers() {
             const pr = productById(t.product_id) || {};
             const isIn = t.type === 'in';
             return `<div class="prow">
-                <div class="row" style="gap:8px"><span class="chip ${isIn ? 'up' : 'down'}">${isIn ? 'وارد' : 'صادر'}</span><span class="pname">${esc(pr.name || 'صنف محذوف')}</span> <span class="punit">${esc(pr.unit || '')}</span> <span class="muted">— ${fmt(t.qty, 2)}</span></div>
-                ${locked ? '' : `<button class="btn btn-ghost btn-sm" style="color:var(--bad)" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
+                <div class="row" style="gap:8px"><span class="chip ${isIn ? 'up' : 'down'}">${isIn ? 'وارد' : 'صادر'}</span><span class="pname">${esc(pr.name || ' حام محذوف')}</span> <span class="punit">${esc(pr.unit || '')}</span> <span class="muted">— ${fmt(t.qty, 2)}</span></div>
+                ${locked ? '' : `<button class="btn btn-ghost btn-sm" style="color:var(--bad)" onclick="deleteTransfer('${esc(t.id)}')"> حذف</button>`}
             </div>`;
-        }).join('')}
+        }).ينضم('')}
     </div>`;
-    }).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
+    }).الانضمام('') || `<div class="muted">${none ? "اليوم ده اتأكد انه بدون تحويلات." : 'مفيش تحويلات في اليوم ده.'}</div>`;
     fillTransProducts();
-    fillTransferFilters();
+    املأ عوامل تصفية النقل();
     setTransType($('trans-type').value || 'in');
 }
 
 async function addTransfer() {
     const d = $('tr-day').value;
-    if (!d) return toast('اختر التاريخ', 'error');
-    if (S.transferLocked[d]) return toast('تحويلات اليوم مقفولة. افتح التعديل الأول', 'error');
+    if (!d) return toast('اختر التاريخ', 'خطأ');
+    if (S.transferLocked[d]) return toast('تحويلات اليوم مقفولة. زيارة الموقع الأول', 'خطأ');
     const type = $('trans-type').value;
     const branch = $('trans-branch').value.trim();
     const pid = $('trans-prod').value;
     const qty = num($('trans-qty').value);
     if (!pid) return toast('اختر صنفاً الأول', 'error');
-    if (qty <= 0) return toast('الكمية لازم تكون أكبر من صفر', 'error');
-    if (branch.length > 120) return toast('اسم الفرع طويل جداً', 'error');
-    if (d > todayStr()) return toast('ما ينفعش تسجل تحويل ليوم لسه ما جاش', 'error');
-    if (d < todayStr() && !await askConfirm('ده تحويل ليوم فات. متأكد؟', 'تأكيد')) return;
+    if (qty <= 0) return toast('الكمية يجب أن تكون أكبر من صفر', 'error');
+    if (branch.length > 120) return toast('اسم فرع طويل جدًا', 'خطأ');
+    if (d > todayStr()) return toast('ما ينفعش تحويل لسببه ما جاش', 'خطأ');
+    if (d < todayStr() && !await AskConfirm('ده تحويل لسبب فات. متأكد؟', 'تأكيد')) return;
     S.transfers.push({ id: uid(), day: d, type, branch, product_id: pid, qty });
-    logAction('إضافة تحويل', d, `${type === 'in' ? 'وارد من' : 'صادر لـ'} ${branch || '—'} — ${productLabel(pid)} ${qty}`);
-    delete S.transferNone[d];
+    logAction('إضافة تحويل', d, `${type === 'in' ? 'وارد من' : 'صادرات لـ'} ${branch || '—'} — ${productLabel(pid)} ${qty}`);
+    حذف S.transferNone[d]؛
     saveDB();
     $('trans-qty').value = '';
     $('trans-search').value = ''; fillTransProducts();
     guardArm();
     $('trans-qty').focus();
     const addedP = productById(pid);
-    $('tr-confirm').textContent = `أضفت ${addedP ? addedP.name : ''} ${qty} ${addedP ? addedP.unit : ''}`;
-    renderAll();
+    $('tr-confirm').textContent = `أؤكدت ${addedP ? addedP.name : ''} ${qty} ${addedP ? addedP.unit : ''}`;
+    استدعاء الكل();
 }
 
-async function deleteTransfer(id) {
+دالة غير متزامنة deleteTransfer(id) {
     const t = S.transfers.find(x => x.id === id);
-    if (!t) return;
-    if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'error');
+    إذا لم يكن (t) فارجع؛
+    if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'خطأ');
     if (t.day < todayStr() && !await askConfirm('ده مسح لتحويل يوم فات. متأكد؟', 'مسح')) return;
     const idx = S.transfers.indexOf(t);
     logAction('مسح تحويل', t.day, `${productLabel(t.product_id)} ${t.qty} (${t.type === 'in' ? 'وارد' : 'صادر'} ${t.branch || '—'})`);
@@ -3613,7 +3495,7 @@ function printTransferReport() {
     clone.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
     clone.querySelectorAll('button').forEach(b => b.remove());
     const from = $('trr-from').value || monthStart(activeMonth), to = $('trr-to').value || monthEnd(activeMonth);
-    area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير التحويلات</div>
+    Area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - إقرار التحويلات</div>
         <div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
     area.appendChild(clone);
     document.body.classList.add('print-area-mode');
@@ -3621,81 +3503,81 @@ function printTransferReport() {
     printNow();
 }
 
-function anRange() {
+دالة anRange() {
     const from = monthStart(activeMonth);
     const to = $('an-to').value;
-    if (!to) return null;
-    if (monthOf(to) !== activeMonth) return { from, to: null, note: 'اختار تاريخ داخل الشهر النشط.' };
+    إذا لم يكن هناك شيء، فأرجع قيمة فارغة (null).
+    if (monthOf(to) !== activeMonth) return { from, to: null, note: 'اختار تاريخ الشراء في الشهر.' };
     return { from, to, note: '' };
 }
 
-function quickAn(kind) {
-    if (kind === 'day') $('an-to').value = $('rc-day').value || todayStr();
-    if (kind === 'month') $('an-to').value = clampToday(activeMonth);
+دالة quickAn(kind) {
+    إذا كان (النوع === 'يوم') $('an-to').value = $('rc-day').value || todayStr();
+    إذا كان (النوع === 'شهر') $('an-to').value = clampToday(activeMonth);
     renderAnalysis();
 }
 
-function calcRow(pid, r, opening, sold, closingStr) {
+دالة حساب الصف (pid، r، الافتتاح، المباع، سلسلة الإغلاق) {
     let rec = 0;
-    eachDay(r.from, r.to, d => { rec += rcpt(d, pid); });
+    everyDay(r.from, r.to, d => { rec += rcpt(d, pid); });
     const net = transfersNet(pid, r.from, r.to);
-    const theo = opening + rec + net - sold;
+    const theo = فتح + مستحق + صافي - مباع؛
     const variance = (closingStr === '' || closingStr === null || closingStr === undefined) ? null : num(closingStr) - theo;
     return { rec, net, theo, variance };
 }
 
-// أيقونة زر الهالك (سلة المهملات)
+// زر هالك (سلة المهملات)
 const WASTE_ICON = '<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg> ';
 
 // قراءة خانة الهالك لصنف (اختيارية - لو مش ظاهرة أو فاضية = صفر)
-function wasteValue(pid) {
+دالة wasteValue(pid) {
     const el = $('aw-' + pid);
     if (!el || el.disabled || el.value === '') return 0;
-    return Math.max(0, num(el.value));
+    أعد القيمة القصوى بين الصفر وقيمة العنصر.
 }
 
-// إظهار / إخفاء خانة الهالك لصنف
-function toggleWaste(pid) {
+// إظهار / إخفاء خانة هالك للصنف
+دالة toggleWaste(pid) {
     const row = $('awr-' + pid);
-    if (!row) return;
+    إذا لم يكن هناك صف، فقم بالخروج؛
     const nowHidden = row.classList.toggle('hidden');
-    if (!nowHidden) {
+    إذا لم يكن العنصر مخفيًا الآن {
         const el = $('aw-' + pid);
-        if (el) el.focus();
+        إذا كان (el) el.focus();
     }
 }
 
-function renderAnalysis() {
+دالة renderAnalysis() {
     const r = anRange();
     const cards = $('an-cards');
     const note = $('an-note');
-    if (!r || !r.to) {
+    إذا لم يكن (r || لم يكن r.to) {
         cards.innerHTML = '';
-        note.textContent = r ? r.note : 'اختار تاريخ النهاية';
+        note.textContent = ص؟ r.note : 'اختر تاريخ النهاية'؛
         note.classList.remove('hidden');
-        return;
+        يعود؛
     }
     note.classList.toggle('hidden', !r.note);
     note.textContent = r.note;
 
     const key = r.to;
     const keep = {};
-    if (key === anKey && !anLoadRows) {
+    إذا كان (المفتاح === anKey && !anLoadRows) {
         S.products.forEach(p => {
             const s = $('as-' + p.id), c = $('ac-' + p.id), w = $('aw-' + p.id);
-            if (s) keep[p.id] = { s: s.value, c: c.value, w: w ? w.value : '', cs: $('acs-' + p.id) ? $('acs-' + p.id).value : '', cn: $('acn-' + p.id) ? $('acn-' + p.id).value : '' };
+            إذا كان (s) keep[p.id] = { s: s.value, c: c.value, w: w ? w.value : '', cs: $('acs-' + p.id) ? $('acs-' + p.id).value : '', cn: $('acn-' + p.id) ? $('acn-' + p.id).value : '' };
         });
     }
     const loaded = anLoadRows;
     anLoadRows = null;
     anKey = key;
 
-    if (!S.products.length) { cards.innerHTML = '<div class="muted">أضف أصنافك من الأصناف ورصيد أول الشهر الأول.</div>'; return; }
+    if (!S.products.length) {cards.innerHTML = '<div class="muted">أضف أصنافك من الأصناف وصيد أول الشهر الأول.</div>'; يعود؛ }
 
     const m = activeMonth;
     cards.innerHTML = S.products.map((p, i) => {
         let s = '', c = '', w = '', cs = '', cn = '';
-        if (loaded && loaded[p.id]) {
+        إذا كان (تم التحميل && تم تحميل[p.id]) {
             s = loaded[p.id].sold;
             c = loaded[p.id].closing === null ? '' : loaded[p.id].closing;
             w = loaded[p.id].waste ? loaded[p.id].waste : '';
@@ -3708,42 +3590,42 @@ function renderAnalysis() {
         const has = hasOpening(p.id, m);
         const hasW = w !== '' && num(w) > 0;
         return `<div class="pcard" data-search="${esc(searchKey(p))}">
-            <div class="ptitle band${isTargetProduct(p) ? ' band-target' : ''}"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span>${isTargetProduct(p) ? '<span class="band-badge">هدف +20%</span>' : ''}</div>
+            <div class="ptitle band${isTargetProduct(p) ? ' band-target' : ''}"><span class="pname">${esc(p.name)}</span> <span class="punit">${esc(p.unit)}</span>${isTargetProduct(p) ? '<span class="band-badge"> هدف +20%</span>' : ''}</div>
             <div class="pgrid">
                 <div class="fld"><span>أول الشهر (ثابت)</span><b>${has ? fmt(openingFor(p.id, m), 2) : '<span class="muted">لم يُدخل</span>'}</b></div>
                 <div class="fld"><span>الوارد (من أول الشهر)</span><b id="ar-${esc(p.id)}">-</b></div>
                 <label class="fld"><span>المباع (من أول الشهر)</span>
                     <input class="inp" type="number" min="0" step="any" id="as-${esc(p.id)}" data-nav="sold" data-ri="${i}" value="${esc(s)}" placeholder="0" oninput="liveAn()"></label>
                 <div class="fld"><span>التحويلات (صافي)</span><b id="at-${esc(p.id)}">-</b></div>
-                <label class="fld"><span>الجرد الفعلي (في تاريخ النهاية)</span>
-                    <input class="inp" type="number" min="0" step="any" id="ac-${esc(p.id)}" data-nav="close" data-ri="${i}" value="${esc(c)}" placeholder="بعد العد" oninput="liveAn()"></label>
+                <label class="fld"><span>الجرد الفعلي (في تاريخ النهائي)</span>
+                    <input class="inp" type="number" min="0" step="any" id="ac-${esc(p.id)}" data-nav="close" data-ri="${i}" value="${esc(c)}" placeholder="بعد الإغلاق" oninput="liveAn()"></label>
                 <div class="fld"><span>النظري</span><b id="ath-${esc(p.id)}">-</b></div>
                 <label class="fld"><span>الهالك (اختياري)</span>
                     <input class="inp" type="number" min="0" step="any" id="aw-${esc(p.id)}" data-nav="waste" data-ri="${i}" value="${esc(w)}" placeholder="0" oninput="liveAn()"></label>
                 <label class="fld"><span>سبب الهالك</span>
                     <select class="inp" id="acs-${esc(p.id)}" onchange="liveAn()">${causeOptions(cs)}</select></label>
-                <div class="fld ${cs === 'أخرى' ? '' : 'hidden'}" id="acnw-${esc(p.id)}" style="grid-column:1/-1"><span>وضح السبب</span>
+                <div class="fld ${cs === 'أخرى' ? '' : 'hidden'}" id="acnw-${esc(p.id)}" style="grid-column:1/-1"><span>توضيح الأسباب</span>
                     <input class="inp" type="text" id="acn-${esc(p.id)}" value="${esc(cn)}" placeholder="اكتب السبب" oninput="liveAn()"></div>
-                <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم الهالك)</span><b id="av-${esc(p.id)}">-</b> <small id="avp-${esc(p.id)}" class="muted"></small></div>
+                <div class="fld" style="grid-column:1/-1"><span>العجز / الزيادة (بعد خصم هالك)</span><b id="av-${esc(p.id)}">-</b> <small id="avp-${esc(p.id)}" class="muted"></small></div>
                 <div class="fld" style="grid-column:1/-1"><span>القيمة بالفلوس</span><b id="avl-${esc(p.id)}">-</b></div>
-                ${isTargetProduct(p) ? `<div class="fld" style="grid-column:1/-1"><span>نسبة الـ Yield (المعياري − الفعلي) ÷ الفعلي</span><b id="yl-${esc(p.id)}">-</b></div>` : ''}
-                <div class="fld hidden" id="awh-${esc(p.id)}" style="grid-column:1/-1;color:var(--gold2)">الهالك والسبب بيتفتحوا بعد كتابة المباع والجرد الفعلي، ويتقفلوا لو فيه زيادة</div>
+                ${isTargetProduct(ع)؟ `<div class="fld" style="grid-column:1/-1"><span>نسبة الـ العائد (المعياري − الفعل) ÷ الفعل</span><b id="yl-${esc(p.id)}">-</b></div>` : ''}
+                <div class="fld Hidden" id="awh-${esc(p.id)}" style="grid-column:1/-1;color:var(--gold2)">الهالك والسبب بيتفتحوا بعد كتابة المباع والجرد الفعلي، ويحبوا لو فيه زيادة</div>
             </div>
         </div>`;
-    }).join('');
+    }).ينضم('')؛
 
     liveAn();
-    applySearch('an-cards', 'an-search', 'an-nomatch');
+    تطبيق البحث('an-cards', 'an-search', 'an-nomatch');
     sortCritFirst();
     renderSavedAnalyses();
 }
 
-function liveAn() {
-    renderCauseSummary();
+دالة liveAn() {
+    عرض ملخص السبب();
     renderFoodCost();
     renderWasteAllowance();
     const r = anRange();
-    if (!r || !r.to) return;
+    إذا لم يكن (r || لم يكن r.to) فارجع؛
     S.products.forEach(p => {
         const as = $('as-' + p.id);
         if (!as) return;
@@ -3927,19 +3809,19 @@ function renderWasteAllowance() {
     const noPrice = [];
     S.products.forEach(p => {
         const w = wasteValue(p.id);
-        if (w <= 0) return;
-        if (p.price === null || p.price === undefined) { noPrice.push(p.name); return; }
+        إذا كان (w <= 0) فارجع؛
+        إذا كان (سعر العنصر p.price يساوي null أو غير مُعرّف) { أضف اسم العنصر p إلى قائمة noPrice؛ ثم ارجع. }
         wasteVal += w * p.price;
     });
     let missingSales = 0;
     eachDay(monthStart(activeMonth), r.to, d => { if (!S.sales[d]) missingSales++; });
-    if (netRev <= 0) {
-        body.innerHTML = '<div class="note">مفيش إيراد مسجل للفترة دي، فالحد المسموح ما يتحسبش. سجّل الإيراد الأول.</div>';
-        return;
+    إذا كان (صافي الإيرادات <= 0) {
+        body.innerHTML = '<div class="note">مفيش إيراد مسجل لموسيقى دي، فالحد المناسب ما يحسبش. سجل الإيراد الأول.</div>';
+        يعود؛
     }
-    if (noPrice.length) {
-        body.innerHTML = `<div class="note">فيه هالك على أصناف من غير سعر (${esc(noPrice.join('، '))})، حط سعرها عشان الحد يتحسب صح.</div>`;
-        return;
+    إذا كان (noPrice.length) {
+        body.innerHTML = `<div class="note">فيه هالك على أصناف غير سعر (${esc(noPrice.join('، '))})، حط سعرها لكي الحد يتحسب صح.</div>`;
+        يعود؛
     }
     const allowed = netRev * WASTE_ALLOW_RATE;
     const remaining = allowed - wasteVal;
@@ -3949,15 +3831,15 @@ function renderWasteAllowance() {
     const barColor = within ? 'var(--ok)' : 'var(--bad)';
     body.innerHTML = `
         <div class="tip ${within ? 'good' : 'warn'}" style="margin-bottom:10px"><span class="dot"></span><span>
-            <b>${within ? 'داخل الحد المسموح' : 'تجاوز الحد المسموح'}</b>${within ? '' : ` بقيمة <b>${fmt(wasteVal - allowed, 2)} ج.م</b>`}
+            <b>${في غضون ؟ 'داخل الحد الأدنى' : 'تجاوز الحدود'}</b>${within ? '' : ` الاستديو <b>${fmt(wasteVal - مسموح, 2)} ج.م</b>`}
         </span></div>
         <table class="sum-tbl"><tbody>
             <tr class="sum-gold"><th>صافي الإيراد</th><td>${fmt(netRev, 2)} ج.م</td></tr>
-            <tr class="sum-gold"><th>نسبة الهالك المسموح</th><td>0.9%</td></tr>
-            <tr class="sum-green"><th>قيمة الهالك المسموح</th><td>${fmt(allowed, 2)} ج.م</td></tr>
-            <tr class="sum-red"><th>قيمة الهالك الفعلي المسجل</th><td>${fmt(wasteVal, 2)} ج.م</td></tr>
-            <tr class="${remaining >= 0 ? 'sum-green' : 'sum-red'}"><th>المتبقي من حد الهالك</th><td>${remaining >= 0 ? '' : '-'}${fmt(Math.abs(remaining), 2)} ج.م</td></tr>
-            <tr class="sum-total"><th>نسبة استهلاك حد الهالك</th><td>${fmt(used, 2)}%</td></tr>
+            <tr class="sum-gold"><th> نسبة تناسبك</th><td>0.9%</td></tr>
+            <tr class="sum-green"><th>قيمة هالك المخصصة</th><td>${fmt(allowed, 2)} ج.م</td></tr>
+            <tr class="sum-red"><th>قيمة الهالك الصناعي المستخدم</th><td>${fmt(wasteVal, 2)} ج.م</td></tr>
+            <tr class="${remaining >= 0 ? 'sum-green' : 'sum-red'}"><th>المتبقي من حد هالك</th><td>${remaining >= 0 ? '' : '-'}${fmt(Math.abs(remaining), 2)} ج.م</td></tr>
+            <tr class="sum-total"><th>نسبة استهلاك حد هالك</th><td>${fmt(used, 2)}%</td></tr>
         </tbody></table>
         <div style="margin-top:12px;height:10px;border-radius:99px;background:var(--card2);overflow:hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(barW)}">
             <div style="height:100%;width:${barW.toFixed(2)}%;background:${barColor};transition:width .3s"></div>
@@ -4068,56 +3950,56 @@ function renderSavedAnalyses() {
     const list = [...S.analyses].sort((a, b) => (a.to < b.to ? 1 : -1));
     $('saved-list').innerHTML = list.map(a => `<div class="prow">
         <div>
-            <b>من ${esc(a.from)} لحد ${esc(a.to)}</b>
+            <b>من ${esc(a.from)} إلى ${esc(a.to)}</b>
             <div class="muted">محفوظ ${esc(a.saved)} · ${Object.keys(a.rows || {}).length} صنف</div>
         </div>
         <div class="row">
-            <button class="btn btn-sm" onclick="loadAnalysis('${esc(a.id)}')">عرض</button>
-            <button class="btn btn-red btn-sm" onclick="deleteAnalysis('${esc(a.id)}')">حذف</button>
+            <button class="btn btn-sm" onclick="loadAnalysis('${esc(a.id)}')"> عرض</button>
+            <button class="btn btn-red btn-sm" onclick="deleteAnalysis('${esc(a.id)}')"> حذف</button>
         </div>
-    </div>`).join('') || '<div class="muted">مفيش تحليلات محفوظة بعد.</div>';
+    </div>`).الانضمام('') || '<div class="muted">مفيش تحليلات محفوظة بعد.</div>';
 }
 
-function loadAnalysis(id) {
+دالة تحميل التحليل (id) {
     const a = S.analyses.find(x => x.id === id);
-    if (!a) return;
-    if (monthOf(a.to) !== activeMonth) { activeMonth = monthOf(a.to); setMonthDefaults(); $('month-input').value = activeMonth; }
+    إذا لم يكن (أ) فارجع؛
+    إذا كان الشهر الحالي (monthOf(a.to) !== activeMonth) { activeMonth = monthOf(a.to); setMonthDefaults(); $('month-input').value = activeMonth; }
     $('an-to').value = a.to;
     anLoadRows = a.rows;
     renderAnalysis();
     toast('تم عرض التحليل المحفوظ');
 }
 
-async function deleteAnalysis(id) {
-    if (!await askConfirm('حذف هذا التحليل المحفوظ؟', 'حذف')) return;
+دالة غير متزامنة deleteAnalysis(id) {
+    if (!await AskConfirm('حذف هذا التحليل المحفوظ؟', 'حذف')) return;
     S.analyses = S.analyses.filter(x => x.id !== id);
     saveDB();
     toast('تم الحذف');
-    renderAll();
+    استدعاء الكل();
 }
 
-// وضع الطباعة بيخفي عناصر مؤقتاً. لو المتصفح ما بعتش حدث afterprint (زي بعض متصفحات الموبايل)،
+// وضع الطباعة بيخفي لوقتاً. تنزيل ما بتش حدث afterprint (زي بعض متصفحات الموبايل)،
 // بنرجّع الشكل الطبيعي عند أول تفاعل حتى الصفحة ما تفضلش مقفولة
 const PRINT_MODE_CLASSES = ['print-orders', 'print-salesforecast', 'print-analysis', 'print-exp-mode'];
 // قبل الطباعة/الحفظ PDF: نسأل شكل الملف (ثيم الشاشة أو خلفية فاتحة)
-function printNow() {
-    // الضغط على زرار الاختيار بيمسح أوضاع الطباعة المؤقتة، فبنحفظها ونرجعها قبل الطباعة
+دالة printNow() {
+    // اضغط على زرار الاختيار بي مسح الخصائص المؤقتة، فبنحفظها ونرجعها قبل الطباعة
     const saved = PRINT_MODE_CLASSES.filter(c => document.body.classList.contains(c));
-    return askChoice('شكل الملف:\nبنفس ثيم الشاشة، أو خلفية فاتحة (أوفر حبر وأوضح على الورق)', 'بنفس ثيم الشاشة', 'خلفية فاتحة').then(c => {
-        if (c === -1) { saved.forEach(x => document.body.classList.remove(x)); return; }
+    return AskChoice('شكل الملف:\nبنفس ثيم الشاشة، أو خلفية فاتحة (أوفر حبر موضح على ورق الحائط)', 'بنفس ثيم الشاشة', ' خلفية فاتحة').then(c => {
+        إذا كانت قيمة c تساوي -1، فسيتم حذف كل عنصر x من قائمة الفئات الموجودة في عنصر body من المستند، ثم يتم إنهاء العملية.
         const root = document.documentElement;
-        if (c === 1) root.classList.add('print-light');
+        إذا كانت قيمة c تساوي 1، فأضف 'print-light' إلى قائمة الفئات الجذرية.
         saved.forEach(x => document.body.classList.add(x));
         window.addEventListener('afterprint', () => root.classList.remove('print-light'), { once: true });
         window.print();
     });
 }
-function resetPrintMode() { PRINT_MODE_CLASSES.forEach(c => document.body.classList.remove(c)); }
+دالة إعادة ضبط وضع الطباعة() { PRINT_MODE_CLASSES.forEach(c => document.body.classList.remove(c)); }
 window.addEventListener('afterprint', resetPrintMode);
 window.addEventListener('focus', resetPrintMode);
 document.addEventListener('pointerdown', resetPrintMode);
 
-function printAnalysis() {
+دالة printAnalysis() {
     const r = anRange();
     if (!r || !r.to) return toast('اختر تاريخ النهاية الأول', 'error');
     const head = $('an-print-head');
