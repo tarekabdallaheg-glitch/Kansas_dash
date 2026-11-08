@@ -23,6 +23,8 @@
   --ring:0 0 0 3px rgba(242,201,107,.28);
 }
 *{box-sizing:border-box}
+.dark{color-scheme:dark}
+select.inp option{background:var(--card);color:var(--text)}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,-apple-system,sans-serif;background:var(--bg);background-image:radial-gradient(1200px 500px at 90% -10%,rgba(214,158,46,.07),transparent 60%),radial-gradient(900px 400px at -10% 0%,rgba(30,58,95,.08),transparent 60%);color:var(--text);font-size:14px;line-height:1.6;padding-bottom:48px;-webkit-font-smoothing:antialiased}
 .wrap{max-width:100%;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:16px}
@@ -483,6 +485,37 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
   body.print-analysis #pn-analysis .up{color:#166534!important}
 }
 
+/* ===== تحسين طباعة تحليل المخزون: ورقة فاتحة بدون تدرجات ولا خطوط مزخرفة ===== */
+@media print{
+  body.print-analysis #pn-analysis{background:#fff!important}
+  body.print-analysis #pn-analysis .card{background:#fff!important;border:0!important;box-shadow:none!important}
+  body.print-analysis #pn-analysis .pcard{background:#fff!important;box-shadow:none!important;break-inside:avoid}
+  body.print-analysis #pn-analysis .cards-grid{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  body.print-analysis #pn-analysis .ptitle.band{background:#f3f4f6!important;margin:0 0 8px!important;padding:6px 8px!important;border-bottom:1px solid #777!important;border-radius:6px!important}
+  body.print-analysis #pn-analysis .ptitle.band::before{display:none!important}
+  body.print-analysis #pn-analysis .ptitle.band-target{background:#fef3c7!important}
+  body.print-analysis #pn-analysis .ptitle.band-target .pname{color:#000!important}
+  body.print-analysis #pn-analysis .punit,
+  body.print-analysis #pn-analysis .ptitle.band-target .punit{background:#fff!important;color:#000!important;border:1px solid #777!important}
+  body.print-analysis #pn-analysis .band-badge{background:#fff!important;color:#000!important;border:1px solid #777!important}
+  body.print-analysis #pn-analysis input,
+  body.print-analysis #pn-analysis select{background:#fff!important;color:#000!important;border:1px solid #777!important;opacity:1!important;-webkit-text-fill-color:#000}
+  body.print-analysis #pn-analysis .fld,
+  body.print-analysis #pn-analysis .fld b,
+  body.print-analysis #pn-analysis .muted{color:#000!important}
+  body.print-analysis #pn-analysis .sum-tbl th,
+  body.print-analysis #pn-analysis .sum-tbl td{background:#f3f4f6!important;color:#000!important}
+  body.print-analysis #pn-analysis .sum-tbl tr.sum-red td{color:#b00000!important}
+  body.print-analysis #pn-analysis .sum-tbl tr.sum-green td{color:#166534!important}
+  body.print-analysis #pn-analysis .sum-tbl tr.sum-gold td{color:#92400e!important}
+  body.print-analysis #pn-analysis .sum-tbl tr.sum-total th,
+  body.print-analysis #pn-analysis .sum-tbl tr.sum-total td{background:#e5e7eb!important;color:#000!important}
+  body.print-analysis #pn-analysis #food-cost details,
+  body.print-analysis #pn-analysis #cause-summary details{display:block!important}
+  body.print-analysis #pn-analysis #waste-allow{display:block!important}
+  body.print-analysis #pn-analysis #waste-allow summary{display:block!important}
+}
+
 /* ===== منطقة طباعة مستقلة (للطلبيات): مخفية على الشاشة، وبتظهر بس وقت الطباعة ===== */
 #print-area{display:none}
 @media print{
@@ -909,7 +942,6 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <button class="btn btn-gold" id="btn-add-prod" onclick="addProduct()">إضافة صنف</button>
                 </div>
                 <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:18px">
-                    <button class="btn btn-ghost" id="open-suggest" onclick="suggestOpening()">اقتراح من آخر جرد للشهر اللي فات</button>
                     <button class="btn btn-gold" id="open-save" data-save onclick="saveOpening()">حفظ وإغلاق</button>
                     <button class="btn" id="open-unlock" onclick="unlockOpening()">فتح تعديل الرصيد</button>
                 </div>
@@ -1243,7 +1275,7 @@ function toast(msg, type = 'success') {
 }
 
 function askConfirm(msg) {
-    return askTyped(`${msg}\nاكتب "تأكيد" عشان توافق:`, 'تأكيد');
+    return askOk(msg);
 }
 
 const emptyDB = () => ({
@@ -1374,24 +1406,7 @@ window.kansasStart = function () {
 };
 
 function checkDailyAutoBackup() {
-    const today = todayStr();
-    if (S.lastBackup !== today) {
-        try {
-            const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'kansas-end-of-day-backup-' + today + '.json';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-            S.lastBackup = today;
-            saveDB();
-            toast('تم إجراء النسخ الاحتياطي التلقائي لنهاية اليوم بنجاح');
-        } catch (e) {
-            console.log('فشل النسخ التلقائي:', e);
-        }
-    }
+    // التنزيل التلقائي اتشال: التذكير بالنسخ الاحتياطية بيظهر من renderBackupAlert
 }
 
 function lockSystem() {
@@ -1430,6 +1445,13 @@ function resetRevRange() {
 }
 
 function switchTab(tab) {
+    if (tab !== 'inventory' && invView) {
+        invView = null;
+        document.body.removeAttribute('data-sec');
+        NAV_STACK.length = 0;
+        if (HIST_PUSHED) { HIST_PUSHED = false; try { history.back(); } catch (e) {} }
+        renderInventory();
+    }
     activeTab = tab;
     $('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
     $('tab-salesforecast').classList.toggle('hidden', tab !== 'salesforecast');
@@ -1479,7 +1501,7 @@ function isValidBackup(d) {
 async function importBackup(input) {
     const f = input.files[0];
     if (!f) return;
-    if (!await askConfirm('الاستيراد هيستبدل كل البيانات الحالية في المتصفح. متأكد؟', 'استيراد')) { input.value = ''; return; }
+    if (!await askTyped('الاستيراد هيستبدل كل البيانات الحالية في المتصفح. متأكد؟\nاكتب "استيراد" عشان توافق:', 'استيراد')) { input.value = ''; return; }
     const r = new FileReader();
     r.onload = () => {
         try {
@@ -1541,10 +1563,8 @@ function nextRowCells(scope, ri, dir) {
 }
 
 // منع زيادة/نقص الأرقام عند لف عجلة الماوس فوق خانات الأرقام
-document.addEventListener('wheel', function(e) {
-    if (document.activeElement && document.activeElement.type === 'number') {
-        e.preventDefault(); document.activeElement.blur();
-    }
+document.addEventListener('wheel', function (e) {
+    if (e.target && e.target.type === 'number' && document.activeElement === e.target) e.preventDefault();
 }, { passive: false });
 
 document.addEventListener('keydown', (e) => {
@@ -1980,37 +2000,38 @@ function renderCompare() {
 }
 
 function revenueAssistantAnswer(question, a) {
-    const q = String(question || '').toLowerCase();
+    const q = arNorm(question);
+    const k = w => q.includes(arNorm(w));
     const money = v => `${fmt(v, 2)} ج.م`;
     if (!a.t.days) return 'مفيش بيانات إيرادات كفاية في الفترة المحددة. سجّل الإيراد وعدد العمليات للأيام، وبعدها أقدر أحلل الأداء.';
-    if (q.includes('خطة') || q.includes('هدف') || q.includes('هحقق') || q.includes('تحقيق')) {
+    if (k('خطة') || k('هدف') || k('هحقق') || k('تحقيق') || k('يقفل') || k('يوصل')) {
         if (!a.c.plan_rev) return 'لسه مفيش خطة شهرية مسجلة. افتح إعدادات الشهر وسجّل المستهدف، وبعدها هحسب نسبة التحقيق والمتوسط اليومي المطلوب.';
         let msg = `المحقق حتى الآن ${money(a.m.rev)} من إجمالي خطة الشهر ${money(a.c.plan_rev)}، بنسبة تحقيق ${(100 * (a.planPct || 0)).toFixed(1)}%. `;
         if (a.required !== null) msg += `محتاج تحقق ${money(a.required)} يوميًا خلال ${a.remDays} يوم متبقي.`;
         if (a.projPlan !== null) msg += ` وبالمعدل الحالي، المتوقع إغلاق الشهر على ${money(a.projected)}، أي ${(100 * a.projPlan).toFixed(1)}% من الخطة الكلية.`;
         return msg;
     }
-    if (q.includes('شيك') || q.includes('متوسط')) {
+    if (k('شيك') || k('فاتورة') || k('متوسط الطلب') || k('متوسط')) {
         let msg = `متوسط الشيك الحالي ${money(a.avgChk)}، بإجمالي ${fmt(a.t.ord)} عملية وإيراد ${money(a.t.rev)}.`;
         if (a.chkGrowth !== null) msg += ` مقارنة بالسنة الماضية، متوسط الشيك ${a.chkGrowth >= 0 ? 'زاد' : 'انخفض'} بنسبة ${Math.abs(a.chkGrowth * 100).toFixed(1)}%.`;
         else msg += ' لا توجد بيانات كافية لمقارنته بالسنة الماضية.';
         return msg;
     }
-    if (q.includes('عملية') || q.includes('عمليات') || q.includes('اوردر') || q.includes('طلبات')) {
+    if (k('عملية') || k('عمليات') || k('اوردر') || k('طلبات')) {
         let msg = `تم تسجيل ${fmt(a.t.ord)} عملية خلال ${a.t.days} يوم، بمتوسط ${fmt(a.avgOrd, 1)} عملية يوميًا.`;
         if (a.ordGrowth !== null) msg += ` مقارنة بالسنة الماضية، عدد العمليات ${a.ordGrowth >= 0 ? 'زاد' : 'انخفض'} بنسبة ${Math.abs(a.ordGrowth * 100).toFixed(1)}%.`;
         else msg += ' لا توجد بيانات مقارنة كافية للسنة الماضية.';
         return msg;
     }
-    if (q.includes('سنة') || q.includes('ماضي') || q.includes('مقارن')) {
+    if (k('سنة') || k('ماضي') || k('مقارن') || k('قارن')) {
         if (a.growthLy === null) return 'بيانات المقارنة مع السنة الماضية غير كافية. أدخل بيانات السنة الماضية من قسم إعدادات الإيرادات.';
         return `إيراد الفترة ${money(a.t.rev)} مقابل ${money(a.lyRev)} لنفس الأيام السنة الماضية؛ ${a.growthLy >= 0 ? 'نمو' : 'انخفاض'} بنسبة ${Math.abs(a.growthLy * 100).toFixed(1)}%.`;
     }
-    if (q.includes('أضعف') || q.includes('اضعف') || q.includes('أفضل') || q.includes('اقوى') || q.includes('أقوى')) {
+    if (k('أضعف') || k('اضعف') || k('أفضل') || k('اقوى') || k('أقوى')) {
         if (!a.best) return 'محتاج بيانات أيام أكثر عشان أحدد أقوى وأضعف يوم في الأسبوع.';
         return `أقوى يوم حسب البيانات المسجلة هو ${DAYS_AR[a.best.i]} بمتوسط ${money(a.best.v)}.` + (a.worst ? ` وأضعف يوم هو ${DAYS_AR[a.worst.i]} بمتوسط ${money(a.worst.v)}.` : ' ولسه محتاجين بيانات أكثر لتحديد الأضعف.');
     }
-    if (q.includes('ليه') || q.includes('سبب') || q.includes('انخفاض') || q.includes('نازل') || q.includes('نزول')) {
+    if (k('ليه') || k('سبب') || k('انخفاض') || k('نازل') || k('نزول')) {
         const clues = [];
         if (a.ordGrowth !== null && a.ordGrowth < 0) clues.push(`عدد العمليات أقل من السنة الماضية بنسبة ${Math.abs(a.ordGrowth * 100).toFixed(1)}%`);
         if (a.chkGrowth !== null && a.chkGrowth < 0) clues.push(`متوسط الشيك أقل بنسبة ${Math.abs(a.chkGrowth * 100).toFixed(1)}%`);
@@ -2403,6 +2424,7 @@ function loadSalesDay() {
     const r = S.sales[$('sales-day').value];
     $('sales-rev').value = r ? r.revenue : '';
     $('sales-ord').value = r ? r.orders : '';
+    FORM_DAY.sales = $('sales-day').value;
     renderSalesForm();
 }
 
@@ -2437,7 +2459,7 @@ async function deleteSalesDay() {
     const d = $('sales-day').value;
     if (!S.sales[d]) return toast('مفيش إيراد مسجل لليوم ده', 'error');
     if (d < todayStr()) return toast('مينفعش تمسح إيراد يوم فات، تقدر تعدله بس', 'error');
-    if (!await askConfirm(`مسح إيراد يوم ${d} نهائياً؟ هيتشال من الفعلي والتوقع والتحليل.`, 'مسح')) return;
+    if (!await askTyped(`مسح إيراد يوم ${d} نهائياً؟ هيتشال من الفعلي والتوقع والتحليل.\nاكتب "مسح" عشان توافق:`, 'مسح')) return;
     logAction('مسح إيراد', d, `كان ${S.sales[d].revenue} ج.م / ${S.sales[d].orders} عملية`);
     delete S.sales[d];
     delete S.locks.sales[d];
@@ -2676,7 +2698,6 @@ function renderOpening() {
             : 'ادخل رصيد أول الشهر لكل صنف (Enter أو ↓ للصنف اللي بعده) واضغط حفظ وإغلاق.';
 
     $('open-save').classList.remove('hidden');
-    $('open-suggest').classList.toggle('hidden', locked);
     $('open-unlock').classList.toggle('hidden', !locked);
     ['new-prod-name', 'new-prod-unit', 'new-prod-price'].forEach(id => { $(id).disabled = locked; });
     $('btn-add-prod').disabled = locked;
@@ -2689,17 +2710,6 @@ async function addProduct() {
     if (!name) return toast('اكتب اسم الصنف', 'error');
     if (name.length > 120 || unit.length > 40) return toast('الاسم أو الوحدة طويل جداً', 'error');
     if (S.products.some(p => p.name === name && p.unit === unit)) return toast('الصنف ده موجود قبل كده', 'error');
-    const similar = S.products.find(p => similarNames(p.name, name));
-    if (similar) {
-        const choice = await askChoice(`الاسم "${name}" قريب من صنف موجود: "${similar.name}".\nهل تقصد نفس الصنف؟`, 'استخدام الصنف الموجود', 'إضافة صنف جديد');
-        if (choice === -1) return;
-        if (choice === 0) {
-            $('new-prod-name').value = ''; $('new-prod-unit').value = ''; $('new-prod-price').value = '';
-            guardArm();
-    toast('تم اختيار الصنف الموجود، مش هتتضاف نسخة جديدة');
-            return;
-        }
-    }
     const priceRaw = $('new-prod-price').value.trim();
     const price = priceRaw === '' ? null : Number(priceRaw);
     if (price !== null && (!Number.isFinite(price) || price < 0)) return toast('السعر لازم يكون رقم صفر أو أكبر', 'error');
@@ -2802,18 +2812,6 @@ async function unlockOpening() {
     renderAll();
 }
 
-function suggestOpening() {
-    const prev = shiftMonth(activeMonth, -1);
-    let n = 0;
-    S.products.forEach(p => {
-        const el = $('op-' + p.id);
-        if (!el || el.disabled) return;
-        const v = lastClosingIn(p.id, prev);
-        const val = v !== null ? v : (hasOpening(p.id, prev) ? openingFor(p.id, prev) : null);
-        if (val !== null) { el.value = val; n++; }
-    });
-    toast(n ? `تم ملء ${n} صنف. راجع الأرقام واضغط حفظ` : 'مفيش جرد محفوظ للشهر اللي فات', n ? 'success' : 'error');
-}
 
 document.addEventListener('change', async (e) => {
     const t = e.target;
@@ -2875,9 +2873,12 @@ function askChoice(msg, b0, b1) {
             </div>
         </div>`;
         document.body.appendChild(ov);
+        const finish = v => { document.removeEventListener('keydown', onKey, true); ov.remove(); resolve(v); };
+        const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); finish(-1); } };
+        document.addEventListener('keydown', onKey, true);
         ov.addEventListener('click', e => {
             const c = e.target.dataset ? e.target.dataset.c : undefined;
-            if (c !== undefined) { ov.remove(); resolve(Number(c)); }
+            if (c !== undefined) finish(Number(c));
         });
     });
 }
@@ -2912,9 +2913,12 @@ function askOk(msg) {
             </div>
         </div>`;
         document.body.appendChild(ov);
+        const finish = v => { document.removeEventListener('keydown', onKey, true); ov.remove(); resolve(v); };
+        const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); finish(false); } };
+        document.addEventListener('keydown', onKey, true);
         ov.addEventListener('click', e => {
             const v = e.target.dataset ? e.target.dataset.ok : undefined;
-            if (v !== undefined) { ov.remove(); resolve(v === '1'); }
+            if (v !== undefined) finish(v === '1');
         });
     });
 }
@@ -2966,6 +2970,7 @@ function unusualRcNote(pid) {
 
 function renderReceipts() {
     const d = $('rc-day').value;
+    FORM_DAY.rc = d;
     const locked = !!S.receiptLocked[d];
     const none = !!S.receiptNone[d];
 
@@ -3119,6 +3124,7 @@ function branchColor(name) {
 
 function renderTransfers() {
     const d = $('tr-day').value;
+    FORM_DAY.tr = d;
     const locked = !!S.transferLocked[d];
     const none = !!S.transferNone[d];
     const list = S.transfers.filter(t => t.day === d);
@@ -3663,7 +3669,10 @@ function lockWasteFields(pid, rawVar) {
     if (cs) cs.disabled = locked;
     if (cn) cn.disabled = locked;
     const hint = $('awh-' + pid);
-    if (hint) hint.classList.toggle('hidden', !locked);
+    if (hint) {
+        hint.classList.toggle('hidden', !locked);
+        if (locked) hint.textContent = surplus ? 'فيه زيادة في الجرد، فمفيش هالك لهذا الصنف' : 'اكتب المباع والجرد الفعلي الأول، بعدين الهالك';
+    }
     const noteWrap = $('acnw-' + pid);
     if (noteWrap && cs) noteWrap.classList.toggle('hidden', cs.value !== 'أخرى');
 }
@@ -3894,7 +3903,7 @@ const PRINT_MODE_CLASSES = ['print-orders', 'print-salesforecast', 'print-analys
 function printNow() {
     // الضغط على زرار الاختيار بيمسح أوضاع الطباعة المؤقتة، فبنحفظها ونرجعها قبل الطباعة
     const saved = PRINT_MODE_CLASSES.filter(c => document.body.classList.contains(c));
-    return askChoice('شكل الملف:\nبنفس ثيم الشاشة، أو خلفية فاتحة (أوفر حبر وأوضح على الورق)', 'بنفس ثيم الشاشة', 'خلفية فاتحة').then(c => {
+    return askChoice('شكل الملف:\nبنفس ثيم الشاشة، أو خلفية فاتحة (أوفر حبر وأوضح على الورق)\nلو الألوان مش ظاهرة، فعّل Background graphics من More settings في نافذة الطباعة.', 'بنفس ثيم الشاشة', 'خلفية فاتحة').then(c => {
         if (c === -1) { saved.forEach(x => document.body.classList.remove(x)); return; }
         const root = document.documentElement;
         if (c === 1) root.classList.add('print-light');
@@ -3903,7 +3912,8 @@ function printNow() {
         window.print();
     });
 }
-function resetPrintMode() { PRINT_MODE_CLASSES.forEach(c => document.body.classList.remove(c)); }
+let PRINTING = false;
+function resetPrintMode() { if (PRINTING) return; PRINT_MODE_CLASSES.forEach(c => document.body.classList.remove(c)); }
 window.addEventListener('afterprint', resetPrintMode);
 window.addEventListener('focus', resetPrintMode);
 document.addEventListener('pointerdown', resetPrintMode);
@@ -3914,10 +3924,26 @@ function printAnalysis() {
     const head = $('an-print-head');
     if (head) head.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تحليل المخزون</div>
         <div style="text-align:center;font-weight:800">من ${esc(r.from)} إلى ${esc(r.to)}</div>`;
+    const root = document.documentElement;
+    const wasDark = root.classList.contains('dark');
+    const wasteEl = $('waste-allow');
+    const wasteWasClosed = wasteEl && !wasteEl.open;
+    if (wasteWasClosed) wasteEl.open = true;
+    // ورقة فاتحة دايماً للتحليل: بنشيل الثيم الليلي وقت الطباعة عشان الألوان تبقى واضحة
+    root.classList.remove('dark');
+    root.classList.add('print-light');
     document.body.classList.add('print-analysis');
-    const clean = () => document.body.classList.remove('print-analysis');
+    PRINTING = true;
+    const clean = () => {
+        PRINTING = false;
+        document.body.classList.remove('print-analysis');
+        root.classList.remove('print-light');
+        if (wasDark) root.classList.add('dark');
+        if (wasteWasClosed && wasteEl) wasteEl.open = false;
+    };
     window.addEventListener('afterprint', clean, { once: true });
-    setTimeout(() => printNow(), 80);
+    toast('لو الألوان مش ظاهرة، فعّل Background graphics من More settings في نافذة الطباعة');
+    setTimeout(() => window.print(), 80);
 }
 
 function setExportMonth() {
@@ -4054,11 +4080,22 @@ function shelfDays(pid) {
     return s && s.value > 0 ? s.value * EXP_UNITS[s.unit] : 0;
 }
 
+// تاريخ الانتهاء بالتقويم الفعلي: الشهر والسنة بيتحسبوا بالتاريخ مش بـ 30 و365 يوم
+function shelfEnd(day, pid) {
+    const s = S.shelf[pid];
+    if (!s || !(s.value > 0)) return null;
+    if (s.unit === 'day') return addDays(day, s.value);
+    const [y, m, d] = day.split('-').map(Number);
+    const months = s.unit === 'year' ? s.value * 12 : s.value;
+    const tm = (m - 1) + months;
+    const ty = y + Math.floor(tm / 12), tmo = ((tm % 12) + 12) % 12;
+    const lastDay = new Date(Date.UTC(ty, tmo + 1, 0)).getUTCDate();
+    return `${ty}-${pad(tmo + 1)}-${pad(Math.min(d, lastDay))}`;
+}
 function expRows() {
     return S.batches.map(b => {
         const p = productById(b.pid);
-        const sd = shelfDays(b.pid);
-        const exp = sd ? addDays(b.day, sd) : null;
+        const exp = shelfEnd(b.day, b.pid);
         return { ...b, name: p ? p.name : 'صنف محذوف', unit: p ? p.unit : '', exp, left: exp ? daysBetween(todayStr(), exp) : null };
     }).sort((a, b) => {
         if (a.left === null && b.left === null) return a.day < b.day ? -1 : 1;
@@ -4654,12 +4691,14 @@ function guardedNav(fn) {
 
 // مسودات مؤقتة في الذاكرة: لو خرجت من قسم وفيه كتابة مش محفوظة، ترجع لما ترجع للقسم
 const DRAFTS = {};
+// اليوم اللي الفورم معروض له فعلاً (بيتحدّث عند التحميل مش عند تغيير الخانة) عشان المسودة تتحفظ على اليوم الصح
+const FORM_DAY = { sales: null, rc: null, tr: null };
 function draftKey() {
     const dayPick =
-        invView === 'receipts' ? $('rc-day').value :
-        invView === 'transfers' ? $('tr-day').value :
+        invView === 'receipts' ? (FORM_DAY.rc || $('rc-day').value) :
+        invView === 'transfers' ? (FORM_DAY.tr || $('tr-day').value) :
         invView === 'analysis' ? $('an-to').value :
-        (activeTab === 'revenue' ? $('sales-day').value : '');
+        (activeTab === 'revenue' ? (FORM_DAY.sales || $('sales-day').value) : '');
     return guardCtxKey() + '|' + activeMonth + '|' + dayPick;
 }
 function draftValues() {
@@ -4697,7 +4736,6 @@ function anToChanged() { guardedNav(() => { renderAnalysis(); guardArm(); }); }
     };
     wrap('switchTab');
     wrap('openInv');
-    wrap('closeInv');
     wrap('switchOrderSubTab');
     wrap('switchExpSub');
     wrap('loadSalesDay');
@@ -4735,12 +4773,23 @@ function applyNavState(s) {
     if (invView) document.body.dataset.sec = invView; else document.body.removeAttribute('data-sec');
     renderAll();
 }
-['openInv', 'switchTab', 'switchOrderSubTab', 'switchExpSub'].forEach(name => {
-    const orig = window[name];
-    window[name] = function (...args) { pushNav(); return orig.apply(this, args); };
-});
+// مسار الرجوع: بيتسجل بس عند فتح قسم من صفحة المخزون الرئيسية (مش التبويبات الداخلية)
+let HIST_PUSHED = false;
+{
+    const origOpen = window.openInv;
+    window.openInv = function (...args) {
+        pushNav();
+        if (!HIST_PUSHED) {
+            try { history.pushState({ kansasInv: true }, ''); HIST_PUSHED = true; } catch (e) {}
+        }
+        return origOpen.apply(this, args);
+    };
+}
 const sameNav = (a, b) => a.tab === b.tab && a.inv === b.inv && a.ord === b.ord && a.exp === b.exp;
 window.closeInv = function () {
+    saveDraft();
+    // لو القسم اتفتح بـ pushState، نشيل الخطوة دي عشان زرار الرجوع ما يحتاجش ضغطة زيادة
+    if (HIST_PUSHED) { HIST_PUSHED = false; try { history.back(); } catch (e) {} }
     let prev = NAV_STACK.pop();
     while (prev && sameNav(prev, navState())) prev = NAV_STACK.pop();
     if (prev) applyNavState(prev);
@@ -4749,6 +4798,11 @@ window.closeInv = function () {
     restoreDraft();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+// زرار الرجوع في المتصفح/الموبايل: لو فيه قسم مفتوح بيرجع للمخزون بدل ما يخرج من البرنامج
+window.addEventListener('popstate', () => {
+    HIST_PUSHED = false;
+    if (invView) window.closeInv();
+});
 
 /* ===== تذكير عند فتح البرنامج: الوارد والتحويلات لليوم (شريط صغير فوق، مش بيقفل الشاشة) ===== */
 let REMINDER_DISMISSED = false;
