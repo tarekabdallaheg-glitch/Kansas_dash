@@ -3624,14 +3624,7 @@ function renderAnalysisSummary() {
     const money = v => fmt(v, 2) + ' ج';
     const box = (lbl, val, color) => `<div style="flex:1;min-width:120px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
         <div class="muted">${lbl}</div><div style="font-size:17px;font-weight:800;color:${color}">${val}</div></div>`;
-    const rank = o => o.vr === null ? 3 : (o.vr < 0 ? 0 : (o.vr > 0 ? 1 : 2));
-    const ordered = per.slice().sort((a, b) => {
-        const ra = rank(a), rb = rank(b);
-        if (ra !== rb) return ra - rb;
-        if (ra === 0) return a.vr - b.vr;
-        if (ra === 1) return b.vr - a.vr;
-        return 0;
-    });
+    const ordered = per;
     const cards = ordered.map(({ p, x, price, vr, theo, yPct }) => {
         const tone = vr === null || vr === 0 ? 'none' : (vr < 0 ? 'bad' : 'ok');
         const color = tone === 'bad' ? 'var(--bad)' : (tone === 'ok' ? 'var(--ok)' : 'var(--muted)');
