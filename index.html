@@ -639,6 +639,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
         </div>
         <div class="row actions">
             <button class="btn" onclick="openAudit()">السجل</button>
+            <button class="btn" onclick="restoreAutoBackup()">استعادة</button>
             <button class="btn" onclick="toggleTheme()" id="theme-btn"></button>
             <button class="btn btn-slate" onclick="exportBackup()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>نسخة</button>
             <label class="btn" style="cursor:pointer"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M4 19h16"/></svg>استيراد<input type="file" accept="application/json" class="hidden" onchange="importBackup(this)"></label>
@@ -1213,6 +1214,9 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 <script>
 const STORE_KEY = 'kansas_v8';
 const BACKUP_KEY = 'kansas_v8_autobackup';
+const PREV_KEY = 'kansas_v8_prev';
+let DB_STATUS = 'ok';
+let DB_NOTICE = '';
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
@@ -1361,33 +1365,86 @@ let AN_VIEW = 'edit';
 let AN_SAVED = null;
 let expSub = 'report';
 
-function loadDB() {
+function readMainDB() {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw === null) return { status: 'empty' };
     try {
-        const raw = localStorage.getItem(STORE_KEY);
-        if (raw) return normalize(JSON.parse(raw));
-    } catch (e) {}
-    const auto = loadAutoBackup();
-    if (auto) { toast('تم استعادة آخر نسخة تلقائية من المتصفح'); return auto; }
-    if (localStorage.getItem(STORE_KEY)) toast('تعذر قراءة البيانات المحفوظة', 'error');
-    return emptyDB();
+        const d = JSON.parse(raw);
+        if (!isValidBackup(d)) return { status: 'unreadable' };
+        return { status: 'ok', data: normalize(d) };
+    } catch (e) {
+        return { status: 'unreadable' };
+    }
 }
 
 function loadAutoBackup() {
     try {
         const b = JSON.parse(localStorage.getItem(BACKUP_KEY) || 'null');
-        if (b && b.data && isValidBackup(b.data)) return normalize(b.data);
+        if (b && b.data && isValidBackup(b.data)) return { data: normalize(b.data), at: b.at || '' };
     } catch (e) {}
     return null;
 }
 
-function saveDB() {
-    try {
-        localStorage.setItem(STORE_KEY, JSON.stringify(S));
-        try { localStorage.setItem(BACKUP_KEY, JSON.stringify({ at: new Date().toISOString(), data: S })); } catch (e) {}
-        guardArm();
-    }
-    catch (e) { toast('تعذر الحفظ (مساحة المتصفح ممتلئة؟)', 'error'); }
+function showDbNotice(msg) {
+    DB_NOTICE = msg || '';
+    renderBackupAlert();
 }
+
+// قراءة البيانات: ما بيكتبش أي حاجة هنا، ولا بينشئ قاعدة فاضية تلقائياً
+function loadDB() {
+    const m = readMainDB();
+    if (m.status === 'ok') { DB_STATUS = 'ok'; return m.data; }
+    const auto = loadAutoBackup();
+    if (auto) {
+        DB_STATUS = 'ok';
+        toast('تم استعادة آخر نسخة تلقائية لأن البيانات الأساسية تعذّرت قراءتها');
+        return auto.data;
+    }
+    if (m.status === 'unreadable') {
+        DB_STATUS = 'unreadable';
+        showDbNotice('تعذّر قراءة البيانات المحفوظة. البيانات القديمة محفوظة كما هي ولن يتم استبدالها. استخدم زرار الاستعادة أو استيراد نسخة.');
+    } else {
+        DB_STATUS = 'empty';
+    }
+    return emptyDB();
+}
+
+// الحفظ: بيحفظ نسخة من الحالة اللي قبل التغيير، ويتأكد من القراءة بعد الكتابة
+function saveDB() {
+    if (DB_STATUS === 'unreadable') {
+        toast('الحفظ متوقف: البيانات القديمة لم تُقرأ، ومش هيتم الكتابة فوقها', 'error');
+        return false;
+    }
+    try {
+        const json = JSON.stringify(S);
+        const before = localStorage.getItem(STORE_KEY);
+        if (before !== null) localStorage.setItem(PREV_KEY, before);
+        localStorage.setItem(STORE_KEY, json);
+        if (localStorage.getItem(STORE_KEY) !== json) throw new Error('verify');
+        try { localStorage.setItem(BACKUP_KEY, JSON.stringify({ at: new Date().toISOString(), data: S })); } catch (e) {}
+        DB_STATUS = 'ok';
+        DB_NOTICE = '';
+        guardArm();
+        return true;
+    } catch (e) {
+        toast('تعذر الحفظ والتحقق منه (مساحة المتصفح ممتلئة؟)', 'error');
+        return false;
+    }
+}
+
+async function restoreAutoBackup() {
+    const b = loadAutoBackup();
+    if (!b) return toast('مفيش نسخة تلقائية صالحة للاستعادة', 'error');
+    const when = b.at ? new Date(b.at).toLocaleString('ar-EG') : 'غير معروف';
+    if (!await askTyped(`هيتم استعادة النسخة التلقائية بتاريخ ${when}.\nالبيانات الحالية هتتحفظ قبل الاستعادة في نسخة سابقة.\nاكتب "استعادة" عشان توافق:`, 'استعادة')) return;
+    DB_STATUS = 'ok';
+    S = b.data;
+    if (saveDB()) {
+        toast('تم استعادة النسخة');
+        renderAll();
+    }
+}
+
 
 function cfg(key) {
     const c = S.monthly[key] || {};
@@ -1405,7 +1462,6 @@ function showWelcome() {
 
 window.kansasStart = function () {
     S = loadDB();
-    saveDB();
     checkDailyAutoBackup();
     $('app').classList.remove('hidden');
     $('month-input').value = activeMonth;
@@ -1420,6 +1476,7 @@ window.kansasStart = function () {
 };
 
 function checkDailyAutoBackup() {
+    if (DB_STATUS !== 'ok') return;
     const today = todayStr();
     if (S.lastBackup !== today) {
         try {
@@ -1539,6 +1596,7 @@ async function importBackup(input) {
         try {
             const d = JSON.parse(r.result);
             if (!isValidBackup(d)) throw new Error('bad');
+            DB_STATUS = 'ok';
             S = normalize(d);
             saveDB();
             toast('تم استيراد النسخة');
@@ -1553,6 +1611,7 @@ async function importBackup(input) {
 
 function renderBackupAlert() {
     const el = $('backup-alert');
+    if (DB_NOTICE) { el.classList.remove('hidden'); el.textContent = DB_NOTICE; return; }
     const days = S.lastBackup ? daysBetween(S.lastBackup, todayStr()) : null;
     if (days === null || days >= 7) {
         el.classList.remove('hidden');
@@ -3570,7 +3629,6 @@ function renderAnalysis() {
 
     liveAn();
     applySearch('an-cards', 'an-search', 'an-nomatch');
-    sortCritFirst();
     renderSavedAnalyses();
     applyInvPickFilter();
 }
@@ -3624,7 +3682,7 @@ function renderAnalysisSummary() {
     const money = v => fmt(v, 2) + ' ج';
     const box = (lbl, val, color) => `<div style="flex:1;min-width:120px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
         <div class="muted">${lbl}</div><div style="font-size:17px;font-weight:800;color:${color}">${val}</div></div>`;
-    const ordered = per.slice().sort((a, b) => (a.vr < 0 ? 0 : 1) - (b.vr < 0 ? 0 : 1));
+    const ordered = per;
     const cards = ordered.map(({ p, x, price, vr, theo, yPct }) => {
         const tone = vr === null || vr === 0 ? 'none' : (vr < 0 ? 'bad' : 'ok');
         const color = tone === 'bad' ? 'var(--bad)' : (tone === 'ok' ? 'var(--ok)' : 'var(--muted)');
