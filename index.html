@@ -3624,7 +3624,7 @@ function renderAnalysisSummary() {
     const money = v => fmt(v, 2) + ' ج';
     const box = (lbl, val, color) => `<div style="flex:1;min-width:120px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
         <div class="muted">${lbl}</div><div style="font-size:17px;font-weight:800;color:${color}">${val}</div></div>`;
-    const ordered = per;
+    const ordered = per.slice().sort((a, b) => (a.vr < 0 ? 0 : 1) - (b.vr < 0 ? 0 : 1));
     const cards = ordered.map(({ p, x, price, vr, theo, yPct }) => {
         const tone = vr === null || vr === 0 ? 'none' : (vr < 0 ? 'bad' : 'ok');
         const color = tone === 'bad' ? 'var(--bad)' : (tone === 'ok' ? 'var(--ok)' : 'var(--muted)');
@@ -4524,12 +4524,8 @@ function renderSmartTips() {
     const figs = lastA ? analysisFigures(lastA) : null;
     const T = figs ? figs.T : null;
     if (lastA && T) {
-        const pickTop = (list, sign, cls) => {
-            const pr = list.filter(x => x.priced).sort((a, b) => b.v - a.v).slice(0, 3);
-            const nop = list.filter(x => !x.priced).sort((a, b) => b.qty - a.qty).slice(0, 3);
-            return pr.map(x => `<span style="color:var(--${cls});font-weight:800">${esc(x.name)} ${sign}${fmt(x.v, 2)} ج</span>`)
-                .concat(nop.map(x => `<span style="color:var(--${cls});font-weight:800">${esc(x.name)} ${sign}${fmt(x.qty, 2)} ${esc(x.unit)}</span>`)).join(' · ');
-        };
+        const pickTop = (list, sign, cls) => list.slice().sort((x, y) => y.qty - x.qty).slice(0, 3)
+            .map(x => `<span style="color:var(--${cls});font-weight:800">${esc(x.name)} ${sign}${fmt(x.qty, 2)} ${esc(x.unit)}</span>`).join(' · ');
         const shortHtml = pickTop(shortList, '-', 'bad');
         const overHtml = pickTop(overList, '+', 'ok');
         const rColor = rating === 'ضعيف' ? 'var(--bad)' : (rating === 'يحتاج متابعة' ? 'var(--gold2)' : 'var(--ok)');
