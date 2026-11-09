@@ -512,7 +512,7 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
   body.print-analysis #pn-analysis .sum-tbl tr.sum-total td{background:#e5e7eb!important;color:#000!important}
   body.print-analysis #pn-analysis #food-cost details,
   body.print-analysis #pn-analysis #cause-summary details{display:block!important}
-  body.print-analysis #pn-analysis #waste-allow{display:block!important}
+  body.print-analysis #pn-analysis #waste-allow:not(.hidden){display:block!important}
   body.print-analysis #pn-analysis #waste-allow summary{display:block!important}
 }
 
@@ -862,6 +862,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     <!-- ================= المخزون ================= -->
     <section id="tab-inventory" class="wrap hidden" style="padding:0">
 
+        
+
         <div id="inv-alert" class="note hidden"></div>
 
         <div id="inv-tiles" class="tiles">
@@ -933,6 +935,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <span id="open-badge" class="badge open">مفتوح</span>
                 </div>
                 <div class="muted" style="margin-bottom:8px">اسم الصنف ووحدته بيتحفظوا مرة واحدة. رصيد أول الشهر بيتدخل مرة في أول كل شهر.</div>
+                <div class="row" style="margin-bottom:12px"><select class="inp inv-pick" onchange="pickInvProduct(this.value)" style="max-width:240px" aria-label="اختر صنف"></select></div>
                 <div id="open-note" class="muted" style="margin-bottom:14px"></div>
                 <div id="open-list"></div>
                 <div class="row" style="margin-top:16px">
@@ -959,6 +962,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div id="rc-alert" class="note hidden"></div>
                 <div class="search" id="rc-search-wrap">
                     <input id="rc-search" class="inp" placeholder="ابحث عن صنف" oninput="applySearch('rc-body','rc-search','rc-nomatch')">
+                    <select class="inp inv-pick" onchange="pickInvProduct(this.value)" style="max-width:240px" aria-label="اختر صنف"></select>
                 </div>
                 <div id="rc-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="rc-progress" class="rc-prog no-print"></div>
@@ -1043,24 +1047,21 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div class="search">
                     <input id="an-search" class="inp" placeholder="ابحث عن صنف في التحليل" oninput="applySearch('an-cards','an-search','an-nomatch')">
+                    <select class="inp inv-pick" onchange="pickInvProduct(this.value)" style="max-width:240px" aria-label="اختر صنف"></select>
                     <select id="an-crit" class="inp" style="max-width:170px" onchange="sortCritFirst();applyCritFilter()"><option value="all">كل الأصناف</option><option value="crit">الحرجة فقط</option></select>
                 </div>
                 <div id="an-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="an-note" class="note hidden" style="margin-bottom:14px"></div>
-                <div id="food-cost" class="card" style="margin-bottom:14px;padding:14px"></div>
-                <details class="card" id="waste-allow" style="margin-bottom:14px;padding:14px">
-                    <summary class="h" style="cursor:pointer;margin:0">🧾 ملخص الهالك المسموح</summary>
-                    <div id="waste-allow-body" style="margin-top:12px"></div>
-                </details>
-                <div id="cause-summary" class="card" style="margin-bottom:14px;padding:14px"></div>
                 <div id="an-cards" class="cards-grid"></div>
                 <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:18px">
                     <button class="btn btn-gold" id="an-save" data-save onclick="saveAnalysis()">حفظ وإغلاق</button>
+                    <button class="btn hidden" id="an-edit" onclick="editAnalysis()">تعديل التحليل</button>
+                    <button class="btn hidden" id="an-new" onclick="newAnalysis()">تحليل جديد</button>
                     <button class="btn btn-green" onclick="exportAnalysisXlsx()">تحميل شيت التحليل</button>
                     <button class="btn" onclick="printAnalysis()">طباعة</button>
                     <button class="btn btn-slate" onclick="printAnalysis()">حفظ PDF</button>
                 </div>
-                <details style="margin-top:18px">
+                <details style="margin-top:18px" open>
                     <summary>التحليلات المحفوظة</summary>
                     <div id="saved-list" style="margin-top:12px"></div>
                 </details>
@@ -1211,6 +1212,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 
 <script>
 const STORE_KEY = 'kansas_v8';
+const BACKUP_KEY = 'kansas_v8_autobackup';
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
@@ -1355,21 +1357,33 @@ let rcDraft = {};
 let rcDraftDay = null;
 let anKey = '';
 let anLoadRows = null;
+let AN_VIEW = 'edit';
+let AN_SAVED = null;
 let expSub = 'report';
 
 function loadDB() {
     try {
         const raw = localStorage.getItem(STORE_KEY);
-        return raw ? normalize(JSON.parse(raw)) : emptyDB();
-    } catch (e) {
-        toast('تعذر قراءة البيانات المحفوظة', 'error');
-        return emptyDB();
-    }
+        if (raw) return normalize(JSON.parse(raw));
+    } catch (e) {}
+    const auto = loadAutoBackup();
+    if (auto) { toast('تم استعادة آخر نسخة تلقائية من المتصفح'); return auto; }
+    if (localStorage.getItem(STORE_KEY)) toast('تعذر قراءة البيانات المحفوظة', 'error');
+    return emptyDB();
+}
+
+function loadAutoBackup() {
+    try {
+        const b = JSON.parse(localStorage.getItem(BACKUP_KEY) || 'null');
+        if (b && b.data && isValidBackup(b.data)) return normalize(b.data);
+    } catch (e) {}
+    return null;
 }
 
 function saveDB() {
     try {
         localStorage.setItem(STORE_KEY, JSON.stringify(S));
+        try { localStorage.setItem(BACKUP_KEY, JSON.stringify({ at: new Date().toISOString(), data: S })); } catch (e) {}
         guardArm();
     }
     catch (e) { toast('تعذر الحفظ (مساحة المتصفح ممتلئة؟)', 'error'); }
@@ -1406,7 +1420,24 @@ window.kansasStart = function () {
 };
 
 function checkDailyAutoBackup() {
-    // التنزيل التلقائي اتشال: التذكير بالنسخ الاحتياطية بيظهر من renderBackupAlert
+    const today = todayStr();
+    if (S.lastBackup !== today) {
+        try {
+            const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'kansas-end-of-day-backup-' + today + '.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            S.lastBackup = today;
+            saveDB();
+            toast('تم إجراء النسخ الاحتياطي التلقائي لنهاية اليوم بنجاح');
+        } catch (e) {
+            console.log('فشل النسخ التلقائي:', e);
+        }
+    }
 }
 
 function lockSystem() {
@@ -1453,6 +1484,7 @@ function switchTab(tab) {
         renderInventory();
     }
     activeTab = tab;
+    syncInvPicker();
     $('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
     $('tab-salesforecast').classList.toggle('hidden', tab !== 'salesforecast');
     $('tab-inventory').classList.toggle('hidden', tab !== 'inventory');
@@ -2675,7 +2707,7 @@ function renderOpening() {
     $('open-list').innerHTML = S.products.map((p, i) => {
         const has = hasOpening(p.id, m);
         const dis = locked && has ? 'disabled' : '';
-        return `<div class="prow">
+        return `<div class="prow" data-search="${esc(searchKey(p))}">
             <div class="pfields">
                 <input class="inp" data-pid="${esc(p.id)}" data-f="name" value="${esc(p.name)}" aria-label="اسم الصنف" ${locked ? 'disabled' : ''}>
                 <input class="inp" data-pid="${esc(p.id)}" data-f="unit" value="${esc(p.unit)}" placeholder="الوحدة" aria-label="الوحدة" ${locked ? 'disabled' : ''}>
@@ -2701,6 +2733,7 @@ function renderOpening() {
     $('open-unlock').classList.toggle('hidden', !locked);
     ['new-prod-name', 'new-prod-unit', 'new-prod-price'].forEach(id => { $(id).disabled = locked; });
     $('btn-add-prod').disabled = locked;
+    applyInvPickFilter();
 }
 
 async function addProduct() {
@@ -3039,6 +3072,7 @@ function renderReceipts() {
         prog.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>تم إدخال ${filledN} من ${S.products.length} صنف</span><b>${pctF}%</b></div><div style="height:8px;border-radius:99px;background:var(--card2);overflow:hidden"><div style="height:100%;width:${pctF}%;background:var(--ok);transition:width .3s"></div></div>`;
     }
     applySearch('rc-body', 'rc-search', 'rc-nomatch');
+    applyInvPickFilter();
 }
 
 function jumpRcDay(d) {
@@ -3465,6 +3499,9 @@ function wasteValue(pid) {
 // إظهار / إخفاء خانة الهالك لصنف
 function renderAnalysis() {
     const r = anRange();
+    if (AN_VIEW === 'summary' && AN_SAVED && r && r.to === AN_SAVED.to) { renderAnalysisSummary(); return; }
+    AN_VIEW = 'edit';
+    setAnalysisChrome(true);
     const cards = $('an-cards');
     const note = $('an-note');
     if (!r || !r.to) {
@@ -3491,6 +3528,7 @@ function renderAnalysis() {
     if (!S.products.length) { cards.innerHTML = '<div class="muted">أضف أصنافك من الأصناف ورصيد أول الشهر الأول.</div>'; return; }
 
     const m = activeMonth;
+    cards.style.display = '';
     cards.innerHTML = S.products.map((p, i) => {
         let s = '', c = '', w = '', cs = '', cn = '';
         if (loaded && loaded[p.id]) {
@@ -3534,12 +3572,154 @@ function renderAnalysis() {
     applySearch('an-cards', 'an-search', 'an-nomatch');
     sortCritFirst();
     renderSavedAnalyses();
+    applyInvPickFilter();
+}
+
+function setAnalysisChrome(editing) {
+    ['food-cost', 'waste-allow', 'cause-summary'].forEach(id => { const el = $(id); if (el) el.classList.toggle('hidden', !editing); });
+    const sv = $('an-save'); if (sv) sv.classList.toggle('hidden', !editing);
+    const ed = $('an-edit'); if (ed) ed.classList.toggle('hidden', editing);
+    const nw = $('an-new'); if (nw) nw.classList.toggle('hidden', editing);
+}
+
+function analysisFigures(rec) {
+    const rr = { from: rec.from, to: rec.to };
+    const per = [];
+    const T = { short: 0, over: 0, waste: 0, cost: 0, pending: 0 };
+    S.products.forEach(p => {
+        const x = rec.rows[p.id];
+        if (!x) return;
+        const price = (p.price === null || p.price === undefined) ? null : p.price;
+        let vr = null, theo = null, consumed = null, yPct = null;
+        if (x.closing !== null) {
+            const c = calcRow(p.id, rr, x.opening, x.sold, x.closing);
+            vr = c.variance + x.waste;
+            theo = c.theo;
+            consumed = x.opening + c.rec + c.net - x.closing;
+            const actualNet = consumed - x.waste;
+            if (x.sold > 0 && actualNet > 0) yPct = (x.sold - actualNet) / actualNet * 100;
+        } else T.pending++;
+        if (price !== null) {
+            if (vr !== null && vr < 0) T.short += -vr * price;
+            if (vr !== null && vr > 0) T.over += vr * price;
+            T.waste += x.waste * price;
+            if (consumed !== null) T.cost += consumed * price;
+        }
+        per.push({ p, x, price, vr, theo, yPct });
+    });
+    const netRev = salesIn(monthStart(monthOf(rec.to)), rec.to).rev / TAX_FACTOR;
+    T.netRev = netRev;
+    T.costPct = netRev > 0 ? T.cost / netRev * 100 : null;
+    T.allowed = netRev * WASTE_ALLOW_RATE;
+    return { per, T };
+}
+
+function renderAnalysisSummary() {
+    setAnalysisChrome(false);
+    const rec = AN_SAVED;
+    const host = $('an-cards');
+    host.style.display = '';
+    const { per, T } = analysisFigures(rec);
+    const net = T.over - T.short;
+    const money = v => fmt(v, 2) + ' ج';
+    const box = (lbl, val, color) => `<div style="flex:1;min-width:120px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
+        <div class="muted">${lbl}</div><div style="font-size:17px;font-weight:800;color:${color}">${val}</div></div>`;
+    const rank = o => o.vr === null ? 3 : (o.vr < 0 ? 0 : (o.vr > 0 ? 1 : 2));
+    const ordered = per.slice().sort((a, b) => {
+        const ra = rank(a), rb = rank(b);
+        if (ra !== rb) return ra - rb;
+        if (ra === 0) return a.vr - b.vr;
+        if (ra === 1) return b.vr - a.vr;
+        return 0;
+    });
+    const cards = ordered.map(({ p, x, price, vr, theo, yPct }) => {
+        const tone = vr === null || vr === 0 ? 'none' : (vr < 0 ? 'bad' : 'ok');
+        const color = tone === 'bad' ? 'var(--bad)' : (tone === 'ok' ? 'var(--ok)' : 'var(--muted)');
+        const label = vr === null ? 'بدون جرد' : (vr < 0 ? `عجز -${fmt(-vr, 2)} ${esc(p.unit)}` : (vr > 0 ? `أوڤر +${fmt(vr, 2)} ${esc(p.unit)}` : 'مطابق'));
+        const amount = (vr === null || vr === 0 || price === null) ? '' : ` · ${vr < 0 ? '-' : '+'}${fmt(Math.abs(vr) * price, 2)} ج`;
+        const yieldChip = isTargetProduct(p) && yPct !== null ? `<span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;white-space:nowrap;color:var(--gold);background:color-mix(in srgb, var(--gold2) 22%, transparent);border:1px solid var(--gold2)">Yield ${fmt(yPct, 1)}% · هدف 20%</span>` : '';
+        const lines = [];
+        if (vr !== null && vr < 0 && x.sold > 0) lines.push(`عجز ${fmt(-vr / x.sold * 100, 1)}% من المباع`);
+        if (x.waste > 0) lines.push(`هالك ${fmt(x.waste, 2)} ${esc(p.unit)}${x.cause ? ' · ' + esc(x.cause) : ''}${x.causeNote ? ' (' + esc(x.causeNote) + ')' : ''}`);
+        const flag = vr === null ? '' : (vr < 0 ? ' st-bad' : (vr > 0 ? ' st-ok' : ''));
+        return `<div class="pcard${flag}" data-search="${esc(searchKey(p))}" style="background:var(--card);border:1px solid var(--border);border-top:3px solid ${color};border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                <div><div style="font-weight:800;font-size:15px">${esc(p.name)}</div><div class="muted" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${esc(p.unit)}${yieldChip}</div></div>
+                <span style="font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;white-space:nowrap;color:${color};border:1px solid ${color}">${label}${amount}</span>
+            </div>
+            <div class="muted" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px">
+                <span>المباع <b style="color:var(--text)">${fmt(x.sold, 2)}</b></span>
+                <span>النظري <b style="color:var(--text)">${theo === null ? '-' : fmt(theo, 2)}</b></span>
+                <span>الجرد <b style="color:var(--text)">${x.closing === null ? '-' : fmt(x.closing, 2)}</b></span>
+            </div>
+            ${lines.length ? `<div class="muted" style="font-size:12px">${lines.join(' · ')}</div>` : ''}
+        </div>`;
+    }).join('');
+    const allowedOk = T.waste <= T.allowed + 1e-9;
+    host.innerHTML = `<div style="grid-column:1/-1;display:flex;flex-direction:column;gap:10px">
+        <div class="muted">من ${esc(rec.from)} إلى ${esc(rec.to)} · محفوظ ${esc(rec.saved)}${T.pending ? ` · ${T.pending} صنف بدون جرد` : ''}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${box('إجمالي العجز', '-' + money(T.short), 'var(--bad)')}
+            ${box('إجمالي الأوڤر', '+' + money(T.over), 'var(--ok)')}
+            ${box('الصافي', (net >= 0 ? '+' : '') + money(net), net >= 0 ? 'var(--ok)' : 'var(--bad)')}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${box('قيمة الهالك', money(T.waste), allowedOk ? 'var(--ok)' : 'var(--bad)')}
+            ${box('الحد المسموح (0.9%)', money(T.allowed), 'var(--text)')}
+            ${box('نسبة التكلفة الغذائية', T.costPct === null ? '-' : fmt(T.costPct, 1) + '%', 'var(--text)')}
+        </div>
+        <div class="muted">صافي الإيراد ${money(T.netRev)} · تكلفة الخامات ${money(T.cost)}</div>
+    </div>` + cards;
+    applySearch('an-cards', 'an-search', 'an-nomatch');
+    applyCritFilter();
+    renderSavedAnalyses();
+    applyInvPickFilter();
+}
+
+function syncInvPicker() {
+    const opts = '<option value="">كل الأصناف</option>' + S.products.map(p => `<option value="${esc(p.id)}">${esc(p.name)} (${esc(p.unit)})</option>`).join('');
+    const valid = INV_PICK && S.products.some(p => p.id === INV_PICK) ? INV_PICK : '';
+    document.querySelectorAll('.inv-pick').forEach(sel => { sel.innerHTML = opts; sel.value = valid; });
+}
+
+let INV_PICK = '';
+function pickInvProduct(id) {
+    INV_PICK = id || '';
+    document.querySelectorAll('.inv-pick').forEach(sel => { sel.value = INV_PICK; });
+    if ($('an-search')) $('an-search').value = '';
+    if ($('rc-search')) $('rc-search').value = '';
+    applyInvPickFilter();
+}
+
+function applyInvPickFilter() {
+    const p = productById(INV_PICK);
+    const key = p ? searchKey(p) : '';
+    ['an-cards', 'rc-body', 'open-list'].forEach(cid => {
+        const box = $(cid);
+        if (!box) return;
+        box.querySelectorAll('[data-search]').forEach(el => el.classList.toggle('hidden', !!key && el.dataset.search !== key));
+    });
+}
+
+function newAnalysis() {
+    AN_SAVED = null;
+    AN_VIEW = 'edit';
+    anLoadRows = null;
+    anKey = '';
+    $('an-to').value = clampToday(activeMonth);
+    renderAnalysis();
+}
+
+async function editAnalysis() {
+    if (!AN_SAVED) return;
+    if (!await askTyped('التحليل ده محفوظ ومقفول. التعديل عليه هيغيّر البوست المحفوظ.\nاكتب "تعديل" عشان توافق:', 'تعديل')) return;
+    anKey = '';
+    anLoadRows = AN_SAVED.rows;
+    AN_VIEW = 'edit';
+    renderAnalysis();
 }
 
 function liveAn() {
-    renderCauseSummary();
-    renderFoodCost();
-    renderWasteAllowance();
     const r = anRange();
     if (!r || !r.to) return;
     S.products.forEach(p => {
@@ -3575,7 +3755,7 @@ function liveAn() {
             }
         }
         // حافة الكارت: أحمر لو عجز، أخضر لو زيادة، محايدة لو مفيش فرق (بعد خصم الهالك)
-        const pcEl = as.closest('.pcard');
+        const pcEl = as.closest('.pcard, tr');
         if (pcEl) {
             pcEl.classList.remove('st-ok', 'st-bad');
             if (res.variance !== null && res.variance < 0) pcEl.classList.add('st-bad');
@@ -3644,7 +3824,7 @@ function sortCritFirst() {
 function applyCritFilter() {
     const sel = $('an-crit');
     const mode = sel ? sel.value : 'all';
-    document.querySelectorAll('#an-cards .pcard').forEach(pc => {
+    document.querySelectorAll('#an-cards .pcard, #an-cards tr[data-search]').forEach(pc => {
         const av = pc.querySelector('[id^="av-"]');
         const crit = pc.classList.contains('st-bad') || (av && av.classList.contains('down'));
         pc.classList.toggle('hidden', mode === 'crit' && !crit);
@@ -3830,6 +4010,7 @@ function renderFoodCost() {
 }
 
 function readAnalysisRows() {
+    if (AN_VIEW === 'summary' && AN_SAVED) return { rows: AN_SAVED.rows };
     const rows = {};
     for (const p of S.products) {
         if (!hasOpening(p.id, activeMonth)) return { error: `ادخل رصيد أول الشهر للصنف "${p.name}" الأول` };
@@ -3856,9 +4037,11 @@ async function saveAnalysis() {
     if (bad) return toast(bad, 'error');
     const anyClosing = Object.values(res.rows).some(x => x.closing !== null);
     if (!anyClosing && !await askConfirm('مفيش جرد فعلي مدخل. تحفظ التحليل على كده؟', 'حفظ')) return;
-    if (S.analyses.some(a => a.to === r.to) && !await askConfirm(`فيه تحليل محفوظ لتاريخ ${r.to}. الحفظ الجديد هيكتب فوقه.`)) return;
+    if (S.analyses.some(a => a.to === r.to) && !await askTyped(`فيه تحليل محفوظ لتاريخ ${r.to}. الحفظ الجديد هيكتب فوقه.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
     S.analyses = S.analyses.filter(a => a.to !== r.to);
-    S.analyses.push({ id: uid(), from: r.from, to: r.to, saved: todayStr(), rows: res.rows });
+    AN_SAVED = { id: uid(), from: r.from, to: r.to, saved: todayStr(), rows: res.rows };
+    S.analyses.push(AN_SAVED);
+    AN_VIEW = 'summary';
     saveDB();
     toast('تم حفظ التحليل');
     renderAll();
@@ -3883,14 +4066,16 @@ function loadAnalysis(id) {
     if (!a) return;
     if (monthOf(a.to) !== activeMonth) { activeMonth = monthOf(a.to); setMonthDefaults(); $('month-input').value = activeMonth; }
     $('an-to').value = a.to;
-    anLoadRows = a.rows;
+    AN_SAVED = a;
+    AN_VIEW = 'summary';
     renderAnalysis();
     toast('تم عرض التحليل المحفوظ');
 }
 
 async function deleteAnalysis(id) {
-    if (!await askConfirm('حذف هذا التحليل المحفوظ؟', 'حذف')) return;
+    if (!await askTyped('حذف هذا التحليل المحفوظ نهائياً؟\nاكتب "مسح" عشان توافق:', 'مسح')) return;
     S.analyses = S.analyses.filter(x => x.id !== id);
+    if (AN_SAVED && AN_SAVED.id === id) { AN_SAVED = null; AN_VIEW = 'edit'; }
     saveDB();
     toast('تم الحذف');
     renderAll();
@@ -3927,7 +4112,7 @@ function printAnalysis() {
     const root = document.documentElement;
     const wasDark = root.classList.contains('dark');
     const wasteEl = $('waste-allow');
-    const wasteWasClosed = wasteEl && !wasteEl.open;
+    const wasteWasClosed = AN_VIEW === 'edit' && wasteEl && !wasteEl.open;
     if (wasteWasClosed) wasteEl.open = true;
     // ورقة فاتحة دايماً للتحليل: بنشيل الثيم الليلي وقت الطباعة عشان الألوان تبقى واضحة
     root.classList.remove('dark');
@@ -4293,6 +4478,7 @@ function renderSmartTips() {
     const lastA = [...S.analyses].sort((a, b) => (a.to < b.to ? 1 : -1))[0];
     let shortMoney = 0, overMoney = 0, soldVal = 0, nShort = 0, nOver = 0, unexplainedShort = 0, analyzedN = 0;
     const shortList = [];
+    const overList = [];
     if (lastA) {
         S.products.forEach(p => {
             const x = lastA.rows && lastA.rows[p.id];
@@ -4300,7 +4486,8 @@ function renderSmartTips() {
             const c = calcRow(p.id, { from: lastA.from, to: lastA.to }, x.opening, x.sold, x.closing);
             if (c.variance === null) return;
             analyzedN++;
-            const pr = p.price === null || p.price === undefined ? 0 : p.price;
+            const hasPrice = !(p.price === null || p.price === undefined);
+    const pr = hasPrice ? p.price : 0;
             const net = c.variance + (x.waste || 0);
             soldVal += (Number(x.sold) || 0) * pr;
             if (net < 0) {
@@ -4308,10 +4495,11 @@ function renderSmartTips() {
                 const v = -net * pr;
                 shortMoney += v;
                 if (!x.waste) unexplainedShort += v;
-                shortList.push({ name: p.name, v, qty: -net });
+                shortList.push({ name: p.name, v, qty: -net, unit: p.unit, priced: hasPrice });
             } else if (net > 0) {
                 nOver++;
                 overMoney += net * pr;
+                overList.push({ name: p.name, v: net * pr, qty: net, unit: p.unit, priced: hasPrice });
             }
         });
     }
@@ -4337,24 +4525,42 @@ function renderSmartTips() {
     if (perf === null) {
         parts.push(`<div class="tip warn"><span class="dot"></span><span>يجب تنفيذ تحليل مخزون أولًا</span></div>`);
     } else {
-        parts.push(`<div class="tip ${ratingCls}"><span class="dot"></span><span style="flex:1"><b>مؤشر أداء المخزون: ${rating}</b> · العجز ${fmt(perf, 2)}% من قيمة المباع · تحليل بتاريخ ${esc(lastA.to)}</span></div>`);
+        parts.push(`<div class="tip ${ratingCls}"><span class="dot"></span><span style="flex:1"><b>عجز المخزون ${fmt(perf, 2)}%</b> من المباع · ${esc(lastA.to)}</span></div>`);
     }
 
-    const topList = shortList.sort((a, b) => b.v - a.v).slice(0, 3)
-        .map(x => `${esc(x.name)}: ${fmt(x.v, 2)} ج.م`).join('<br>') || 'لا يوجد';
-    parts.push(`<details style="margin-top:6px"><summary style="cursor:pointer;font-weight:700">تفاصيل التقييم وأسباب النتيجة</summary>
-        <div class="muted" style="margin:8px 0;line-height:1.9">
-            إجمالي قيمة العجز: <b>${fmt(shortMoney, 2)} ج.م</b><br>
-            إجمالي قيمة الزيادة: <b>${fmt(overMoney, 2)} ج.م</b><br>
-            عدد الأصناف التي تم تحليلها: <b>${analyzedN}</b><br>
-            عدد الأصناف بعجز: <b>${nShort}</b> · عدد الأصناف بزيادة: <b>${nOver}</b><br>
-            أساس النسبة: العجز ÷ قيمة المباع (المباع × السعر) للأصناف اللي ليها سعر.<br>
-            أكثر الأصناف تأثيراً:<br>${topList}<br>
-            <span style="color:var(--text)">مؤكد من البيانات:</span> ${fmt(shortMoney - unexplainedShort, 2)} ج.م (عجز عليه هالك مسجل)<br>
-            <span style="color:var(--text)">يحتاج مراجعة:</span> ${fmt(unexplainedShort, 2)} ج.م (عجز من غير سبب مسجل)
-        </div>
-    </details>`);
-
+    const figs = lastA ? analysisFigures(lastA) : null;
+    const T = figs ? figs.T : null;
+    if (lastA && T) {
+        const pickTop = (list, sign, cls) => {
+            const pr = list.filter(x => x.priced).sort((a, b) => b.v - a.v).slice(0, 3);
+            const nop = list.filter(x => !x.priced).sort((a, b) => b.qty - a.qty).slice(0, 3);
+            return pr.map(x => `<span style="color:var(--${cls});font-weight:800">${esc(x.name)} ${sign}${fmt(x.v, 2)} ج</span>`)
+                .concat(nop.map(x => `<span style="color:var(--${cls});font-weight:800">${esc(x.name)} ${sign}${fmt(x.qty, 2)} ${esc(x.unit)}</span>`)).join(' · ');
+        };
+        const shortHtml = pickTop(shortList, '-', 'bad');
+        const overHtml = pickTop(overList, '+', 'ok');
+        const rColor = rating === 'ضعيف' ? 'var(--bad)' : (rating === 'يحتاج متابعة' ? 'var(--gold2)' : 'var(--ok)');
+        const rowK = (lbl, val, color) => `<tr><td class="muted" style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--border)">${lbl}</td><td style="padding:7px 10px;text-align:left;font-weight:800;color:${color};border-bottom:1px solid var(--border)">${val}</td></tr>`;
+        const allowedOk = T.waste <= T.allowed + 1e-9;
+        parts.push(`<details class="card" style="padding:12px 14px">
+            <summary style="cursor:pointer;font-weight:800">تفاصيل أداء مؤشر المخزون</summary>
+            <div class="tbl-wrap" style="margin-top:10px"><table style="width:100%;font-size:13px;border-collapse:collapse"><tbody>
+                ${rowK('تقييم مؤشر المخزون', rating || '-', rColor)}
+                ${rowK('صافي الإيراد', fmt(T.netRev, 2) + ' ج', 'var(--text)')}
+                ${rowK('نسبة التكلفة الغذائية', T.costPct === null ? '-' : fmt(T.costPct, 1) + '%', 'var(--text)')}
+                ${rowK('إجمالي العجز', '-' + fmt(T.short, 2) + ' ج', 'var(--bad)')}
+                ${rowK('إجمالي الأوڤر', '+' + fmt(T.over, 2) + ' ج', 'var(--ok)')}
+                ${rowK('قيمة الهالك', fmt(T.waste, 2) + ' ج', allowedOk ? 'var(--ok)' : 'var(--bad)')}
+                ${rowK('الحد المسموح (0.9%)', fmt(T.allowed, 2) + ' ج', 'var(--text)')}
+                ${rowK('الأصناف المحللة', analyzedN, 'var(--text)')}
+                ${rowK('أصناف بعجز / أوڤر', nShort + ' / ' + nOver, 'var(--text)')}
+                ${rowK('عجز عليه هالك مسجل', fmt(shortMoney - unexplainedShort, 2) + ' ج', 'var(--ok)')}
+                ${rowK('عجز يحتاج مراجعة (بدون سبب)', fmt(unexplainedShort, 2) + ' ج', unexplainedShort > 0 ? 'var(--bad)' : 'var(--ok)')}
+            </tbody></table></div>
+            ${shortHtml ? `<div class="muted" style="margin-top:10px;font-size:12px">أكثر الأصناف عجزاً: ${shortHtml}</div>` : ''}
+            ${overHtml ? `<div class="muted" style="margin-top:6px;font-size:12px">أكثر الأصناف أوڤر: ${overHtml}</div>` : ''}
+        </details>`);
+    }
     host.innerHTML = parts.join('');
 }
 
@@ -4392,6 +4598,7 @@ function printExpiry() {
 
 function renderInventory() {
     const m = activeMonth;
+    syncInvPicker();
     const al = $('inv-alert');
     if (!S.openLocked[m]) {
         al.classList.remove('hidden');
@@ -4764,6 +4971,7 @@ function pushNav() {
 }
 function applyNavState(s) {
     activeTab = s.tab; invView = s.inv; orderSubTab = s.ord; expSub = s.exp;
+    syncInvPicker();
     $('tab-revenue').classList.toggle('hidden', activeTab !== 'revenue');
     $('tab-salesforecast').classList.toggle('hidden', activeTab !== 'salesforecast');
     $('tab-inventory').classList.toggle('hidden', activeTab !== 'inventory');
