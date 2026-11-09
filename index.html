@@ -3636,15 +3636,15 @@ function renderAnalysisSummary() {
         const tone = vr === null || vr === 0 ? 'none' : (vr < 0 ? 'bad' : 'ok');
         const color = tone === 'bad' ? 'var(--bad)' : (tone === 'ok' ? 'var(--ok)' : 'var(--muted)');
         const label = vr === null ? 'بدون جرد' : (vr < 0 ? `عجز -${fmt(-vr, 2)} ${esc(p.unit)}` : (vr > 0 ? `أوڤر +${fmt(vr, 2)} ${esc(p.unit)}` : 'مطابق'));
-        const amount = (vr === null || vr === 0 || price === null) ? '' : ` · ${vr < 0 ? '-' : '+'}${fmt(Math.abs(vr) * price, 2)} ج`;
+        const amount = '';
         const yieldChip = isTargetProduct(p) && yPct !== null ? `<span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;white-space:nowrap;color:var(--gold);background:color-mix(in srgb, var(--gold2) 22%, transparent);border:1px solid var(--gold2)">Yield ${fmt(yPct, 1)}% · هدف 20%</span>` : '';
         const lines = [];
-        if (vr !== null && vr < 0 && x.sold > 0) lines.push(`عجز ${fmt(-vr / x.sold * 100, 1)}% من المباع`);
         if (x.waste > 0) lines.push(`هالك ${fmt(x.waste, 2)} ${esc(p.unit)}${x.cause ? ' · ' + esc(x.cause) : ''}${x.causeNote ? ' (' + esc(x.causeNote) + ')' : ''}`);
         const flag = vr === null ? '' : (vr < 0 ? ' st-bad' : (vr > 0 ? ' st-ok' : ''));
-        return `<div class="pcard${flag}" data-search="${esc(searchKey(p))}" style="background:var(--card);border:1px solid var(--border);border-top:3px solid ${color};border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0">
+        const tgt = isTargetProduct(p);
+        return `<div class="pcard${flag}" data-search="${esc(searchKey(p))}" style="background:${tgt ? 'linear-gradient(180deg,rgba(214,158,46,.22),var(--card) 70%)' : 'var(--card)'};border:1px solid ${tgt ? 'var(--gold2)' : 'var(--border)'};border-top:3px solid ${tgt ? 'var(--gold2)' : color};border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-                <div><div style="font-weight:800;font-size:15px">${esc(p.name)}</div><div class="muted" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${esc(p.unit)}${yieldChip}</div></div>
+                <div><div style="font-weight:800;font-size:15px;color:var(--gold2)">${esc(p.name)}</div><div class="muted" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${esc(p.unit)}${yieldChip}</div></div>
                 <span style="font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;white-space:nowrap;color:${color};border:1px solid ${color}">${label}${amount}</span>
             </div>
             <div class="muted" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px">
