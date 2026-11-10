@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.googleapis.com https://www.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>Kansas Premium</title>
+
 <style>
 :root{
   --s-open:#1D4ED8;--s-recv:#15803D;--s-trans:#C2410C;--s-an:#A16207;--s-ord:#6D28D9;--s-exp:#B91C1C;
@@ -1411,6 +1412,10 @@ function loadDB() {
 
 // الحفظ: بيحفظ نسخة من الحالة اللي قبل التغيير، ويتأكد من القراءة بعد الكتابة
 function saveDB() {
+    if (cloudReadOnly()) {
+        toast('حساب القراءة مش مسموح له يحفظ. البيانات للعرض بس.', 'error');
+        return false;
+    }
     if (DB_STATUS === 'unreadable') {
         toast('الحفظ متوقف: البيانات القديمة لم تُقرأ، ومش هيتم الكتابة فوقها', 'error');
         return false;
@@ -1425,6 +1430,7 @@ function saveDB() {
         DB_STATUS = 'ok';
         DB_NOTICE = '';
         guardArm();
+        pushCloud();
         return true;
     } catch (e) {
         toast('تعذر الحفظ والتحقق منه (مساحة المتصفح ممتلئة؟)', 'error');
@@ -1460,6 +1466,120 @@ function showWelcome() {
     setTimeout(() => w.remove(), 2100);
 }
 
+/* ===== السحابة (Firebase): الكمبيوتر بحساب الكتابة، والتليفون بحساب القراءة ===== */
+let CLOUD_PUSHING = false;
+let CLOUD_PENDING = false;
+let lastRemoteJson = '';
+function cloudState(){ return window.kansasCloud ? window.kansasCloud.cloud : null; }
+function cloudReadOnly(){ const c = cloudState(); return !!(c && c.user && !c.canWrite); }
+function hasLocalData(){ return !!(S.products.length || Object.keys(S.sales).length); }
+
+const CLOUD_WARN_BYTES = 800000;
+const CLOUD_BLOCK_BYTES = 950000;
+const CLOUD_FAIL_MSG = 'فيه تغييرات مش مترفوعة للسحابة. هتترفع تلقائي لما النت يرجع.';
+let CLOUD_FAILED = false;
+
+function clearCloudNotice(){
+    if (CLOUD_FAILED) {
+        CLOUD_FAILED = false;
+        if (DB_NOTICE === CLOUD_FAIL_MSG) { DB_NOTICE = ''; renderBackupAlert(); }
+    }
+}
+
+function pushCloud(){
+    const c = cloudState();
+    if (!c || !c.user || !c.canWrite) return;
+    const json = JSON.stringify(S);
+    const bytes = new TextEncoder().encode(json).length;
+    if (bytes > CLOUD_BLOCK_BYTES) {
+        showDbNotice('حجم البيانات وصل للحد (' + Math.round(bytes / 1024) + ' كيلوبايت). لازم تعمل أرشفة للتحليلات القديمة قبل الرفع.');
+        toast('البيانات كبيرة، محتاجة أرشفة', 'error');
+        return;
+    }
+    if (bytes > CLOUD_WARN_BYTES) {
+        showDbNotice('حجم البيانات قرب من حد السحابة (' + Math.round(bytes / 1024) + ' كيلوبايت). محتاج أرشفة قريب.');
+    }
+    if (CLOUD_PUSHING) { CLOUD_PENDING = true; return; }
+    CLOUD_PUSHING = true;
+    window.kansasCloud.push(json).then(() => {
+        CLOUD_PUSHING = false;
+        clearCloudNotice();
+        if (CLOUD_PENDING) { CLOUD_PENDING = false; pushCloud(); }
+    }).catch(() => {
+        CLOUD_PUSHING = false;
+        CLOUD_PENDING = false;
+        CLOUD_FAILED = true;
+        showDbNotice(CLOUD_FAIL_MSG);
+        toast('تعذر الرفع للسحابة', 'error');
+    });
+}
+window.addEventListener('online', pushCloud);
+
+window.kansasOnRemote = function (d) {
+    const c = cloudState();
+    if (!c) return;
+    if (!d) { if (c.canWrite && hasLocalData()) pushCloud(); return; }
+    if (c.canWrite && hasLocalData()) return;
+    if (typeof d.data !== 'string' || d.data === lastRemoteJson) return;
+    try {
+        const parsed = JSON.parse(d.data);
+        if (!isValidBackup(parsed)) return;
+        lastRemoteJson = d.data;
+        S = normalize(parsed);
+        try { localStorage.setItem(STORE_KEY, d.data); } catch (e) {}
+        DB_STATUS = 'ok';
+        renderAll();
+    } catch (e) { console.warn('remote data', e); }
+};
+
+window.kansasCloudChanged = function () {
+    const c = cloudState();
+    if (!c || !c.user) return;
+    if (c.canWrite) { if (hasLocalData()) pushCloud(); toast('متصل بالسحابة (كتابة)'); }
+    else toast('متصل بالسحابة (قراءة فقط)');
+};
+
+function askCloudLogin(){
+    const ov = document.createElement('div');
+    ov.className = 'modal';
+    ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
+        <div class="h" style="margin:0">تسجيل الدخول للسحابة</div>
+        <input id="cl_email" class="inp" type="email" placeholder="الإيميل" autocomplete="username">
+        <input id="cl_pass" class="inp" type="password" placeholder="الباسورد" autocomplete="current-password">
+        <div id="cl_err" class="muted" style="color:var(--bad)"></div>
+        <div class="row" style="justify-content:flex-end">
+            <button class="btn" id="cl_skip">بدون سحابة</button>
+            <button class="btn btn-gold" id="cl_go">دخول</button>
+        </div>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.querySelector('#cl_skip').onclick = () => { ov.remove(); showDbNotice('البيانات محلية على هذا الجهاز بس (غير متصل بالسحابة).'); };
+    ov.querySelector('#cl_go').onclick = async () => {
+        const email = ov.querySelector('#cl_email').value.trim();
+        const pass = ov.querySelector('#cl_pass').value;
+        ov.querySelector('#cl_err').textContent = '';
+        try {
+            await window.kansasCloud.login(email, pass);
+            ov.remove();
+        } catch (e) {
+            ov.querySelector('#cl_err').textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
+        }
+    };
+}
+
+async function cloudStart(){
+    const ready = new Promise((resolve, reject) => {
+        const t0 = Date.now();
+        const t = setInterval(() => {
+            if (window.__kansasAuthChecked) { clearInterval(t); resolve(); }
+            else if (Date.now() - t0 > 10000) { clearInterval(t); reject(new Error('timeout')); }
+        }, 200);
+    });
+    try { await ready; }
+    catch (e) { showDbNotice('تعذّر الاتصال بالسحابة. البيانات محلية على هذا الجهاز بس.'); return; }
+    if (!cloudState().user) askCloudLogin();
+}
+
 window.kansasStart = function () {
     S = loadDB();
     checkDailyAutoBackup();
@@ -1473,6 +1593,7 @@ window.kansasStart = function () {
     renderAll();
     applyTheme(localStorage.getItem('kansas_theme') || 'dark');
     showWelcome();
+    cloudStart();
 };
 
 function checkDailyAutoBackup() {
@@ -1497,7 +1618,8 @@ function checkDailyAutoBackup() {
     }
 }
 
-function lockSystem() {
+async function lockSystem() {
+    try { if (window.kansasCloud) await window.kansasCloud.logout(); } catch (e) {}
     try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
     location.reload();
 }
@@ -5085,6 +5207,53 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) chec
 
 // تحذير المتصفح عند إغلاق التبويب لو فيه تغييرات غير محفوظة
 
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCvbeR9xSN7PsOy_F4uPi4iGS2HoGBTeT4",
+  authDomain: "my-power-1d1eb.firebaseapp.com",
+  projectId: "my-power-1d1eb",
+  storageBucket: "my-power-1d1eb.firebasestorage.app",
+  messagingSenderId: "251799413902",
+  appId: "1:251799413902:web:43798fce64e6b9a0b5d5df"
+};
+const WRITER_EMAIL = 'tarek@admin.com';
+
+const fapp = initializeApp(firebaseConfig);
+const fdb = getFirestore(fapp);
+const fauth = getAuth(fapp);
+const REF = doc(fdb, 'branches', 'main');
+const cloud = { user: null, canWrite: false };
+let unsubRemote = null;
+
+window.kansasCloud = {
+  cloud,
+  login: (email, pass) => signInWithEmailAndPassword(fauth, email, pass),
+  push: (json) => setDoc(REF, { data: json, at: new Date().toISOString(), by: fauth.currentUser ? fauth.currentUser.email : '' }),
+  logout: () => signOut(fauth)
+};
+
+onAuthStateChanged(fauth, (u) => {
+  cloud.user = u || null;
+  cloud.canWrite = !!u && (u.email || '').toLowerCase() === WRITER_EMAIL;
+  if (unsubRemote) { unsubRemote(); unsubRemote = null; }
+  if (u) {
+    unsubRemote = onSnapshot(REF, (snap) => {
+      if (snap.metadata.hasPendingWrites) return;
+      if (window.kansasOnRemote) window.kansasOnRemote(snap.exists() ? snap.data() : null);
+    }, (err) => console.warn('firestore', err));
+  }
+  window.__kansasAuthChecked = true;
+  if (window.kansasCloudChanged) window.kansasCloudChanged();
+});
+window.__kansasCloudReady = true;
+</script>
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(function (e) { console.warn('sw', e); }); }
 </script>
 </body>
 </html>p
