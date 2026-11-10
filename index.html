@@ -1553,18 +1553,21 @@ function askCloudLogin(){
         </div>
     </div>`;
     document.body.appendChild(ov);
-    ov.querySelector('#cl_skip').onclick = () => { ov.remove(); showDbNotice('البيانات محلية على هذا الجهاز بس (غير متصل بالسحابة).'); };
-    ov.querySelector('#cl_go').onclick = async () => {
+    const submit = async () => {
         const email = ov.querySelector('#cl_email').value.trim();
         const pass = ov.querySelector('#cl_pass').value;
-        ov.querySelector('#cl_err').textContent = '';
+        const err = ov.querySelector('#cl_err');
+        err.textContent = '';
+        if (!email || !pass) { err.textContent = 'اكتب الإيميل والباسورد الأول'; return; }
         try {
             await window.kansasCloud.login(email, pass);
             ov.remove();
         } catch (e) {
-            ov.querySelector('#cl_err').textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
+            err.textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
         }
     };
+    ov.querySelector('#cl_go').onclick = submit;
+    ov.querySelector('#cl_skip').onclick = submit;
 }
 
 async function cloudStart(){
