@@ -1055,6 +1055,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 </div>
                 <div id="an-nomatch" class="muted hidden" style="margin-bottom:8px">مفيش صنف بالاسم ده</div>
                 <div id="an-note" class="note hidden" style="margin-bottom:14px"></div>
+                <div id="an-live" style="margin-bottom:14px"></div>
                 <div id="an-cards" class="cards-grid"></div>
                 <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:18px">
                     <button class="btn btn-gold" id="an-save" data-save onclick="saveAnalysis()">حفظ وإغلاق</button>
@@ -3820,6 +3821,7 @@ function setAnalysisChrome(editing) {
     ['food-cost', 'waste-allow', 'cause-summary'].forEach(id => { const el = $(id); if (el) el.classList.toggle('hidden', !editing); });
     const sv = $('an-save'); if (sv) sv.classList.toggle('hidden', !editing);
     const ed = $('an-edit'); if (ed) ed.classList.toggle('hidden', editing);
+    const lv = $('an-live'); if (lv) lv.classList.toggle('hidden', !editing);
     const nw = $('an-new'); if (nw) nw.classList.toggle('hidden', editing);
 }
 
@@ -3953,7 +3955,64 @@ async function editAnalysis() {
     renderAnalysis();
 }
 
+function liveAnalysisFigures(){
+    const r = anRange();
+    if (!r || !r.to) return null;
+    const netRev = salesIn(monthStart(activeMonth), r.to).rev / TAX_FACTOR;
+    let short = 0, over = 0, cost = 0, anyEntry = false, anyClosing = false;
+    S.products.forEach(p => {
+        const as = $('as-' + p.id), ac = $('ac-' + p.id);
+        if (!as || !ac) return;
+        const waste = wasteValue(p.id);
+        if (as.value !== '' || ac.value !== '' || waste > 0) anyEntry = true;
+        if (ac.value === '') return;
+        anyClosing = true;
+        const opening = openingFor(p.id, activeMonth);
+        const res = calcRow(p.id, r, opening, num(as.value), ac.value);
+        if (p.price === null || p.price === undefined) return;
+        const variance = res.variance + waste;
+        if (variance < 0) short += -variance * p.price;
+        if (variance > 0) over += variance * p.price;
+        cost += (opening + res.rec + res.net - num(ac.value)) * p.price;
+    });
+    return {
+        netRev,
+        hasNetRev: netRev > 0,
+        allowed: netRev * WASTE_ALLOW_RATE,
+        costPct: (netRev > 0 && anyClosing) ? cost / netRev * 100 : null,
+        short, over, anyEntry
+    };
+}
+
+function renderLiveSummary(){
+    const host = $('an-live');
+    if (!host) return;
+    if (AN_VIEW === 'summary') { host.innerHTML = ''; return; }
+    const f = liveAnalysisFigures();
+    if (!f) { host.innerHTML = '<div class="muted">اختار تاريخ النهاية عشان يظهر الملخص.</div>'; return; }
+    const money = v => fmt(v, 2) + ' ج';
+    const row = (lbl, val, color) => `<tr><td class="muted" style="padding:7px 10px;text-align:right;border-bottom:1px solid var(--border)">${lbl}</td><td style="padding:7px 10px;text-align:left;font-weight:800;color:${color || 'var(--text)'};border-bottom:1px solid var(--border)">${val}</td></tr>`;
+    const rows = [
+        row('صافي الإيراد', f.hasNetRev ? money(f.netRev) : '-'),
+        row('قيمة الهالك المسموح (0.9% من صافي الإيراد)', money(f.allowed), 'var(--ok)')
+    ];
+    if (f.anyEntry) {
+        const d = f.over - f.short;
+        rows.push(row('نسبة الهالك المسموح', '0.9%'));
+        rows.push(row('نسبة التكلفة الغذائية', f.costPct === null ? '-' : fmt(f.costPct, 1) + '%', 'var(--gold2)'));
+        rows.push(row('إجمالي قيمة العجز', '-' + money(f.short), 'var(--bad)'));
+        rows.push(row('إجمالي قيمة الأوڤر', '+' + money(f.over), 'var(--ok)'));
+        rows.push(row('الفرق بينهم', (d >= 0 ? '+' : '') + money(d), d >= 0 ? 'var(--ok)' : 'var(--bad)'));
+    }
+    host.innerHTML = `<details class="card" open style="padding:12px 14px">
+        <summary style="cursor:pointer;font-weight:800">ملخص التحليل المختصر</summary>
+        <div class="tbl-wrap" style="margin-top:10px"><table style="width:100%;font-size:13px;border-collapse:collapse"><tbody>${rows.join('')}</tbody></table></div>
+        ${f.hasNetRev ? '' : '<div class="muted" style="margin-top:8px">مفيش إيراد مسجل للفترة دي.</div>'}
+    </details>`;
+}
+
 function liveAn() {
+    renderLiveSummary();
     const r = anRange();
     if (!r || !r.to) return;
     S.products.forEach(p => {
