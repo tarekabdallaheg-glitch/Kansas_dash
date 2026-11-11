@@ -568,7 +568,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 </div>
 <script>
 (function () {
-    var PIN = '1234';
+    window.APP_PIN = '1234';
+    var PIN = window.APP_PIN;
     var errBox = document.getElementById('lock-err');
     var input = document.getElementById('unlock-pin');
     var btn = document.getElementById('unlock-btn');
@@ -1486,9 +1487,13 @@ function clearCloudNotice(){
     }
 }
 
+let LAST_PUSHED_JSON = '';
+let LAST_SEEN_REMOTE = '';
+let CLOUD_HOLD = false;
+
 function pushCloud(){
     const c = cloudState();
-    if (!c || !c.user || !c.canWrite) return;
+    if (!c || !c.user || !c.canWrite || CLOUD_HOLD) return;
     const json = JSON.stringify(S);
     const bytes = new TextEncoder().encode(json).length;
     if (bytes > CLOUD_BLOCK_BYTES) {
@@ -1500,9 +1505,22 @@ function pushCloud(){
         showDbNotice('حجم البيانات قرب من حد السحابة (' + Math.round(bytes / 1024) + ' كيلوبايت). محتاج أرشفة قريب.');
     }
     if (CLOUD_PUSHING) { CLOUD_PENDING = true; return; }
+    if (LAST_SEEN_REMOTE && LAST_SEEN_REMOTE !== LAST_PUSHED_JSON && LAST_SEEN_REMOTE !== json) {
+        askOk('فيه بيانات في السحابة مختلفة عن اللي على الجهاز دلوقتي، والرفع هيكتب فوقها. تكمل؟').then((ok) => {
+            if (ok) doPushCloud(json);
+            else { CLOUD_HOLD = true; showDbNotice('الرفع للسحابة متوقف لحد ما تعيد تشغيل البرنامج.'); }
+        });
+        return;
+    }
+    doPushCloud(json);
+}
+
+function doPushCloud(json){
+    if (CLOUD_HOLD) return;
     CLOUD_PUSHING = true;
     window.kansasCloud.push(json).then(() => {
         CLOUD_PUSHING = false;
+        LAST_PUSHED_JSON = json;
         clearCloudNotice();
         if (CLOUD_PENDING) { CLOUD_PENDING = false; pushCloud(); }
     }).catch(() => {
@@ -1519,6 +1537,7 @@ window.kansasOnRemote = function (d) {
     const c = cloudState();
     if (!c) return;
     if (!d) { if (c.canWrite && hasLocalData()) pushCloud(); return; }
+    if (typeof d.data === 'string') LAST_SEEN_REMOTE = d.data;
     if (c.canWrite && hasLocalData()) return;
     if (typeof d.data !== 'string' || d.data === lastRemoteJson) return;
     try {
@@ -1542,32 +1561,71 @@ window.kansasCloudChanged = function () {
 function askCloudLogin(){
     const ov = document.createElement('div');
     ov.className = 'modal';
-    ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
-        <div class="h" style="margin:0">تسجيل الدخول للسحابة</div>
-        <input id="cl_email" class="inp" type="email" placeholder="الإيميل" autocomplete="username">
-        <input id="cl_pass" class="inp" type="password" placeholder="الباسورد" autocomplete="current-password">
-        <div id="cl_err" class="muted" style="color:var(--bad)"></div>
-        <div class="row" style="justify-content:flex-end">
-            <button class="btn" id="cl_skip">بدون سحابة</button>
-            <button class="btn btn-gold" id="cl_go">دخول</button>
-        </div>
-    </div>`;
+    const box = document.createElement('div');
+    box.className = 'mbox';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    ov.appendChild(box);
     document.body.appendChild(ov);
-    const submit = async () => {
-        const email = ov.querySelector('#cl_email').value.trim();
-        const pass = ov.querySelector('#cl_pass').value;
-        const err = ov.querySelector('#cl_err');
-        err.textContent = '';
-        if (!email || !pass) { err.textContent = 'اكتب الإيميل والباسورد الأول'; return; }
-        try {
-            await window.kansasCloud.login(email, pass);
-            ov.remove();
-        } catch (e) {
-            err.textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
-        }
+
+    const showChoice = () => {
+        box.innerHTML = `
+            <div class="h" style="margin:0">اختار طريقة الدخول</div>
+            <button class="btn btn-gold" id="ch_cloud">دخول بالسحابة</button>
+            <button class="btn" id="ch_local">دخول بدون سحابة</button>`;
+        box.querySelector('#ch_cloud').onclick = showCloud;
+        box.querySelector('#ch_local').onclick = showLocal;
     };
-    ov.querySelector('#cl_go').onclick = submit;
-    ov.querySelector('#cl_skip').onclick = submit;
+
+    const showCloud = () => {
+        box.innerHTML = `
+            <div class="h" style="margin:0">دخول بالسحابة</div>
+            <input id="cl_email" class="inp" type="email" placeholder="الإيميل" autocomplete="username">
+            <input id="cl_pass" class="inp" type="password" placeholder="الباسورد" autocomplete="current-password">
+            <div id="cl_err" class="muted" style="color:var(--bad)"></div>
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" id="cl_back">رجوع</button>
+                <button class="btn btn-gold" id="cl_go">دخول</button>
+            </div>`;
+        box.querySelector('#cl_back').onclick = showChoice;
+        box.querySelector('#cl_go').onclick = async () => {
+            const email = box.querySelector('#cl_email').value.trim();
+            const pass = box.querySelector('#cl_pass').value;
+            const err = box.querySelector('#cl_err');
+            err.textContent = '';
+            if (!email || !pass) { err.textContent = 'اكتب الإيميل والباسورد'; return; }
+            try {
+                await window.kansasCloud.login(email, pass);
+                ov.remove();
+            } catch (e) {
+                err.textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
+            }
+        };
+    };
+
+    const showLocal = () => {
+        box.innerHTML = `
+            <div class="h" style="margin:0">دخول بدون سحابة</div>
+            <div class="muted">البيانات هتتحفظ على الجهاز بس، ومش هتترفع للسحابة.</div>
+            <input id="lo_pin" class="inp" type="password" inputmode="numeric" placeholder="اكتب الـ PIN">
+            <div id="lo_err" class="muted" style="color:var(--bad)"></div>
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" id="lo_back">رجوع</button>
+                <button class="btn btn-gold" id="lo_go">دخول</button>
+            </div>`;
+        box.querySelector('#lo_back').onclick = showChoice;
+        box.querySelector('#lo_go').onclick = () => {
+            const pin = box.querySelector('#lo_pin').value.replace(/\s/g, '');
+            const err = box.querySelector('#lo_err');
+            err.textContent = '';
+            if (!pin) { err.textContent = 'اكتب الـ PIN'; return; }
+            if (pin !== window.APP_PIN) { err.textContent = 'الـ PIN غلط'; return; }
+            ov.remove();
+            showDbNotice('وضع محلي: البيانات بتتحفظ على الجهاز بس، ومش بتترفع للسحابة.');
+        };
+    };
+
+    showChoice();
 }
 
 async function cloudStart(){
