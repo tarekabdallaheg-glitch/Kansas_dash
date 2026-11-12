@@ -3325,6 +3325,26 @@ function jumpRcDay(d) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function askPreview(title, bodyHtml){
+    return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal';
+        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" style="max-width:560px;max-height:85vh;overflow:auto">
+            <div class="h" style="margin:0">${esc(title)}</div>
+            ${bodyHtml}
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" data-p="0">تعديل</button>
+                <button class="btn btn-gold" data-p="1">تأكيد الحفظ</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        ov.addEventListener('click', e => {
+            const v = e.target.dataset ? e.target.dataset.p : undefined;
+            if (v !== undefined) { ov.remove(); resolve(v === '1'); }
+        });
+    });
+}
+
 async function saveReceipts() {
     const d = $('rc-day').value;
     if (!d) return toast('اختر التاريخ', 'error');
@@ -3338,6 +3358,11 @@ async function saveReceipts() {
         const n = num(v);
         if (n < 0) return toast('الوارد لا يكون بالسالب', 'error');
         if (n > 0) rec[p.id] = n;
+    }
+    if (Object.keys(rec).length) {
+        const rows = S.products.filter(p => rec[p.id]).map(p => `<tr><td style="padding:8px;text-align:right">${esc(p.name)}</td><td style="padding:8px">${fmt(rec[p.id], 2)}</td><td style="padding:8px;text-align:right">${esc(p.unit)}</td></tr>`).join('');
+        const body = `<div class="muted">التاريخ: ${esc(d)}</div><div class="tbl-wrap" style="margin-top:8px"><table style="width:100%;font-size:14px;border-collapse:collapse"><thead><tr><th style="text-align:right">الصنف</th><th>الكمية</th><th style="text-align:right">الوحدة</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        if (!await askPreview('هيتحفظ الوارد التالي', body)) return;
     }
     if (!Object.keys(rec).length && !await askConfirm('مفيش وارد مدخل. تعتبر اليوم ده بدون توريد؟', 'بدون توريد')) return;
     if (Object.keys(rec).length) S.receipts[d] = rec; else { delete S.receipts[d]; S.receiptNone[d] = true; }
@@ -3510,6 +3535,15 @@ async function deleteTransfer(id) {
 async function lockTransfers() {
     const d = $('tr-day').value;
     if (!d) return;
+    const dayRows = S.transfers.filter(t => t.day === d);
+    if (dayRows.length) {
+        const rows = dayRows.map(t => {
+            const pr = productById(t.product_id) || {};
+            return `<tr><td style="padding:8px;text-align:right">${esc(t.branch || '—')}</td><td style="padding:8px">${t.type === 'in' ? 'وارد' : 'صادر'}</td><td style="padding:8px;text-align:right">${esc(pr.name || 'صنف محذوف')}</td><td style="padding:8px">${fmt(t.qty, 2)} ${esc(pr.unit || '')}</td></tr>`;
+        }).join('');
+        const body = `<div class="muted">التاريخ: ${esc(d)}</div><div class="tbl-wrap" style="margin-top:8px"><table style="width:100%;font-size:14px;border-collapse:collapse"><thead><tr><th style="text-align:right">الفرع</th><th>النوع</th><th style="text-align:right">الصنف</th><th>الكمية</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        if (!await askPreview('هيتحفظ التحويلات التالية', body)) return;
+    }
     if (!S.transfers.some(t => t.day === d)) {
         if (!await askConfirm('مفيش تحويلات في اليوم ده. تعتبره بدون تحويلات؟', 'بدون تحويلات')) return;
         S.transferNone[d] = true;
@@ -5377,3 +5411,4 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').
 </script>
 </body>
 </html>p
+p
