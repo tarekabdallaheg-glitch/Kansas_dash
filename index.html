@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.googleapis.com https://www.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
-<title>Kansas Premium</title>
+<title>KANSAS PREMIUM</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="theme-color" content="#0b1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
 :root{
@@ -550,101 +556,73 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
   #print-exp-tmp table{width:100%;border-collapse:collapse;font-size:12px}
   #print-exp-tmp th,#print-exp-tmp td{border:1px solid #777;padding:6px;color:#000;text-align:right}
 }
+.hdr-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:230px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);padding:8px;display:flex;flex-direction:column;gap:6px;z-index:150}
+.hdr-menu .btn{width:100%;justify-content:flex-start}
+#splash{position:fixed;inset:0;background:#0b1220;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
+#splash img{width:180px;height:180px;border-radius:24px}
+#splash.gone{opacity:0;pointer-events:none}
+#authGate{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 0%,#1c1f24 0%,#0b0d10 60%,#050607 100%)}
+.gate-box{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.gate-logo{width:120px;height:120px;border-radius:26px;box-shadow:0 10px 30px rgba(245,184,0,.18)}
+.gate-name{font-size:26px;font-weight:900;letter-spacing:2px;color:#F5B800;margin-top:6px}
+.gate-sub{font-size:11px;letter-spacing:3px;color:#8a909a}
+.gate-msg{color:#8a909a;font-size:14px;margin-top:16px}
+.gate-form{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.gate-title{font-size:20px;font-weight:700;color:#f4f1ea;margin:6px 0 4px}
+.gate-input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #2a2f37;background:#14171c;color:#f4f1ea;font-size:15px;font-family:inherit}
+.gate-input:focus{outline:none;border-color:#F5B800;box-shadow:0 0 0 3px rgba(245,184,0,.18)}
+.gate-btn{width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(180deg,#F5B800,#C99700);color:#111;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px}
+.gate-link{background:none;border:0;color:#F5B800;font-size:13px;cursor:pointer;font-family:inherit;padding:4px;width:auto;margin:0 auto}
+.gate-err{min-height:18px;color:#ff6b6b;font-size:13px;text-align:center}
+@media (max-width:480px){.gate-logo{width:96px;height:96px}.gate-name{font-size:22px}}
+#cloudDot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#9aa6b2;margin-left:8px;cursor:pointer;vertical-align:middle}
 </style>
 </head>
 <body>
 
-<div id="lock" class="lock">
-    <div class="card">
-        <div class="logo">K</div>
-        <div>
-            <div class="brand-name">KANSAS PREMIUM</div>
-            <div class="muted">أدخل رمز الحماية</div>
+<div id="splash"><img src="./icon-512.png" alt="KANSAS PREMIUM"></div>
+<div id="authGate">
+    <div class="gate-box">
+        <img class="gate-logo" src="./icon-512.png" alt="KANSAS PREMIUM">
+        <div class="gate-name">KANSAS PREMIUM</div>
+        <div class="gate-sub">BRANCH MANAGEMENT SYSTEM</div>
+        <div id="gateMsg" class="gate-msg">جاري التحقق من الجلسة...</div>
+        <div id="gateForm" class="hidden gate-form">
+            <div class="gate-title">مرحباً بعودتك</div>
+            <input id="gateEmail" class="gate-input" type="email" placeholder="البريد الإلكتروني" autocomplete="username">
+            <input id="gatePass" class="gate-input" type="password" placeholder="كلمة المرور" autocomplete="current-password">
+            <div id="gateErr" class="gate-err"></div>
+            <button class="gate-btn" id="gateGo">تسجيل الدخول</button>
+            <button class="gate-link" id="gateForgot">نسيت كلمة المرور؟</button>
         </div>
-        <input id="unlock-pin" class="inp" type="password" inputmode="numeric" autocomplete="off" placeholder="الرمز">
-        <p id="lock-err"></p>
-        <button class="btn btn-gold" id="unlock-btn" type="button">فتح النظام</button>
     </div>
 </div>
-<script>
-(function () {
-    window.APP_PIN = '1234';
-    var PIN = window.APP_PIN;
-    var errBox = document.getElementById('lock-err');
-    var input = document.getElementById('unlock-pin');
-    var btn = document.getElementById('unlock-btn');
-
-    function show(msg, ok) {
-        errBox.textContent = msg;
-        errBox.className = ok ? 'ok' : '';
-    }
-
-    function normDigits(s) {
-        return String(s || '')
-            .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
-            .replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
-            .replace(/\s/g, '');
-    }
-
-    function openApp(attempt) {
-        attempt = attempt || 0;
-        if (typeof window.kansasStart !== 'function') {
-            if (attempt < 40) {
-                setTimeout(function () { openApp(attempt + 1); }, 100);
-                return;
-            }
-            show('البرنامج ما اتحمّلش بالكامل. حدّث الصفحة.');
-            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
-            return;
-        }
-        try {
-            window.kansasStart();
-            try { sessionStorage.setItem('kansas_unlocked', '1'); } catch (e) {}
-            document.getElementById('lock').classList.add('hidden');
-        } catch (err) {
-            try { sessionStorage.removeItem('kansas_unlocked'); } catch (e) {}
-            show('حصلت مشكلة أثناء فتح البرنامج: ' + (err && err.message ? err.message : err));
-        }
-    }
-
-    function tryUnlock() {
-        show('');
-        var v = normDigits(input.value);
-        if (!v) { show('اكتب الرمز الأول'); return; }
-        if (v !== PIN) { show('رمز الحماية غير صحيح'); input.select(); return; }
-        input.value = '';
-        openApp();
-    }
-
-    btn.addEventListener('click', tryUnlock);
-    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
-
-    window.addEventListener('load', function () {
-        var unlocked = false;
-        try { unlocked = sessionStorage.getItem('kansas_unlocked') === '1'; } catch (e) {}
-        if (unlocked) openApp();
-        else input.focus();
-    });
-})();
-</script>
-
 <div id="app" class="hidden">
 <div class="wrap">
 
     <header class="card flat row between no-print sticky-header" style="gap:12px">
+        <div class="row" style="gap:10px;align-items:center">
         <div class="brand">
             <div class="logo">K</div>
             <div>
-                <div class="brand-name">KANSAS PREMIUM</div>
+                <div class="brand-name"><span id="cloudDot" onclick="openCloudStatus()" title="حالة السحابة"></span>KANSAS PREMIUM</div>
                 <div class="brand-sub">Designed &amp; Developed by Tarek Abdallah</div>
             </div>
         </div>
-        <div class="row actions">
+        <div class="row" style="gap:8px;align-items:center">
+            <div id="hdrMenuWrap" style="position:relative">
+                <button class="btn" id="btnMenu" title="القائمة" onclick="toggleHdrMenu(event)" style="padding:8px 14px;font-size:18px;font-weight:900;letter-spacing:1px">⋯</button>
+                <div id="hdrMenu" class="hidden hdr-menu">
             <button class="btn" onclick="openAudit()">السجل</button>
             <button class="btn" onclick="restoreAutoBackup()">استعادة</button>
+            <button class="btn" id="btnChangePw" onclick="openChangePassword()" style="display:none">تغيير كلمة المرور</button>
             <button class="btn" onclick="toggleTheme()" id="theme-btn"></button>
             <button class="btn btn-slate" onclick="exportBackup()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>نسخة</button>
             <label class="btn" style="cursor:pointer"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M4 19h16"/></svg>استيراد<input type="file" accept="application/json" class="hidden" onchange="importBackup(this)"></label>
+                </div>
+            </div>
+        </div>
+        <div class="row actions">
             <button class="btn btn-red" onclick="lockSystem()"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>قفل</button>
         </div>
     </header>
@@ -999,6 +977,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="toggleBranchChips()">الفروع ▾</button>
                         <div id="trans-branch-chips" class="hidden" style="position:absolute;top:100%;left:0;right:0;z-index:50;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:6px;display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto"></div>
                     </div>
+                    <div id="trErrBranchWrap" style="grid-column:1/-1;margin-top:-6px"><div id="trErrBranch" style="color:var(--bad);font-size:12px;min-height:16px"></div></div>
                     <div>
                         <input id="trans-search" class="inp" placeholder="ابحث عن الصنف" oninput="fillTransProducts()" style="margin-bottom:6px">
                         <select id="trans-prod" class="inp"></select>
@@ -1006,6 +985,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     </div>
                     <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp" placeholder="الكمية" style="max-width:150px" onkeydown="if(event.key==='Enter'){event.preventDefault();addTransfer();}"><button class="btn btn-gold" onclick="addTransfer()">إضافة</button></div>
                 </div>
+                <div id="trErrQty" style="color:var(--bad);font-size:12px;min-height:16px;margin-top:4px"></div>
+                <div id="trErrProd" style="color:var(--bad);font-size:12px;min-height:16px"></div>
                 <div id="tr-confirm" style="margin-top:10px;font-weight:700;color:var(--ok)"></div>
                 <div id="tr-list" style="margin-top:14px"></div>
 
@@ -1432,6 +1413,7 @@ function saveDB() {
         DB_STATUS = 'ok';
         DB_NOTICE = '';
         guardArm();
+        if (cloudState() && cloudState().user && cloudState().canWrite) { PENDING_COUNT++; SYNC_STATE = 'pending'; }
         pushCloud();
         return true;
     } catch (e) {
@@ -1443,14 +1425,7 @@ function saveDB() {
 async function restoreAutoBackup() {
     const b = loadAutoBackup();
     if (!b) return toast('مفيش نسخة تلقائية صالحة للاستعادة', 'error');
-    const when = b.at ? new Date(b.at).toLocaleString('ar-EG') : 'غير معروف';
-    if (!await askTyped(`هيتم استعادة النسخة التلقائية بتاريخ ${when}.\nالبيانات الحالية هتتحفظ قبل الاستعادة في نسخة سابقة.\nاكتب "استعادة" عشان توافق:`, 'استعادة')) return;
-    DB_STATUS = 'ok';
-    S = b.data;
-    if (saveDB()) {
-        toast('تم استعادة النسخة');
-        renderAll();
-    }
+    await runRestoreFlow(b.data, 'النسخة التلقائية على الجهاز', b.at || null);
 }
 
 
@@ -1498,6 +1473,7 @@ function pushCloud(){
     const json = JSON.stringify(S);
     const bytes = new TextEncoder().encode(json).length;
     if (bytes > CLOUD_BLOCK_BYTES) {
+        SYNC_STATE = 'failed';
         showDbNotice('حجم البيانات وصل للحد (' + Math.round(bytes / 1024) + ' كيلوبايت). لازم تعمل أرشفة للتحليلات القديمة قبل الرفع.');
         toast('البيانات كبيرة، محتاجة أرشفة', 'error');
         return;
@@ -1507,9 +1483,10 @@ function pushCloud(){
     }
     if (CLOUD_PUSHING) { CLOUD_PENDING = true; return; }
     if (LAST_SEEN_REMOTE && LAST_SEEN_REMOTE !== LAST_PUSHED_JSON && LAST_SEEN_REMOTE !== json) {
+        SYNC_STATE = 'pending';
         askOk('فيه بيانات في السحابة مختلفة عن اللي على الجهاز دلوقتي، والرفع هيكتب فوقها. تكمل؟').then((ok) => {
             if (ok) doPushCloud(json);
-            else { CLOUD_HOLD = true; showDbNotice('الرفع للسحابة متوقف لحد ما تعيد تشغيل البرنامج.'); }
+            else { CLOUD_HOLD = true; SYNC_STATE = 'failed'; showDbNotice('الرفع للسحابة متوقف لحد ما تعيد تشغيل البرنامج.'); }
         });
         return;
     }
@@ -1522,19 +1499,23 @@ function doPushCloud(json){
     window.kansasCloud.push(json).then(() => {
         CLOUD_PUSHING = false;
         LAST_PUSHED_JSON = json;
+        PENDING_COUNT = 0;
+        markSynced();
         clearCloudNotice();
         if (CLOUD_PENDING) { CLOUD_PENDING = false; pushCloud(); }
     }).catch(() => {
         CLOUD_PUSHING = false;
         CLOUD_PENDING = false;
         CLOUD_FAILED = true;
+        SYNC_STATE = 'failed';
+        renderCloudStatus();
         showDbNotice(CLOUD_FAIL_MSG);
         toast('تعذر الرفع للسحابة', 'error');
     });
 }
 window.addEventListener('online', pushCloud);
 
-window.kansasOnRemote = function (d) {
+window.kansasOnRemote = function (d, fromCache) {
     const c = cloudState();
     if (!c) return;
     if (!d) { if (c.canWrite && hasLocalData()) pushCloud(); return; }
@@ -1549,98 +1530,253 @@ window.kansasOnRemote = function (d) {
         try { localStorage.setItem(STORE_KEY, d.data); } catch (e) {}
         DB_STATUS = 'ok';
         renderAll();
+        if (!fromCache) markSynced();
     } catch (e) { console.warn('remote data', e); }
 };
 
 window.kansasCloudChanged = function () {
     const c = cloudState();
-    if (!c || !c.user) return;
+    const pwBtn = $('btnChangePw');
+    if (pwBtn) pwBtn.style.display = (c && c.user) ? '' : 'none';
+    if (!c || !c.user) { SYNC_STATE = 'local'; showAuthGate(''); renderCloudStatus(); return; }
+    if (SYNC_STATE === 'local') SYNC_STATE = 'unknown';
+    if (c.user.email) localStorage.setItem('kansas_last_email', c.user.email);
+    startAppOnce();
     if (c.canWrite) { if (hasLocalData()) pushCloud(); toast('متصل بالسحابة (كتابة)'); }
     else toast('متصل بالسحابة (قراءة فقط)');
+    runCloudTests();
 };
 
-function askCloudLogin(){
+let CLOUD_TEST = { conn: 'idle', write: 'idle', read: 'idle' };
+let CLOUD_TESTING = false;
+let PENDING_COUNT = 0;
+let SYNC_STATE = 'unknown';
+let LAST_SYNC_AT = localStorage.getItem('kansas_last_sync') || '';
+const CLOUD_COLORS = { green: '#2e7d32', yellow: '#e08e00', red: '#c62828', grey: '#9aa6b2' };
+const CLOUD_TEXT = { green: 'متصل ومتزامن', yellow: 'جاري الاختبار أو فيه تغييرات معلقة', red: 'فيه مشكلة في السحابة', grey: 'وضع محلي أو قراءة فقط' };
+
+function markSynced(){
+    if (PENDING_COUNT > 0) return;
+    SYNC_STATE = 'synced';
+    LAST_SYNC_AT = new Date().toISOString();
+    try { localStorage.setItem('kansas_last_sync', LAST_SYNC_AT); } catch (e) {}
+    renderCloudStatus();
+}
+
+function cloudLevel(){
+    const c = cloudState();
+    if (!c || !c.user) return 'grey';
+    if (CLOUD_TESTING) return 'yellow';
+    if (CLOUD_TEST.conn === 'fail' || CLOUD_TEST.read === 'fail' || (c.canWrite && CLOUD_TEST.write === 'fail')) return 'red';
+    if (SYNC_STATE === 'failed') return 'red';
+    if (SYNC_STATE === 'synced' && PENDING_COUNT === 0 && CLOUD_TEST.conn === 'ok') return 'green';
+    return 'yellow';
+}
+
+function renderCloudStatus(){
+    const dot = $('cloudDot');
+    if (!dot) return;
+    const lvl = cloudLevel();
+    dot.style.background = CLOUD_COLORS[lvl];
+    dot.title = CLOUD_TEXT[lvl];
+    drawCloudRows();
+}
+
+function testLabel(v){
+    if (v === 'ok') return '<span style="color:var(--ok)">ناجح</span>';
+    if (v === 'fail') return '<span style="color:var(--bad)">فشل</span>';
+    if (v === 'skip') return '<span class="muted">غير مطلوب (حساب قراءة)</span>';
+    return '<span class="muted">لم يُختبر</span>';
+}
+
+function cloudRow(label, value){
+    return `<tr><td class="muted" style="padding:8px;text-align:right;border-bottom:1px solid var(--border)">${label}</td><td style="padding:8px;text-align:left;font-weight:800;border-bottom:1px solid var(--border)">${value}</td></tr>`;
+}
+
+function drawCloudRows(){
+    const body = $('csRows');
+    if (!body) return;
+    const c = cloudState();
+    const online = !!(c && c.user);
+    const connTxt = !online ? '<span class="muted">غير متصل بالسحابة</span>'
+        : CLOUD_TEST.conn === 'ok' ? '<span style="color:var(--ok)">متصل</span>'
+        : CLOUD_TEST.conn === 'fail' ? '<span style="color:var(--bad)">فشل الاتصال</span>'
+        : '<span class="muted">لم يُختبر</span>';
+    const SYNC_TEXT = {
+        synced: 'تمت المزامنة (بيانات الفرع مؤكدة من السيرفر)',
+        pending: 'جاري المزامنة أو فيه تغييرات معلقة',
+        failed: 'فشلت مزامنة بيانات الفرع',
+        local: 'وضع محلي / غير متصل بالسحابة',
+        unknown: 'لم تتم مزامنة بيانات الفرع بعد'
+    };
+    body.innerHTML = cloudRow('Firebase Connection Status', connTxt)
+        + cloudRow('Database Write Test', testLabel(online && !c.canWrite ? 'skip' : CLOUD_TEST.write))
+        + cloudRow('Database Read Test', testLabel(CLOUD_TEST.read))
+        + cloudRow('Data Synchronization Status', SYNC_TEXT[SYNC_STATE] || SYNC_TEXT.unknown)
+        + cloudRow('Pending Changes', PENDING_COUNT)
+        + cloudRow('Last Successful Sync', LAST_SYNC_AT ? new Date(LAST_SYNC_AT).toLocaleString('ar-EG') : '-');
+}
+
+function openCloudStatus(){
+    const old = $('cloudStatusBox');
+    if (old) old.remove();
     const ov = document.createElement('div');
     ov.className = 'modal';
-    const box = document.createElement('div');
-    box.className = 'mbox';
-    box.setAttribute('role', 'dialog');
-    box.setAttribute('aria-modal', 'true');
-    ov.appendChild(box);
+    ov.id = 'cloudStatusBox';
+    ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" style="max-width:520px">
+        <div class="h" style="margin:0">حالة السحابة</div>
+        <div class="tbl-wrap"><table style="width:100%;font-size:14px;border-collapse:collapse"><tbody id="csRows"></tbody></table></div>
+        <div class="row" style="justify-content:flex-end">
+            <button class="btn" id="csClose">إغلاق</button>
+            <button class="btn btn-gold" id="csRecheck">Recheck Connection</button>
+        </div>
+    </div>`;
     document.body.appendChild(ov);
+    ov.querySelector('#csClose').onclick = () => ov.remove();
+    ov.querySelector('#csRecheck').onclick = () => runCloudTests();
+    drawCloudRows();
+}
 
-    const showChoice = () => {
-        box.innerHTML = `
-            <div class="h" style="margin:0">اختار طريقة الدخول</div>
-            <button class="btn btn-gold" id="ch_cloud">دخول بالسحابة</button>
-            <button class="btn" id="ch_local">دخول بدون سحابة</button>`;
-        box.querySelector('#ch_cloud').onclick = showCloud;
-        box.querySelector('#ch_local').onclick = showLocal;
-    };
-
-    const showCloud = () => {
-        box.innerHTML = `
-            <div class="h" style="margin:0">دخول بالسحابة</div>
-            <input id="cl_email" class="inp" type="email" placeholder="الإيميل" autocomplete="username">
-            <input id="cl_pass" class="inp" type="password" placeholder="الباسورد" autocomplete="current-password">
-            <div id="cl_err" class="muted" style="color:var(--bad)"></div>
-            <div class="row" style="justify-content:flex-end">
-                <button class="btn" id="cl_back">رجوع</button>
-                <button class="btn btn-gold" id="cl_go">دخول</button>
-            </div>`;
-        box.querySelector('#cl_back').onclick = showChoice;
-        box.querySelector('#cl_go').onclick = async () => {
-            const email = box.querySelector('#cl_email').value.trim();
-            const pass = box.querySelector('#cl_pass').value;
-            const err = box.querySelector('#cl_err');
-            err.textContent = '';
-            if (!email || !pass) { err.textContent = 'اكتب الإيميل والباسورد'; return; }
+async function runCloudTests(){
+    const c = cloudState();
+    if (!c || !c.user) {
+        CLOUD_TEST = { conn: 'idle', write: 'idle', read: 'idle' };
+        renderCloudStatus();
+        return;
+    }
+    if (CLOUD_TESTING) return;
+    CLOUD_TESTING = true;
+    renderCloudStatus();
+    const nonce = 'chk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    const res = { conn: 'fail', write: c.canWrite ? 'fail' : 'skip', read: 'fail' };
+    try { await window.kansasCloud.testRead(); res.conn = 'ok'; } catch (e) { res.conn = 'fail'; }
+    if (res.conn === 'ok') {
+        if (c.canWrite) {
+            try { await window.kansasCloud.testWrite(nonce); res.write = 'ok'; } catch (e) { res.write = 'fail'; }
+        }
+        if (!c.canWrite || res.write === 'ok') {
             try {
-                await window.kansasCloud.login(email, pass);
-                ov.remove();
-            } catch (e) {
-                err.textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
-            }
-        };
-    };
+                const got = await window.kansasCloud.testRead();
+                res.read = (!c.canWrite || (got && got.nonce === nonce)) ? 'ok' : 'fail';
+            } catch (e) { res.read = 'fail'; }
+        }
+    }
+    CLOUD_TEST = res;
+    CLOUD_TESTING = false;
+    renderCloudStatus();
+}
 
-    const showLocal = () => {
-        box.innerHTML = `
-            <div class="h" style="margin:0">دخول بدون سحابة</div>
-            <div class="muted">البيانات هتتحفظ على الجهاز بس، ومش هتترفع للسحابة.</div>
-            <input id="lo_pin" class="inp" type="password" inputmode="numeric" placeholder="اكتب الـ PIN">
-            <div id="lo_err" class="muted" style="color:var(--bad)"></div>
-            <div class="row" style="justify-content:flex-end">
-                <button class="btn" id="lo_back">رجوع</button>
-                <button class="btn btn-gold" id="lo_go">دخول</button>
-            </div>`;
-        box.querySelector('#lo_back').onclick = showChoice;
-        box.querySelector('#lo_go').onclick = () => {
-            const pin = box.querySelector('#lo_pin').value.replace(/\s/g, '');
-            const err = box.querySelector('#lo_err');
-            err.textContent = '';
-            if (!pin) { err.textContent = 'اكتب الـ PIN'; return; }
-            if (pin !== window.APP_PIN) { err.textContent = 'الـ PIN غلط'; return; }
+function showAuthGate(msg){
+    const gate = $('authGate');
+    if (!gate) return;
+    gate.classList.remove('hidden');
+    $('gateMsg').textContent = msg || '';
+    $('gateForm').classList.remove('hidden');
+    const last = localStorage.getItem('kansas_last_email');
+    if (last && !$('gateEmail').value) $('gateEmail').value = last;
+}
+
+function hideAuthGate(){
+    const gate = $('authGate');
+    if (gate) gate.classList.add('hidden');
+}
+
+let APP_STARTED = false;
+function startAppOnce(){
+    if (APP_STARTED) return;
+    APP_STARTED = true;
+    hideAuthGate();
+    window.kansasStart();
+}
+
+(function initAuthGate(){
+    const btn = $('gateGo');
+    if (btn) btn.onclick = async () => {
+        const email = $('gateEmail').value.trim();
+        const pass = $('gatePass').value;
+        const err = $('gateErr');
+        err.textContent = '';
+        if (!email || !pass) { err.textContent = 'اكتب البريد وكلمة المرور'; return; }
+        if (!window.kansasCloud) { err.textContent = 'خدمة الدخول لسه ما اتحملتش'; return; }
+        try {
+            await window.kansasCloud.login(email, pass);
+            $('gatePass').value = '';
+        } catch (e) {
+            err.textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
+        }
+    };
+    const fg = $('gateForgot');
+    if (fg) fg.onclick = async () => {
+        const email = $('gateEmail').value.trim();
+        const err = $('gateErr');
+        err.textContent = '';
+        if (!email) { err.textContent = 'اكتب البريد الأول'; return; }
+        if (!window.kansasCloud) { err.textContent = 'خدمة الدخول لسه ما اتحملتش'; return; }
+        try {
+            await window.kansasCloud.reset(email);
+            err.textContent = 'لو البريد مسجل، هيوصلك رابط استعادة كلمة المرور';
+        } catch (e) {
+            err.textContent = 'تعذر إرسال الرابط: ' + ((e && e.code) || 'خطأ');
+        }
+    };
+    setTimeout(() => {
+        if (!window.__kansasAuthChecked) $('gateMsg').textContent = 'تعذر تحميل خدمة الدخول. تأكد من النت وحدّث الصفحة.';
+    }, 12000);
+})();
+
+window.addEventListener('load', function () {
+    setTimeout(function () {
+        const sp = $('splash');
+        if (sp) { sp.classList.add('gone'); setTimeout(function () { sp.remove(); }, 450); }
+    }, 1200);
+});
+
+function openChangePassword(){
+    const c = cloudState();
+    if (!c || !c.user) { toast('سجل دخول بالسحابة الأول', 'error'); return; }
+    const ov = document.createElement('div');
+    ov.className = 'modal';
+    ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
+        <div class="h" style="margin:0">تغيير كلمة المرور</div>
+        <input id="cp_cur" class="inp" type="password" placeholder="كلمة المرور الحالية" autocomplete="current-password">
+        <input id="cp_new" class="inp" type="password" placeholder="كلمة المرور الجديدة (6 حروف على الأقل)" autocomplete="new-password">
+        <input id="cp_conf" class="inp" type="password" placeholder="تأكيد الجديدة" autocomplete="new-password">
+        <div id="cp_err" class="muted" style="color:var(--bad)"></div>
+        <div class="row" style="justify-content:flex-end">
+            <button class="btn" id="cp_cancel">إلغاء</button>
+            <button class="btn btn-gold" id="cp_save">حفظ</button>
+        </div>
+    </div>`;
+    document.body.appendChild(ov);
+    const err = ov.querySelector('#cp_err');
+    ov.querySelector('#cp_cancel').onclick = () => ov.remove();
+    ov.querySelector('#cp_save').onclick = async () => {
+        const cur = ov.querySelector('#cp_cur').value;
+        const next = ov.querySelector('#cp_new').value;
+        const conf = ov.querySelector('#cp_conf').value;
+        err.textContent = '';
+        if (!cur || !next || !conf) { err.textContent = 'املا الخانات الثلاثة'; return; }
+        if (next.length < 6) { err.textContent = 'الجديدة لازم تكون 6 حروف على الأقل'; return; }
+        if (next !== conf) { err.textContent = 'التأكيد مش مطابق للجديدة'; return; }
+        if (next === cur) { err.textContent = 'الجديدة لازم تكون غير القديمة'; return; }
+        try {
+            await window.kansasCloud.changePassword(cur, next);
             ov.remove();
-            showDbNotice('وضع محلي: البيانات بتتحفظ على الجهاز بس، ومش بتترفع للسحابة.');
-        };
+            toast('تم تغيير كلمة المرور');
+        } catch (e) {
+            const code = (e && e.code) || '';
+            if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') err.textContent = 'كلمة المرور الحالية غلط';
+            else if (code === 'auth/weak-password') err.textContent = 'كلمة المرور الجديدة ضعيفة';
+            else if (code === 'auth/requires-recent-login') err.textContent = 'سجل دخول تاني وحاول';
+            else if (code === 'auth/network-request-failed') err.textContent = 'مفيش اتصال بالنت';
+            else err.textContent = 'تعذر تغيير كلمة المرور: ' + (code || 'خطأ');
+        }
     };
-
-    showChoice();
 }
 
-async function cloudStart(){
-    const ready = new Promise((resolve, reject) => {
-        const t0 = Date.now();
-        const t = setInterval(() => {
-            if (window.__kansasAuthChecked) { clearInterval(t); resolve(); }
-            else if (Date.now() - t0 > 10000) { clearInterval(t); reject(new Error('timeout')); }
-        }, 200);
-    });
-    try { await ready; }
-    catch (e) { showDbNotice('تعذّر الاتصال بالسحابة. البيانات محلية على هذا الجهاز بس.'); return; }
-    if (!cloudState().user) askCloudLogin();
-}
+
+
+
 
 window.kansasStart = function () {
     S = loadDB();
@@ -1655,7 +1791,6 @@ window.kansasStart = function () {
     renderAll();
     applyTheme(localStorage.getItem('kansas_theme') || 'dark');
     showWelcome();
-    cloudStart();
 };
 
 function checkDailyAutoBackup() {
@@ -1736,6 +1871,18 @@ function switchTab(tab) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function toggleHdrMenu(e){
+    if (e) e.stopPropagation();
+    const m = $('hdrMenu');
+    if (m) m.classList.toggle('hidden');
+}
+document.addEventListener('click', function (e) {
+    const m = $('hdrMenu');
+    if (!m || m.classList.contains('hidden')) return;
+    if (!e.target.closest('#hdrMenuWrap')) { m.classList.add('hidden'); return; }
+    if (e.target.closest('#hdrMenu button, #hdrMenu label')) setTimeout(() => m.classList.add('hidden'), 0);
+});
+
 function toggleTheme() {
     applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
 }
@@ -1771,26 +1918,171 @@ function isValidBackup(d) {
         && (d.receipts === undefined || objOk(d.receipts));
 }
 
+const RESTORE_PIN_HASH = '4db4da60384e47d40db276bb49c097b3c1c698d6444a2a72f0acfb549a060fe0';
+const RESTORE_MAX_TRIES = 3;
+const RESTORE_LOCK_MS = 5 * 60 * 1000;
+const RESTORE_UNDO_MS = 2 * 60 * 1000;
+let RESTORE_UNDO_TIMER = null;
+
+async function sha256Hex(text){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+function salesKeys(obj){
+    return Object.keys((obj && obj.sales) || {}).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort();
+}
+function dataSummary(obj){
+    const keys = salesKeys(obj);
+    return {
+        products: ((obj && obj.products) || []).length,
+        sales: keys.length,
+        analyses: ((obj && obj.analyses) || []).length,
+        first: keys[0] || '',
+        last: keys[keys.length - 1] || ''
+    };
+}
+
+function askRestorePin(){
+    const until = Number(localStorage.getItem('kansas_restore_lock') || 0);
+    if (Date.now() < until) {
+        toast('الاستعادة مقفولة مؤقتاً. حاول بعد ' + Math.ceil((until - Date.now()) / 60000) + ' دقيقة', 'error');
+        return Promise.resolve(false);
+    }
+    return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal';
+        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">
+            <div class="h" style="margin:0">الرقم السري للاستعادة</div>
+            <input id="rp_pin" class="inp" type="password" inputmode="numeric" placeholder="الرقم السري">
+            <div id="rp_err" class="muted" style="color:var(--bad)"></div>
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" id="rp_cancel">إلغاء</button>
+                <button class="btn btn-gold" id="rp_ok">تأكيد</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        const err = ov.querySelector('#rp_err');
+        const finish = v => { ov.remove(); resolve(v); };
+        ov.querySelector('#rp_cancel').onclick = () => finish(false);
+        ov.querySelector('#rp_ok').onclick = async () => {
+            const pin = ov.querySelector('#rp_pin').value.trim();
+            if (!pin) { err.textContent = 'اكتب الرقم السري'; return; }
+            if (await sha256Hex(pin) === RESTORE_PIN_HASH) {
+                localStorage.removeItem('kansas_restore_fails');
+                finish(true);
+                return;
+            }
+            const fails = Number(localStorage.getItem('kansas_restore_fails') || 0) + 1;
+            localStorage.setItem('kansas_restore_fails', String(fails));
+            if (fails >= RESTORE_MAX_TRIES) {
+                localStorage.setItem('kansas_restore_lock', String(Date.now() + RESTORE_LOCK_MS));
+                localStorage.removeItem('kansas_restore_fails');
+                toast('الرقم غلط ' + RESTORE_MAX_TRIES + ' مرات. الاستعادة مقفولة 5 دقايق', 'error');
+                finish(false);
+            } else {
+                err.textContent = 'الرقم غلط (المحاولة ' + fails + ' من ' + RESTORE_MAX_TRIES + ')';
+            }
+        };
+    });
+}
+
+function askRestoreConfirm(bodyHtml){
+    return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal';
+        ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" style="max-width:560px;max-height:85vh;overflow:auto">
+            <div class="h" style="margin:0">معاينة الاستعادة</div>
+            ${bodyHtml}
+            <div class="row" style="justify-content:flex-end">
+                <button class="btn" data-r="0">إلغاء</button>
+                <button class="btn btn-gold" data-r="1">تأكيد الاستعادة</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        ov.addEventListener('click', e => {
+            const v = e.target.dataset ? e.target.dataset.r : undefined;
+            if (v !== undefined) { ov.remove(); resolve(v === '1'); }
+        });
+    });
+}
+
+function showRestoreUndo(){
+    const old = $('restoreUndo');
+    if (old) old.remove();
+    clearTimeout(RESTORE_UNDO_TIMER);
+    const bar = document.createElement('div');
+    bar.id = 'restoreUndo';
+    bar.className = 'undo-bar';
+    bar.innerHTML = '<span>تم استعادة النسخة. تقدر تتراجع خلال دقيقتين</span><button type="button" class="btn btn-gold btn-sm" id="restoreUndoBtn">تراجع</button>';
+    document.body.appendChild(bar);
+    $('restoreUndoBtn').onclick = undoRestore;
+    RESTORE_UNDO_TIMER = setTimeout(() => { const b = $('restoreUndo'); if (b) b.remove(); }, RESTORE_UNDO_MS);
+}
+
+function undoRestore(){
+    const b = $('restoreUndo');
+    if (b) b.remove();
+    clearTimeout(RESTORE_UNDO_TIMER);
+    try {
+        const data = JSON.parse(localStorage.getItem(PREV_KEY) || 'null');
+        if (!data || !isValidBackup(data)) return toast('مفيش نسخة للتراجع', 'error');
+        DB_STATUS = 'ok';
+        S = normalize(data);
+        if (saveDB()) { toast('تم التراجع عن الاستعادة'); renderAll(); }
+    } catch (e) {
+        toast('تعذر التراجع', 'error');
+    }
+}
+
+async function runRestoreFlow(data, source, at){
+    if (!await askRestorePin()) return false;
+    const cur = dataSummary(S);
+    const nd = dataSummary(data);
+    const warn = [];
+    if (cur.products + cur.sales > 0) {
+        if (cur.last && nd.last && nd.last < cur.last) {
+            const days = daysBetween(nd.last, cur.last);
+            if (days > 30) warn.push('النسخة أقدم من البيانات الحالية بـ ' + days + ' يوم');
+        }
+        if (nd.products < cur.products) warn.push('عدد الأصناف في النسخة (' + nd.products + ') أقل من الحالي (' + cur.products + ')');
+        if (cur.sales > 0 && nd.sales < cur.sales * 0.5) warn.push('أيام الإيرادات في النسخة أقل من نص الحالي');
+    }
+    const c = cloudState();
+    const rows = [
+        ['مصدر النسخة', source],
+        ['تاريخ حفظ النسخة', at ? new Date(at).toLocaleString('ar-EG') : 'غير معروف'],
+        ['عدد الأصناف', nd.products],
+        ['أيام الإيرادات', nd.sales],
+        ['التحليلات المحفوظة', nd.analyses],
+        ['أول يوم في النسخة', nd.first || '-'],
+        ['آخر يوم في النسخة', nd.last || '-'],
+        ['آخر يوم في البيانات الحالية', cur.last || '-']
+    ];
+    const table = `<div class="tbl-wrap" style="margin-top:8px"><table style="width:100%;font-size:14px;border-collapse:collapse"><tbody>${rows.map(r => `<tr><td class="muted" style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--border)">${esc(r[0])}</td><td style="padding:6px 8px;font-weight:800;text-align:left;border-bottom:1px solid var(--border)">${esc(String(r[1]))}</td></tr>`).join('')}</tbody></table></div>`;
+    const warnHtml = warn.length ? `<div style="color:var(--bad);font-weight:800;margin-top:10px">${warn.map(esc).join('<br>')}</div>` : '';
+    const cloudHtml = (c && c.user && c.canWrite) ? '<div style="color:var(--bad);margin-top:10px">الاستعادة هتكتب على السحابة كمان، والتغيير هيوصل للكمبيوتر والتليفون.</div>' : '';
+    if (!await askRestoreConfirm(table + warnHtml + cloudHtml)) return false;
+    DB_STATUS = 'ok';
+    S = data;
+    if (!saveDB()) return false;
+    toast('تم استعادة النسخة');
+    renderAll();
+    showRestoreUndo();
+    return true;
+}
+
 async function importBackup(input) {
     const f = input.files[0];
     if (!f) return;
-    if (!await askTyped('الاستيراد هيستبدل كل البيانات الحالية في المتصفح. متأكد؟\nاكتب "استيراد" عشان توافق:', 'استيراد')) { input.value = ''; return; }
-    const r = new FileReader();
-    r.onload = () => {
-        try {
-            const d = JSON.parse(r.result);
-            if (!isValidBackup(d)) throw new Error('bad');
-            DB_STATUS = 'ok';
-            S = normalize(d);
-            saveDB();
-            toast('تم استيراد النسخة');
-            renderAll();
-        } catch (e) {
-            toast('ملف النسخة غير صالح', 'error');
-        }
-        input.value = '';
-    };
-    r.readAsText(f);
+    try {
+        const d = JSON.parse(await f.text());
+        if (!isValidBackup(d)) throw new Error('bad');
+        await runRestoreFlow(normalize(d), 'ملف النسخة', null);
+    } catch (e) {
+        toast('ملف النسخة غير صالح', 'error');
+    }
+    input.value = '';
 }
 
 function renderBackupAlert() {
@@ -3489,6 +3781,29 @@ function renderTransfers() {
     setTransType($('trans-type').value || 'in');
 }
 
+function setTrErr(msgId, fieldId, msg){
+    const m = $(msgId), f = $(fieldId);
+    if (m) m.textContent = msg || '';
+    if (f) f.classList.toggle('error', !!msg);
+}
+
+function validateTransferForm(){
+    const type = $('trans-type').value;
+    const branch = $('trans-branch').value.trim();
+    const pid = $('trans-prod').value;
+    const qtyRaw = $('trans-qty').value.trim();
+    const qty = Number(qtyRaw);
+    const eBranch = !branch
+        ? (type === 'in' ? 'من فضلك اختر الفرع المرسل' : 'من فضلك اختر الفرع المستلم')
+        : (branch.length > 120 ? 'اسم الفرع طويل جداً' : '');
+    const eProd = (!pid || !productById(pid)) ? 'من فضلك اختر الصنف' : '';
+    const eQty = (qtyRaw === '' || !Number.isFinite(qty) || qty <= 0) ? 'من فضلك أدخل كمية صحيحة أكبر من صفر' : '';
+    setTrErr('trErrBranch', 'trans-branch', eBranch);
+    setTrErr('trErrProd', 'trans-prod', eProd);
+    setTrErr('trErrQty', 'trans-qty', eQty);
+    return !eBranch && !eProd && !eQty;
+}
+
 async function addTransfer() {
     const d = $('tr-day').value;
     if (!d) return toast('اختر التاريخ', 'error');
@@ -3497,9 +3812,7 @@ async function addTransfer() {
     const branch = $('trans-branch').value.trim();
     const pid = $('trans-prod').value;
     const qty = num($('trans-qty').value);
-    if (!pid) return toast('اختر صنفاً الأول', 'error');
-    if (qty <= 0) return toast('الكمية لازم تكون أكبر من صفر', 'error');
-    if (branch.length > 120) return toast('اسم الفرع طويل جداً', 'error');
+    if (!validateTransferForm()) return;
     if (d > todayStr()) return toast('ما ينفعش تسجل تحويل ليوم لسه ما جاش', 'error');
     if (d < todayStr() && !await askConfirm('ده تحويل ليوم فات. متأكد؟', 'تأكيد')) return;
     S.transfers.push({ id: uid(), day: d, type, branch, product_id: pid, qty });
@@ -5364,8 +5677,8 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) chec
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCvbeR9xSN7PsOy_F4uPi4iGS2HoGBTeT4",
@@ -5381,6 +5694,7 @@ const fapp = initializeApp(firebaseConfig);
 const fdb = getFirestore(fapp);
 const fauth = getAuth(fapp);
 const REF = doc(fdb, 'branches', 'main');
+const TEST_REF = doc(fdb, 'system', 'connection_test');
 const cloud = { user: null, canWrite: false };
 let unsubRemote = null;
 
@@ -5388,7 +5702,17 @@ window.kansasCloud = {
   cloud,
   login: (email, pass) => signInWithEmailAndPassword(fauth, email, pass),
   push: (json) => setDoc(REF, { data: json, at: new Date().toISOString(), by: fauth.currentUser ? fauth.currentUser.email : '' }),
-  logout: () => signOut(fauth)
+  logout: () => signOut(fauth),
+  reset: (email) => sendPasswordResetEmail(fauth, email),
+  testWrite: (nonce) => setDoc(TEST_REF, { nonce: nonce, at: new Date().toISOString(), by: fauth.currentUser ? fauth.currentUser.email : '' }),
+  testRead: async () => { const snap = await getDoc(TEST_REF); return snap.exists() ? snap.data() : null; },
+  changePassword: async (current, next) => {
+    const user = fauth.currentUser;
+    if (!user) throw { code: 'auth/no-user' };
+    const cred = EmailAuthProvider.credential(user.email, current);
+    await reauthenticateWithCredential(user, cred);
+    await updatePassword(user, next);
+  }
 };
 
 onAuthStateChanged(fauth, (u) => {
@@ -5398,7 +5722,7 @@ onAuthStateChanged(fauth, (u) => {
   if (u) {
     unsubRemote = onSnapshot(REF, (snap) => {
       if (snap.metadata.hasPendingWrites) return;
-      if (window.kansasOnRemote) window.kansasOnRemote(snap.exists() ? snap.data() : null);
+      if (window.kansasOnRemote) window.kansasOnRemote(snap.exists() ? snap.data() : null, snap.metadata.fromCache);
     }, (err) => console.warn('firestore', err));
   }
   window.__kansasAuthChecked = true;
@@ -5411,4 +5735,3 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').
 </script>
 </body>
 </html>p
-p
