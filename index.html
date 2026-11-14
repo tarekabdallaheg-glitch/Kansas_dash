@@ -788,13 +788,13 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <span class="muted">من</span>
                 <input type="date" id="fc-from" class="inp sm" onchange="renderForecast()"><span class="muted">إلى</span><input type="date" id="fc-to" class="inp sm" onchange="renderForecast()">
                 <span class="muted">نسبة النمو %</span>
-                <input type="number" id="fc-growth" class="inp xs" step="any" value="5" onchange="renderForecast();renderVariance()">
+                <input type="number" id="fc-growth" class="inp xs" step="any" value="" placeholder="اكتب النسبة" onchange="renderForecast();renderVariance()">
             </div>
             <div id="forecast-summary" class="note" style="margin-top:12px">ابدأ بتسجيل المبيعات أو استيراد بيانات سابقة لبناء التوقع.</div>
             <div class="tbl-wrap" style="margin-top:12px"><table>
-                <thead><tr><th>اليوم</th><th>متوسط الإيراد</th><th>نسبة النمو %</th><th>المتوقع</th><th>الفعلي</th><th>الفرق (الفعلي − المتوقع)</th><th>نسبة الفرق</th><th>نمو عن اليوم السابق</th></tr></thead>
+                <thead><tr><th>اليوم</th><th>المناسبة</th><th>متوسط الإيراد</th><th>نسبة النمو %</th><th>المتوقع</th><th>الفعلي</th><th>الفرق (الفعلي − المتوقع)</th><th>نسبة الفرق</th><th>نمو عن نفس اليوم الأسبوع اللي فات</th></tr></thead>
                 <tbody id="forecast-rows"></tbody>
-                <tfoot><tr><th>إجمالي الفترة</th><th id="var-tot-avg">—</th><th></th><th id="var-tot-exp">—</th><th id="var-tot-act">—</th><th id="var-tot-diff">—</th><th id="var-tot-pct">—</th><th></th></tr></tfoot>
+                <tfoot><tr><th>إجمالي الفترة</th><th></th><th id="var-tot-avg">—</th><th></th><th id="var-tot-exp">—</th><th id="var-tot-act">—</th><th id="var-tot-diff">—</th><th id="var-tot-pct">—</th><th></th></tr></tfoot>
             </table></div>
             <details style="margin-top:14px" open>
                 <summary>إدارة وتغذية النظام ببيانات الأسابيع السابقة</summary>
@@ -2654,16 +2654,6 @@ function forecastHistory() {
         .sort().map(d => ({ date:d, revenue:Number(S.sales[d].revenue), orders:Number(S.sales[d].orders || 0), weekday:weekdayOf(d) }));
 }
 function mean(values) { return values.length ? values.reduce((a,b)=>a+b,0)/values.length : 0; }
-function forecastTrend(history) {
-    if (!history.length) return { factor:1, label:'لا توجد بيانات كافية لقياس الاتجاه' };
-    const end = todayStr(), startRecent = addDays(end,-13), startPrior = addDays(end,-27);
-    const recent = history.filter(x=>x.date>=startRecent && x.date<=end).map(x=>x.revenue);
-    const prior = history.filter(x=>x.date>=startPrior && x.date<startRecent).map(x=>x.revenue);
-    if (recent.length < 3 || prior.length < 3 || mean(prior) <= 0) return { factor:1, label:'الاتجاه غير محسوب لعدم كفاية بيانات آخر 4 أسابيع' };
-    const raw = mean(recent)/mean(prior);
-    const factor = Math.max(0.85, Math.min(1.15, raw));
-    return { factor, label: factor>1.015 ? 'اتجاه صاعد' : factor<0.985 ? 'اتجاه هابط' : 'اتجاه مستقر' };
-}
 function setForecastDate(v) {
     if (!v) return;
     activeMonth = monthOf(v);
@@ -2680,11 +2670,20 @@ function fcStartDate() {
 }
 function fcGrowth() {
     const el = $('fc-growth');
-    let g = el ? Number(el.value) : 5;
+    let g = (el && el.value !== '') ? Number(el.value) : 5;
     if (!Number.isFinite(g)) g = 5;
     return g;
 }
-function forecastOne(day, history, trend, gOverride) {
+function fcGrowthExplicit() {
+    const el = $('fc-growth');
+    if (!el || el.value === '') return null;
+    const g = Number(el.value);
+    return Number.isFinite(g) ? g : null;
+}
+function rowGrowthExplicit(d) {
+    return S.growth && S.growth[d] !== undefined ? S.growth[d] : fcGrowthExplicit();
+}
+function forecastOne(day, history, gOverride) {
     const wd = weekdayOf(day);
     const winStart = addDays(day,-28);
     const same = history.filter(x=>x.weekday===wd && x.date>=winStart && x.date<day);
@@ -2719,7 +2718,7 @@ function forecastOne(day, history, trend, gOverride) {
             if (ratios.length >= 2) confidence = confidence === 'مرتفعة' ? 'مرتفعة' : 'متوسطة';
         }
     }
-    const predicted = Math.max(0, base * trend.factor * (1 + impact/100) * (1 + (gOverride ?? fcGrowth())/100));
+    const predicted = Math.max(0, base * (1 + impact/100) * (1 + (gOverride ?? fcGrowth())/100));
     return { day, base, predicted, event, impact, learned, confidence, basis };
 }
 function parseForecastDate(v) {
@@ -2836,7 +2835,7 @@ function setExpected(d, v) {
 function expectedFor(d, hist) {
     const before = hist.filter(x => x.date < d);
     if (!before.length) return null;
-    const f = forecastOne(d, before, forecastTrend(before));
+    const f = forecastOne(d, before);
     return f.base ? f.predicted : null;
 }
 
@@ -2871,32 +2870,37 @@ function renderForecast() {
     const range = fcRange();
     const days = [];
     eachDay(range.from, range.to, d => days.push(d));
-    let prev = null, tE = 0, tA = 0, tEall = 0, tAvg = 0;
+    let tE = 0, tA = 0, tEall = 0, tAvg = 0;
     body.innerHTML = days.map(d => {
         const before = hist.filter(x => x.date < d);
-        const f = before.length ? forecastOne(d, before, forecastTrend(before), rowGrowth(d)) : null;
+        const gx = rowGrowthExplicit(d);
+        const f = before.length ? forecastOne(d, before, gx !== null ? gx : undefined) : null;
         const ok = !!(f && f.base);
         const avg = ok ? f.base : null;
-        const exp = ok ? f.predicted : null;
+        const exp = ok ? (gx !== null ? f.predicted : f.base) : null;
         const rec = S.sales[d];
         const act = rec ? Number(rec.revenue || 0) : null;
         const both = act !== null && exp !== null;
         const diff = both ? act - exp : null;
         const dp = both && exp > 0 ? diff / exp : null;
-        const grow = act !== null && prev !== null && prev > 0 ? (act - prev) / prev : null;
-        if (act !== null) prev = act;
+        const lwRec = S.sales[addDays(d, -7)];
+        const lw = lwRec ? Number(lwRec.revenue || 0) : null;
+        const cur = act !== null ? act : exp;
+        const wk = (cur !== null && lw !== null && lw > 0) ? (cur - lw) / lw : null;
+        
+        
         if (avg !== null) tAvg += avg;
         if (exp !== null) tEall += exp;
         if (both) { tE += exp; tA += act; }
         const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
-        return `<tr class="${d === todayStr() ? 'row-today' : ''}"><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td>
+        return `<tr class="${d === todayStr() ? 'row-today' : ''}"><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td><td>${esc((forecastEventFor(d) || {}).name || '—')}</td>
             <td>${avg === null ? '<span class="muted">—</span>' : fmt(avg) + '<br><span class="muted">' + esc(f.basis) + '</span>'}</td>
-            <td><input class="inp xs" type="number" step="any" value="${rowGrowth(d)}" onchange="setRowGrowth('${d}', this.value)"></td>
+            <td><input class="inp xs" type="number" step="any" value="${gx === null ? '' : gx}" placeholder="—" onchange="setRowGrowth('${d}', this.value)"></td>
             <td><b>${exp === null ? '—' : fmt(exp)}</b></td>
             <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
             <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
             <td class="${cls}">${dp === null ? '—' : pct(dp)}</td>
-            <td>${arrowChip(grow)}</td></tr>`;
+            <td>${arrowChip(wk)}</td></tr>`;
     }).join('');
     const tDiff = tA - tE;
     const achieved = tEall > 0 && tA > 0 ? tA / tEall : null;
@@ -2906,7 +2910,7 @@ function renderForecast() {
     $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
     $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
     $('forecast-summary').textContent = hist.length
-        ? `الفترة من ${range.from} إلى ${range.to}. المتوقع للفترة: ${fmt(tEall)} ج.م، والمحقق فعلاً: ${fmt(tA)} ج.م${achieved !== null ? ` (${(achieved * 100).toFixed(1)}% من المتوقع)` : ''}. المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع × اتجاه الفترة × تأثير المناسبات × نسبة النمو. الفرق = الفعلي − المتوقع.`
+        ? `الفترة من ${range.from} إلى ${range.to}. المتوقع للفترة: ${tEall > 0 ? fmt(tEall) + ' ج.م' : '—'}، والمحقق فعلاً: ${fmt(tA)} ج.م${achieved !== null ? ` (${(achieved * 100).toFixed(1)}% من المتوقع)` : ''}. المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع × تأثير المناسبات × نسبة النمو. الفرق = الفعلي − المتوقع.`
         : 'لا توجد مبيعات مسجلة بعد. سجّل الإيراد اليومي أو أدخل بيانات سابقة ليبدأ التوقع.';
     $('forecast-history-count').textContent = `الموجود حاليًا: ${hist.length} يوم`;
 }
@@ -5333,10 +5337,12 @@ function savePer1000Close() {
 }
 
 function planForecast(d) {
-  // نفس الأرقام اللي في جدول التخطيط للمبيعات (متوسط × اتجاه × مناسبات × نسبة النمو لكل يوم)
+  // نفس محرك جدول توقع المبيعات، ونفس قاعدة نسبة النمو: لازم تتكتب الأول
   const before = forecastHistory().filter(x => x.date < d);
-  if (!before.length) return { day: d, base: 0, predicted: 0 };
-  return forecastOne(d, before, forecastTrend(before), rowGrowth(d));
+  if (!before.length) return { day: d, base: 0, predicted: 0, missingGrowth: false };
+  const gx = rowGrowthExplicit(d);
+  const f = forecastOne(d, before, gx !== null ? gx : undefined);
+  return { ...f, predicted: gx !== null ? f.predicted : f.base, missingGrowth: gx === null };
 }
 function orderStartDate() {
   const el=$('orders-start-date');
@@ -5348,14 +5354,14 @@ function renderOrderForecast() {
   renderPer1000Products();
   switchOrderSubTab(orderSubTab);
   const start=orderStartDate();
-  const history=forecastHistory(), trend=forecastTrend(history);
+  const history=forecastHistory();
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
   const forecasts=days.map(day=>planForecast(day));
   const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
-  const quantities=forecasts.map(f=>products.map(p=>({id:p.id,qty:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100})));
+  const quantities=forecasts.map(f=>products.map(p=>({id:p.id,qty:f.predicted===null?0:Math.round((f.predicted/1000)*Number(S.per1000[p.id].rate)*100)/100})));
   $('orders-head').innerHTML=`<tr><th>اليوم والتاريخ</th><th>الإيراد المتوقع</th>${products.map(p=>`<th>${esc(p.name)}<br><span class="muted">${esc(p.unit||'')}</span></th>`).join('')}</tr>`;
-  $('orders-rows').innerHTML=forecasts.map((f,i)=>`<tr><td><b>${DAYS_AR[weekdayOf(f.day)]}</b><br><span class="muted">${f.day}</span></td><td><b>${f.base?fmt(f.predicted)+' ج.م':'لا توجد بيانات'}</b></td>${products.map(p=>{const q=quantities[i].find(x=>x.id===p.id)?.qty||0;return `<td><b>${f.base?fmt(q,2):'—'}</b></td>`}).join('')}</tr>`).join('');
-  const totalRev=forecasts.reduce((a,f)=>a+f.predicted,0);
+  $('orders-rows').innerHTML=forecasts.map((f,i)=>`<tr><td><b>${DAYS_AR[weekdayOf(f.day)]}</b><br><span class="muted">${f.day}</span></td><td><b>${!f.base ? 'لا توجد بيانات' : (f.predicted === null ? '<span class="muted">أدخل نسبة النمو في توقع المبيعات</span>' : fmt(f.predicted) + ' ج.م')}</b></td>${products.map(p=>{const q=quantities[i].find(x=>x.id===p.id)?.qty||0;return `<td><b>${(!f.base || f.predicted === null) ? '—' : fmt(q,2)}</b></td>`}).join('')}</tr>`).join('');
+  const totalRev=forecasts.reduce((a,f)=>a+(f.predicted||0),0);
   const totals=products.map(p=>quantities.reduce((a,row)=>a+(row.find(x=>x.id===p.id)?.qty||0),0));
   $('orders-foot').innerHTML=`<tr><th>إجمالي الأسبوع</th><th>${fmt(totalRev)} ج.م</th>${totals.map(q=>`<th>${fmt(q,2)}</th>`).join('')}</tr>`;
   $('orders-print-period').textContent=`من ${days[0]} إلى ${days[6]}`;
@@ -5393,7 +5399,7 @@ async function saveOrderSnapshot() {
   if (S.orderSnapshots[s0] && !await askTyped(`فيه نسخة معتمدة لأسبوع ${s0} (${S.orderSnapshots[s0].savedAt||''}). الاعتماد الجديد هيكتب فوقها، والكميات الفعلية اللي اتدخلت هتتمسح.\nاكتب "تأكيد" عشان توافق:`, 'تأكيد')) return;
   logAction('اعتماد نسخة طلبية', s0, '');
   const start=orderStartDate();
-  const history=forecastHistory(), trend=forecastTrend(history);
+  const history=forecastHistory();
   const days=Array.from({length:7},(_,i)=>addDays(start,i));
   const products=S.products.filter(p=>S.per1000[p.id]?.enabled && Number(S.per1000[p.id]?.rate)>0);
   if(!products.length) return toast('اختار الأصناف وأدخل معدلات Per 1000 أولًا','error');
