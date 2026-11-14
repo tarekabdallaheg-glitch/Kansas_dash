@@ -4454,12 +4454,23 @@ function liveAn() {
 }
 
 // الأصناف اللي ليها هدف +20% بس (بالاسم)
-const TARGET_WORDS = ['شورتنج', 'فرايز', 'سلو', 'أرز', 'دقيق'];
-function isTargetProduct(p) {
-    const nm = String(p.name || '').trim();
-    return TARGET_WORDS.some(w => nm.includes(w));
+// توحيد الحروف العربية عشان "ارز" و"أرز" و"رز" تتعامل كلها كصنف واحد
+function normAr(t) {
+  return String(t || '')
+    .replace(/[\u064B-\u0652]/g, '')
+    .replace(/[إأآ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/\s+/g, '')
+    .toLowerCase();
 }
-
+const TARGET_WORDS = ['شورتنج', 'فرايز', 'سلو', 'ارز', 'رز', 'دقيق'].map(normAr);
+function isTargetProduct(p) {
+  const nm = normAr(p.name);
+  return TARGET_WORDS.some(w => nm.includes(w));
+}
 // فلتر الحرجة: الصنف تحت الهدف أو فيه عجز غير متفسر
 function critOf(pc) {
     const av = pc.querySelector('[id^="av-"]');
