@@ -787,8 +787,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 
                 <span class="muted">من</span>
                 <input type="date" id="fc-from" class="inp sm" onchange="renderForecast()"><span class="muted">إلى</span><input type="date" id="fc-to" class="inp sm" onchange="renderForecast()">
-                <span class="muted">نسبة النمو %</span>
-                <input type="number" id="fc-growth" class="inp xs" step="any" value="" placeholder="اكتب النسبة" onchange="renderForecast();renderVariance()">
+                <span class="muted">نسبة النمو للشهر (كل الأيام)</span>
+                <input type="number" id="fc-growth" class="inp xs" step="any" value="" placeholder="اكتب النسبة" onchange="setMonthGrowth(this.value)">
             </div>
             <div id="forecast-summary" class="note" style="margin-top:12px">ابدأ بتسجيل المبيعات أو استيراد بيانات سابقة لبناء التوقع.</div>
             <div class="tbl-wrap" style="margin-top:12px"><table>
@@ -2674,14 +2674,22 @@ function fcGrowth() {
     if (!Number.isFinite(g)) g = 5;
     return g;
 }
-function fcGrowthExplicit() {
-    const el = $('fc-growth');
-    if (!el || el.value === '') return null;
-    const g = Number(el.value);
-    return Number.isFinite(g) ? g : null;
+function growthForMonth(m) {
+    return S.monthGrowth && S.monthGrowth[m] !== undefined ? S.monthGrowth[m] : null;
 }
 function rowGrowthExplicit(d) {
-    return S.growth && S.growth[d] !== undefined ? S.growth[d] : fcGrowthExplicit();
+    return S.growth && S.growth[d] !== undefined ? S.growth[d] : growthForMonth(monthOf(d));
+}
+function setMonthGrowth(v) {
+    S.monthGrowth = S.monthGrowth || {};
+    if (v === '') delete S.monthGrowth[activeMonth];
+    else {
+        const g = Number(v);
+        if (!Number.isFinite(g)) return toast('أدخل نسبة صحيحة', 'error');
+        S.monthGrowth[activeMonth] = g;
+    }
+    saveDB();
+    renderForecast();
 }
 function forecastOne(day, history, gOverride) {
     const wd = weekdayOf(day);
@@ -2863,6 +2871,8 @@ function fcRange() {
 }
 
 function renderForecast() {
+  const fgEl = $('fc-growth');
+  if (fgEl && document.activeElement !== fgEl) fgEl.value = growthForMonth(activeMonth) ?? '';
     const body = $('forecast-rows');
     if (!body) return;
     renderForecastEvents();
@@ -2885,8 +2895,7 @@ function renderForecast() {
         const dp = both && exp > 0 ? diff / exp : null;
         const lwRec = S.sales[addDays(d, -7)];
         const lw = lwRec ? Number(lwRec.revenue || 0) : null;
-        const cur = act !== null ? act : exp;
-        const wk = (cur !== null && lw !== null && lw > 0) ? (cur - lw) / lw : null;
+        const wk = (act !== null && lw !== null && lw > 0) ? (act - lw) / lw : null;
         
         
         if (avg !== null) tAvg += avg;
@@ -2895,7 +2904,7 @@ function renderForecast() {
         const cls = diff === null ? '' : (diff >= 0 ? 'up' : 'down');
         return `<tr class="${d === todayStr() ? 'row-today' : ''}"><td>${Number(d.slice(8))} · ${DAYS_AR[weekdayOf(d)]}</td><td>${esc((forecastEventFor(d) || {}).name || '—')}</td>
             <td>${avg === null ? '<span class="muted">—</span>' : fmt(avg) + '<br><span class="muted">' + esc(f.basis) + '</span>'}</td>
-            <td><input class="inp xs" type="number" step="any" value="${gx === null ? '' : gx}" placeholder="—" onchange="setRowGrowth('${d}', this.value)"></td>
+            <td><input class="inp xs" type="number" step="any" value="${gx === null ? '' : gx}" style="${S.growth && S.growth[d] !== undefined ? 'border-color:var(--gold2);font-weight:800' : ''}" placeholder="—" onchange="setRowGrowth('${d}', this.value)"></td>
             <td><b>${exp === null ? '—' : fmt(exp)}</b></td>
             <td>${act === null ? '<span class="muted">—</span>' : fmt(act)}</td>
             <td class="${cls}">${diff === null ? '—' : (diff > 0 ? '+' : '') + fmt(diff)}</td>
@@ -2910,7 +2919,7 @@ function renderForecast() {
     $('var-tot-diff').textContent = (tDiff > 0 ? '+' : '') + fmt(tDiff);
     $('var-tot-pct').textContent = tE > 0 ? pct(tDiff / tE) : '—';
     $('forecast-summary').textContent = hist.length
-        ? `الفترة من ${range.from} إلى ${range.to}. المتوقع للفترة: ${tEall > 0 ? fmt(tEall) + ' ج.م' : '—'}، والمحقق فعلاً: ${fmt(tA)} ج.م${achieved !== null ? ` (${(achieved * 100).toFixed(1)}% من المتوقع)` : ''}. المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع × تأثير المناسبات × نسبة النمو. الفرق = الفعلي − المتوقع.`
+        ? `الفترة من ${range.from} إلى ${range.to}. المتوقع للفترة: ${tEall > 0 ? fmt(tEall) + ' ج.م' : '—'}، والمحقق فعلاً: ${fmt(tA)} ج.م${achieved !== null ? ` (نمو عن المتوقع: ${((achieved - 1) * 100 >= 0 ? '+' : '')}${((achieved - 1) * 100).toFixed(1)}%)` : ''}. المتوقع لكل يوم = متوسط نفس اليوم في الأسبوع × تأثير المناسبات × نسبة النمو. الفرق = الفعلي − المتوقع.`
         : 'لا توجد مبيعات مسجلة بعد. سجّل الإيراد اليومي أو أدخل بيانات سابقة ليبدأ التوقع.';
     $('forecast-history-count').textContent = `الموجود حاليًا: ${hist.length} يوم`;
 }
