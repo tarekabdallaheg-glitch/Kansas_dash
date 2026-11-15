@@ -657,7 +657,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                 <div><div class="muted" style="margin-bottom:6px">عدد العمليات</div><input type="number" min="0" step="1" id="sales-ord" class="inp" data-nav="sord" data-ri="0"></div>
             </div>
             <div class="row" style="margin-top:14px">
-                <button class="btn btn-gold" id="sales-save" data-save onclick="saveSalesDay()">حفظ وقفل اليوم</button>
+                <button class="btn btn-gold" id="sales-save" data-save onclick="saveSalesDay()" style="flex:1;padding:14px 20px;font-size:17px">حفظ وقفل اليوم</button>
                 <button class="btn" id="sales-unlock" onclick="unlockSales()">فتح التعديل</button>
                 <button class="btn btn-red" id="sales-delete" onclick="deleteSalesDay()">مسح إيراد اليوم</button>
             </div>
@@ -679,7 +679,21 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 
         <div class="trend" id="trend"></div>
 
-        <div class="card no-print" id="revenue-assistant" style="border:1px solid var(--gold, #d6a500)">
+        <div class="grid g3 no-print" id="rev-cards" style="margin-bottom:14px">
+  <div class="card"><div class="ilbl">إيراد الشهر حتى اليوم</div><div class="ibig" id="rv-month">—</div><div class="muted" id="rv-cmp" style="font-size:12px"></div></div>
+  <div class="card"><div class="ilbl">عدد العمليات للشهر</div><div class="ibig" id="rv-ops">—</div></div>
+  <div class="card"><div class="ilbl">متوسط الشيك للشهر</div><div class="ibig" id="rv-chk">—</div></div>
+</div>
+<div class="card no-print" id="rev-plan" style="margin-bottom:14px">
+  <div class="muted" id="rp-sentence" style="margin-bottom:10px;font-size:14px"></div>
+  <div class="grid g4">
+    <div><div class="ilbl">الخطة</div><div class="ibig" id="rp-plan">—</div></div>
+    <div><div class="ilbl">نسبة تحقيق الخطة</div><div class="ibig" id="rp-pct">—</div></div>
+    <div><div class="ilbl">المطلوب يومياً للخطة</div><div class="ibig" id="rp-day">—</div><div class="muted" id="rp-left" style="font-size:12px"></div></div>
+    <div><div class="ilbl">أيام من غير إيراد</div><div class="ibig" id="rp-miss">—</div><div class="muted" id="rp-list" style="font-size:12px"></div><button class="btn btn-ghost btn-sm" id="rp-goto" style="margin-top:6px" onclick="gotoFirstMissingDay()">روح لأول يوم ناقص</button></div>
+  </div>
+</div>
+<div class="card no-print hidden" id="revenue-assistant" style="border:1px solid var(--gold, #d6a500)">
             <div class="row between" style="align-items:center;gap:10px">
                 <div>
                     <div class="eyebrow">مساعد الفرع</div>
@@ -703,15 +717,15 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             <div id="revenue-assistant-answer" class="note" aria-live="polite" style="margin-top:10px">اختار سؤالاً أو اكتب سؤالك عن الإيرادات.</div>
         </div>
 
-        <div class="grid g4" id="quick"></div>
+        <div class="grid g4 hidden" id="quick"></div>
 
         <div class="card">
             <div class="h">مقترحات الأولوية</div>
-            <div class="ins-list" id="priorities"></div>
+            <div class="ins-list hidden" id="priorities"></div>
         </div>
 
-        <div class="h" style="margin:4px 2px 0">التفاصيل</div>
-        <div class="grid g2" id="items"></div>
+        <div class="h hidden" style="margin:4px 2px 0">التفاصيل</div>
+        <div class="grid g2 hidden" id="items"></div>
 
         <details class="card no-print" id="cmp-card">
             <summary>مقارنة فترتين</summary>
@@ -737,17 +751,14 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
         </details>
 
         <div class="card no-print">
-            <div class="h">تصدير وطباعة</div>
+            <div class="h">فترة التقرير</div>
             <div class="exp">
                 <div class="exp-row">
                     <span class="muted">من</span><input type="date" id="rev-from" class="inp sm" onchange="renderAll()">
                     <span class="muted">إلى</span><input type="date" id="rev-to" class="inp sm" onchange="renderAll()">
                     <button class="btn btn-ghost btn-sm" onclick="resetRevRange()">الشهر كله</button>
                 </div>
-                <div class="exp-row">
-                    <button class="btn btn-green" onclick="exportRevenueXlsx()">تحميل شيت الإيراد</button>
-                    <button class="btn" onclick="printNow()">طباعة التقرير</button>
-                </div>
+                
             </div>
         </div>
 
@@ -760,6 +771,14 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             </div>
             <div class="row" style="position:sticky;bottom:0;background:var(--card);padding:10px 0;border-top:0.5px solid var(--border);z-index:5;margin-top:16px"><button class="btn btn-gold" id="set-save" onclick="saveSettings()">حفظ وإغلاق</button><button class="btn" id="set-unlock" onclick="unlockSettings()">فتح تعديل الإعدادات</button></div>
         </details>
+
+<div class="card no-print">
+<div class="h">تصدير وطباعة</div>
+<div class="exp-row">
+                    <button class="btn btn-green" onclick="exportRevenueXlsx()">تحميل شيت الإيراد</button>
+                    <button class="btn" onclick="printNow()">طباعة التقرير</button>
+                </div>
+</div>
 
         <details class="card no-print" data-scope>
             <summary>بيانات السنة اللي فاتت يوم بيوم</summary>
@@ -2136,6 +2155,7 @@ document.addEventListener('wheel', function (e) {
 
 document.addEventListener('keydown', (e) => {
     const el = e.target;
+    if (e.key === 'Enter' && el && el.id === 'sales-ord') { e.preventDefault(); saveSalesDay(); return; }
     if (!el || !el.dataset || !el.dataset.nav) return;
     const scope = el.closest('[data-scope]') || document;
     const ri = Number(el.dataset.ri || 0);
@@ -2935,11 +2955,40 @@ function calcGrowth() {
     $('gr-result').textContent = `${g >= 0 ? '+' : ''}${g.toFixed(2)}% (${g >= 0 ? 'نمو' : 'نزول'})`;
 }
 
+function gotoFirstMissingDay() {
+  const miss = missingRevenueDays();
+  if (!miss.length) return toast('مفيش أيام ناقصة في الشهر');
+  $('sales-day').value = activeMonth + '-' + String(miss[0]).padStart(2, '0');
+  loadSalesDay();
+  $('sales-rev').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  $('sales-rev').focus();
+}
+
+function renderRevCards(a) {
+  if (!$('rv-month')) return;
+  $('rv-month').textContent = fmt(a.m.rev) + ' ج.م';
+  $('rv-cmp').innerHTML = arrowChip(a.growthLy, 'vs السنة اللي فاتت (الفترة المختارة)');
+  $('rv-ops').textContent = fmt(a.m.ord);
+  $('rv-chk').textContent = a.m.ord ? fmt(a.m.rev / a.m.ord, 2) + ' ج.م' : '—';
+  $('rp-plan').textContent = a.c.plan_rev > 0 ? fmt(a.c.plan_rev) + ' ج.م' : '—';
+  $('rp-pct').textContent = a.planPct === null ? '—' : (a.planPct * 100).toFixed(1) + '%';
+  $('rp-day').textContent = a.required === null ? '—' : fmt(a.required) + ' ج.م';
+  $('rp-left').textContent = a.remDays ? 'باقي ' + a.remDays + ' يوم في الشهر' : '';
+  $('rp-miss').textContent = a.missing.length;
+  $('rp-list').textContent = a.missing.length ? a.missing.slice(0, 10).join('، ') : '';
+  $('rp-goto').style.display = a.missing.length ? '' : 'none';
+  $('rp-pct').style.color = a.planPct === null ? '' : (a.planPct >= 1 ? 'var(--ok)' : (a.planPct >= 0.8 ? '#e08e00' : 'var(--bad)'));
+  if (a.c.plan_rev <= 0) $('rp-sentence').textContent = 'حدد خطة الشهر من الإعدادات عشان يظهر المطلوب يومياً.';
+  else if (a.required === null) $('rp-sentence').textContent = a.planPct !== null && a.planPct >= 1 ? 'تم تحقيق خطة الشهر.' : 'الشهر خلص، مفيش أيام باقية.';
+  else $('rp-sentence').textContent = 'لازم تحقق ' + fmt(a.required) + ' ج.م يومياً لحد نهاية الشهر.';
+}
+
 function renderRevenue() {
     const from = $('rev-from').value, to = $('rev-to').value;
     const a = analyzeRevenue(from, to);
     const blocks = buildBlocks(a);
     renderHero(a, from, to);
+  renderRevCards(a);
     renderTrend(a);
     renderRevenueAssistant(a);
     renderForecast();
@@ -2948,7 +2997,7 @@ function renderRevenue() {
     renderItems(blocks);
     renderCompare();
     const al = $('rev-alert');
-    if (a.missing.length) { al.classList.remove('hidden'); al.textContent = 'أيام سابقة بدون إيراد مسجلْ: ' + a.missing.join(', '); }
+    if (a.missing.length) { al.classList.add('hidden'); al.textContent = 'أيام سابقة بدون إيراد مسجلْ: ' + a.missing.join(', '); }
     else al.classList.add('hidden');
 }
 
