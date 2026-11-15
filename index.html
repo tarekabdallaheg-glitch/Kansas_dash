@@ -589,6 +589,15 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 #tab-revenue .grid.g3 .ibig{color:var(--gold)}
 #tab-revenue .eyebrow{color:var(--muted)}
 #tab-revenue .muted{font-size:12px}
+
+/* جدول الهدف من السنة اللي فاتت */
+#rev-plan .lyt-title{font-size:13px;font-weight:800;color:var(--text);margin:16px 0 8px}
+#rev-plan .lyt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-variant-numeric:tabular-nums}
+#rev-plan .lyt th{font-size:11.5px;font-weight:700;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap}
+#rev-plan .lyt th:first-child{text-align:right}
+#rev-plan .lyt td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:center;font-size:14px;font-weight:800;color:var(--text)}
+#rev-plan .lyt tbody tr:last-child td{border-bottom:0}
+#rev-plan .lyt td.lab{text-align:right;font-size:13px;font-weight:700;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -705,7 +714,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     <div><div class="ilbl">المطلوب يومياً للخطة</div><div class="ibig" id="rp-day">—</div><div class="muted" id="rp-left" style="font-size:12px"></div></div>
     <div><div class="ilbl">أيام من غير إيراد</div><div class="ibig" id="rp-miss">—</div><div class="muted" id="rp-list" style="font-size:12px"></div><button class="btn btn-ghost btn-sm" id="rp-goto" style="margin-top:6px" onclick="gotoFirstMissingDay()">روح لأول يوم ناقص</button></div>
   </div>
-  <div class="tbl-wrap" style="margin-top:12px"><table style="width:100%;font-size:13px;border-collapse:collapse"><thead><tr><th style="text-align:right;padding:6px">الهدف من السنة اللي فاتت</th><th style="padding:6px">السنة اللي فاتت</th><th style="padding:6px">حققت</th><th style="padding:6px">نسبتك منها</th><th style="padding:6px">لازم يومياً</th></tr></thead><tbody id="rp-ly"></tbody></table></div>
+  <div class="lyt-title">الهدف من السنة اللي فاتت</div>
+  <div class="tbl-wrap"><table class="lyt"><thead><tr><th>المقياس</th><th>السنة اللي فاتت</th><th>حققت</th><th>نسبتك</th><th>لازم يومياً</th></tr></thead><tbody id="rp-ly"></tbody></table></div>
 </div>
 <div class="card no-print hidden" id="revenue-assistant" style="border:1px solid var(--gold, #d6a500)">
             <div class="row between" style="align-items:center;gap:10px">
@@ -2995,11 +3005,11 @@ function renderRevCards(a) {
   const row = (label, lyVal, done, fmtFn) => {
     const pct = lyVal > 0 ? done / lyVal : null;
     const need = (lyVal > done && remD > 0) ? (lyVal - done) / remD : null;
-    return '<tr><td style="padding:6px;text-align:right">' + label + '</td>'
-      + '<td style="padding:6px;font-weight:800">' + (lyVal > 0 ? fmtFn(lyVal) : '—') + '</td>'
-      + '<td style="padding:6px;font-weight:800">' + fmtFn(done) + '</td>'
-      + '<td style="padding:6px;font-weight:800;color:' + (pct === null ? 'inherit' : (pct >= 1 ? 'var(--ok)' : 'var(--text)')) + '">' + (pct === null ? '—' : (pct * 100).toFixed(1) + '%') + '</td>'
-      + '<td style="padding:6px;font-weight:800">' + (lyVal <= 0 ? '—' : (need === null ? 'تم' : fmtFn(need))) + '</td></tr>';
+    return '<tr><td class="lab">' + label + '</td>'
+      + '<td>' + (lyVal > 0 ? fmtFn(lyVal) : '—') + '</td>'
+      + '<td>' + fmtFn(done) + '</td>'
+      + '<td style="color:' + (pct === null ? 'inherit' : (pct >= 1 ? 'var(--ok)' : 'var(--text)')) + '">' + (pct === null ? '—' : (pct * 100).toFixed(1) + '%') + '</td>'
+      + '<td>' + (lyVal <= 0 ? '—' : (need === null ? 'تم' : fmtFn(need))) + '</td></tr>';
   };
   $('rp-ly').innerHTML = row('إيراد الشهر', ly.rev, a.m.rev, v => fmt(v) + ' ج.م')
     + row('عمليات الشهر', ly.ord, a.m.ord, v => fmt(v));
