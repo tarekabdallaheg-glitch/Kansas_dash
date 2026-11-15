@@ -579,9 +579,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 
 /* توحيد شكل كروت تقرير الإيرادات (شكل بس، من غير أي تغيير في الحسابات) */
 #tab-revenue .card,
-#tab-revenue .hero,
 #tab-revenue .quick{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);color:var(--text)}
-#tab-revenue .hero{position:static;overflow:visible;background:var(--card);color:var(--text);box-shadow:var(--shadow)}
 #tab-revenue .card.entry{border-color:var(--border)}
 #tab-revenue .grid.g3,#tab-revenue .grid.g4{gap:12px}
 #tab-revenue .grid.g3>.card,#tab-revenue .grid.g4>div{min-height:96px}
@@ -695,8 +693,8 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
         <div class="trend" id="trend"></div>
 
         <div class="grid g3 no-print" id="rev-cards" style="margin-bottom:14px">
-  <div class="card"><div class="ilbl">إيراد الشهر حتى اليوم</div><div class="ibig" id="rv-month">—</div><div class="muted" id="rv-cmp" style="font-size:12px"></div></div>
-  <div class="card"><div class="ilbl">عدد العمليات للشهر</div><div class="ibig" id="rv-ops">—</div></div>
+  <div class="card"><div class="ilbl">إيراد الشهر حتى اليوم</div><div class="ibig" id="rv-month">—</div><div class="muted" id="rv-avg"></div><div class="muted" id="rv-cmp" style="font-size:12px"></div></div>
+  <div class="card"><div class="ilbl">عدد العمليات للشهر</div><div class="ibig" id="rv-ops">—</div><div class="muted" id="rv-ops-avg"></div></div>
   <div class="card"><div class="ilbl">متوسط الشيك للشهر</div><div class="ibig" id="rv-chk">—</div></div>
 </div>
 <div class="card no-print" id="rev-plan" style="margin-bottom:14px">
@@ -707,6 +705,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
     <div><div class="ilbl">المطلوب يومياً للخطة</div><div class="ibig" id="rp-day">—</div><div class="muted" id="rp-left" style="font-size:12px"></div></div>
     <div><div class="ilbl">أيام من غير إيراد</div><div class="ibig" id="rp-miss">—</div><div class="muted" id="rp-list" style="font-size:12px"></div><button class="btn btn-ghost btn-sm" id="rp-goto" style="margin-top:6px" onclick="gotoFirstMissingDay()">روح لأول يوم ناقص</button></div>
   </div>
+  <div class="tbl-wrap" style="margin-top:12px"><table style="width:100%;font-size:13px;border-collapse:collapse"><thead><tr><th style="text-align:right;padding:6px">الهدف من السنة اللي فاتت</th><th style="padding:6px">السنة اللي فاتت</th><th style="padding:6px">حققت</th><th style="padding:6px">نسبتك منها</th><th style="padding:6px">لازم يومياً</th></tr></thead><tbody id="rp-ly"></tbody></table></div>
 </div>
 <div class="card no-print hidden" id="revenue-assistant" style="border:1px solid var(--gold, #d6a500)">
             <div class="row between" style="align-items:center;gap:10px">
@@ -2989,6 +2988,21 @@ function renderRevCards(a) {
   $('rp-pct').textContent = a.planPct === null ? '—' : (a.planPct * 100).toFixed(1) + '%';
   $('rp-day').textContent = a.required === null ? '—' : fmt(a.required) + ' ج.م';
   $('rp-left').textContent = a.remDays ? 'باقي ' + a.remDays + ' يوم في الشهر' : '';
+  $('rv-avg').textContent = a.t.days ? 'متوسط الإيراد اليومي للفترة: ' + fmt(a.t.rev / a.t.days) + ' ج.م' : '';
+  $('rv-ops-avg').textContent = a.t.days ? 'متوسط العمليات اليومي للفترة: ' + fmt(a.t.ord / a.t.days, 1) : '';
+  const ly = lyMonthTotal(activeMonth);
+  const remD = a.remDays || 0;
+  const row = (label, lyVal, done, fmtFn) => {
+    const pct = lyVal > 0 ? done / lyVal : null;
+    const need = (lyVal > done && remD > 0) ? (lyVal - done) / remD : null;
+    return '<tr><td style="padding:6px;text-align:right">' + label + '</td>'
+      + '<td style="padding:6px;font-weight:800">' + (lyVal > 0 ? fmtFn(lyVal) : '—') + '</td>'
+      + '<td style="padding:6px;font-weight:800">' + fmtFn(done) + '</td>'
+      + '<td style="padding:6px;font-weight:800;color:' + (pct === null ? 'inherit' : (pct >= 1 ? 'var(--ok)' : 'var(--text)')) + '">' + (pct === null ? '—' : (pct * 100).toFixed(1) + '%') + '</td>'
+      + '<td style="padding:6px;font-weight:800">' + (lyVal <= 0 ? '—' : (need === null ? 'تم' : fmtFn(need))) + '</td></tr>';
+  };
+  $('rp-ly').innerHTML = row('إيراد الشهر', ly.rev, a.m.rev, v => fmt(v) + ' ج.م')
+    + row('عمليات الشهر', ly.ord, a.m.ord, v => fmt(v));
   $('rp-miss').textContent = a.missing.length;
   $('rp-list').textContent = a.missing.length ? a.missing.slice(0, 10).join('، ') : '';
   $('rp-goto').style.display = a.missing.length ? '' : 'none';
