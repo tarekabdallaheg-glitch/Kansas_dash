@@ -996,6 +996,25 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                     <button class="btn" id="rc-none" onclick="markReceiptNone()">لا توجد توريدات في اليوم ده</button>
                     <button class="btn hidden" id="rc-edit" onclick="unlockReceipts()">تعديل اليوم</button>
                 </div>
+<div class="trr-card" style="margin-top:18px">
+<div class="row between" style="margin-bottom:10px">
+<div class="h" style="margin:0">📊 تقرير الوارد</div>
+<div class="row" style="gap:8px"><span class="muted">مجمّع لكل صنف، والتفاصيل بالتاريخ جنب كل سطر</span><button type="button" class="btn btn-ghost btn-sm" onclick="toggleRcReport()">طي / فرد ▴▾</button></div>
+</div>
+<div id="rcr-body">
+<div class="grid g3">
+<div><label class="muted">من تاريخ</label><input type="date" id="rcr-from" class="inp"></div>
+<div><label class="muted">إلى تاريخ</label><input type="date" id="rcr-to" class="inp"></div>
+<div><label class="muted">الصنف</label><select id="rcr-prod" class="inp"></select></div>
+</div>
+<div class="row" style="margin-top:12px">
+<button class="btn btn-gold" onclick="renderReceiptReport()">عرض التقرير</button>
+<button class="btn btn-green" onclick="exportReceiptReportXlsx()">تحميل Excel</button>
+<button class="btn btn-slate" onclick="printReceiptReport()">طباعة / حفظ PDF</button>
+</div>
+<div id="rcr-out" style="margin-top:14px"></div>
+</div>
+</div>
             </div>
 
             <!-- التحويلات -->
@@ -4063,6 +4082,114 @@ function trProductTotals(groups) {
         t.inQty += g.inQty; t.outQty += g.outQty;
     });
     return [...map.values()].sort((a, b) => productLabel(a.pid).localeCompare(productLabel(b.pid), 'ar'));
+}
+
+// ===== تقرير الوارد =====
+function toggleRcReport() {
+  const b = $('rcr-body');
+  if (b) b.classList.toggle('hidden');
+}
+
+function fillReceiptReportFilters() {
+  if (!$('rcr-from')) return;
+  if (!$('rcr-from').value) { $('rcr-from').value = monthStart(activeMonth); $('rcr-to').value = monthEnd(activeMonth); }
+  const pSel = $('rcr-prod');
+  const cur = pSel.value;
+  pSel.innerHTML = '<option value="">كل الأصناف</option>' + S.products.map(p => `<option value="${esc(p.id)}">${esc(p.name)} (${esc(p.unit)})</option>`).join('');
+  pSel.value = cur;
+}
+
+function rcReportRows() {
+  const from = $('rcr-from').value || monthStart(activeMonth);
+  const to = $('rcr-to').value || monthEnd(activeMonth);
+  const pid = $('rcr-prod').value;
+  const rows = [];
+  Object.keys(S.receipts || {}).forEach(day => {
+    if (!inRange(day, from, to)) return;
+    Object.entries(S.receipts[day] || {}).forEach(([p, q]) => {
+      const qty = Number(q) || 0;
+      if (qty > 0 && (!pid || p === pid)) rows.push({ day, pid: p, qty });
+    });
+  });
+  return rows.sort((a, b) => (a.day < b.day ? -1 : (a.day > b.day ? 1 : 0)));
+}
+
+function rcReportGroups(rows) {
+  const map = new Map();
+  rows.forEach(r => {
+    if (!map.has(r.pid)) map.set(r.pid, { pid: r.pid, qty: 0, days: new Set(), items: [] });
+    const g = map.get(r.pid);
+    g.qty += r.qty;
+    g.days.add(r.day);
+    g.items.push(r);
+  });
+  return [...map.values()].sort((a, b) => productLabel(a.pid).localeCompare(productLabel(b.pid), 'ar'));
+}
+
+function toggleRcDetail(i) {
+  const r = $('rcd-' + i);
+  if (r) r.classList.toggle('hidden');
+}
+
+function renderReceiptReport() {
+  const host = $('rcr-out');
+  if (!host) return;
+  fillReceiptReportFilters();
+  const rows = rcReportRows();
+  if (!rows.length) { host.innerHTML = '<div class="muted">مفيش توريدات في الفلتر ده</div>'; return; }
+  const groups = rcReportGroups(rows);
+  const body = groups.map((g, i) => {
+    const p = productById(g.pid) || {};
+    return `<tr class="trr-main">
+      <td><span class="pname">${esc(p.name || 'صنف محذوف')}</span> <span class="punit">${esc(p.unit || '')}</span></td>
+      <td><span class="rep-qty up">+${fmt(g.qty, 2)}</span></td>
+      <td>${g.days.size}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="toggleRcDetail(${i})">التفاصيل ▾</button></td>
+    </tr>
+    <tr id="rcd-${i}" class="hidden"><td colspan="4" style="padding:0 10px 10px">
+      <table class="trr-det"><thead><tr><th>التاريخ</th><th>الكمية</th></tr></thead><tbody>
+      ${g.items.map(r => `<tr><td>${r.day}</td><td>${fmt(r.qty, 2)}</td></tr>`).join('')}
+      </tbody></table>
+    </td></tr>`;
+  }).join('');
+  host.innerHTML = `<div class="tbl-wrap"><table class="trr">
+    <thead><tr><th>الصنف</th><th>إجمالي الوارد</th><th>عدد أيام التوريد</th><th></th></tr></thead>
+    <tbody>${body}</tbody>
+  </table></div>`;
+}
+
+function exportReceiptReportXlsx() {
+  const rows = rcReportRows();
+  if (!rows.length) return toast('مفيش توريدات في الفلتر ده', 'error');
+  const groups = rcReportGroups(rows);
+  const summary = groups.map(g => {
+    const p = productById(g.pid) || {};
+    return { 'الصنف': safeCell(p.name || ''), 'الوحدة': safeCell(p.unit || ''), 'إجمالي الوارد': g.qty, 'عدد أيام التوريد': g.days.size };
+  });
+  const detail = rows.map(r => {
+    const p = productById(r.pid) || {};
+    return { 'التاريخ': r.day, 'الصنف': safeCell(p.name || ''), 'الوحدة': safeCell(p.unit || ''), 'الكمية': r.qty };
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'الملخص');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail), 'التفاصيل');
+  XLSX.writeFile(wb, `Kansas_Receipts_${$('rcr-from').value || monthStart(activeMonth)}_${$('rcr-to').value || monthEnd(activeMonth)}.xlsx`);
+}
+
+function printReceiptReport() {
+  const out = $('rcr-out');
+  const area = $('print-area');
+  if (!out || !area || !out.innerHTML.trim()) return toast('اعرض التقرير الأول', 'error');
+  const clone = out.cloneNode(true);
+  clone.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
+  clone.querySelectorAll('button').forEach(b => b.remove());
+  const from = $('rcr-from').value || monthStart(activeMonth);
+  const to = $('rcr-to').value || monthEnd(activeMonth);
+  area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير الوارد</div><div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
+  area.appendChild(clone);
+  document.body.classList.add('print-area-mode');
+  window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
+  printNow();
 }
 
 function toggleTrDetail(i) {
