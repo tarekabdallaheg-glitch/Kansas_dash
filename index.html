@@ -5058,15 +5058,13 @@ function renderInvPeriodReport() {
   eachDay(from, to, d => days.push(d));
 
   const cols = S.products;
-  const recHead = `<tr><th>التاريخ</th>${cols.map(p => `<th>${esc(p.name)} (${esc(p.unit)})</th>`).join('')}<th>الإجمالي</th></tr>`;
+  const recHead = `<tr><th>التاريخ</th>${cols.map(p => `<th>${esc(p.name)} (${esc(p.unit)})</th>`).join('')}</tr>`;
   const recRows = days.map(d => {
     const cells = cols.map(p => { const v = rcpt(d, p.id); return `<td>${v ? fmt(v, 2) : '—'}</td>`; }).join('');
-    const tot = cols.reduce((a, p) => a + (rcpt(d, p.id) || 0), 0);
-    return `<tr><td>${d}</td>${cells}<td>${tot ? fmt(tot, 2) : '—'}</td></tr>`;
+    return `<tr><td>${d}</td>${cells}</tr>`;
   }).join('');
   const colTot = cols.map(p => days.reduce((a, d) => a + (rcpt(d, p.id) || 0), 0));
-  const grand = colTot.reduce((a, v) => a + v, 0);
-  const recTot = `<tr class="rpt-tot"><td>الإجمالي</td>${colTot.map(v => `<td>${v ? fmt(v, 2) : '—'}</td>`).join('')}<td>${grand ? fmt(grand, 2) : '—'}</td></tr>`;
+  const recTot = `<tr class="rpt-tot"><td>الإجمالي</td>${colTot.map(v => `<td>${v ? fmt(v, 2) : '—'}</td>`).join('')}</tr>`;
 
   const trRows = S.transfers.filter(t => inRange(t.day, from, to)).sort((a, b) => (a.day < b.day ? -1 : (a.day > b.day ? 1 : 0)));
   const trBody = trRows.length
