@@ -598,6 +598,17 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 #rev-plan .lyt td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:center;font-size:14px;font-weight:800;color:var(--text)}
 #rev-plan .lyt tbody tr:last-child td{border-bottom:0}
 #rev-plan .lyt td.lab{text-align:right;font-size:13px;font-weight:700;color:var(--muted)}
+
+/* تقرير الوارد والتحويلات والإيراد في المخزون */
+.rpt-sec{border:0.5px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.rpt-sec>summary{cursor:pointer;font-size:14px;font-weight:800;margin-bottom:8px;color:var(--text)}
+.rpt-sec .tbl-wrap{overflow-x:auto}
+.rpt-tbl{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.rpt-tbl th{font-size:12px;font-weight:700;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap}
+.rpt-tbl td{padding:9px 6px;border-bottom:1px solid var(--border);text-align:center;color:var(--text)}
+.rpt-tbl td:first-child,.rpt-tbl th:first-child{text-align:right}
+.rpt-tbl tr:last-child td{border-bottom:0}
+.rpt-tbl .rpt-tot td{font-weight:800;border-top:1px solid var(--border-strong)}
 </style>
 </head>
 <body>
@@ -929,19 +940,27 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
             <div id="smart-tips" class="ins-list"></div>
         </div>
         <div class="card" id="inv-export">
-            <div class="h">تحميل شيت الوارد والتحويلات والإيراد</div>
-            <div class="exp">
-                <div class="exp-row">
-                    <span class="muted">من</span><input type="date" id="ex-from" class="inp sm">
-                    <span class="muted">إلى</span><input type="date" id="ex-to" class="inp sm">
-                    <button class="btn btn-ghost btn-sm" onclick="setExportMonth()">الشهر كله</button>
-                </div>
-                <div class="muted">الشيت بيكون داخل الشهر النشط بس، ومقسوم لثلاث صفحات: الوارد (يوم × صنف)، والتحويلات، والإيراد.</div>
-                <div class="exp-row">
-                    <button class="btn btn-green" onclick="exportPeriodXlsx()">تحميل الشيت</button>
-                </div>
-            </div>
-        </div>
+<div class="row between" style="margin-bottom:10px">
+<div class="h" style="margin:0">📊 تقرير الوارد والتحويلات والإيراد</div>
+<button type="button" class="btn btn-ghost btn-sm" onclick="toggleInvPeriod()">طي / فرد ▴▾</button>
+</div>
+<div id="inv-period-body">
+<div class="exp">
+<div class="exp-row">
+<span class="muted">من</span><input type="date" id="ex-from" class="inp sm">
+<span class="muted">إلى</span><input type="date" id="ex-to" class="inp sm">
+<button class="btn btn-ghost btn-sm" onclick="setExportMonth()">الشهر كله</button>
+</div>
+<div class="muted">التقرير بيكون داخل الشهر النشط بس.</div>
+<div class="exp-row">
+<button class="btn btn-gold" onclick="renderInvPeriodReport()">عرض التقرير</button>
+<button class="btn btn-green" onclick="exportPeriodXlsx()">تحميل Excel</button>
+<button class="btn btn-slate" onclick="printInvPeriodReport()">طباعة / حفظ PDF</button>
+</div>
+</div>
+<div id="inv-period-out" style="margin-top:14px"></div>
+</div>
+</div>
 
         <div id="inv-panel" class="hidden">
             <div class="pnl-head">
@@ -3657,6 +3676,7 @@ function unusualRcNote(pid) {
 }
 
 function renderReceipts() {
+  fillReceiptReportFilters();
     const d = $('rc-day').value;
     FORM_DAY.rc = d;
     const locked = !!S.receiptLocked[d];
@@ -5023,6 +5043,69 @@ function exportRange() {
     if (monthOf(from) !== activeMonth) from = monthStart(activeMonth);
     if (monthOf(to) !== activeMonth) to = monthEnd(activeMonth);
     return { from, to };
+}
+
+function toggleInvPeriod() {
+  const b = $('inv-period-body');
+  if (b) b.classList.toggle('hidden');
+}
+
+function renderInvPeriodReport() {
+  const host = $('inv-period-out');
+  if (!host) return;
+  const { from, to } = exportRange();
+  const days = [];
+  eachDay(from, to, d => days.push(d));
+
+  const cols = S.products;
+  const recHead = `<tr><th>التاريخ</th>${cols.map(p => `<th>${esc(p.name)} (${esc(p.unit)})</th>`).join('')}<th>الإجمالي</th></tr>`;
+  const recRows = days.map(d => {
+    const cells = cols.map(p => { const v = rcpt(d, p.id); return `<td>${v ? fmt(v, 2) : '—'}</td>`; }).join('');
+    const tot = cols.reduce((a, p) => a + (rcpt(d, p.id) || 0), 0);
+    return `<tr><td>${d}</td>${cells}<td>${tot ? fmt(tot, 2) : '—'}</td></tr>`;
+  }).join('');
+  const colTot = cols.map(p => days.reduce((a, d) => a + (rcpt(d, p.id) || 0), 0));
+  const grand = colTot.reduce((a, v) => a + v, 0);
+  const recTot = `<tr class="rpt-tot"><td>الإجمالي</td>${colTot.map(v => `<td>${v ? fmt(v, 2) : '—'}</td>`).join('')}<td>${grand ? fmt(grand, 2) : '—'}</td></tr>`;
+
+  const trRows = S.transfers.filter(t => inRange(t.day, from, to)).sort((a, b) => (a.day < b.day ? -1 : (a.day > b.day ? 1 : 0)));
+  const trBody = trRows.length
+    ? trRows.map(t => {
+        const pr = productById(t.product_id) || {};
+        return `<tr><td>${t.day}</td><td><span class="chip ${t.type === 'in' ? 'up' : 'down'}">${t.type === 'in' ? 'وارد' : 'صادر'}</span></td><td>${esc(t.branch || '—')}</td><td>${esc(pr.name || 'صنف محذوف')} <span class="punit">${esc(pr.unit || '')}</span></td><td>${fmt(t.qty, 2)}</td></tr>`;
+      }).join('')
+    : '<tr><td colspan="5" class="muted">مفيش تحويلات في الفترة دي</td></tr>';
+
+  const revDays = days.filter(d => S.sales[d]);
+  const revRows = revDays.map(d => {
+    const r = S.sales[d];
+    return `<tr><td>${d}</td><td>${fmt(r.revenue)}</td><td>${fmt(r.orders)}</td><td>${r.orders ? fmt(r.revenue / r.orders, 2) : '—'}</td></tr>`;
+  }).join('') || '<tr><td colspan="4" class="muted">مفيش إيراد مسجل في الفترة دي</td></tr>';
+  const revSum = revDays.reduce((a, d) => a + (S.sales[d].revenue || 0), 0);
+  const ordSum = revDays.reduce((a, d) => a + (S.sales[d].orders || 0), 0);
+  const revTot = `<tr class="rpt-tot"><td>الإجمالي</td><td>${fmt(revSum)}</td><td>${fmt(ordSum)}</td><td>${ordSum ? fmt(revSum / ordSum, 2) : '—'}</td></tr>`;
+
+  host.innerHTML = `
+<details open class="rpt-sec"><summary>الوارد اليومي</summary>
+<div class="tbl-wrap"><table class="rpt-tbl"><thead>${recHead}</thead><tbody>${recRows}${recTot}</tbody></table></div></details>
+<details open class="rpt-sec"><summary>التحويلات</summary>
+<div class="tbl-wrap"><table class="rpt-tbl"><thead><tr><th>التاريخ</th><th>النوع</th><th>الفرع</th><th>الصنف</th><th>الكمية</th></tr></thead><tbody>${trBody}</tbody></table></div></details>
+<details open class="rpt-sec"><summary>الإيراد اليومي</summary>
+<div class="tbl-wrap"><table class="rpt-tbl"><thead><tr><th>التاريخ</th><th>الإيراد</th><th>العمليات</th><th>متوسط الشيك</th></tr></thead><tbody>${revRows}${revTot}</tbody></table></div></details>`;
+}
+
+function printInvPeriodReport() {
+  const out = $('inv-period-out');
+  const area = $('print-area');
+  if (!out || !area || !out.innerHTML.trim()) return toast('اعرض التقرير الأول', 'error');
+  const { from, to } = exportRange();
+  const clone = out.cloneNode(true);
+  clone.querySelectorAll('details').forEach(d => { d.open = true; });
+  area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير الوارد والتحويلات والإيراد</div><div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
+  area.appendChild(clone);
+  document.body.classList.add('print-area-mode');
+  window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
+  printNow();
 }
 
 function exportPeriodXlsx() {
