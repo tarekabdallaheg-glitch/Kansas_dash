@@ -415,7 +415,7 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 
 @page{size:A4;margin:9mm}
 @media print{
-    .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,details,.entry{display:none!important}
+    .no-print,#tab-inventory,.tabs,header,#backup-alert,#month-input,.entry{display:none!important}
     .wrap{padding:0;gap:6px;max-width:none}
     .card,.icard,.quick,.tb{box-shadow:none;padding:6px;border-radius:8px;break-inside:avoid}
     .hero{box-shadow:none;padding:8px;border-radius:8px}
@@ -436,6 +436,9 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
     .trend{gap:6px}
     .g2,.g4,.g3{gap:6px}
     .icard{break-inside:avoid}
+    table{break-inside:auto}
+    thead{display:table-header-group}
+    tr{break-inside:avoid}
 }
 
 @page{size:A4 landscape;margin:10mm}
@@ -1189,7 +1192,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
                   </div>
                 </div>
                 <div id="orders-print-heading" style="text-align:center;margin:0 0 12px">
-                  <div style="font-size:20px;font-weight:900">KANSAS CHICKEN</div>
+                  <div style="font-size:20px;font-weight:900">KANSAS PREMIUM</div>
                   <div style="font-size:17px;font-weight:800">جدول توقع الإيرادات والطلبيات</div>
                   <div id="orders-print-period" class="muted"></div>
                 </div>
@@ -4205,7 +4208,7 @@ function printReceiptReport() {
   clone.querySelectorAll('button').forEach(b => b.remove());
   const from = $('rcr-from').value || monthStart(activeMonth);
   const to = $('rcr-to').value || monthEnd(activeMonth);
-  area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير الوارد</div><div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
+  area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS PREMIUM - تقرير الوارد</div><div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
   area.appendChild(clone);
   document.body.classList.add('print-area-mode');
   window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
@@ -4293,7 +4296,7 @@ function printTransferReport() {
     clone.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
     clone.querySelectorAll('button').forEach(b => b.remove());
     const from = $('trr-from').value || monthStart(activeMonth), to = $('trr-to').value || monthEnd(activeMonth);
-    area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير التحويلات</div>
+    area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS PREMIUM - تقرير التحويلات</div>
         <div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
     area.appendChild(clone);
     document.body.classList.add('print-area-mode');
@@ -5006,7 +5009,7 @@ function printAnalysis() {
     const r = anRange();
     if (!r || !r.to) return toast('اختر تاريخ النهاية الأول', 'error');
     const head = $('an-print-head');
-    if (head) head.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تحليل المخزون</div>
+    if (head) head.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS PREMIUM - تحليل المخزون</div>
         <div style="text-align:center;font-weight:800">من ${esc(r.from)} إلى ${esc(r.to)}</div>`;
     const root = document.documentElement;
     const wasDark = root.classList.contains('dark');
@@ -5099,7 +5102,7 @@ function printInvPeriodReport() {
   const { from, to } = exportRange();
   const clone = out.cloneNode(true);
   clone.querySelectorAll('details').forEach(d => { d.open = true; });
-  area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير الوارد والتحويلات والإيراد</div><div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
+  area.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS PREMIUM - تقرير الوارد والتحويلات والإيراد</div><div style="text-align:center;font-weight:800;margin-bottom:8px">من ${esc(from)} إلى ${esc(to)}</div>`;
   area.appendChild(clone);
   document.body.classList.add('print-area-mode');
   window.addEventListener('afterprint', () => document.body.classList.remove('print-area-mode'), { once: true });
@@ -5545,7 +5548,7 @@ function printExpiry() {
     if (!rows.length) return toast('مفيش بيانات للطباعة', 'error');
     let box = $('print-exp-tmp');
     if (!box) { box = document.createElement('div'); box.id = 'print-exp-tmp'; document.body.appendChild(box); }
-    box.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS CHICKEN - تقرير صلاحية المنتجات</div>
+    box.innerHTML = `<div style="text-align:center;font-weight:900;font-size:16px">KANSAS PREMIUM - تقرير صلاحية المنتجات</div>
         <div style="text-align:center;margin-bottom:8px">حتى ${todayStr()}</div>${expTableHtml(rows)}`;
     document.body.classList.add('print-exp-mode');
     window.addEventListener('afterprint', () => document.body.classList.remove('print-exp-mode'), { once: true });
