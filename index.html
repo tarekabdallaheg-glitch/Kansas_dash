@@ -423,16 +423,16 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
     html.print-light .card,html.print-light .icard,html.print-light .quick,html.print-light .tb{border:1px solid #bbb}
     html.print-light .hero{background:#fff;color:#000;border:1px solid #bbb}
     html.print-light .hero *{color:#000!important}
-    body{font-size:10.5px;padding:0}
+    body{font-size:12px;padding:0}
     .hero h2{font-size:14px}
     .hero-sum{font-size:10.5px;margin-top:6px}
-    .tb .big{font-size:14px}
-    .quick .val{font-size:14px}
-    .ibig{font-size:13px}
-    .ilbl,.muted{font-size:9.5px}
+    .tb .big{font-size:18px}
+    .quick .val{font-size:16px}
+    .ibig{font-size:18px;font-variant-numeric:tabular-nums}
+    .ilbl,.muted{font-size:11px}
     .ilines{font-size:10px}
     .tip{font-size:10px;padding:4px 6px}
-    .h{font-size:11px;margin-bottom:4px}
+    .h{font-size:14px;margin-bottom:6px}
     .trend{gap:6px}
     .g2,.g4,.g3{gap:6px}
     .icard{break-inside:avoid}
@@ -440,7 +440,7 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
     thead{display:table-header-group}
     tr{break-inside:avoid}
     .card.trr-card,#inv-export,#tab-revenue .card,.rpt-sec{break-inside:auto!important}
-    .rpt-tbl,.trr,.trr-det{font-size:9px}
+    .rpt-tbl,.trr,.trr-det{font-size:10px}
     .rpt-tbl td,.rpt-tbl th,.trr td,.trr th,.trr-det td,.trr-det th{padding:3px 4px}
     .card,.hero,.tb,.quick,.icard,.rpt-sec{background:#fff!important;color:#000!important}
     .ibig,.h,.ilbl,.muted,.rpt-sec>summary{color:#000!important}
@@ -630,6 +630,17 @@ html.theme-gold{--bg:#0a0a0a;--bg2:#121212;--card:#15130d;--card2:#1b180f;--text
 html.theme-dayblue{--bg:#EAF2FD;--bg2:#DCE9FA;--card:#FFFFFF;--card2:#F5F9FF;--text:#0F2A5C;--muted:#3B5B8C;--border:#BFD7F5;--inp:#FFFFFF;--gold:#1E40AF;--gold2:#2563EB;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B;--shadow:0 1px 2px rgba(15,42,92,.08),0 8px 24px rgba(15,42,92,.10);--shadow-lg:0 2px 6px rgba(15,42,92,.10),0 18px 40px rgba(15,42,92,.14);--ring:0 0 0 3px rgba(37,99,235,.25)}
 html.theme-dayblue .btn-gold{color:#fff}
 html.theme-dayblue .band-badge{color:#fff}
+
+/* ثيم تباين عالي */
+html.theme-contrast{--bg:#000000;--bg2:#000000;--card:#000000;--card2:#000000;--text:#FFFFFF;--muted:#E5E5E5;--border:#FFFFFF;--inp:#000000;--gold:#FFD60A;--gold2:#FFD60A;--accent:#FFD60A;--ok:#00FF88;--bad:#FF4D4D;--shadow:none;--shadow-lg:none;--ring:0 0 0 3px #FFD60A}
+html.theme-contrast .card,html.theme-contrast .quick,html.theme-contrast .tb,html.theme-contrast .icard{border:2px solid #FFFFFF!important}
+html.theme-contrast .hero{background:#000000!important;border:2px solid #FFFFFF;color:#FFFFFF}
+html.theme-contrast .status{background:#000000;border:1px solid #FFFFFF;color:#FFFFFF}
+html.theme-contrast .inp,html.theme-contrast select.inp{border:2px solid #FFFFFF}
+html.theme-contrast .btn{border:2px solid #FFFFFF}
+html.theme-contrast .btn-gold{border-color:#FFD60A;color:#000000}
+html.theme-contrast .btn-green,html.theme-contrast .btn-red,html.theme-contrast .btn-slate{border-color:#FFFFFF}
+html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFFFFF!important}
 </style>
 </head>
 <body>
@@ -2010,7 +2021,8 @@ function getThemes() {
     dark:    { cls: 'dark',               name: 'داكن',        meta: '#0b1220', sw: '#0B1220' },
     light:   { cls: '',                   name: 'فاتح',        meta: '#F5F7FA', sw: '#F5F7FA' },
     gold:    { cls: 'dark theme-gold',    name: 'ذهبي',        meta: '#0a0a0a', sw: '#E0A526' },
-    dayblue: { cls: 'theme-dayblue',      name: 'أزرق نهاري',  meta: '#EAF2FD', sw: '#2563EB' }
+    dayblue: { cls: 'theme-dayblue',      name: 'أزرق نهاري',  meta: '#EAF2FD', sw: '#2563EB' },
+    contrast:{ cls: 'dark theme-contrast', name: 'تباين عالي',  meta: '#000000', sw: '#FFD60A' }
   };
 }
 
@@ -5054,16 +5066,13 @@ async function deleteAnalysis(id) {
 const PRINT_MODE_CLASSES = ['print-orders', 'print-salesforecast', 'print-analysis', 'print-exp-mode'];
 // قبل الطباعة/الحفظ PDF: نسأل شكل الملف (ثيم الشاشة أو خلفية فاتحة)
 function printNow() {
-    // الضغط على زرار الاختيار بيمسح أوضاع الطباعة المؤقتة، فبنحفظها ونرجعها قبل الطباعة
-    const saved = PRINT_MODE_CLASSES.filter(c => document.body.classList.contains(c));
-    return askChoice('شكل الملف:\nبنفس ثيم الشاشة، أو خلفية فاتحة (أوفر حبر وأوضح على الورق)\nلو الألوان مش ظاهرة، فعّل Background graphics من More settings في نافذة الطباعة.', 'بنفس ثيم الشاشة', 'خلفية فاتحة').then(c => {
-        if (c === -1) { saved.forEach(x => document.body.classList.remove(x)); return; }
-        const root = document.documentElement;
-        if (c === 1) root.classList.add('print-light');
-        saved.forEach(x => document.body.classList.add(x));
-        window.addEventListener('afterprint', () => root.classList.remove('print-light'), { once: true });
-        window.print();
-    });
+  // كل الطباعة والـ PDF بالخلفية الفاتحة تلقائي (أوفر حبر وأوضح على الورق)
+  const saved = PRINT_MODE_CLASSES.filter(c => document.body.classList.contains(c));
+  const root = document.documentElement;
+  root.classList.add('print-light');
+  saved.forEach(x => document.body.classList.add(x));
+  window.addEventListener('afterprint', () => root.classList.remove('print-light'), { once: true });
+  window.print();
 }
 let PRINTING = false;
 function resetPrintMode() { if (PRINTING) return; PRINT_MODE_CLASSES.forEach(c => document.body.classList.remove(c)); }
@@ -5097,7 +5106,7 @@ function printAnalysis() {
     };
     window.addEventListener('afterprint', clean, { once: true });
     toast('لو الألوان مش ظاهرة، فعّل Background graphics من More settings في نافذة الطباعة');
-    setTimeout(() => window.print(), 80);
+    setTimeout(() => printNow(), 80);
 }
 
 function setExportMonth() {
