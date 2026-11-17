@@ -296,15 +296,15 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
 #pn-analysis .pgrid{gap:14px 16px}
 #pn-analysis .fld{font-size:12px;letter-spacing:.2px;color:var(--muted)}
 #pn-analysis .fld b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
-#pn-analysis .inp{border-radius:14px;background:rgba(255,255,255,.04);border-color:transparent}
+#pn-analysis .inp{border-radius:14px;background:var(--inp);border:1px solid var(--border);color:var(--text)}
 #pn-analysis .inp:focus{border-color:var(--gold2)}
 #pn-analysis .sum-tbl td{font-size:16px}
 #pn-analysis .card{border:0;box-shadow:0 8px 26px rgba(0,0,0,.2)}
 #pn-analysis .chip,#pn-analysis .badge{border-radius:99px}
 /* ألوان الكتابة للوضعين: نهاري وليلي (تحليل المخزون) */
 .dark #pn-analysis{--muted:#c3cfe2;--ok:#4ade80;--bad:#fb7185;--gold2:#f2c96b}
-.dark #pn-analysis .fld b{color:#ffffff}
-.dark #pn-analysis .h{color:#f5f8ff}
+#pn-analysis .fld b{color:var(--text)}
+#pn-analysis .h{color:var(--text)}
 #pn-analysis .fld{font-weight:600}
 #pn-analysis .ptitle .pname{font-weight:800}
 .tabs .on{background:var(--bg2);color:var(--text);box-shadow:inset 0 -3px 0 var(--accent)}
@@ -439,6 +439,12 @@ body[data-sec="expiry"]{--sec:var(--s-exp)}
     table{break-inside:auto}
     thead{display:table-header-group}
     tr{break-inside:avoid}
+    .card.trr-card,#inv-export,#tab-revenue .card,.rpt-sec{break-inside:auto!important}
+    .rpt-tbl,.trr,.trr-det{font-size:9px}
+    .rpt-tbl td,.rpt-tbl th,.trr td,.trr th,.trr-det td,.trr-det th{padding:3px 4px}
+    .card,.hero,.tb,.quick,.icard,.rpt-sec{background:#fff!important;color:#000!important}
+    .ibig,.h,.ilbl,.muted,.rpt-sec>summary{color:#000!important}
+    .card,.rpt-sec{border:1px solid #bbb!important}
 }
 
 @page{size:A4 landscape;margin:10mm}
@@ -612,6 +618,18 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 .rpt-tbl td:first-child,.rpt-tbl th:first-child{text-align:right}
 .rpt-tbl tr:last-child td{border-bottom:0}
 .rpt-tbl .rpt-tot td{font-weight:800;border-top:1px solid var(--border-strong)}
+
+/* الوضع الفاتح: الخانات والـ placeholder والصف السفلي */
+.inp::placeholder,#pn-analysis .inp::placeholder{color:var(--muted);opacity:1}
+#pn-analysis input{color:var(--text)}
+.row:has(> #an-save){flex-wrap:nowrap;overflow-x:auto}
+.row:has(> #an-save) .btn{white-space:nowrap;padding:10px 14px;font-size:14px}
+
+/* ثيمات إضافية: ذهبي، وأزرق نهاري */
+html.theme-gold{--bg:#0a0a0a;--bg2:#121212;--card:#15130d;--card2:#1b180f;--text:#f5efe0;--muted:#b9a878;--border:#3a2f10;--inp:#0f0d08;--gold:#E0A526;--gold2:#F2C14E;--accent:#B8860B;--ok:#4ADE80;--bad:#F87171;--shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.45);--shadow-lg:0 2px 6px rgba(0,0,0,.5),0 22px 50px rgba(0,0,0,.5);--ring:0 0 0 3px rgba(224,165,38,.3)}
+html.theme-dayblue{--bg:#EAF2FD;--bg2:#DCE9FA;--card:#FFFFFF;--card2:#F5F9FF;--text:#0F2A5C;--muted:#3B5B8C;--border:#BFD7F5;--inp:#FFFFFF;--gold:#1E40AF;--gold2:#2563EB;--accent:#1E3A8A;--ok:#166534;--bad:#991B1B;--shadow:0 1px 2px rgba(15,42,92,.08),0 8px 24px rgba(15,42,92,.10);--shadow-lg:0 2px 6px rgba(15,42,92,.10),0 18px 40px rgba(15,42,92,.14);--ring:0 0 0 3px rgba(37,99,235,.25)}
+html.theme-dayblue .btn-gold{color:#fff}
+html.theme-dayblue .band-badge{color:#fff}
 </style>
 </head>
 <body>
@@ -814,7 +832,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 <div class="h">تصدير وطباعة</div>
 <div class="exp-row">
                     <button class="btn btn-green" onclick="exportRevenueXlsx()">تحميل شيت الإيراد</button>
-                    <button class="btn" onclick="printNow()">طباعة التقرير</button>
+                    <button class="btn" onclick="printRevenuePage()">طباعة التقرير</button>
                 </div>
 </div>
 
@@ -1968,12 +1986,43 @@ document.addEventListener('click', function (e) {
 });
 
 function toggleTheme() {
-    applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+  openThemeMenu();
 }
+
+function openThemeMenu() {
+  const themes = getThemes();
+  const cur = localStorage.getItem('kansas_theme') || 'dark';
+  const ov = document.createElement('div');
+  ov.className = 'modal';
+  ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" style="max-width:360px">
+    <div class="h" style="margin:0">اختار الثيم</div>
+    ${Object.keys(themes).map(k => `<button class="btn${k === cur ? ' btn-gold' : ''}" data-theme="${k}" style="display:flex;align-items:center;gap:10px;justify-content:flex-start;width:100%"><span style="width:18px;height:18px;border-radius:50%;background:${themes[k].sw};border:1px solid var(--border);display:inline-block;flex:none"></span>${themes[k].name}${k === cur ? ' ✓' : ''}</button>`).join('')}
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => {
+    const b = e.target.closest('button[data-theme]');
+    if (b) { applyTheme(b.dataset.theme); ov.remove(); return; }
+    if (e.target === ov) ov.remove();
+  });
+}
+function getThemes() {
+  return {
+    dark:    { cls: 'dark',               name: 'داكن',        meta: '#0b1220', sw: '#0B1220' },
+    light:   { cls: '',                   name: 'فاتح',        meta: '#F5F7FA', sw: '#F5F7FA' },
+    gold:    { cls: 'dark theme-gold',    name: 'ذهبي',        meta: '#0a0a0a', sw: '#E0A526' },
+    dayblue: { cls: 'theme-dayblue',      name: 'أزرق نهاري',  meta: '#EAF2FD', sw: '#2563EB' }
+  };
+}
+
 function applyTheme(t) {
-    document.documentElement.className = t;
-    $('theme-btn').innerHTML = t === 'dark' ? ico('sun') + 'فاتح' : ico('moon') + 'داكن';
-    try { localStorage.setItem('kansas_theme', t); } catch (e) {}
+  const themes = getThemes();
+  const th = themes[t] || themes.dark;
+  document.documentElement.className = th.cls;
+  const tc = document.querySelector('meta[name="theme-color"]');
+  if (tc) tc.setAttribute('content', th.meta);
+  const btn = $('theme-btn');
+  if (btn) btn.innerHTML = ico('sun') + 'الثيم: ' + th.name;
+  try { localStorage.setItem('kansas_theme', t in themes ? t : 'dark'); } catch (e) {}
 }
 
 function exportBackup() {
@@ -4199,7 +4248,23 @@ function exportReceiptReportXlsx() {
   XLSX.writeFile(wb, `Kansas_Receipts_${$('rcr-from').value || monthStart(activeMonth)}_${$('rcr-to').value || monthEnd(activeMonth)}.xlsx`);
 }
 
+function setPrintPage(orient) {
+  let st = document.getElementById('print-page-style');
+  if (!st) { st = document.createElement('style'); st.id = 'print-page-style'; document.head.appendChild(st); }
+  st.textContent = '@page{size:A4 ' + orient + ';margin:10mm}';
+  window.addEventListener('afterprint', () => {
+    const x = document.getElementById('print-page-style');
+    if (x) x.textContent = '@page{size:A4 landscape;margin:10mm}';
+  }, { once: true });
+}
+
+function printRevenuePage() {
+  setPrintPage('portrait');
+  printNow();
+}
+
 function printReceiptReport() {
+  setPrintPage('landscape');
   const out = $('rcr-out');
   const area = $('print-area');
   if (!out || !area || !out.innerHTML.trim()) return toast('اعرض التقرير الأول', 'error');
@@ -4289,6 +4354,7 @@ function exportTransferReportXlsx() {
 }
 
 function printTransferReport() {
+  setPrintPage('landscape');
     const out = $('trr-out');
     const area = $('print-area');
     if (!out || !area || !out.innerHTML.trim()) return toast('اعرض التقرير الأول', 'error');
@@ -5006,6 +5072,7 @@ window.addEventListener('focus', resetPrintMode);
 document.addEventListener('pointerdown', resetPrintMode);
 
 function printAnalysis() {
+  setPrintPage('landscape');
     const r = anRange();
     if (!r || !r.to) return toast('اختر تاريخ النهاية الأول', 'error');
     const head = $('an-print-head');
@@ -5096,6 +5163,7 @@ function renderInvPeriodReport() {
 }
 
 function printInvPeriodReport() {
+  setPrintPage('landscape');
   const out = $('inv-period-out');
   const area = $('print-area');
   if (!out || !area || !out.innerHTML.trim()) return toast('اعرض التقرير الأول', 'error');
