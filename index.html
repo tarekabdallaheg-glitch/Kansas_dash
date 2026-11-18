@@ -1080,7 +1080,7 @@ html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFF
                 <div id="tr-alert" class="note hidden"></div>
                 <div id="trans-form" class="grid g3" style="margin-top:4px">
                     <div class="row" style="gap:6px">
-                        <select id="trans-type" class="inp hidden"><option value="in">وارد من فرع</option><option value="out">صادر لفرع</option></select>
+                        <select id="trans-type" class="inp hidden"><option value="" selected>— اختار النوع —</option><option value="in">وارد من فرع</option><option value="out">صادر لفرع</option></select>
                         <button type="button" id="tt-in" class="btn btn-sm tt-btn" onclick="setTransType('in')">وارد من فرع</button>
                         <button type="button" id="tt-out" class="btn btn-sm tt-btn" onclick="setTransType('out')">صادر لفرع</button>
                     </div>
@@ -1096,7 +1096,8 @@ html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFF
                         <select id="trans-prod" class="inp"></select>
                         <div id="trans-nomatch" class="muted hidden" style="margin-top:4px">مفيش صنف بالاسم ده</div>
                     </div>
-                    <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp" placeholder="الكمية" style="max-width:150px" onkeydown="if(event.key==='Enter'){event.preventDefault();addTransfer();}"><button class="btn btn-gold" onclick="addTransfer()">إضافة</button></div>
+                    <div class="row"><input id="trans-qty" type="number" min="0.01" step="any" class="inp" placeholder="الكمية" style="max-width:150px" onkeydown="if(event.key==='Enter'){event.preventDefault();addTransfer();}"><button class="btn btn-gold" id="trans-save-btn" onclick="addTransfer()">إضافة</button>
+<button type="button" id="trans-edit-cancel" class="btn btn-ghost btn-sm hidden" onclick="cancelEditTransfer()">إلغاء التعديل</button></div>
                 </div>
                 <div id="trErrQty" style="color:var(--bad);font-size:12px;min-height:16px;margin-top:4px"></div>
                 <div id="trErrProd" style="color:var(--bad);font-size:12px;min-height:16px"></div>
@@ -3203,14 +3204,25 @@ async function saveSalesDay() {
     if (!d) return toast('اختر التاريخ', 'error');
     if (S.locks.sales[d]) return toast('اليوم ده مقفول. افتح التعديل الأول', 'error');
     const rv = $('sales-rev').value, ov = $('sales-ord').value;
-    if (rv === '' || ov === '') return toast('أدخل الإيراد وعدد العمليات', 'error');
+    if (rv === '' || ov === '') {
+        const emptyBox = ov === '' ? $('sales-ord') : $('sales-rev');
+        toast(rv === '' && ov === '' ? 'أدخل الإيراد وعدد العمليات' : (ov === '' ? 'أدخل عدد العمليات قبل الحفظ' : 'أدخل الإيراد قبل الحفظ'), 'error');
+        if (emptyBox && emptyBox.focus) emptyBox.focus();
+        return;
+    }
     const revenue = num(rv), orders = int(ov);
     if (revenue < 0) return toast('الإيراد لا يكون بالسالب', 'error');
     if (d > todayStr()) return toast('ما ينفعش تسجل إيراد ليوم لسه ما جاش', 'error');
     if (revenue > 0 && orders === 0 && !await askConfirm('عدد العمليات صفر والإيراد أكبر من صفر. متأكد؟')) return;
     if (revenue === 0 && orders > 0 && !await askConfirm('الإيراد صفر وفيه عمليات. متأكد؟')) return;
     const prevSale = S.sales[d];
-    if (prevSale && !await askConfirm(`تعديل إيراد يوم ${d} المسجل قبل كده (${prevSale.revenue} ج.م / ${prevSale.orders} عملية). التعديل هيغير التوقع والتحليل.`)) return;
+    const rowOf = (lbl, r, o) => `<tr><td style="text-align:right">${lbl}</td><td>${fmt(r)} ج.م</td><td>${fmt(o)}</td><td>${o ? fmt(r / o, 2) : '—'}</td></tr>`;
+    let revBody = `<div class="muted">التاريخ: ${esc(d)} (${esc(DAYS_AR[weekdayOf(d)])})</div><div class="tbl-wrap" style="margin-top:8px"><table style="width:100%;font-size:14px;border-collapse:collapse"><thead><tr><th style="text-align:right">البيان</th><th>الإيراد</th><th>العمليات</th><th>متوسط الشيك</th></tr></thead><tbody>`;
+    if (prevSale) revBody += rowOf('قبل', prevSale.revenue, prevSale.orders) + rowOf('بعد', revenue, orders);
+    else revBody += rowOf('الإيراد الجديد', revenue, orders);
+    revBody += '</tbody></table></div>';
+    if (prevSale) revBody += '<div style="margin-top:10px;color:var(--bad);font-size:13px">التعديل هيغير التوقع والتحليل.</div>';
+    if (!await askPreview(prevSale ? 'هيتعدل إيراد اليوم' : 'هيتحفظ إيراد اليوم', revBody)) return;
     S.sales[d] = { revenue, orders };
     logAction(prevSale ? 'تعديل إيراد' : 'تسجيل إيراد', d, prevSale ? `من ${prevSale.revenue} ج.م / ${prevSale.orders} عملية إلى ${revenue} ج.م / ${orders} عملية` : `${revenue} ج.م / ${orders} عملية`);
     S.locks.sales[d] = true;
@@ -3975,14 +3987,14 @@ function renderTransfers() {
             const isIn = t.type === 'in';
             return `<div class="prow">
                 <div class="row" style="gap:8px"><span class="chip ${isIn ? 'up' : 'down'}">${isIn ? 'وارد' : 'صادر'}</span><span class="pname">${esc(pr.name || 'صنف محذوف')}</span> <span class="punit">${esc(pr.unit || '')}</span> <span class="muted">— ${fmt(t.qty, 2)}</span></div>
-                ${locked ? '' : `<button class="btn btn-ghost btn-sm" style="color:var(--bad)" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
+                ${locked ? '' : `<button class="btn btn-ghost btn-sm" onclick="startEditTransfer('${esc(t.id)}')">تعديل</button><button class="btn btn-ghost btn-sm" style="color:var(--bad)" onclick="deleteTransfer('${esc(t.id)}')">حذف</button>`}
             </div>`;
         }).join('')}
     </div>`;
     }).join('') || `<div class="muted">${none ? 'اليوم ده اتأكد إنه بدون تحويلات.' : 'مفيش تحويلات في اليوم ده.'}</div>`;
     fillTransProducts();
     fillTransferFilters();
-    setTransType($('trans-type').value || 'in');
+    setTransType($('trans-type').value || '');
 }
 
 function setTrErr(msgId, fieldId, msg){
@@ -4008,17 +4020,76 @@ function validateTransferForm(){
     return !eBranch && !eProd && !eQty;
 }
 
+const TABLE_HEAD_TR = `<div class="tbl-wrap" style="margin-top:8px"><table style="width:100%;font-size:14px;border-collapse:collapse"><thead><tr><th style="text-align:right">النوع</th><th style="text-align:right">الفرع</th><th style="text-align:right">الصنف</th><th>الكمية</th></tr></thead><tbody>`;
+let TR_EDIT_ID = null;
+let TR_SAVE_DEFAULT = null;
+
+function startEditTransfer(id) {
+    const t = S.transfers.find(x => x.id === id);
+    if (!t) return toast('التحويل ده مش موجود', 'error');
+    if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'error');
+    TR_EDIT_ID = id;
+    const sb = $('trans-save-btn');
+    if (sb) {
+        if (TR_SAVE_DEFAULT === null) TR_SAVE_DEFAULT = sb.textContent;
+        sb.textContent = 'حفظ التعديل';
+    }
+    $('trans-edit-cancel').classList.remove('hidden');
+    setTransType(t.type);
+    $('trans-branch').value = t.branch || '';
+    $('trans-search').value = '';
+    fillTransProducts();
+    $('trans-prod').value = t.product_id;
+    $('trans-qty').value = t.qty;
+    $('tr-confirm').textContent = 'بتعدل تحويل. عدّل ثم اضغط حفظ التعديل';
+    $('trans-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelEditTransfer() {
+    TR_EDIT_ID = null;
+    const sb = $('trans-save-btn');
+    if (sb && TR_SAVE_DEFAULT !== null) sb.textContent = TR_SAVE_DEFAULT;
+    $('trans-edit-cancel').classList.add('hidden');
+    setTransType('');
+    $('trans-branch').value = '';
+    $('trans-qty').value = '';
+    $('tr-confirm').textContent = '';
+}
+
 async function addTransfer() {
     const d = $('tr-day').value;
     if (!d) return toast('اختر التاريخ', 'error');
     if (S.transferLocked[d]) return toast('تحويلات اليوم مقفولة. افتح التعديل الأول', 'error');
     const type = $('trans-type').value;
+    if (!type) return toast('اختار وارد أو صادر الأول', 'error');
     const branch = $('trans-branch').value.trim();
     const pid = $('trans-prod').value;
     const qty = num($('trans-qty').value);
     if (!validateTransferForm()) return;
+    if (TR_EDIT_ID) {
+        const t = S.transfers.find(x => x.id === TR_EDIT_ID);
+        if (!t) { cancelEditTransfer(); return toast('التحويل ده مش موجود', 'error'); }
+        if (S.transferLocked[t.day]) return toast('تحويلات اليوم مقفولة', 'error');
+        const before = `${t.type === 'in' ? 'وارد من' : 'صادر لـ'} ${t.branch || '—'} — ${productLabel(t.product_id)} ${t.qty}`;
+        const after = `${type === 'in' ? 'وارد من' : 'صادر لـ'} ${branch || '—'} — ${productLabel(pid)} ${qty}`;
+        const editBody = `<div class="muted">التاريخ: ${esc(t.day)}</div>` + TABLE_HEAD_TR
+            + `<tr><td style="text-align:right">قبل</td><td style="text-align:right">${t.type === 'in' ? 'وارد من' : 'صادر لـ'}</td><td style="text-align:right">${esc(t.branch || '—')}</td><td style="text-align:right">${esc(productLabel(t.product_id))}</td><td>${fmt(t.qty, 2)}</td></tr>`
+            + `<tr><td style="text-align:right">بعد</td><td style="text-align:right">${type === 'in' ? 'وارد من' : 'صادر لـ'}</td><td style="text-align:right">${esc(branch || '—')}</td><td style="text-align:right">${esc(productLabel(pid))}</td><td>${fmt(qty, 2)}</td></tr></tbody></table></div>`;
+        if (!await askPreview('هيتعدل التحويل التالي', editBody)) return;
+        t.type = type;
+        t.branch = branch;
+        t.product_id = pid;
+        t.qty = qty;
+        logAction('تعديل تحويل', t.day, `${before} ← ${type === 'in' ? 'وارد من' : 'صادر لـ'} ${branch || '—'} — ${productLabel(pid)} ${qty}`);
+        saveDB();
+        cancelEditTransfer();
+        renderAll();
+        return;
+    }
     if (d > todayStr()) return toast('ما ينفعش تسجل تحويل ليوم لسه ما جاش', 'error');
     if (d < todayStr() && !await askConfirm('ده تحويل ليوم فات. متأكد؟', 'تأكيد')) return;
+    const addBody = `<div class="muted">التاريخ: ${esc(d)}</div>` + TABLE_HEAD_TR + `<tr><td style="text-align:right">${type === 'in' ? 'وارد من' : 'صادر لـ'}</td><td style="text-align:right">${esc(branch || '—')}</td><td style="text-align:right">${esc(productLabel(pid))}</td><td>${fmt(qty, 2)}</td></tr></tbody></table></div>`;
+    if (!await askPreview('هيتحفظ التحويل التالي', addBody)) return;
     S.transfers.push({ id: uid(), day: d, type, branch, product_id: pid, qty });
     logAction('إضافة تحويل', d, `${type === 'in' ? 'وارد من' : 'صادر لـ'} ${branch || '—'} — ${productLabel(pid)} ${qty}`);
     delete S.transferNone[d];
