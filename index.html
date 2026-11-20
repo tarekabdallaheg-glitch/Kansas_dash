@@ -580,7 +580,10 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 .gate-title{font-size:20px;font-weight:700;color:#f4f1ea;margin:6px 0 4px}
 .gate-input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #2a2f37;background:#14171c;color:#f4f1ea;font-size:15px;font-family:inherit}
 .gate-input:focus{outline:none;border-color:#F5B800;box-shadow:0 0 0 3px rgba(245,184,0,.18)}
-.gate-btn{width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(180deg,#F5B800,#C99700);color:#111;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px}
+.gate-input.bad{border-color:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.15)}
+.gate-btn{width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(180deg,#F5B800,#C99700);color:#111;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px;transition:transform .12s ease}
+.gate-btn:active{transform:scale(.96)}
+.gate-btn:disabled{cursor:default}
 .gate-link{background:none;border:0;color:#F5B800;font-size:13px;cursor:pointer;font-family:inherit;padding:4px;width:auto;margin:0 auto}
 .gate-err{min-height:18px;color:#ff6b6b;font-size:13px;text-align:center}
 @media (max-width:480px){.gate-logo{width:80px;height:80px}.gate-name{font-size:22px}}
@@ -1839,18 +1842,51 @@ function startAppOnce(){
 
 (function initAuthGate(){
     const btn = $('gateGo');
+    const gEmail = $('gateEmail'), gPass = $('gatePass');
+    const markBad = (which) => {
+        gEmail.classList.toggle('bad', which === 'email');
+        gPass.classList.toggle('bad', which === 'pass');
+    };
+    [gEmail, gPass].forEach(el => el.addEventListener('input', () => { el.classList.remove('bad'); $('gateErr').textContent = ''; }));
+    gEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); gPass.focus(); } });
+    gPass.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (btn) btn.click(); } });
     if (btn) btn.onclick = async () => {
-        const email = $('gateEmail').value.trim();
-        const pass = $('gatePass').value;
+        if (btn.disabled) return;
+        const email = gEmail.value.trim();
+        const pass = gPass.value;
         const err = $('gateErr');
         err.textContent = '';
-        if (!email || !pass) { err.textContent = 'اكتب البريد وكلمة المرور'; return; }
+        markBad(null);
+        if (!email && !pass) { err.textContent = 'اكتب البريد وكلمة المرور'; markBad(null); gEmail.classList.add('bad'); gPass.classList.add('bad'); return; }
+        if (!email) { err.textContent = 'اكتب البريد الإلكتروني'; markBad('email'); return; }
+        if (!pass) { err.textContent = 'اكتب كلمة المرور'; markBad('pass'); return; }
         if (!window.kansasCloud) { err.textContent = 'خدمة الدخول لسه ما اتحملتش'; return; }
+        btn.disabled = true;
+        let signedIn = false;
         try {
             await window.kansasCloud.login(email, pass);
-            $('gatePass').value = '';
+            signedIn = true;
+            gPass.value = '';
         } catch (e) {
-            err.textContent = 'تعذر تسجيل الدخول: ' + ((e && e.code) || 'خطأ');
+            const code = (e && e.code) || '';
+            const arMsg = {
+                'auth/invalid-email': 'البريد الإلكتروني مش صحيح',
+                'auth/missing-password': 'اكتب كلمة المرور',
+                'auth/invalid-credential': 'البريد أو كلمة المرور خطأ',
+                'auth/wrong-password': 'البريد أو كلمة المرور خطأ',
+                'auth/user-not-found': 'البريد أو كلمة المرور خطأ',
+                'auth/user-disabled': 'الحساب ده موقوف، كلّم المدير',
+                'auth/too-many-requests': 'محاولات كتير، استنى شوية وجرب تاني',
+                'auth/network-request-failed': 'مفيش اتصال بالنت، جرب تاني'
+            };
+            err.textContent = arMsg[code] || 'حصل خطأ، جرب تاني';
+            if (code === 'auth/invalid-email') markBad('email');
+            else if (code === 'auth/missing-password') markBad('pass');
+            else if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+                gEmail.classList.add('bad'); gPass.classList.add('bad');
+            }
+        } finally {
+            if (!signedIn) btn.disabled = false;
         }
     };
     const fg = $('gateForgot');
