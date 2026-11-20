@@ -641,6 +641,19 @@ html.theme-contrast .btn{border:2px solid #FFFFFF}
 html.theme-contrast .btn-gold{border-color:#FFD60A;color:#000000}
 html.theme-contrast .btn-green,html.theme-contrast .btn-red,html.theme-contrast .btn-slate{border-color:#FFFFFF}
 html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFFFFF!important}
+
+/* طباعة تقرير الإيراد: كل أقسام التقرير تطلع على الورق، والتقسيم على صفحات A4 تلقائي */
+.rev-print-head{display:none}
+@media print{
+  body.print-revenue .rev-print-head{display:block!important;text-align:center;font-weight:900;font-size:15px;margin-bottom:8px}
+  body.print-revenue #tab-revenue #rev-cards{display:grid!important}
+  body.print-revenue #tab-revenue #rev-plan,
+  body.print-revenue #tab-revenue #cmp-card,
+  body.print-revenue #tab-revenue .rep-print{display:block!important;margin-bottom:10px}
+  body.print-revenue #tab-revenue .rep-print .row,
+  body.print-revenue #tab-revenue .rep-print button{display:none!important}
+  body.print-revenue #tab-revenue .card{break-inside:auto!important}
+}
 </style>
 </head>
 <body>
@@ -710,6 +723,7 @@ html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFF
 
     <!-- ================= الإيرادات ================= -->
     <section id="tab-revenue" class="wrap" style="padding:0">
+<div class="rev-print-head">KANSAS PREMIUM - تقرير الإيراد اليومي<div id="rev-print-period" class="muted"></div></div>
 
         <div class="card entry no-print" data-scope>
             <div class="row between">
@@ -829,7 +843,7 @@ html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFF
             </div>
         </div>
 
-        <details class="card no-print" data-scope>
+        <details class="card no-print rep-print" data-scope>
             <summary>إعدادات الشهر (الخطة + السنة اللي فاتت)</summary>
             <div class="grid g3" style="margin-top:16px">
                 <div><div class="muted" style="margin-bottom:6px">خطة إيراد الشهر</div><input type="number" min="0" id="s-plan" class="inp" data-nav="splan" data-ri="0"></div>
@@ -847,7 +861,7 @@ html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFF
                 </div>
 </div>
 
-        <details class="card no-print" data-scope>
+        <details class="card no-print rep-print" data-scope>
             <summary>بيانات السنة اللي فاتت يوم بيوم</summary>
             <div class="muted" style="margin:12px 0">بتتحفظ بتاريخ السنة اللي فاتت. لو يوم مش متسجل بتُستخدم القيمة الشهرية الموزعة على أيام الشهر.</div>
             <div class="tbl-wrap"><table>
@@ -1527,7 +1541,7 @@ function saveDB() {
         DB_STATUS = 'ok';
         DB_NOTICE = '';
         guardArm();
-        if (cloudState() && cloudState().user && cloudState().canWrite) { PENDING_COUNT++; SYNC_STATE = 'pending'; }
+        if (cloudState() && cloudState().user && cloudState().canWrite) { PENDING_COUNT++; SYNC_STATE = 'pending'; markUnsynced(true); }
         pushCloud();
         return true;
     } catch (e) {
@@ -1581,6 +1595,16 @@ let LAST_PUSHED_JSON = '';
 let LAST_SEEN_REMOTE = '';
 let CLOUD_HOLD = false;
 
+const UNSYNCED_KEY = 'kansas_unsynced';
+let WAIT_REMOTE_PUSH = false;
+function hasUnsynced() {
+  if (CLOUD_PUSHING || CLOUD_PENDING || PENDING_COUNT > 0) return true;
+  try { return localStorage.getItem(UNSYNCED_KEY) === '1'; } catch (e) { return false; }
+}
+function markUnsynced(v) {
+  try { if (v) localStorage.setItem(UNSYNCED_KEY, '1'); else localStorage.removeItem(UNSYNCED_KEY); } catch (e) {}
+}
+
 function pushCloud(){
     const c = cloudState();
     if (!c || !c.user || !c.canWrite || CLOUD_HOLD) return;
@@ -1616,7 +1640,7 @@ function doPushCloud(json){
         PENDING_COUNT = 0;
         markSynced();
         clearCloudNotice();
-        if (CLOUD_PENDING) { CLOUD_PENDING = false; pushCloud(); }
+        if (CLOUD_PENDING) { CLOUD_PENDING = false; pushCloud(); } else markUnsynced(false);
     }).catch(() => {
         CLOUD_PUSHING = false;
         CLOUD_PENDING = false;
@@ -1632,10 +1656,20 @@ window.addEventListener('online', pushCloud);
 window.kansasOnRemote = function (d, fromCache) {
     const c = cloudState();
     if (!c) return;
-    if (!d) { if (c.canWrite && hasLocalData()) pushCloud(); return; }
+    if (!d) { if (c.canWrite && hasUnsynced()) pushCloud(); return; }
     if (typeof d.data === 'string') LAST_SEEN_REMOTE = d.data;
-    if (c.canWrite && hasLocalData()) return;
-    if (typeof d.data !== 'string' || d.data === lastRemoteJson) return;
+    if (typeof d.data !== 'string') return;
+    if (d.data === lastRemoteJson || d.data === JSON.stringify(S)) {
+        lastRemoteJson = d.data;
+        if (WAIT_REMOTE_PUSH) { WAIT_REMOTE_PUSH = false; if (c.canWrite && hasUnsynced()) pushCloud(); }
+        return;
+    }
+    // المدير: التعديلات المحلية اللي لسه ما اترفعتش ما تتكتبش فوقها. pushCloud بيفحص التعارض قبل الرفع
+    if (c.canWrite && hasUnsynced()) {
+        if (WAIT_REMOTE_PUSH) { WAIT_REMOTE_PUSH = false; pushCloud(); }
+        return;
+    }
+    WAIT_REMOTE_PUSH = false;
     try {
         const parsed = JSON.parse(d.data);
         if (!isValidBackup(parsed)) return;
@@ -1646,7 +1680,7 @@ window.kansasOnRemote = function (d, fromCache) {
         renderAll();
         if (!fromCache) markSynced();
     } catch (e) { console.warn('remote data', e); }
-};
+};;
 
 window.kansasCloudChanged = function () {
     const c = cloudState();
@@ -1656,7 +1690,7 @@ window.kansasCloudChanged = function () {
     if (SYNC_STATE === 'local') SYNC_STATE = 'unknown';
     if (c.user.email) localStorage.setItem('kansas_last_email', c.user.email);
     startAppOnce();
-    if (c.canWrite) { if (hasLocalData()) pushCloud(); toast('متصل بالسحابة (كتابة)'); }
+    if (c.canWrite) { if (hasUnsynced()) WAIT_REMOTE_PUSH = true; toast('متصل بالسحابة (كتابة)'); }
     else toast('متصل بالسحابة (قراءة فقط)');
     runCloudTests();
 };
@@ -4342,6 +4376,18 @@ function setPrintPage(orient) {
 }
 
 function printRevenuePage() {
+  const tab = $('tab-revenue');
+  const from = $('rev-from') ? $('rev-from').value : '';
+  const to = $('rev-to') ? $('rev-to').value : '';
+  const per = $('rev-print-period');
+  if (per) per.textContent = 'الفترة: ' + (from || '—') + ' إلى ' + (to || '—');
+  const opened = [];
+  if (tab) tab.querySelectorAll('details').forEach(d => { if (!d.open) { d.open = true; opened.push(d); } });
+  document.body.classList.add('print-revenue');
+  window.addEventListener('afterprint', () => {
+    document.body.classList.remove('print-revenue');
+    opened.forEach(d => { d.open = false; });
+  }, { once: true });
   setPrintPage('portrait');
   printNow();
 }
@@ -6188,16 +6234,37 @@ window.kansasCloud = {
   }
 };
 
+let remoteRetry = null;
+function attachRemote() {
+  if (unsubRemote) { unsubRemote(); unsubRemote = null; }
+  if (!cloud.user) return;
+  unsubRemote = onSnapshot(REF, (snap) => {
+    if (snap.metadata.hasPendingWrites) return;
+    if (window.kansasOnRemote) window.kansasOnRemote(snap.exists() ? snap.data() : null, snap.metadata.fromCache);
+  }, (err) => {
+    console.warn('firestore', err);
+    if (unsubRemote) { unsubRemote(); unsubRemote = null; }
+    clearTimeout(remoteRetry);
+    remoteRetry = setTimeout(attachRemote, 5000);
+  });
+}
+async function refreshRemote() {
+  if (!cloud.user) return;
+  try {
+    const snap = await getDoc(REF);
+    if (window.kansasOnRemote) window.kansasOnRemote(snap.exists() ? snap.data() : null, false);
+  } catch (e) { console.warn('refresh', e); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { refreshRemote(); if (!unsubRemote) attachRemote(); }
+});
+window.addEventListener('online', () => { refreshRemote(); if (!unsubRemote) attachRemote(); });
+
 onAuthStateChanged(fauth, (u) => {
   cloud.user = u || null;
   cloud.canWrite = !!u && (u.email || '').toLowerCase() === WRITER_EMAIL;
   if (unsubRemote) { unsubRemote(); unsubRemote = null; }
-  if (u) {
-    unsubRemote = onSnapshot(REF, (snap) => {
-      if (snap.metadata.hasPendingWrites) return;
-      if (window.kansasOnRemote) window.kansasOnRemote(snap.exists() ? snap.data() : null, snap.metadata.fromCache);
-    }, (err) => console.warn('firestore', err));
-  }
+  if (u) attachRemote();
   window.__kansasAuthChecked = true;
   if (window.kansasCloudChanged) window.kansasCloudChanged();
 });
