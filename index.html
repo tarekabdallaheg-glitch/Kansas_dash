@@ -1604,13 +1604,146 @@ function hasUnsynced() {
   if (CLOUD_PUSHING || CLOUD_PENDING || PENDING_COUNT > 0) return true;
   try { return localStorage.getItem(UNSYNCED_KEY) === '1'; } catch (e) { return false; }
 }
-function markUnsynced(v) {
-  try { if (v) localStorage.setItem(UNSYNCED_KEY, '1'); else localStorage.removeItem(UNSYNCED_KEY); } catch (e) {}
+// ===== مزامنة بنسخة (rev) =====
+const BASE_REV_KEY = 'kansas_base_rev';
+const CONFLICT_BACKUP_KEY = 'kansas_conflict_backup';
+const RETRY_DELAYS = [5000, 15000, 60000];
+let BASE_REV = (function () { try { const v = parseInt(localStorage.getItem(BASE_REV_KEY), 10); return Number.isFinite(v) ? v : null; } catch (e) { return null; } })();
+let CONFLICT = null;
+let RETRY_TIMER = null;
+let RETRY_STEP = 0;
+let PUSHING_JSON = null;
+
+function setBaseRev(v) {
+    BASE_REV = (typeof v === 'number' && Number.isFinite(v)) ? v : null;
+    try {
+        if (BASE_REV === null) localStorage.removeItem(BASE_REV_KEY);
+        else localStorage.setItem(BASE_REV_KEY, String(BASE_REV));
+    } catch (e) {}
 }
 
-function pushCloud(){
+// نسخة احتياطية محلية للتعديلات المتعارضة. بترجع true بس لو اتحفظت وتأكدنا من قراءتها
+function saveConflictBackup(localJson, remoteJson, remoteRev) {
+    try {
+        const raw = localStorage.getItem(CONFLICT_BACKUP_KEY);
+        let list = [];
+        if (raw) { list = JSON.parse(raw); if (!Array.isArray(list)) return false; }
+        list.push({ at: new Date().toISOString(), baseRev: BASE_REV, remoteRev: remoteRev, local: localJson, remote: remoteJson || null });
+        list = list.slice(-5);
+        const text = JSON.stringify(list);
+        localStorage.setItem(CONFLICT_BACKUP_KEY, text);
+        return localStorage.getItem(CONFLICT_BACKUP_KEY) === text;
+    } catch (e) { return false; }
+}
+
+function openConflict(remoteRev, remoteJson) {
+    if (CONFLICT) { CONFLICT.remoteRev = remoteRev; CONFLICT.remoteJson = remoteJson; return; }
+    CONFLICT = { remoteRev: remoteRev, remoteJson: remoteJson };
+    SYNC_STATE = 'conflict';
+    renderCloudStatus();
+    showConflictDialog();
+}
+
+function showConflictDialog() {
+    if (document.getElementById('conflictModal')) return;
+    const ov = document.createElement('div');
+    ov.className = 'modal';
+    ov.id = 'conflictModal';
+    ov.innerHTML = '<div class="mbox" role="dialog" aria-modal="true" style="max-width:420px">'
+        + '<div class="h" style="margin:0">فيه تعارض في بيانات الفرع</div>'
+        + '<div class="muted" style="margin:10px 0 14px;line-height:1.7">جهاز تاني عدّل البيانات في السحابة. اختار اللي تحتفظ بيه. أي تعديلات هتتشال هتتحفظ في نسخة احتياطية على الجهاز قبل أي تغيير.</div>'
+        + '<div style="display:flex;flex-direction:column;gap:8px">'
+        + '<button class="btn btn-gold" data-choice="local">احتفظ بتعديلاتي</button>'
+        + '<button class="btn" data-choice="remote">استقبل نسخة السحابة</button>'
+        + '</div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-choice]');
+        if (!b) return;
+        ov.remove();
+        resolveConflict(b.dataset.choice);
+    });
+}
+
+async function resolveConflict(choice) {
+    const c = CONFLICT;
+    if (!c) return;
+    if (!saveConflictBackup(JSON.stringify(S), c.remoteJson, c.remoteRev)) {
+        showDbNotice('تعذر حفظ النسخة الاحتياطية، فمفيش حاجة اتغيرت. اتأكد من مساحة المتصفح وجرب تاني.');
+        toast('تعذر إنشاء نسخة احتياطية، مفيش حاجة اتغيرت', 'error');
+        showConflictDialog();
+        return;
+    }
+    if (choice === 'remote') {
+        let parsed = null;
+        try { parsed = c.remoteJson ? JSON.parse(c.remoteJson) : null; } catch (e) { parsed = null; }
+        if (!parsed || !isValidBackup(parsed)) {
+            showDbNotice('نسخة السحابة مش قابلة للقراءة، فمفيش حاجة اتغيرت.');
+            showConflictDialog();
+            return;
+        }
+        CONFLICT = null;
+        lastRemoteJson = c.remoteJson;
+        S = normalize(parsed);
+        try { localStorage.setItem(STORE_KEY, c.remoteJson); } catch (e) {}
+        DB_STATUS = 'ok';
+        PENDING_COUNT = 0;
+        markUnsynced(false);
+        setBaseRev(c.remoteRev);
+        markSynced();
+        renderAll();
+        toast('اتاخدت نسخة السحابة. تعديلاتك المحلية محفوظة في النسخة الاحتياطية');
+        return;
+    }
+    // احتفظ بتعديلاتي: قبل الرفع بنعيد التحقق من أحدث نسخة في السحابة
+    CONFLICT = null;
+    SYNC_STATE = 'pending';
+    renderCloudStatus();
+    verifyAndPush(c.remoteRev);
+}
+
+// keepRev: الرقم اللي المستخدم شافه وقرر يحتفظ بتعديلاته عليه. لو السحابة اتغيرت بعده، بيفتح تعارض جديد بدل ما يكتب
+async function verifyAndPush(keepRev) {
     const c = cloudState();
-    if (!c || !c.user || !c.canWrite || CLOUD_HOLD) return;
+    if (!c || !c.user || !c.canWrite || CLOUD_HOLD || CONFLICT) return;
+    if (CLOUD_PUSHING) { CLOUD_PENDING = true; return; }
+    let latest;
+    try { latest = await window.kansasCloud.getRemote(); }
+    catch (e) { scheduleRetry(); return; }
+    const latestRev = (latest && typeof latest.rev === 'number') ? latest.rev : 0;
+    const latestJson = (latest && typeof latest.data === 'string') ? latest.data : null;
+    if (typeof keepRev === 'number') {
+        if (latestRev !== keepRev) { openConflict(latestRev, latestJson); return; }
+        doPushCloud(JSON.stringify(S), latestRev);
+        return;
+    }
+    if (latestJson && (BASE_REV === null || latestRev !== BASE_REV)) { openConflict(latestRev, latestJson); return; }
+    doPushCloud(JSON.stringify(S), latestRev);
+}
+
+async function handleRevMismatch() {
+    try {
+        const latest = await window.kansasCloud.getRemote();
+        const latestRev = (latest && typeof latest.rev === 'number') ? latest.rev : 0;
+        const latestJson = (latest && typeof latest.data === 'string') ? latest.data : null;
+        openConflict(latestRev, latestJson);
+    } catch (e) { scheduleRetry(); }
+}
+
+function scheduleRetry() {
+    if (RETRY_TIMER) return;
+    const delay = RETRY_DELAYS[Math.min(RETRY_STEP, RETRY_DELAYS.length - 1)];
+    RETRY_STEP++;
+    RETRY_TIMER = setTimeout(() => {
+        RETRY_TIMER = null;
+        if (CONFLICT || !hasUnsynced()) return;
+        pushCloud();
+    }, delay);
+}
+
+function pushCloud() {
+    const c = cloudState();
+    if (!c || !c.user || !c.canWrite || CLOUD_HOLD || CONFLICT) return;
     const json = JSON.stringify(S);
     const bytes = new TextEncoder().encode(json).length;
     if (bytes > CLOUD_BLOCK_BYTES) {
@@ -1623,56 +1756,62 @@ function pushCloud(){
         showDbNotice('حجم البيانات قرب من حد السحابة (' + Math.round(bytes / 1024) + ' كيلوبايت). محتاج أرشفة قريب.');
     }
     if (CLOUD_PUSHING) { CLOUD_PENDING = true; return; }
-    if (LAST_SEEN_REMOTE && LAST_SEEN_REMOTE !== LAST_PUSHED_JSON && LAST_SEEN_REMOTE !== json) {
-        SYNC_STATE = 'pending';
-        askOk('فيه بيانات في السحابة مختلفة عن اللي على الجهاز دلوقتي، والرفع هيكتب فوقها. تكمل؟').then((ok) => {
-            if (ok) doPushCloud(json);
-            else { CLOUD_HOLD = true; SYNC_STATE = 'failed'; showDbNotice('الرفع للسحابة متوقف لحد ما تعيد تشغيل البرنامج.'); }
-        });
-        return;
-    }
-    doPushCloud(json);
+    if (BASE_REV === null) { verifyAndPush(); return; }
+    doPushCloud(json, BASE_REV);
 }
 
-function doPushCloud(json){
-    if (CLOUD_HOLD) return;
+function doPushCloud(json, baseRev) {
+    if (CLOUD_HOLD || CONFLICT) return;
     CLOUD_PUSHING = true;
-    window.kansasCloud.push(json).then(() => {
+    PUSHING_JSON = json;
+    window.kansasCloud.push(json, baseRev).then((newRev) => {
         CLOUD_PUSHING = false;
+        PUSHING_JSON = null;
+        RETRY_STEP = 0;
+        clearTimeout(RETRY_TIMER); RETRY_TIMER = null;
         LAST_PUSHED_JSON = json;
+        setBaseRev(newRev);
+        if (CLOUD_PENDING) { CLOUD_PENDING = false; pushCloud(); return; }
         PENDING_COUNT = 0;
-        markSynced();
+        markUnsynced(false);
         clearCloudNotice();
-        if (CLOUD_PENDING) { CLOUD_PENDING = false; pushCloud(); } else markUnsynced(false);
-    }).catch(() => {
+        markSynced();
+    }).catch((e) => {
         CLOUD_PUSHING = false;
+        PUSHING_JSON = null;
         CLOUD_PENDING = false;
+        if (e && e.code === 'kansas/rev-mismatch') { handleRevMismatch(); return; }
         CLOUD_FAILED = true;
         SYNC_STATE = 'failed';
         renderCloudStatus();
         showDbNotice(CLOUD_FAIL_MSG);
-        toast('تعذر الرفع للسحابة', 'error');
+        toast('تعذر الرفع للسحابة، هنحاول تاني', 'error');
+        scheduleRetry();
     });
 }
-window.addEventListener('online', pushCloud);
 
 window.kansasOnRemote = function (d, fromCache) {
     const c = cloudState();
     if (!c) return;
-    if (!d) { if (c.canWrite && hasUnsynced()) pushCloud(); return; }
-    if (typeof d.data === 'string') LAST_SEEN_REMOTE = d.data;
+    if (!d) { if (c.canWrite && hasUnsynced() && !CONFLICT) pushCloud(); return; }
     if (typeof d.data !== 'string') return;
+    // ده تحديث جاي من رفعنا إحنا: مش محتاج أي تصرف
+    if (PUSHING_JSON !== null && d.data === PUSHING_JSON) return;
+    const remoteRev = (typeof d.rev === 'number') ? d.rev : 0;
+    LAST_SEEN_REMOTE = d.data;
+    // الكاش ما يتبنيش عليه قرار للمدير
+    if (c.canWrite && fromCache) return;
+    if (c.canWrite && hasUnsynced()) {
+        if (CONFLICT) { CONFLICT.remoteRev = remoteRev; CONFLICT.remoteJson = d.data; return; }
+        if (BASE_REV === null || remoteRev !== BASE_REV) { openConflict(remoteRev, d.data); return; }
+        if (!CLOUD_PUSHING) pushCloud();
+        return;
+    }
     if (d.data === lastRemoteJson || d.data === JSON.stringify(S)) {
         lastRemoteJson = d.data;
-        if (WAIT_REMOTE_PUSH) { WAIT_REMOTE_PUSH = false; if (c.canWrite && hasUnsynced()) pushCloud(); }
+        if (c.canWrite && !hasUnsynced()) setBaseRev(remoteRev);
         return;
     }
-    // المدير: التعديلات المحلية اللي لسه ما اترفعتش ما تتكتبش فوقها. pushCloud بيفحص التعارض قبل الرفع
-    if (c.canWrite && hasUnsynced()) {
-        if (WAIT_REMOTE_PUSH) { WAIT_REMOTE_PUSH = false; pushCloud(); }
-        return;
-    }
-    WAIT_REMOTE_PUSH = false;
     try {
         const parsed = JSON.parse(d.data);
         if (!isValidBackup(parsed)) return;
@@ -1680,10 +1819,26 @@ window.kansasOnRemote = function (d, fromCache) {
         S = normalize(parsed);
         try { localStorage.setItem(STORE_KEY, d.data); } catch (e) {}
         DB_STATUS = 'ok';
+        if (c.canWrite) setBaseRev(remoteRev);
         renderAll();
         if (!fromCache) markSynced();
     } catch (e) { console.warn('remote data', e); }
-};;
+};
+
+function markUnsynced(v) {
+  try { if (v) localStorage.setItem(UNSYNCED_KEY, '1'); else localStorage.removeItem(UNSYNCED_KEY); } catch (e) {}
+}
+
+
+
+
+window.addEventListener('online', () => {
+    if (window.kansasCloud && window.kansasCloud.reattach) window.kansasCloud.reattach();
+    if (window.kansasCloud && window.kansasCloud.refresh) window.kansasCloud.refresh();
+    if (hasUnsynced() && !CONFLICT) pushCloud();
+});
+
+;
 
 window.kansasCloudChanged = function () {
     const c = cloudState();
@@ -1718,6 +1873,7 @@ function cloudLevel(){
     const c = cloudState();
     if (!c || !c.user) return 'grey';
     if (CLOUD_TESTING) return 'yellow';
+    if (SYNC_STATE === 'conflict') return 'yellow';
     if (CLOUD_TEST.conn === 'fail' || CLOUD_TEST.read === 'fail' || (c.canWrite && CLOUD_TEST.write === 'fail')) return 'red';
     if (SYNC_STATE === 'failed') return 'red';
     if (SYNC_STATE === 'synced' && PENDING_COUNT === 0 && CLOUD_TEST.conn === 'ok') return 'green';
@@ -1756,6 +1912,7 @@ function drawCloudRows(){
     const SYNC_TEXT = {
         synced: 'تمت المزامنة (بيانات الفرع مؤكدة من السيرفر)',
         pending: 'جاري المزامنة أو فيه تغييرات معلقة',
+        conflict: 'فيه تعارض في البيانات، لازم تختار',
         failed: 'فشلت مزامنة بيانات الفرع',
         local: 'وضع محلي / غير متصل بالسحابة',
         unknown: 'لم تتم مزامنة بيانات الفرع بعد'
@@ -6225,14 +6382,19 @@ function checkNewDay() {
     if ($('tr-day') && $('tr-day').value === old) { $('tr-day').value = now; renderTransfers(); }
 }
 setInterval(checkNewDay, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    checkNewDay();
+    if (window.kansasCloud && window.kansasCloud.refresh) window.kansasCloud.refresh();
+    if (window.kansasCloud && window.kansasCloud.reattach) window.kansasCloud.reattach();
+});
 
 // تحذير المتصفح عند إغلاق التبويب لو فيه تغييرات غير محفوظة
 
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -6256,7 +6418,10 @@ let unsubRemote = null;
 window.kansasCloud = {
   cloud,
   login: (email, pass) => signInWithEmailAndPassword(fauth, email, pass),
-  push: (json) => setDoc(REF, { data: json, at: new Date().toISOString(), by: fauth.currentUser ? fauth.currentUser.email : '' }),
+  push: pushRevision,
+  getRemote: getRemote,
+  refresh: () => refreshRemote(),
+  reattach: () => { if (!unsubRemote) attachRemote(); },
   logout: () => signOut(fauth),
   reset: (email) => sendPasswordResetEmail(fauth, email),
   testWrite: (nonce) => setDoc(TEST_REF, { nonce: nonce, at: new Date().toISOString(), by: fauth.currentUser ? fauth.currentUser.email : '' }),
@@ -6269,6 +6434,27 @@ window.kansasCloud = {
     await updatePassword(user, next);
   }
 };
+
+// الكتابة بنسخة: بتتأكد إن رقم النسخة في السحابة هو اللي الجهاز شافه، وبعدها بتزوده
+async function pushRevision(json, baseRev) {
+  return runTransaction(fdb, async (tx) => {
+    const snap = await tx.get(REF);
+    const cur = (snap.exists() && typeof snap.data().rev === 'number') ? snap.data().rev : 0;
+    if (typeof baseRev === 'number' && cur !== baseRev) {
+      const e = new Error('rev-mismatch');
+      e.code = 'kansas/rev-mismatch';
+      e.remoteRev = cur;
+      throw e;
+    }
+    const next = cur + 1;
+    tx.set(REF, { data: json, rev: next, at: new Date().toISOString(), by: fauth.currentUser ? fauth.currentUser.email : '' }, { merge: true });
+    return next;
+  });
+}
+async function getRemote() {
+  const snap = await getDoc(REF);
+  return snap.exists() ? snap.data() : null;
+}
 
 let remoteRetry = null;
 function attachRemote() {
@@ -6291,10 +6477,7 @@ async function refreshRemote() {
     if (window.kansasOnRemote) window.kansasOnRemote(snap.exists() ? snap.data() : null, false);
   } catch (e) { console.warn('refresh', e); }
 }
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') { refreshRemote(); if (!unsubRemote) attachRemote(); }
-});
-window.addEventListener('online', () => { refreshRemote(); if (!unsubRemote) attachRemote(); });
+
 
 onAuthStateChanged(fauth, (u) => {
   cloud.user = u || null;
