@@ -685,6 +685,17 @@ html.theme-contrast #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]
 html.theme-contrast #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]) > span{color:#FFD60A}
 body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
 body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:none;box-shadow:none}
+
+/* تحسين توزيع شاشة تسجيل الدخول (CSS فقط) */
+#authGate .gate-box{gap:6px}
+#authGate .gate-name{margin-top:0;line-height:1.2}
+#authGate .gate-sub{margin-top:-2px;font-size:12px;letter-spacing:2.2px;line-height:1.4}
+#authGate .gate-msg{margin-top:20px}
+#authGate .gate-form{margin-top:22px;gap:10px}
+#authGate .gate-title{margin:0 0 2px;font-size:19px;letter-spacing:.2px}
+#authGate .gate-input{height:48px;padding:0 14px;font-size:15px;box-sizing:border-box}
+#authGate .gate-err{min-height:16px;margin:-4px 0 -2px;font-size:12px;line-height:16px}
+#authGate .gate-btn{height:48px;padding:0;margin-top:4px;box-sizing:border-box;font-size:16px}
 </style>
 </head>
 <body>
@@ -6534,4 +6545,4 @@ window.__kansasCloudReady = true;
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(function (e) { console.warn('sw', e); }); }
 </script>
 </body>
-</html>p
+</html>
