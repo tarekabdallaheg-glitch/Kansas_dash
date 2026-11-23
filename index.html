@@ -696,6 +696,15 @@ body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
 #authGate .gate-input{height:48px;padding:0 14px;font-size:15px;box-sizing:border-box}
 #authGate .gate-err{min-height:16px;margin:-4px 0 -2px;font-size:12px;line-height:16px}
 #authGate .gate-btn{height:48px;padding:0;margin-top:4px;box-sizing:border-box;font-size:16px}
+
+/* تماشي شاشة الدخول مع هوية البرنامج: كحلي وذهبي ناعم وأزرق (CSS فقط) */
+#authGate{background:radial-gradient(circle at 50% 0%,#15233d 0%,#0B1220 55%,#070d18 100%)}
+#authGate .gate-logo{box-shadow:0 10px 30px rgba(242,201,107,.16)}
+#authGate .gate-name{color:#F2C96B}
+#authGate .gate-input{background:#0A1322;border-color:#22324D}
+#authGate .gate-input:focus{border-color:#60A5FA;box-shadow:0 0 0 3px rgba(96,165,250,.2)}
+#authGate .gate-input.bad,#authGate .gate-input.bad:focus{border-color:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.15)}
+#authGate .gate-btn{background:linear-gradient(180deg,#F2C96B,#D4A74A);color:#0B1220}
 </style>
 </head>
 <body>
