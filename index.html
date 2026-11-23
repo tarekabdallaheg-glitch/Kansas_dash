@@ -705,6 +705,17 @@ body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
 #authGate .gate-input:focus{border-color:#60A5FA;box-shadow:0 0 0 3px rgba(96,165,250,.2)}
 #authGate .gate-input.bad,#authGate .gate-input.bad:focus{border-color:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.15)}
 #authGate .gate-btn{background:linear-gradient(180deg,#F2C96B,#D4A74A);color:#0B1220}
+
+/* تحسينات شاشة الدخول (CSS فقط): الشريط والحقول والمسافات والخطوط والتوزيع الرأسي */
+#authGate{background:linear-gradient(180deg,#0B1220 0%,#0D1729 45%,#070D18 100%);padding-bottom:12vh}
+#authGate .gate-sub{letter-spacing:1.6px;font-size:11.5px}
+#authGate .gate-title{font-size:22px;font-weight:800;margin:0 0 6px}
+#authGate .gate-form{gap:10px;margin-top:30px}
+#authGate .gate-input{background:#0C1628;border:1px solid #4A6497}
+#authGate .gate-input:focus{border-color:#60A5FA}
+#authGate .gate-err{min-height:0;margin:0}
+#authGate .gate-err:empty{display:none}
+#authGate .gate-btn{margin-top:0}
 </style>
 </head>
 <body>
