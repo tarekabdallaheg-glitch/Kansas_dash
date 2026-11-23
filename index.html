@@ -6,8 +6,8 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.googleapis.com https://www.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>KANSAS PREMIUM</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="icon" href="./icon-192.png">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" href="./icon-192-premium.png">
+<link rel="apple-touch-icon" href="./icon-192-premium.png">
 <meta name="theme-color" content="#0b1220">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -575,7 +575,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 #splash.gone{opacity:0;pointer-events:none}
 #authGate{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 0%,#1c1f24 0%,#0b0d10 60%,#050607 100%)}
 .gate-box{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
-.gate-logo{width:120px;height:120px;border-radius:26px;box-shadow:0 10px 30px rgba(245,184,0,.18)}
+.gate-logo{width:auto;height:150px;max-width:86vw;border-radius:26px;box-shadow:0 10px 30px rgba(245,184,0,.18)}
 .gate-name{font-size:26px;font-weight:900;letter-spacing:2px;color:#F5B800;margin-top:6px}
 .gate-sub{font-size:13px;letter-spacing:2.5px;color:#b8bec7}
 .gate-msg{color:#8a909a;font-size:14px;margin-top:16px}
@@ -589,7 +589,7 @@ tr.rowyel td{background:rgba(183,121,31,.14)}
 .gate-btn:disabled{cursor:default}
 .gate-link{background:none;border:0;color:#F5B800;font-size:13px;cursor:pointer;font-family:inherit;padding:4px;width:auto;margin:0 auto}
 .gate-err{min-height:18px;color:#ff6b6b;font-size:13px;text-align:center}
-@media (max-width:480px){.gate-logo{width:80px;height:80px}.gate-name{font-size:22px}}
+@media (max-width:480px){.gate-logo{height:120px}.gate-name{font-size:22px}}
 #cloudDot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#9aa6b2;margin-left:8px;cursor:pointer;vertical-align:middle}
 
 /* توحيد شكل كروت تقرير الإيرادات (شكل بس، من غير أي تغيير في الحسابات) */
@@ -660,14 +660,39 @@ html.theme-contrast .rpt-sec,html.theme-contrast .trr-card{border:2px solid #FFF
   body.print-revenue #tab-revenue .rep-print button{display:none!important}
   body.print-revenue #tab-revenue .card{break-inside:auto!important}
 }
+
+/* تمييز خانتي الإدخال الأساسيتين في كروت تحليل المخزون: المباع والجرد الفعلي (CSS فقط) */
+#pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
+#pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:rgba(34,197,94,.07);box-shadow:inset 0 0 0 1px rgba(34,197,94,.38);border-radius:8px}
+#pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]) > span,
+#pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]) > span{color:#15803d;font-weight:700}
+html.dark #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]) > span,
+html.dark #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]) > span{color:#86efac}
+body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
+body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:none;box-shadow:none}
+/* تمييز الخانتين حسب الثيم (CSS فقط). الداكن يفضل بالأخضر، والأزرق النهاري/الذهبي/التباين العالي لهم ألوانهم */
+html.theme-gold #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
+html.theme-gold #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:rgba(226,184,79,.06);box-shadow:inset 0 0 0 1px rgba(226,184,79,.5)}
+html.theme-gold #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]) > span,
+html.theme-gold #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]) > span{color:#e2b84f}
+html.theme-dayblue #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
+html.theme-dayblue #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:rgba(30,58,138,.05);box-shadow:inset 0 0 0 1px rgba(30,58,138,.6)}
+html.theme-dayblue #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]) > span,
+html.theme-dayblue #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]) > span{color:#1E3A8A}
+html.theme-contrast #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
+html.theme-contrast #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:rgba(255,214,10,.06);box-shadow:inset 0 0 0 1px rgba(255,214,10,.8)}
+html.theme-contrast #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]) > span,
+html.theme-contrast #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]) > span{color:#FFD60A}
+body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
+body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:none;box-shadow:none}
 </style>
 </head>
 <body>
 
-<div id="splash"><img src="./icon-512.png" alt="KANSAS PREMIUM"></div>
+<div id="splash"><img src="./icon-512-premium.png" alt="KANSAS PREMIUM"></div>
 <div id="authGate">
     <div class="gate-box">
-        <img class="gate-logo" src="./icon-512.png" alt="KANSAS PREMIUM">
+        <img class="gate-logo" src="./login-logo-premium.png" alt="KANSAS PREMIUM">
         <div class="gate-name">KANSAS PREMIUM</div>
         <div class="gate-sub">BRANCH MANAGEMENT SYSTEM</div>
         <div id="gateMsg" class="gate-msg">جاري التحقق من الجلسة...</div>
