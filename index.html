@@ -781,6 +781,7 @@ body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
         <button class="btn on" id="tab-btn-revenue" onclick="switchTab('revenue')">تقرير الإيرادات <span id="tab-badge-rev" class="tab-dot"></span></button>
         <button class="btn" id="tab-btn-salesforecast" onclick="switchTab('salesforecast')">Sales Forecasting</button>
         <button class="btn" id="tab-btn-inventory" onclick="switchTab('inventory')">المخزون <span id="tab-badge-inv" class="tab-dot"></span></button>
+      <button class="btn" id="tab-btn-performance" onclick="switchTab('performance')">خريطة الأداء العام</button>
     </nav>
 
     <!-- ================= الإيرادات ================= -->
@@ -1003,6 +1004,7 @@ body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
     </section>
 
     <!-- ================= المخزون ================= -->
+    <section id="tab-performance" class="wrap hidden" style="padding:0"><div id="perf-root"></div></section>
     <section id="tab-inventory" class="wrap hidden" style="padding:0">
 
         
@@ -2264,6 +2266,35 @@ function resetRevRange() {
     renderAll();
 }
 
+/* خريطة الأداء العام: تحميل كسول عند فتح التبويب أول مرة فقط (ملفات منفصلة) */
+const PERF_LOAD = { css: false, mounted: false, loading: false };
+function loadPerformanceMap() {
+    if (PERF_LOAD.mounted) { if (window.KansasPerfMap) window.KansasPerfMap.refresh(); return; }
+    if (PERF_LOAD.loading) return;
+    PERF_LOAD.loading = true;
+    if (!PERF_LOAD.css) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'css/performance-map.css';
+        document.head.appendChild(link);
+        PERF_LOAD.css = true;
+    }
+    const script = document.createElement('script');
+    script.src = 'modules/performance-map.js';
+    script.onload = function () {
+        PERF_LOAD.loading = false;
+        if (!window.KansasPerfMap || PERF_LOAD.mounted) return;
+        PERF_LOAD.mounted = true;
+        window.KansasPerfMap.mount($('perf-root'));
+    };
+    script.onerror = function () {
+        PERF_LOAD.loading = false;
+        const box = $('perf-root');
+        if (box) box.innerHTML = '<div style="margin:12px;padding:12px;border:1px solid var(--bad);border-radius:10px">تعذر تحميل خريطة الأداء العام. تأكد أن مجلدي modules وcss موجودين بجانب الصفحة.</div>';
+    };
+    document.body.appendChild(script);
+}
+
 function switchTab(tab) {
     if (tab !== 'inventory' && invView) {
         invView = null;
@@ -2277,9 +2308,12 @@ function switchTab(tab) {
     $('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
     $('tab-salesforecast').classList.toggle('hidden', tab !== 'salesforecast');
     $('tab-inventory').classList.toggle('hidden', tab !== 'inventory');
+    $('tab-performance').classList.toggle('hidden', tab !== 'performance');
     $('tab-btn-revenue').classList.toggle('on', tab === 'revenue');
     $('tab-btn-salesforecast').classList.toggle('on', tab === 'salesforecast');
     $('tab-btn-inventory').classList.toggle('on', tab === 'inventory');
+    $('tab-btn-performance').classList.toggle('on', tab === 'performance');
+    if (tab === 'performance') loadPerformanceMap();
     if (tab === 'salesforecast') { renderForecast(); renderVariance(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -6395,9 +6429,11 @@ function applyNavState(s) {
     $('tab-revenue').classList.toggle('hidden', activeTab !== 'revenue');
     $('tab-salesforecast').classList.toggle('hidden', activeTab !== 'salesforecast');
     $('tab-inventory').classList.toggle('hidden', activeTab !== 'inventory');
+    $('tab-performance').classList.toggle('hidden', activeTab !== 'performance');
     $('tab-btn-revenue').classList.toggle('on', activeTab === 'revenue');
     $('tab-btn-salesforecast').classList.toggle('on', activeTab === 'salesforecast');
     $('tab-btn-inventory').classList.toggle('on', activeTab === 'inventory');
+    $('tab-btn-performance').classList.toggle('on', activeTab === 'performance');
     if (invView) document.body.dataset.sec = invView; else document.body.removeAttribute('data-sec');
     renderAll();
 }
