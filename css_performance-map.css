@@ -1,0 +1,195 @@
+/* KANSAS PREMIUM — خريطة الأداء العام (تنسيق الوحدة فقط)
+   يعتمد على متغيرات الثيم الموجودة في البرنامج، فيتغير الشكل تلقائيًا مع كل ثيم.
+   كل القواعد مسبوقة بـ pm- لعدم التأثير على باقي البرنامج. */
+
+.pm-root{position:relative;color:var(--text);font-size:14px;line-height:1.55;padding:6px 0 28px}
+.pm-root *{box-sizing:border-box}
+
+.pm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;
+  background:linear-gradient(135deg,var(--card) 0%,var(--card2) 100%);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:12px}
+.pm-kicker{font-size:10.5px;letter-spacing:2.5px;color:var(--gold);font-weight:700}
+.pm-head h2{margin:2px 0 4px;font-size:22px;font-weight:800;color:var(--text)}
+.pm-sub{margin:0;color:var(--muted);font-size:13px}
+.pm-sub b{color:var(--gold)}
+
+.pm-chip{display:inline-block;padding:7px 14px;border-radius:99px;font-size:13px;font-weight:700;border:1px solid var(--border);background:var(--card)}
+.pm-chip.pm-good{color:var(--ok);border-color:var(--ok)}
+.pm-chip.pm-watch{color:var(--gold);border-color:var(--gold)}
+.pm-chip.pm-low{color:var(--bad);border-color:var(--bad)}
+.pm-chip.pm-nd{color:var(--muted)}
+
+.pm-jump{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.pm-jump a{font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:99px;padding:5px 12px;background:var(--card)}
+.pm-jump a:hover{color:var(--gold);border-color:var(--gold)}
+
+.pm-sec{margin-top:18px;scroll-margin-top:70px}
+.pm-sec h3{display:flex;align-items:baseline;gap:10px;margin:0 0 10px;font-size:17px;font-weight:800;color:var(--text)}
+.pm-sec h3 span{font-size:10.5px;letter-spacing:1.6px;color:var(--gold);font-weight:700;text-transform:uppercase}
+
+.pm-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.pm-grid3{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
+.pm-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;min-width:0;position:relative}
+.pm-card.pm-wide{grid-column:1/-1}
+.pm-ct{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.pm-ct h4{margin:0;font-size:14px;font-weight:700;color:var(--text)}
+.pm-muted{color:var(--muted);font-size:13px}
+.pm-note{color:var(--muted);font-size:12px;margin:8px 0 0}
+.pm-hint{margin-top:10px}
+.pm-legend-row{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.pm-legend-row i{display:inline-block;width:12px;height:4px;border-radius:2px;margin-inline-end:6px;vertical-align:middle}
+.pm-k-act{background:var(--gold)}
+.pm-k-fc{background:var(--muted);opacity:.9}
+.pm-k-lo{background:var(--bad)}
+.pm-k-mid{background:var(--gold2)}
+.pm-k-hi{background:var(--ok)}
+
+/* الملخص والتنبيهات */
+.pm-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
+.pm-kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;cursor:default;transition:transform .2s,border-color .2s}
+.pm-kpi:hover{transform:translateY(-2px);border-color:var(--gold)}
+.pm-kpi span{display:block;font-size:11.5px;color:var(--muted)}
+.pm-kpi b{display:block;font-size:17px;font-weight:800;color:var(--gold);margin-top:4px;font-variant-numeric:tabular-nums}
+.pm-sline{padding:6px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+.pm-sline:last-child{border-bottom:0}
+.pm-sline b{color:var(--muted);font-weight:600}
+.pm-alert{padding:9px 12px;border-radius:10px;margin-bottom:8px;font-size:13px;border:1px solid var(--border);border-inline-start:4px solid var(--border);background:var(--card2)}
+.pm-alert.pm-watch{border-inline-start-color:var(--gold)}
+.pm-alert.pm-low{border-inline-start-color:var(--bad)}
+.pm-alert.pm-good{border-inline-start-color:var(--ok)}
+
+/* المقارنات */
+.pm-cmp{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13px}
+.pm-cmp:last-child{border-bottom:0}
+.pm-cmp span{color:var(--muted)}
+.pm-cmp b{font-variant-numeric:tabular-nums}
+.pos{color:var(--ok)!important}
+.neg{color:var(--bad)!important}
+
+/* الرسوم الخطية */
+.pm-chart{width:100%;height:auto;display:block;overflow:visible}
+.pm-grid{stroke:var(--border);stroke-width:1}
+.pm-ax{fill:var(--muted);font-size:11px;font-family:inherit}
+.pm-act-line{fill:none;stroke:var(--gold);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:2000;stroke-dashoffset:0}
+.pm-fc-line{fill:none;stroke:var(--muted);stroke-width:2;stroke-dasharray:6 5;opacity:.9}
+.pm-area{fill:var(--gold);opacity:.14}
+.pm-dot{fill:var(--gold);stroke:var(--card);stroke-width:2}
+.pm-dot-fc{fill:var(--accent);opacity:.8}
+.pm-hit{cursor:pointer}
+.pm-hitcol{fill:transparent;cursor:crosshair}
+.pm-hitcol:hover{fill:var(--gold);opacity:.07}
+
+/* أيام الأسبوع (أشرطة أفقية) */
+.pm-hbars{display:flex;flex-direction:column;gap:8px}
+.pm-hrow{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;gap:10px;font-size:12.5px;cursor:pointer}
+.pm-hrow span{color:var(--muted)}
+.pm-hrow b{text-align:end;font-variant-numeric:tabular-nums}
+.pm-htrack{height:12px;background:var(--card2);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
+.pm-hfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold2),var(--gold));transform-origin:right;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.pm-hrow:hover .pm-hfill{filter:brightness(1.15)}
+
+/* التفاصيل */
+.pm-detailbox{display:flex;flex-direction:column;justify-content:center}
+.pm-detail{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px}
+.pm-dtitle{font-weight:800;color:var(--gold);margin-bottom:8px}
+.pm-dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pm-dgrid div{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+.pm-dgrid span{display:block;font-size:11.5px;color:var(--muted)}
+.pm-dgrid b{font-variant-numeric:tabular-nums}
+
+/* خريطة التنفيذ الحرارية */
+.pm-heat{width:100%;border-collapse:separate;border-spacing:4px;font-size:12px}
+.pm-heat th{font-weight:600;color:var(--muted);font-size:11.5px;padding:4px 2px;text-align:center}
+.pm-heat th:first-child{text-align:start;white-space:nowrap}
+.pm-cell{height:52px;border-radius:9px;text-align:center;vertical-align:middle;position:relative;border:1px solid var(--border);background:var(--card2);color:var(--text);transition:transform .15s}
+.pm-cell span{font-size:11px;color:var(--muted);display:block}
+.pm-cell small{font-size:12px;font-weight:700;display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+.pm-cell.pm-empty{background:transparent;border-style:dashed}
+.pm-cell.pm-hi{background:color-mix(in srgb,var(--ok) calc(var(--a)*45%),var(--card2));border-color:color-mix(in srgb,var(--ok) 60%,var(--border))}
+.pm-cell.pm-mid{background:color-mix(in srgb,var(--gold2) calc(var(--a)*45%),var(--card2));border-color:color-mix(in srgb,var(--gold2) 60%,var(--border))}
+.pm-cell.pm-lo{background:color-mix(in srgb,var(--bad) calc(var(--a)*45%),var(--card2));border-color:color-mix(in srgb,var(--bad) 60%,var(--border))}
+.pm-cell:not(.pm-empty):hover{transform:scale(1.04);cursor:pointer}
+
+/* الرادار */
+.pm-radar{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+.pm-rgrid{fill:none;stroke:var(--border);stroke-width:1}
+.pm-rlabel{fill:var(--muted);font-size:12px}
+.pm-rshape{fill:var(--gold);fill-opacity:.18;stroke:var(--gold);stroke-width:2;stroke-linejoin:round}
+.pm-rdot{fill:var(--gold);stroke:var(--card);stroke-width:2}
+.pm-rdot-empty{fill:var(--card);stroke:var(--muted);stroke-dasharray:3 2}
+
+/* الدونات */
+.pm-donut{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
+.pm-dn{width:200px;height:200px}
+.pm-seg{transition:stroke-width .2s,opacity .2s}
+.pm-seg:hover{stroke-width:31;opacity:.95}
+.pm-dn-big{fill:var(--text);font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.pm-legend{display:flex;flex-direction:column;gap:8px;min-width:150px}
+.pm-leg{font-size:13px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pm-leg i{display:inline-block;width:10px;height:10px;border-radius:3px}
+.pm-leg b{font-variant-numeric:tabular-nums;margin-inline-start:auto}
+.pm-leg em{font-style:normal;color:var(--muted);font-size:12px}
+
+/* أكبر الفروقات */
+.pm-vbars{display:flex;flex-direction:column;gap:8px}
+.pm-vrow{display:grid;grid-template-columns:110px 1fr 90px;gap:10px;align-items:center;font-size:12.5px}
+.pm-vname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.pm-vtrack{position:relative;height:14px;background:var(--card2);border:1px solid var(--border);border-radius:99px;overflow:hidden}
+.pm-vmid{position:absolute;inset-inline-start:50%;top:0;bottom:0;width:1px;background:var(--muted);opacity:.6}
+.pm-vfill{position:absolute;top:0;bottom:0;border-radius:99px;transform-origin:center;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.pm-vfill.pm-neg{background:var(--bad)}
+.pm-vfill.pm-pos{background:var(--ok)}
+.pm-vrow b{text-align:end;font-variant-numeric:tabular-nums}
+.pm-vrow:hover .pm-vfill{filter:brightness(1.2)}
+
+/* المؤشرات الدائرية */
+.pm-gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.pm-gauge{text-align:center;padding:8px 6px;border-radius:12px;border:1px solid var(--border);background:var(--card2)}
+.pm-gsvg{width:100%;max-width:170px;height:auto;display:block;margin:0 auto}
+.pm-gbg{fill:none;stroke:var(--border);stroke-width:10;stroke-linecap:round}
+.pm-gfg{fill:none;stroke:var(--gold);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.pm-gfg.g-mat{stroke:var(--ok)}
+.pm-gval{font-size:20px;font-weight:800;color:var(--text);margin-top:-6px;font-variant-numeric:tabular-nums}
+.pm-glabel{font-size:12px;color:var(--muted)}
+.pm-oprow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13px}
+.pm-oprow:last-child{border-bottom:0}
+.pm-oprow span{color:var(--muted)}
+.pm-oprow b{font-variant-numeric:tabular-nums;text-align:end}
+
+/* التلميح */
+.pm-tip{position:absolute;display:none;pointer-events:none;z-index:20;max-width:250px;background:var(--card);color:var(--text);border:1px solid var(--gold);border-radius:10px;padding:8px 10px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+
+/* الحركة: تُشغَّل مرة واحدة فقط عند أول ظهور، ولا تتكرر مع كل تحديث */
+.pm-root:not(.pm-played) .pm-act-line{animation:pmDraw 1s ease-out both}
+.pm-root:not(.pm-played) .pm-hfill,.pm-root:not(.pm-played) .pm-vfill{animation:pmGrow .8s ease-out both}
+.pm-root:not(.pm-played) .pm-gfg{animation:pmGaugeIn .9s ease-out both}
+.pm-root:not(.pm-played) .pm-rshape{animation:pmFade .8s ease-out both}
+.pm-root:not(.pm-played) .pm-seg{animation:pmFade .8s ease-out both}
+.pm-root:not(.pm-played) .pm-card,.pm-root:not(.pm-played) .pm-kpi{animation:pmFade .5s ease-out both}
+@keyframes pmDraw{from{stroke-dashoffset:2000}to{stroke-dashoffset:0}}
+@keyframes pmGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pmGaugeIn{from{stroke-dashoffset:var(--from)}to{stroke-dashoffset:var(--to)}}
+@keyframes pmFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.pm-error .pm-card{opacity:.9}
+
+/* الموبايل */
+@media (max-width:980px){
+  .pm-kpis{grid-template-columns:repeat(3,1fr)}
+  .pm-grid2,.pm-grid3{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .pm-head h2{font-size:19px}
+  .pm-kpis{grid-template-columns:1fr 1fr;gap:8px}
+  .pm-kpi b{font-size:15px}
+  .pm-gauges{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .pm-gval{font-size:17px}
+  .pm-vrow{grid-template-columns:84px 1fr 74px;font-size:11.5px}
+  .pm-heat th:first-child{display:none}
+  .pm-cell{height:46px}
+  .pm-dn{width:170px;height:170px}
+  .pm-hrow{grid-template-columns:58px 1fr 60px}
+  .pm-chart text{font-size:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  .pm-root *,.pm-root *::before,.pm-root *::after{animation:none!important;transition:none!important}
+}
