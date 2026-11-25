@@ -716,6 +716,13 @@ body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
 #authGate .gate-err{min-height:0;margin:0}
 #authGate .gate-err:empty{display:none}
 #authGate .gate-btn{margin-top:0}
+
+/* ===== إصلاح عرض الموبايل فقط (أقل من 641px): لا تأثير على الكمبيوتر ===== */
+@media (max-width:640px){
+    .tabs{flex-wrap:wrap;gap:6px}
+    .tabs .btn{flex:1 1 calc(50% - 6px);min-width:0;white-space:normal;line-height:1.3;padding:10px 8px}
+    .row:has(> #an-save){flex-wrap:wrap;overflow-x:visible}
+}
 </style>
 </head>
 <body>
@@ -781,6 +788,7 @@ body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
         <button class="btn on" id="tab-btn-revenue" onclick="switchTab('revenue')">تقرير الإيرادات <span id="tab-badge-rev" class="tab-dot"></span></button>
         <button class="btn" id="tab-btn-salesforecast" onclick="switchTab('salesforecast')">Sales Forecasting</button>
         <button class="btn" id="tab-btn-inventory" onclick="switchTab('inventory')">المخزون <span id="tab-badge-inv" class="tab-dot"></span></button>
+      <button class="btn" id="tab-btn-channels" onclick="switchTab('channels')">قنوات البيع</button>
       <button class="btn" id="tab-btn-performance" onclick="switchTab('performance')">خريطة الأداء العام</button>
     </nav>
 
@@ -1004,6 +1012,7 @@ body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
     </section>
 
     <!-- ================= المخزون ================= -->
+    <section id="tab-channels" class="wrap hidden" style="padding:0"><div id="channels-root"></div></section>
     <section id="tab-performance" class="wrap hidden" style="padding:0"><div id="perf-root"></div></section>
     <section id="tab-inventory" class="wrap hidden" style="padding:0">
 
@@ -2295,6 +2304,38 @@ function loadPerformanceMap() {
     document.body.appendChild(script);
 }
 
+/* قنوات البيع: تحميل كسول لملفات الوحدة (مرة واحدة) */
+const CH_LOAD = { css: false, loaded: false, loading: false, queue: [] };
+function ensureSalesChannels(cb) {
+    if (CH_LOAD.loaded && window.KansasSalesChannels) { if (cb) cb(); return; }
+    if (cb) CH_LOAD.queue.push(cb);
+    if (CH_LOAD.loading) return;
+    CH_LOAD.loading = true;
+    if (!CH_LOAD.css) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'css/sales-channels.css';
+        document.head.appendChild(link);
+        CH_LOAD.css = true;
+    }
+    const script = document.createElement('script');
+    script.src = 'modules/sales-channels.js';
+    script.onload = function () {
+        CH_LOAD.loading = false;
+        CH_LOAD.loaded = !!window.KansasSalesChannels;
+        const q = CH_LOAD.queue.splice(0);
+        q.forEach(function (f) { try { f(); } catch (e) { console.error(e); } });
+    };
+    script.onerror = function () {
+        CH_LOAD.loading = false;
+        const q = CH_LOAD.queue.splice(0);
+        const box = $('channels-root');
+        if (box) box.innerHTML = '<div style="margin:12px;padding:12px;border:1px solid var(--bad);border-radius:10px">تعذر تحميل قنوات البيع. تأكد أن مجلدي modules وcss موجودين بجانب الصفحة.</div>';
+        q.forEach(function (f) { try { f(); } catch (e) { console.error(e); } });
+    };
+    document.body.appendChild(script);
+}
+
 function switchTab(tab) {
     if (tab !== 'inventory' && invView) {
         invView = null;
@@ -2308,11 +2349,14 @@ function switchTab(tab) {
     $('tab-revenue').classList.toggle('hidden', tab !== 'revenue');
     $('tab-salesforecast').classList.toggle('hidden', tab !== 'salesforecast');
     $('tab-inventory').classList.toggle('hidden', tab !== 'inventory');
+    $('tab-channels').classList.toggle('hidden', tab !== 'channels');
     $('tab-performance').classList.toggle('hidden', tab !== 'performance');
     $('tab-btn-revenue').classList.toggle('on', tab === 'revenue');
     $('tab-btn-salesforecast').classList.toggle('on', tab === 'salesforecast');
     $('tab-btn-inventory').classList.toggle('on', tab === 'inventory');
+    $('tab-btn-channels').classList.toggle('on', tab === 'channels');
     $('tab-btn-performance').classList.toggle('on', tab === 'performance');
+    if (tab === 'channels') ensureSalesChannels(function () { if (window.KansasSalesChannels) window.KansasSalesChannels.open($('channels-root')); });
     if (tab === 'performance') loadPerformanceMap();
     if (tab === 'salesforecast') { renderForecast(); renderVariance(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -6429,11 +6473,15 @@ function applyNavState(s) {
     $('tab-revenue').classList.toggle('hidden', activeTab !== 'revenue');
     $('tab-salesforecast').classList.toggle('hidden', activeTab !== 'salesforecast');
     $('tab-inventory').classList.toggle('hidden', activeTab !== 'inventory');
+    $('tab-channels').classList.toggle('hidden', activeTab !== 'channels');
     $('tab-performance').classList.toggle('hidden', activeTab !== 'performance');
     $('tab-btn-revenue').classList.toggle('on', activeTab === 'revenue');
     $('tab-btn-salesforecast').classList.toggle('on', activeTab === 'salesforecast');
     $('tab-btn-inventory').classList.toggle('on', activeTab === 'inventory');
+    $('tab-btn-channels').classList.toggle('on', activeTab === 'channels');
     $('tab-btn-performance').classList.toggle('on', activeTab === 'performance');
+    if (activeTab === 'channels') ensureSalesChannels(function () { if (window.KansasSalesChannels) window.KansasSalesChannels.open($('channels-root')); });
+    if (activeTab === 'performance') loadPerformanceMap();
     if (invView) document.body.dataset.sec = invView; else document.body.removeAttribute('data-sec');
     renderAll();
 }
