@@ -1,0 +1,67 @@
+/* KANSAS PREMIUM — قنوات البيع (تنسيق الوحدة فقط)
+   يعتمد على متغيرات الثيم الموجودة في البرنامج، ويتغير تلقائيًا مع أي ثيم.
+   كل القواعد مسبوقة بـ sc- لعدم التأثير على باقي البرنامج. */
+
+.sc-root{color:var(--text);font-size:14px;line-height:1.55;padding:6px 0 28px}
+.sc-root *{box-sizing:border-box}
+.sc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;
+  background:linear-gradient(135deg,var(--card) 0%,var(--card2) 100%);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:12px}
+.sc-kicker{font-size:10.5px;letter-spacing:2.5px;color:var(--gold);font-weight:700}
+.sc-head h2{margin:2px 0 4px;font-size:22px;font-weight:800;color:var(--text)}
+.sc-sub{margin:0;color:var(--muted);font-size:13px}
+.sc-sub b{color:var(--gold)}
+.sc-badges{display:flex;gap:6px;flex-wrap:wrap}
+.sc-chip{display:inline-block;padding:6px 12px;border-radius:99px;font-size:12.5px;font-weight:700;border:1px solid var(--border);background:var(--card);color:var(--muted)}
+.sc-chip.sc-good{color:var(--ok);border-color:var(--ok)}
+.sc-chip.sc-watch{color:var(--gold);border-color:var(--gold)}
+.sc-chip.sc-nd{color:var(--muted)}
+.sc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;min-width:0}
+.sc-ct{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.sc-ct h4{margin:0;font-size:14px;font-weight:700;color:var(--text)}
+.sc-note{color:var(--muted);font-size:12.5px;margin:6px 0 10px}
+.sc-muted{color:var(--muted);font-style:normal;font-weight:400;font-size:11.5px}
+.sc-pos{color:var(--ok)!important}
+.sc-neg{color:var(--bad)!important}
+
+/* جدول المقارنة */
+.sc-tbl{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.sc-tbl th,.sc-tbl td{padding:8px 9px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap}
+.sc-tbl thead th{color:var(--muted);font-weight:700;font-size:11.5px;background:var(--card2)}
+.sc-tbl tbody th{text-align:start;font-weight:700;color:var(--text)}
+.sc-tbl tr.sc-total th,.sc-tbl tr.sc-total td{background:var(--card2);font-weight:800;border-top:2px solid var(--gold)}
+.sc-tbl td{color:var(--text)}
+
+/* الإدارة */
+.sc-toggle{margin:4px 0 12px}
+.sc-mtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.sc-mtabs .btn.on{border-color:var(--gold);color:var(--gold)}
+.sc-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:8px 0}
+.sc-row label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.sc-daygrid{display:grid;gap:8px;margin:8px 0}
+.sc-chrow{display:grid;grid-template-columns:110px 1fr 1fr;gap:8px;align-items:center}
+.sc-chrow>span{font-weight:700;color:var(--text);font-size:13px}
+.sc-chrow label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--muted)}
+.sc-root input[type=number],.sc-root input[type=date],.sc-root input[type=text]{background:var(--inp);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:7px 9px;font:inherit;width:100%;min-width:0}
+.sc-root input:focus,.sc-root select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.sc-root input:disabled{opacity:.55}
+.sc-refgrid{margin-top:10px;max-height:460px;overflow:auto}
+.sc-entry{border-collapse:collapse;font-size:12px;min-width:100%}
+.sc-entry th,.sc-entry td{border-bottom:1px solid var(--border);padding:4px;text-align:center}
+.sc-entry thead th{background:var(--card2);color:var(--muted);position:sticky;top:0}
+.sc-entry td input{width:78px;padding:5px 6px;font-size:12px}
+.sc-unlock{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;border:1px dashed var(--bad);border-radius:12px;padding:10px;margin:10px 0}
+.sc-unlock label{display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px;font-size:12.5px;color:var(--muted)}
+#sc-review{margin:10px 0}
+
+/* الموبايل فقط */
+@media (max-width:640px){
+  .sc-head h2{font-size:19px}
+  .sc-chrow{grid-template-columns:1fr 1fr}
+  .sc-chrow>span{grid-column:1/-1}
+  .sc-tbl{font-size:11.5px}
+  .sc-tbl th,.sc-tbl td{padding:6px 6px}
+  .sc-entry td input{width:64px}
+  .sc-row{gap:8px}
+  .sc-row>.btn{flex:1 1 calc(50% - 4px)}
+}
+@media (prefers-reduced-motion:reduce){ .sc-root *{transition:none!important;animation:none!important} }
