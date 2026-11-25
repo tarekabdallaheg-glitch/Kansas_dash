@@ -172,12 +172,27 @@
 
 .pm-error .pm-card{opacity:.9}
 
+/* قنوات البيع داخل الخريطة */
+.pm-kpis-ch{grid-template-columns:repeat(5,1fr)}
+.pm-dbar{transition:opacity .2s}
+.pm-dbar.pos{fill:var(--ok)}
+.pm-dbar.neg{fill:var(--bad)}
+.pm-dbar:hover{opacity:.75}
+
 /* الموبايل */
 @media (max-width:980px){
   .pm-kpis{grid-template-columns:repeat(3,1fr)}
   .pm-grid2,.pm-grid3{grid-template-columns:1fr}
 }
 @media (max-width:640px){
+  .pm-kpis-ch{grid-template-columns:1fr 1fr}
+  .pm-card{min-width:0;max-width:100%}
+  .pm-card:has(> .pm-heat),
+  #pm-heat{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .pm-heat{min-width:0;width:100%;border-spacing:3px}
+  .pm-heat th{font-size:10px}
+  .pm-cell span{font-size:10px}
+  .pm-cell small{font-size:10.5px}
   .pm-head h2{font-size:19px}
   .pm-kpis{grid-template-columns:1fr 1fr;gap:8px}
   .pm-kpi b{font-size:15px}
