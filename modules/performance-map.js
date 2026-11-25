@@ -389,6 +389,22 @@
     }).join('');
   }
 
+
+  /* ---------- قنوات البيع: العرض كله داخل وحدة sales-channels.js ----------
+     خريطة الأداء تستقبل الشاشة الجاهزة من الوحدة وتعرضها في قسمها فقط. */
+  function renderChannelsSection() {
+    var el = $$('pm-channels');
+    if (!el) return;
+    var go = function () {
+      var C = window.KansasSalesChannels;
+      if (!C || !C.renderSummary) { el.innerHTML = '<p class="pm-muted">وحدة قنوات البيع غير متاحة.</p>'; return; }
+      C.renderSummary(el, activeMonth);
+    };
+    if (window.KansasSalesChannels) { go(); return; }
+    if (window.ensureSalesChannels) { el.innerHTML = '<p class="pm-muted">جاري تحميل قنوات البيع…</p>'; window.ensureSalesChannels(go); }
+    else { el.innerHTML = '<p class="pm-muted">وحدة قنوات البيع غير متاحة.</p>'; }
+  }
+
   /* ---------- التفاعل (مرّة واحدة عند التهيئة) ---------- */
   function showTip(el, x, y) {
     var t = el.getAttribute('data-tip');
@@ -425,7 +441,7 @@
       '<header class="pm-head"><div><div class="pm-kicker">BUSINESS INTELLIGENCE</div><h2>خريطة الأداء العام</h2>' +
       '<p class="pm-sub">الشهر المعروض: <b id="pm-month"></b> · البيانات من تسجيلات البرنامج الفعلية</p></div>' +
       '<div id="pm-status"></div></header>' +
-      '<nav class="pm-jump"><a href="#pm-exec">نظرة عامة</a><a href="#pm-sales">المبيعات</a><a href="#pm-inv">المخزون</a><a href="#pm-fc">التوقع والاتجاه</a><a href="#pm-ops">التشغيل</a></nav>' +
+      '<nav class="pm-jump"><a href="#pm-exec">نظرة عامة</a><a href="#pm-sales">المبيعات</a><a href="#pm-ch">القنوات</a><a href="#pm-inv">المخزون</a><a href="#pm-fc">التوقع والاتجاه</a><a href="#pm-ops">التشغيل</a></nav>' +
       '<section id="pm-exec" class="pm-sec"><h3><span>Executive Overview</span>نظرة عامة على الفرع</h3>' +
       '<div id="pm-kpis" class="pm-kpis"></div>' +
       '<div class="pm-grid2"><div class="pm-card"><div id="pm-sumtext"></div></div><div class="pm-card" id="pm-alerts"></div></div></section>' +
@@ -437,6 +453,8 @@
       '<section id="pm-fc" class="pm-sec"><h3><span>Forecast &amp; Trend</span>التوقع والاتجاه</h3>' +
       '<div class="pm-grid2"><div class="pm-card" id="pm-radar"></div><div class="pm-card" id="pm-heat"></div></div>' +
       '<div class="pm-card pm-wide" id="pm-trend"></div></section>' +
+      '<section id="pm-ch" class="pm-sec"><h3><span>Sales Channels</span>قنوات البيع</h3>' +
+      '<div class="pm-card pm-wide" id="pm-channels"></div></section>' +
       '<section id="pm-ops" class="pm-sec"><h3><span>Operational Indicators</span>مؤشرات التشغيل</h3>' +
       '<div class="pm-card"><div id="pm-gauges" class="pm-gauges"></div></div>' +
       '<div class="pm-card" id="pm-ops-list"></div></section>';
@@ -461,6 +479,7 @@
     });
     var mi = $$('month-input');
     if (mi) mi.addEventListener('change', function () { refresh(); });
+    window.addEventListener('kansas-channels-changed', function () { if (ROOT) renderChannelsSection(); });
 
     refresh();
     setTimeout(function () { PLAYED = true; ROOT.classList.add('pm-played'); }, 1100);
@@ -478,6 +497,7 @@
       renderInv(D);
       renderForecast(D, K);
       renderOps(D, K);
+      renderChannelsSection();
       if (!PLAYED) ROOT.classList.remove('pm-played');
       ROOT.classList.remove('pm-error');
     } catch (err) {
