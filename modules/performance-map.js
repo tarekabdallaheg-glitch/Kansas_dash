@@ -398,7 +398,7 @@
     var go = function () {
       var C = window.KansasSalesChannels;
       if (!C || !C.renderSummary) { el.innerHTML = '<p class="pm-muted">وحدة قنوات البيع غير متاحة.</p>'; return; }
-      C.renderSummary(el, activeMonth);
+      C.renderSummary(el);
     };
     if (window.KansasSalesChannels) { go(); return; }
     if (window.ensureSalesChannels) { el.innerHTML = '<p class="pm-muted">جاري تحميل قنوات البيع…</p>'; window.ensureSalesChannels(go); }
