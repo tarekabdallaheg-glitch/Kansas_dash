@@ -686,36 +686,50 @@ html.theme-contrast #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"
 body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="sold"]),
 body.print-analysis #pn-analysis .pgrid > label.fld:has(> input[data-nav="close"]){background:none;box-shadow:none}
 
-/* تحسين توزيع شاشة تسجيل الدخول (CSS فقط) */
-#authGate .gate-box{gap:6px}
-#authGate .gate-name{margin-top:0;line-height:1.2}
-#authGate .gate-sub{margin-top:-2px;font-size:12px;letter-spacing:2.2px;line-height:1.4}
-#authGate .gate-msg{margin-top:20px}
-#authGate .gate-form{margin-top:22px;gap:10px}
-#authGate .gate-title{margin:0 0 2px;font-size:19px;letter-spacing:.2px}
-#authGate .gate-input{height:48px;padding:0 14px;font-size:15px;box-sizing:border-box}
-#authGate .gate-err{min-height:16px;margin:-4px 0 -2px;font-size:12px;line-height:16px}
-#authGate .gate-btn{height:48px;padding:0;margin-top:4px;box-sizing:border-box;font-size:16px}
+/* ===== شاشة تسجيل الدخول: هندسة موحّدة ومتجاوبة (تحل محل طبقات التعديل السابقة) ===== */
+#authGate{
+    --lg-logo: clamp(84px, 17vh, 150px);
+    --lg-gap-logo: 10px;
+    --lg-gap-title: clamp(18px, 3.4vh, 28px);
+    --lg-gap-field: 10px;
+    --lg-field-h: 48px;
+    padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    overflow-y: auto;
+    background:
+        radial-gradient(ellipse 60% 45% at 85% 8%, rgba(242,201,107,.10) 0%, rgba(242,201,107,0) 70%),
+        radial-gradient(ellipse 55% 50% at 12% 92%, rgba(59,111,199,.16) 0%, rgba(59,111,199,0) 70%),
+        linear-gradient(180deg, #0F1B2F 0%, #0B1220 50%, #070D18 100%);
+}
+@supports (height: 100dvh){ #authGate{ --lg-logo: clamp(84px, 17dvh, 150px); --lg-gap-title: clamp(18px, 3.4dvh, 28px); } }
+#authGate .gate-box{ width: 100%; max-width: 380px; gap: 0; margin: auto; }
+/* خلفية التحليل: طبقة رسم خفيفة (SVG مضمّن) ترتفع ببطء، وطبقة تعتيم في المنتصف تحمي الحقول */
+#authGate::before{ content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .5;
+    background: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201600%201000'%20preserveAspectRatio='xMidYMax%20slice'%3E%3Cdefs%3E%3ClinearGradient%20id='bg'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='rgb(50,100,190)'%20stop-opacity='0.55'/%3E%3Cstop%20offset='1'%20stop-color='rgb(20,40,80)'%20stop-opacity='0.15'/%3E%3C/linearGradient%3E%3ClinearGradient%20id='gb'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='rgb(242,201,107)'%20stop-opacity='0.55'/%3E%3Cstop%20offset='1'%20stop-color='rgb(242,201,107)'%20stop-opacity='0.12'/%3E%3C/linearGradient%3E%3ClinearGradient%20id='ln'%20x1='0'%20y1='0'%20x2='1'%20y2='0'%3E%3Cstop%20offset='0'%20stop-color='rgb(96,165,250)'%20stop-opacity='0.35'/%3E%3Cstop%20offset='1'%20stop-color='rgb(242,201,107)'%20stop-opacity='0.9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cline%20x1='0'%20x2='1600'%20y1='180'%20y2='180'%20stroke='rgb(201,214,234)'%20stroke-opacity='0.07'/%3E%3Cline%20x1='0'%20x2='1600'%20y1='340'%20y2='340'%20stroke='rgb(201,214,234)'%20stroke-opacity='0.07'/%3E%3Cline%20x1='0'%20x2='1600'%20y1='500'%20y2='500'%20stroke='rgb(201,214,234)'%20stroke-opacity='0.07'/%3E%3Cline%20x1='0'%20x2='1600'%20y1='660'%20y2='660'%20stroke='rgb(201,214,234)'%20stroke-opacity='0.07'/%3E%3Cline%20x1='0'%20x2='1600'%20y1='820'%20y2='820'%20stroke='rgb(201,214,234)'%20stroke-opacity='0.07'/%3E%3Crect%20x='96'%20y='820'%20width='38'%20height='120'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='186'%20y='790'%20width='38'%20height='150'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='276'%20y='810'%20width='38'%20height='130'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='366'%20y='765'%20width='38'%20height='175'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='456'%20y='780'%20width='38'%20height='160'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='546'%20y='735'%20width='38'%20height='205'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='636'%20y='750'%20width='38'%20height='190'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='726'%20y='700'%20width='38'%20height='240'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='816'%20y='715'%20width='38'%20height='225'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='906'%20y='670'%20width='38'%20height='270'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='996'%20y='640'%20width='38'%20height='300'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='1086'%20y='655'%20width='38'%20height='285'%20rx='6'%20fill='url(%23bg)'/%3E%3Crect%20x='1176'%20y='600'%20width='38'%20height='340'%20rx='6'%20fill='url(%23gb)'/%3E%3Crect%20x='1266'%20y='575'%20width='38'%20height='365'%20rx='6'%20fill='url(%23gb)'/%3E%3Crect%20x='1356'%20y='550'%20width='38'%20height='390'%20rx='6'%20fill='url(%23gb)'/%3E%3Crect%20x='1446'%20y='510'%20width='38'%20height='430'%20rx='6'%20fill='url(%23gb)'/%3E%3Cline%20x1='560'%20x2='560'%20y1='680'%20y2='940'%20stroke='rgb(242,201,107)'%20stroke-opacity='0.10'%20stroke-dasharray='4%206'/%3E%3Cline%20x1='1000'%20x2='1000'%20y1='500'%20y2='940'%20stroke='rgb(242,201,107)'%20stroke-opacity='0.10'%20stroke-dasharray='4%206'/%3E%3Cline%20x1='1260'%20x2='1260'%20y1='300'%20y2='940'%20stroke='rgb(242,201,107)'%20stroke-opacity='0.10'%20stroke-dasharray='4%206'/%3E%3Cpath%20d='M60%20860%20C%20260%20840,%20380%20720,%20560%20680%20S%20880%20560,%201000%20500%20S%201260%20300,%201560%20170'%20fill='none'%20stroke='url(%23ln)'%20stroke-width='3'%20stroke-linecap='round'/%3E%3Ccircle%20cx='560'%20cy='680'%20r='7'%20fill='rgb(11,18,32)'%20stroke='rgb(242,201,107)'%20stroke-opacity='0.55'%20stroke-width='2.5'/%3E%3Ccircle%20cx='1000'%20cy='500'%20r='7'%20fill='rgb(11,18,32)'%20stroke='rgb(242,201,107)'%20stroke-opacity='0.55'%20stroke-width='2.5'/%3E%3Ccircle%20cx='1260'%20cy='300'%20r='7'%20fill='rgb(11,18,32)'%20stroke='rgb(242,201,107)'%20stroke-opacity='0.55'%20stroke-width='2.5'/%3E%3C/svg%3E") center bottom / cover no-repeat; }
+#authGate::after{ content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse 62% 58% at 50% 52%, rgba(7,13,24,.92) 0%, rgba(7,13,24,.7) 50%, rgba(7,13,24,0) 100%); }
+#authGate .gate-box{ position: relative; z-index: 1; }
 
-/* تماشي شاشة الدخول مع هوية البرنامج: كحلي وذهبي ناعم وأزرق (CSS فقط) */
-#authGate{background:radial-gradient(circle at 50% 0%,#15233d 0%,#0B1220 55%,#070d18 100%)}
-#authGate .gate-logo{box-shadow:0 10px 30px rgba(242,201,107,.16)}
-#authGate .gate-name{color:#F2C96B}
-#authGate .gate-input{background:#0A1322;border-color:#22324D}
-#authGate .gate-input:focus{border-color:#60A5FA;box-shadow:0 0 0 3px rgba(96,165,250,.2)}
-#authGate .gate-input.bad,#authGate .gate-input.bad:focus{border-color:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.15)}
-#authGate .gate-btn{background:linear-gradient(180deg,#F2C96B,#D4A74A);color:#0B1220}
-
-/* تحسينات شاشة الدخول (CSS فقط): الشريط والحقول والمسافات والخطوط والتوزيع الرأسي */
-#authGate{background:linear-gradient(180deg,#0B1220 0%,#0D1729 45%,#070D18 100%);padding-bottom:12vh}
-#authGate .gate-sub{letter-spacing:1.6px;font-size:11.5px}
-#authGate .gate-title{font-size:22px;font-weight:800;margin:0 0 6px}
-#authGate .gate-form{gap:10px;margin-top:30px}
-#authGate .gate-input{background:#0C1628;border:1px solid #4A6497}
-#authGate .gate-input:focus{border-color:#60A5FA}
-#authGate .gate-err{min-height:0;margin:0}
-#authGate .gate-err:empty{display:none}
-#authGate .gate-btn{margin-top:0}
+#authGate .gate-logo{ height: var(--lg-logo); width: auto; max-width: 86vw; border-radius: 26px; box-shadow: 0 10px 30px rgba(242,201,107,.16); }
+#authGate .gate-name{ margin-top: var(--lg-gap-logo); font-size: 26px; line-height: 1.2; font-weight: 900; letter-spacing: 2px; color: #F2C96B; }
+#authGate .gate-sub{ margin-top: 4px; font-size: 12px; line-height: 1.4; letter-spacing: 2px; color: #b8bec7; }
+#authGate .gate-msg{ margin-top: var(--lg-gap-title); font-size: 14px; color: #8a909a; }
+#authGate .gate-form{ width: 100%; margin-top: var(--lg-gap-title); gap: var(--lg-gap-field); display: flex; flex-direction: column; }
+#authGate .gate-title{ margin: 0 0 6px; font-size: 22px; font-weight: 800; line-height: 1.3; color: #f4f1ea; }
+#authGate .gate-input{ width: 100%; height: var(--lg-field-h); padding: 0 14px; box-sizing: border-box; font-size: 15px; font-family: inherit; background: #0C1628; border: 1px solid #4A6497; border-radius: 12px; color: #f4f1ea; }
+#authGate .gate-input:focus{ outline: none; border-color: #60A5FA; box-shadow: 0 0 0 3px rgba(96,165,250,.2); }
+#authGate .gate-input.bad, #authGate .gate-input.bad:focus{ border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,.15); }
+#authGate .gate-err{ min-height: 0; margin: 0; }
+#authGate .gate-err:empty{ display: none; }
+#authGate .gate-btn{ width: 100%; height: var(--lg-field-h); margin-top: 0; padding: 0; box-sizing: border-box; font-size: 16px; font-weight: 900; font-family: inherit; color: #0B1220; background: linear-gradient(180deg, #F2C96B, #D4A74A); border: 0; border-radius: 12px; cursor: pointer; }
+#authGate .gate-btn:active{ transform: scale(.97); }
+#authGate .gate-btn:disabled{ cursor: default; }
+@media (max-width: 480px){
+    #authGate::before{ opacity: .34; background-size: 150% auto; background-position: 62% 100%; }
+    #authGate{ --lg-logo: clamp(96px, 15vh, 124px); --lg-gap-title: clamp(16px, 3vh, 24px); }
+    @supports (height: 100dvh){ #authGate{ --lg-logo: clamp(96px, 15dvh, 124px); --lg-gap-title: clamp(16px, 3dvh, 24px); } }
+    #authGate .gate-name{ font-size: 22px; }
+    #authGate .gate-title{ font-size: 20px; }
+}
 
 /* ===== إصلاح عرض الموبايل فقط (أقل من 641px): لا تأثير على الكمبيوتر ===== */
 @media (max-width:640px){
